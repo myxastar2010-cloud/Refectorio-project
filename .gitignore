@@ -1,0 +1,32 @@
+# Зависимости и сборка
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.vite/
+.eslintcache
+
+# Отчёты тестов и аудитов
+test-results/
+playwright-report/
+blob-report/
+.lighthouseci/
+stats.html
+
+# Секреты — только .env.example попадает в git
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# Служебные файлы
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.playwright-mcp/
+.claude/settings.local.json

@@ -1,0 +1,32 @@
+{
+  "name": "refectorio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Refectorio — сайт-постановщик целей в питании с ИИ. Школьный проект команды Modern Manifesto (школа #2107).",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @refectorio/web",
+    "build": "npm run build --workspaces --if-present",
+    "preview": "npm run preview -w @refectorio/web",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "npm run test:e2e -w @refectorio/web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "assets": "node scripts/optimize-assets.mjs",
+    "lhci": "lhci autorun",
+    "prepare": "husky"
+  }
+}
