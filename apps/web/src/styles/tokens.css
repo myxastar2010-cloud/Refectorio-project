@@ -1,8 +1,22 @@
 /*
- * Refectorio design tokens — the single source of truth for colours, type, radii, z-layers and motion.
- * Values come from the mockups (Figma cache + measurements), see docs/design-system.md.
- * Phase 0.8 seeds the palette and font; phase 0.7 adds the full scale.
+ * Refectorio design tokens — the single source of truth for colours, type, radii, z-layers, geometry and motion.
+ * Sources: Figma cache (refectorio-workspace/design/figma/), mockup measurements and font fitting
+ * (refectorio-workspace/design/analysis/0*.{py,mjs}). Documentation: docs/design-system.md.
+ *
+ * Geometry is written in "mockup px" of the 1920×1080 reference frame as unitless numbers and turned into
+ * lengths with the scale unit --s:  calc(var(--hero-card-y) * var(--s)).
  */
+
+/* Metric-compatible fallback while Nunito loads: same width (size-adjust) and same line box (overrides) → no CLS. */
+@font-face {
+  font-family: 'Nunito Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
+  size-adjust: 91.5%;
+  ascent-override: 110.5%;
+  descent-override: 38.6%;
+  line-gap-override: 0%;
+}
+
 @theme {
   --color-*: initial;
   --color-bg: #fef9f7;
@@ -10,7 +24,213 @@
   --color-ink: #000000;
   --color-ink-muted: #5a5451;
   --color-on-accent: #ffffff;
+  --color-scrim: rgb(0 0 0 / 0.52);
+  --color-team-card: #08050a;
 
   --font-*: initial;
   --font-sans: 'Nunito Variable', 'Nunito Fallback', ui-rounded, system-ui, sans-serif;
+
+  --breakpoint-*: initial;
+  --breakpoint-tablet: 48rem; /* 768 px */
+  --breakpoint-laptop: 64rem; /* 1024 px */
+  --breakpoint-desktop: 80rem; /* 1280 px */
+
+  --ease-*: initial;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root {
+  /* ── Scale ─────────────────────────────────────────────────────────────────────────────── */
+  /* One mockup pixel on the current screen: the 1920×1080 frame fits the viewport. */
+  --s: min(100vw / 1920, 100svh / 1080);
+
+  /* ── Z-layers (bottom → top), see ТЗ 6.1 ───────────────────────────────────────────────── */
+  --z-food: 10;
+  --z-scene: 20;
+  --z-scrim: 40;
+  --z-dialog: 50;
+  --z-toast: 60;
+
+  /* ── Focus and touch ───────────────────────────────────────────────────────────────────── */
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 3px;
+  --focus-ring-color: var(--color-ink);
+  --focus-ring-color-inverse: var(--color-on-accent);
+  --touch-target-min: 44px;
+
+  /* ── Typography roles (Figma SF Pro Rounded → Nunito; fitted to mockup line widths) ────── */
+  /* size and line-height in mockup px; tracking in em (scales with the size). */
+  --type-brand-size: 50.6;
+  --type-brand-weight: 700;
+  --type-brand-tracking: 0em;
+
+  --type-pill-label-size: 23.55; /* «О проекте» */
+  --type-pill-label-weight: 700;
+  --type-pill-label-tracking: 0.036em;
+
+  --type-hero-title-size: 77;
+  --type-hero-title-weight: 900;
+  --type-hero-title-leading: 84.5;
+  --type-hero-title-tracking-1: 0.0065em; /* «Питаться» */
+  --type-hero-title-tracking-2: 0.038em; /* «полезно и» */
+  --type-hero-title-tracking-3: 0.039em; /* «вкусно сейчас» */
+
+  --type-hero-lead-size: 23.55;
+  --type-hero-lead-weight: 600;
+  --type-hero-lead-leading: 29;
+  --type-hero-lead-tracking: 0.018em;
+
+  --type-cta-label-size: 26.7; /* «Создать меню» */
+  --type-cta-label-weight: 700;
+  --type-cta-label-tracking: 0.036em;
+
+  --type-card-title-size: 32.65;
+  --type-card-title-weight: 600;
+  --type-card-title-tracking: -0.0087em;
+
+  --type-card-text-size: 20.5;
+  --type-card-text-weight: 600;
+  --type-card-text-leading: 24;
+  --type-card-text-tracking: -0.0043em;
+
+  --type-about-title-size: 65.55;
+  --type-about-title-weight: 700;
+  --type-about-title-tracking: 0.0125em;
+
+  --type-info-label-size: 36.7; /* «Команда:», «Проект:» */
+  --type-info-label-weight: 700;
+  --type-info-label-tracking: 0.0123em;
+
+  --type-info-name-size: 50.6;
+  --type-info-name-weight: 700;
+  --type-info-name-leading: 57;
+  --type-info-name-tracking: -0.0166em;
+
+  --type-info-lead-size: 25.55;
+  --type-info-lead-weight: 400;
+  --type-info-lead-leading: 29;
+  --type-info-lead-tracking: -0.0156em;
+
+  --type-more-label-size: 27.65; /* «Ещё» */
+  --type-more-label-weight: 600;
+  --type-more-label-tracking: -0.0865em;
+
+  --type-link-size: 24.55;
+  --type-link-weight: 400;
+  --type-link-tracking: 0.0052em;
+
+  --type-dialog-title-size: 66.55;
+  --type-dialog-title-weight: 700;
+  --type-dialog-title-leading: 76;
+  --type-dialog-title-tracking: -0.0083em;
+
+  --type-dialog-lead-size: 32.65;
+  --type-dialog-lead-weight: 400;
+  --type-dialog-lead-leading: 38;
+  --type-dialog-lead-tracking: 0.0113em;
+
+  --type-member-size: 32.65;
+  --type-member-weight: 400;
+  --type-member-tracking: -0.0079em;
+  --type-member-row: 84;
+
+  /* Minimum rendered sizes on small desktops (the frame scales down to 0.53 at 1024 px). */
+  --type-min-small: 12px;
+  --type-min-body: 14px;
+  --type-min-title: 17px;
+
+  /* Nunito vertical metrics (UPM 1000, USE_TYPO_METRICS): ascent 1011, descent 353, cap 705, x 484. */
+  --font-ascent: 1.011;
+  --font-descent: 0.353;
+  --font-cap-height: 0.705;
+
+  /* ── Radii (mockup px; Figma, no corner smoothing) ─────────────────────────────────────── */
+  --radius-pill: 38; /* 83-px buttons */
+  --radius-feature-card: 71;
+  --radius-info-card: 174;
+  --radius-tile: 45; /* team icon 187×187 */
+  --radius-dialog: 217;
+
+  /* ── Hero (scene 1), frame 1920×1080 ───────────────────────────────────────────────────── */
+  --hero-gutter: 48;
+  --hero-logo-icon-x: 23;
+  --hero-logo-icon-y: 19;
+  --hero-logo-icon-size: 97; /* Tabler 24-unit box → visible apple ≈ 73×78 */
+  --hero-brand-ink-x: 129;
+  --hero-brand-baseline: 92;
+  --hero-about-x: 1675;
+  --hero-about-y: 19;
+  --hero-about-w: 189;
+  --hero-about-h: 83;
+  --hero-about-border: 2;
+  --hero-title-ink-x: 51;
+  --hero-title-baseline: 279;
+  --hero-lead-ink-x: 48;
+  --hero-lead-baseline: 518;
+  --hero-cta-x: 48;
+  --hero-cta-y: 595;
+  --hero-cta-w: 440;
+  --hero-cta-h: 83;
+  --hero-cta-icon-size: 28;
+  --hero-cta-gap: 5;
+  --hero-cards-y: 833;
+  --hero-card-w: 440;
+  --hero-card-h: 161;
+  --hero-card-gap: 21;
+  --hero-cards-bottom: 86; /* space under the cards */
+  --hero-card-pad-x: 55; /* ink left of the texts */
+  --hero-card-title-baseline: 54; /* from the card top */
+  --hero-card-text-baseline: 86;
+  --hero-card-icon-size: 73;
+  --hero-card-icon-inset: 36; /* from the right edge */
+
+  /* ── About (scene 2) ───────────────────────────────────────────────────────────────────── */
+  --about-title-baseline: 152;
+  --about-title-ink-x: 777; /* group «О проекте ^» is centred: 777…1146 */
+  --about-chevron-size: 58;
+  --about-chevron-gap: 4; /* title box → chevron box; visible gap ≈ 16 */
+  --about-cards-y: 419;
+  --about-card-w: 754;
+  --about-card-h: 487;
+  --about-card-margin: 104;
+  --about-card-gap: 204;
+  --about-label-baseline: 85; /* from the card top, centred horizontally */
+  --about-tile-x: 143;
+  --about-tile-y: 138;
+  --about-tile-size: 187;
+  --about-name-ink-x: 375;
+  --about-name-baseline: 184;
+  --about-lead-ink-x: 372;
+  --about-lead-baseline: 285;
+  --about-more-y: 376;
+  --about-more-w: 113;
+  --about-more-h: 62;
+  --about-more-border: 2;
+  --about-links-y: 374;
+  --about-link-circle: 34;
+  --about-link-gap: 11; /* text ink → circle */
+  --about-links-gap: 44; /* between the two links */
+
+  /* ── Team dialog (expanded card) ───────────────────────────────────────────────────────── */
+  --dialog-w: 1401;
+  --dialog-h: 844;
+  --dialog-pad-x: 105; /* ink left of title and lead */
+  --dialog-title-baseline: 357;
+  --dialog-lead-baseline: 489;
+  --dialog-members-x1: 363; /* ink left of names, column 1 */
+  --dialog-members-x2: 819;
+  --dialog-bullet-offset: 27; /* bullet centre → name ink */
+  --dialog-members-baseline: 582;
+  --dialog-close-size: 51;
+  --dialog-close-top: 107;
+  --dialog-close-right: 112;
+  --dialog-max-fraction: 0.92; /* tablets: never more than 92% of the viewport */
+
+  /* ── Food (background layer) ───────────────────────────────────────────────────────────── */
+  --food-size-desktop: 185; /* sprite edge, mockup px (±10% per item) */
+  --food-about-scale: 0.8874; /* Figma: the whole layer, origin (773, 1484) of the frame */
+  --food-about-origin-x: 40.26%;
+  --food-about-origin-y: 137.41%;
+  --food-about-opacity: 0.6; /* fitted on mockup №2 (σ ≈ 7 px, opacity 0.6) */
 }
