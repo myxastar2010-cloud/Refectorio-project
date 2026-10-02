@@ -5,7 +5,7 @@
 //   food   → square sprites, AVIF + WebP at 1× and 2×; pre-blurred copies for the "about" scene
 //            (with transparent padding so the blur is not clipped); 32×32 alpha masks for hit tests
 //   team   → card background without transparent corners (AVIF + WebP), logo (AVIF + WebP)
-import { mkdir, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -34,21 +34,19 @@ const WEBP_PHOTO = { quality: 80, effort: 6 };
 
 const toFile = (name) => path.join(OUT, name);
 
+// libvips (sharp) may mishandle non-ASCII paths on Windows (the project lives in a Cyrillic folder),
+// so Node's fs does all disk I/O and sharp only sees buffers.
+const load = (file) => readFile(file);
+
 async function writeVariants(pipeline, baseName, { avif, webp }) {
-  await pipeline
-    .clone()
-    .avif(avif)
-    .toFile(toFile(`${baseName}.avif`));
-  await pipeline
-    .clone()
-    .webp(webp)
-    .toFile(toFile(`${baseName}.webp`));
+  await writeFile(toFile(`${baseName}.avif`), await pipeline.clone().avif(avif).toBuffer());
+  await writeFile(toFile(`${baseName}.webp`), await pipeline.clone().webp(webp).toBuffer());
   return { avif: `${baseName}.avif`, webp: `${baseName}.webp` };
 }
 
 /** Bounding box of pixels with alpha above `threshold`, in source pixels. */
 async function alphaBounds(file, threshold = 8) {
-  const { data, info } = await sharp(file)
+  const { data, info } = await sharp(await load(file))
     .ensureAlpha()
     .extractChannel('alpha')
     .raw()
@@ -72,7 +70,7 @@ async function alphaBounds(file, threshold = 8) {
 
 /** 32×32 opacity mask, one 32-bit row per string of 8 hex digits (bit 31 = leftmost pixel). */
 async function alphaMask(file) {
-  const data = await sharp(file)
+  const data = await sharp(await load(file))
     .ensureAlpha()
     .extractChannel('alpha')
     .resize(MASK_SIZE, MASK_SIZE, { fit: 'fill', kernel: 'cubic' })
@@ -98,7 +96,8 @@ async function buildFood() {
     if (!match) throw new Error(`Unexpected food file name: ${name}`);
     const [, index, slug] = match;
     const file = path.join(dir, name);
-    const meta = await sharp(file).metadata();
+    const input = await load(file);
+    const meta = await sharp(input).metadata();
     if (meta.width !== meta.height) throw new Error(`${name} must be square`);
 
     const sharpVariants = {};
@@ -107,12 +106,15 @@ async function buildFood() {
       const edge = FOOD_SIZE_1X * density;
       const base = `food-${index}-${slug}-${edge}`;
       sharpVariants[`${density}x`] = await writeVariants(
-        sharp(file).resize(edge, edge, { kernel: 'lanczos3' }),
+        sharp(input).resize(edge, edge, { kernel: 'lanczos3' }),
         base,
         { avif: AVIF_SPRITE, webp: WEBP_SPRITE },
       );
       const pad = Math.round(edge * BLUR_PAD_RATIO);
-      const resized = await sharp(file).resize(edge, edge, { kernel: 'lanczos3' }).png().toBuffer();
+      const resized = await sharp(input)
+        .resize(edge, edge, { kernel: 'lanczos3' })
+        .png()
+        .toBuffer();
       blurredVariants[`${density}x`] = await writeVariants(
         sharp(resized)
           .extend({
@@ -149,7 +151,7 @@ async function buildFood() {
 
 /** Mean colour of the opaque pixels in the four corner squares (the baked rounded corners are dark). */
 async function cornerFill(file, square = 240) {
-  const { data, info } = await sharp(file)
+  const { data, info } = await sharp(await load(file))
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -181,8 +183,10 @@ async function cornerFill(file, square = 240) {
 async function buildTeam() {
   const bgFile = path.join(SRC, 'team/team-card-bg.png');
   const logoFile = path.join(SRC, 'team/team-logo.png');
-  const bgMeta = await sharp(bgFile).metadata();
-  const logoMeta = await sharp(logoFile).metadata();
+  const bgInput = await load(bgFile);
+  const logoInput = await load(logoFile);
+  const bgMeta = await sharp(bgInput).metadata();
+  const logoMeta = await sharp(logoInput).metadata();
   const fill = await cornerFill(bgFile);
 
   const background = {};
@@ -190,12 +194,12 @@ async function buildTeam() {
     background[width] = await writeVariants(
       // The source has rounded corners baked in; the app clips with its own animated radius,
       // so transparent corners must not show up mid-animation.
-      sharp(bgFile).flatten({ background: fill }).resize({ width, kernel: 'lanczos3' }),
+      sharp(bgInput).flatten({ background: fill }).resize({ width, kernel: 'lanczos3' }),
       `team-card-bg-${width}`,
       { avif: AVIF_PHOTO, webp: WEBP_PHOTO },
     );
   }
-  const logo = await writeVariants(sharp(logoFile), `team-logo-${logoMeta.width}`, {
+  const logo = await writeVariants(sharp(logoInput), `team-logo-${logoMeta.width}`, {
     avif: AVIF_PHOTO,
     webp: { ...WEBP_PHOTO, alphaQuality: 100 },
   });
