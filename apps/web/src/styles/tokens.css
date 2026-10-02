@@ -1,0 +1,16 @@
+/*
+ * Refectorio design tokens — the single source of truth for colours, type, radii, z-layers and motion.
+ * Values come from the mockups (Figma cache + measurements), see docs/design-system.md.
+ * Phase 0.8 seeds the palette and font; phase 0.7 adds the full scale.
+ */
+@theme {
+  --color-*: initial;
+  --color-bg: #fef9f7;
+  --color-accent: #e63946;
+  --color-ink: #000000;
+  --color-ink-muted: #5a5451;
+  --color-on-accent: #ffffff;
+
+  --font-*: initial;
+  --font-sans: 'Nunito Variable', 'Nunito Fallback', ui-rounded, system-ui, sans-serif;
+}

@@ -22,11 +22,35 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "npm run test:e2e -w @refectorio/web",
+    "test:e2e": "npm run test:e2e -w @refectorio/web --",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "assets": "node scripts/optimize-assets.mjs",
     "lhci": "lhci autorun",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lhci:mobile": "lhci autorun --config=lighthouserc.mobile.json"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^10.0.1",
+    "@lhci/cli": "^0.15.1",
+    "@playwright/test": "~1.63.0",
+    "@types/node": "^24.19.0",
+    "@vitest/coverage-v8": "^5.0.2",
+    "eslint": "^10.11.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
+    "prettier": "^3.9.9",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "rollup-plugin-visualizer": "^7.1.1",
+    "sharp": "^0.35.4",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
   }
 }

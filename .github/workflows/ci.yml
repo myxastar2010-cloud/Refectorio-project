@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:coverage
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: E2E smoke (Chromium)
+        run: npm run test:e2e -- --project=chromium
+      - name: Lighthouse (desktop budgets)
+        run: npm run lhci
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports
+          path: |
+            apps/web/playwright-report/
+            .lighthouseci/
+          retention-days: 7
