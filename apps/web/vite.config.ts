@@ -39,6 +39,36 @@ function preloadFonts(): Plugin {
   };
 }
 
+/**
+ * GitHub Pages cannot send response headers, so the production build carries the CSP as a <meta> tag too
+ * (Render sends the full set from render.yaml). frame-ancestors and upgrade-insecure-requests are header-only:
+ * in <meta> they are ignored or break the local http preview.
+ */
+const META_CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+function metaCsp(): Plugin {
+  return {
+    name: 'refectorio:meta-csp',
+    apply: 'build',
+    transformIndexHtml: (html) =>
+      html.replace(
+        '<meta charset="UTF-8" />',
+        `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${META_CSP}" />`,
+      ),
+  };
+}
+
 /** "/" for Render, "/refectorio/" (or whatever Pages reports) for GitHub Pages. */
 function base(): string {
   const value = process.env.VITE_BASE ?? '/';
@@ -51,6 +81,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     preloadFonts(),
+    metaCsp(),
     process.env.ANALYZE
       ? visualizer({ filename: 'dist/stats.html', gzipSize: true, brotliSize: true })
       : null,

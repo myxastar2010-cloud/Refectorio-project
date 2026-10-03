@@ -1,0 +1,55 @@
+{
+  "version": "2026-10-03",
+  "research": "refectorio-workspace/research/R02-macronutrients.md, conflicts.md C-05…C-08; fact-check B-01…B-11",
+  "protein": {
+    "adultGPerKg": { "value": 0.83, "source": "EFSA 2012 PRI (NASEM RDA 0,8)" },
+    "olderAdultGPerKg": {
+      "value": 1.0,
+      "fromAgeYears": 65,
+      "source": "PROT-AGE / ESPEN (Bauer 2013): 1,0–1,2 г/кг"
+    },
+    "gainGPerKg": { "value": 1.6, "source": "ISSN 2017: 1,4–2,0 г/кг для тренирующихся" },
+    "loseGPerKg": { "value": 1.2, "source": "инженерное решение (R02, низкая уверенность)" },
+    "childGPerKg": {
+      "source": "IOM 2005 RDA (не проходило фактчекинг)",
+      "bands": [
+        { "fromAgeYears": 1, "toAgeYears": 4, "value": 1.05 },
+        { "fromAgeYears": 4, "toAgeYears": 14, "value": 0.95 },
+        { "fromAgeYears": 14, "toAgeYears": 18, "value": 0.85 }
+      ]
+    }
+  },
+  "energyShare": {
+    "fatTarget": 0.3,
+    "source": "AMDR IOM 2005: белок 10–35%, жиры 20–35%, углеводы 45–65%; ВОЗ: свободные сахара < 10%, насыщенные ≤ 10%",
+    "proteinRange": [0.1, 0.35],
+    "fatRange": [0.2, 0.35],
+    "carbRange": [0.45, 0.65],
+    "freeSugarsMax": 0.1,
+    "freeSugarsIdeal": 0.05,
+    "saturatedFatMax": 0.1,
+    "noAddedSugarUnderAgeYears": 2
+  },
+  "fiber": {
+    "source": "NASEM AI 14 г/1000 ккал; ВОЗ 2023: ≥ 25 г взрослым, 15/21/25 г детям 2–5/6–9/10+",
+    "gPer1000Kcal": 14,
+    "adultMinG": 25,
+    "childBands": [
+      { "fromAgeYears": 2, "toAgeYears": 6, "value": 15 },
+      { "fromAgeYears": 6, "toAgeYears": 10, "value": 21 },
+      { "fromAgeYears": 10, "toAgeYears": 18, "value": 25 }
+    ]
+  },
+  "water": {
+    "source": "EFSA 2010 Adequate Intake, вся вода (включая воду из пищи); дети и надбавки — не проходили фактчекинг",
+    "adultMl": { "male": 2500, "female": 2000, "unspecified": 2000 },
+    "childBands": [
+      { "fromAgeYears": 1, "toAgeYears": 2, "male": 1150, "female": 1150 },
+      { "fromAgeYears": 2, "toAgeYears": 4, "male": 1300, "female": 1300 },
+      { "fromAgeYears": 4, "toAgeYears": 9, "male": 1600, "female": 1600 },
+      { "fromAgeYears": 9, "toAgeYears": 14, "male": 2100, "female": 1900 }
+    ],
+    "pregnancyExtraMl": 300,
+    "lactationExtraMl": 700
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "source": "МР 2.3.1.0253-21 «Нормы физиологических потребностей в энергии и пищевых веществах для различных групп населения Российской Федерации» (Роспотребнадзор, 2021)",
+  "url": "https://docs.cntd.ru/document/608629034",
+  "version": "2021",
+  "research": "refectorio-workspace/research/R01-energy.md §3, §7–8; fact-check A-05, A-09",
+  "palByActivityGroup": { "kfa1": 1.4, "kfa2": 1.6, "kfa3": 1.9, "kfa4": 2.2 },
+  "olderAdultsFromAgeYears": 65,
+  "palOlderAdults": 1.7,
+  "pregnancyExtraKcal": { "none": 0, "trimester1": 0, "trimester2": 250, "trimester3": 350 },
+  "lactationExtraKcal": { "none": 0, "months0to6": 500, "months7to12": 450 }
+}
