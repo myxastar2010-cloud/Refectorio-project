@@ -56,8 +56,11 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding-top: calc(88px + env(safe-area-inset-top));
+    /* Height of the header zone: the content starts below it, and focused elements scroll into view below it too. */
+    --hero-top: calc(88px + env(safe-area-inset-top));
+    padding-top: var(--hero-top);
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    scroll-padding-top: var(--hero-top);
     overflow-y: auto;
     overscroll-behavior: contain;
   }
@@ -320,7 +323,7 @@
 
   .scene--hero {
     gap: 20px;
-    padding-top: calc(120px + env(safe-area-inset-top));
+    --hero-top: calc(120px + env(safe-area-inset-top));
     padding-bottom: calc(32px + env(safe-area-inset-bottom));
   }
 
@@ -400,7 +403,7 @@
 @media (min-width: 48rem) and (orientation: landscape) and (not ((min-width: 64rem) and (hover: hover))) {
   /* Tablets on their side: a slightly tighter part 1, so it fits without scrolling (e.g. 1180×820). */
   .scene--hero {
-    padding-top: calc(96px + env(safe-area-inset-top));
+    --hero-top: calc(96px + env(safe-area-inset-top));
   }
 
   .hero-title {
@@ -440,7 +443,7 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 24px;
     row-gap: 12px;
-    padding-top: calc(60px + env(safe-area-inset-top));
+    --hero-top: calc(60px + env(safe-area-inset-top));
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
   }
 

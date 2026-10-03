@@ -31,6 +31,8 @@ export const SPRING = {
   tilt: { type: 'spring', stiffness: 180, damping: 20, mass: 0.6 },
   /** Team card expansion (shared element). */
   expand: { type: 'spring', visualDuration: 0.55, bounce: 0.12 },
+  /** Closing is faster than opening (≈70 %) and without overshoot: an exit should feel responsive. */
+  collapse: { type: 'spring', visualDuration: 0.4, bounce: 0 },
   aboutTitle: { type: 'spring', visualDuration: 0.6, bounce: 0.1 },
   /** Cards "fly in from the first person" with a light overshoot. */
   aboutCards: { type: 'spring', visualDuration: 0.66, bounce: 0.22 },
@@ -65,6 +67,15 @@ export const DIALOG = {
   contentStaggerMs: 50,
   /** The team logo cross-fades into the card background during the first part of the expansion. */
   logoCrossfadeEnd: 0.18,
+  /**
+   * Radii of the shared element in mockup px (mirror of --radius-tile / --radius-dialog in tokens.css, checked by
+   * tokens.test.ts): Motion animates and corrects the radius only from pixel values. Phones use a sheet radius.
+   */
+  tileRadius: 45,
+  dialogRadius: 217,
+  phoneDialogRadiusPx: 28,
+  /** Phone tiles scale with the screen width against this frame. */
+  phoneFrameWidth: 390,
 } as const;
 
 export const TILT = {

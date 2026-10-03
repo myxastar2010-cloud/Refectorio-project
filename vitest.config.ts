@@ -17,6 +17,8 @@ export default defineConfig({
           root: './apps/web',
           include: ['src/**/*.test.{ts,tsx}'],
           environment: 'node',
+          // CSS is replaced by empty strings in tests by default; tokens.test.ts reads the tokens file as text.
+          css: { include: [/styles\/tokens\.css/] },
         },
       },
     ],

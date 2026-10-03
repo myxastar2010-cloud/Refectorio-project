@@ -6,12 +6,6 @@ import { useViewport } from '../../lib/useViewport';
 
 export const TEAM_LAYOUT_ID = 'team-card';
 
-/** Mockup radii (tokens.css --radius-tile / --radius-dialog); phones use a sheet-like radius. */
-const TILE_RADIUS = 45;
-const DIALOG_RADIUS = 217;
-const PHONE_DIALOG_RADIUS_PX = 28;
-const PHONE_FRAME_WIDTH = 390;
-
 type Props = {
   readonly mode: 'tile' | 'dialog';
   /** Skip the logo/background cross-fade (first render of the page). */
@@ -31,20 +25,22 @@ export function TeamSurface({ mode, still }: Props) {
   // Motion animates and corrects the radius only from pixel values.
   const radius = dialog
     ? viewport.phone
-      ? PHONE_DIALOG_RADIUS_PX
-      : DIALOG_RADIUS * viewport.sd
-    : TILE_RADIUS * (viewport.phone ? viewport.width / PHONE_FRAME_WIDTH : viewport.s);
-  const expand = calm ? { duration: 0.2 } : SPRING.expand;
+      ? DIALOG.phoneDialogRadiusPx
+      : DIALOG.dialogRadius * viewport.sd
+    : DIALOG.tileRadius * (viewport.phone ? viewport.width / DIALOG.phoneFrameWidth : viewport.s);
+  // The dialog surface animates the opening; the tile surface takes over (and animates) the closing.
+  const spring = dialog ? SPRING.expand : SPRING.collapse;
+  const shape = calm ? { duration: 0.2 } : spring;
   const crossfade = calm ? 0.2 : SPRING.expand.visualDuration * DIALOG.logoCrossfadeEnd;
   // Closing: the logo comes back at the very end of the way.
-  const closingDelay = calm ? 0 : SPRING.expand.visualDuration * (1 - DIALOG.logoCrossfadeEnd);
+  const closingDelay = calm ? 0 : SPRING.collapse.visualDuration * (1 - DIALOG.logoCrossfadeEnd);
 
   return (
     <m.div
       layoutId={TEAM_LAYOUT_ID}
       className={dialog ? 'team-surface team-surface--dialog' : 'team-surface'}
       style={{ borderRadius: radius }}
-      transition={expand}
+      transition={shape}
     >
       <m.picture
         layout
