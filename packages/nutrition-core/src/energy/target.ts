@@ -68,10 +68,10 @@ function adultEnergy(q: Questionnaire, decision: GuardrailDecision): AdultEnergy
     q.bodyFatPct === undefined
       ? mifflinStJeorKcal(q)
       : katchMcArdleKcal({ weightKg: q.weightKg, bodyFatPct: q.bodyFatPct });
+  // МР gives one PAL (1.7) for 65+; active older adults keep their group PAL so energy is not underestimated (D-016).
+  const groupPal = mr.palByActivityGroup[q.activity];
   const pal =
-    q.ageYears >= mr.olderAdultsFromAgeYears
-      ? mr.palOlderAdults
-      : mr.palByActivityGroup[q.activity];
+    q.ageYears >= mr.olderAdultsFromAgeYears ? Math.max(mr.palOlderAdults, groupPal) : groupPal;
   const extraKcal = reproductiveExtraKcal(q);
   const tdeeKcal = bmrKcal * pal + extraKcal;
 

@@ -78,6 +78,14 @@ export const BMI_OBESITY_FROM = 30;
 const ALL_GOALS: readonly Goal[] = ['maintain', 'lose', 'gain', 'habits'];
 const NO_ENERGY_GOALS: readonly Goal[] = ['maintain', 'habits'];
 const NO_DIETS: readonly Regime[] = ['intermittentFasting', 'keto', 'vlcd'];
+/** Children 1–13: no energy goals; health data stays in the browser until a parental-consent flow exists (D-009). */
+const CHILD_LIMITS = {
+  goals: NO_ENERGY_GOALS,
+  noDeficit: true,
+  noSurplus: true,
+  forbid: NO_DIETS,
+  guestOnly: true,
+} as const;
 
 /** What a single rule contributes; everything is merged into one decision. */
 type Effect = {
@@ -102,20 +110,8 @@ function ageEffects(q: Questionnaire): Effect[] {
   if (age < AGE_LIMITS.childUnderYears) {
     const effects: Effect[] = [
       q.mode === 'family'
-        ? {
-            status: 'limited',
-            reason: 'CHILD_FAMILY_MODE',
-            goals: NO_ENERGY_GOALS,
-            noDeficit: true,
-            noSurplus: true,
-          }
-        : {
-            status: 'requiresAdult',
-            reason: 'CHILD_NEEDS_ADULT',
-            goals: NO_ENERGY_GOALS,
-            noDeficit: true,
-            noSurplus: true,
-          },
+        ? { status: 'limited', reason: 'CHILD_FAMILY_MODE', ...CHILD_LIMITS }
+        : { status: 'requiresAdult', reason: 'CHILD_NEEDS_ADULT', ...CHILD_LIMITS },
     ];
     if (age < AGE_LIMITS.toddlerUnderYears) {
       effects.push({

@@ -33,8 +33,9 @@ describe('energy target: adults', () => {
     expect(e.bmrKcal).toBeCloseTo(370 + 21.6 * 45, 9);
   });
 
-  it('older adults use PAL 1.7 regardless of the group', () => {
-    expect(adult({ ageYears: 70, activity: 'kfa4' }).pal).toBe(1.7);
+  it('older adults use МР PAL 1.7, but never less than their activity group (D-016)', () => {
+    expect(adult({ ageYears: 70, activity: 'kfa1' }).pal).toBe(1.7);
+    expect(adult({ ageYears: 70, activity: 'kfa4' }).pal).toBe(2.2);
   });
 
   it('weight loss: default 0.5 %/week via 7700 kcal/kg', () => {

@@ -35,7 +35,7 @@
     "gPer1000Kcal": 14,
     "adultMinG": 25,
     "childBands": [
-      { "fromAgeYears": 2, "toAgeYears": 6, "value": 15 },
+      { "fromAgeYears": 3, "toAgeYears": 6, "value": 15 },
       { "fromAgeYears": 6, "toAgeYears": 10, "value": 21 },
       { "fromAgeYears": 10, "toAgeYears": 18, "value": 25 }
     ]

@@ -16,6 +16,9 @@ export type MacroTargets = {
   readonly saturatedFatMaxG: number;
 };
 
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, value));
+
 type Band = { readonly fromAgeYears: number; readonly toAgeYears: number; readonly value: number };
 const inBand = (bands: readonly Band[], ageYears: number): number | undefined =>
   bands.find((b) => ageYears >= b.fromAgeYears && ageYears < b.toAgeYears)?.value;
@@ -36,6 +39,8 @@ export function proteinGPerKg(ageYears: number, goal: Goal): number {
 export function fiberTargetG(ageYears: number, energyKcal: number): number | null {
   const f = data.fiber;
   if (ageYears >= 18) return Math.max((f.gPer1000Kcal * energyKcal) / 1000, f.adultMinG);
+  // No individual numbers before 3 years (algorithm-spec.md §4.3).
+  if (ageYears < 3) return null;
   return inBand(f.childBands, ageYears) ?? null;
 }
 
@@ -63,13 +68,18 @@ export function macroTargets(
   goal: Goal,
 ): MacroTargets {
   const share = data.energyShare;
-  const proteinG = proteinGPerKg(q.ageYears, goal) * q.weightKg;
-  const fatG = (share.fatTarget * energyKcal) / KCAL_PER_G.fat;
-  const carbKcal = energyKcal - proteinG * KCAL_PER_G.protein - fatG * KCAL_PER_G.fat;
+  // Priority: protein g/kg kept inside 10–35% of energy, carbohydrates at least 45%, fat 30% → down to 20% if needed.
+  const proteinShare = clamp(
+    (proteinGPerKg(q.ageYears, goal) * q.weightKg * KCAL_PER_G.protein) / energyKcal,
+    AMDR.protein[0],
+    AMDR.protein[1],
+  );
+  const fatShare = clamp(1 - proteinShare - AMDR.carb[0], AMDR.fat[0], share.fatTarget);
+  const carbShare = 1 - proteinShare - fatShare;
   return {
-    proteinG,
-    fatG,
-    carbG: Math.max(0, carbKcal / KCAL_PER_G.carb),
+    proteinG: (proteinShare * energyKcal) / KCAL_PER_G.protein,
+    fatG: (fatShare * energyKcal) / KCAL_PER_G.fat,
+    carbG: (carbShare * energyKcal) / KCAL_PER_G.carb,
     fiberG: fiberTargetG(q.ageYears, energyKcal),
     waterMl: waterTargetMl(q),
     freeSugarsMaxG:

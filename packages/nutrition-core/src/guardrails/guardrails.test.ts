@@ -16,6 +16,7 @@ describe('guardrails: age', () => {
     const d = evaluateGuardrails(q({ ageYears: 10, heightCm: 140, weightKg: 32, mode: 'self' }));
     expect(d.status).toBe('requiresAdult');
     expect(d.reasons).toContain('CHILD_NEEDS_ADULT');
+    expect(d.guestOnly).toBe(true);
     expect(d.allowedGoals).toEqual(['maintain', 'habits']);
     expect(d.energyDeficitAllowed).toBe(false);
     expect(d.energySurplusAllowed).toBe(false);
@@ -29,6 +30,8 @@ describe('guardrails: age', () => {
     expect(d.reasons).toEqual(['CHILD_FAMILY_MODE']);
     expect(d.allowedGoals).toEqual(['maintain', 'habits']);
     expect(d.individualEnergy).toBe(true);
+    expect(d.guestOnly).toBe(true);
+    expect(d.forbiddenRegimes).toEqual(['intermittentFasting', 'keto', 'vlcd']);
   });
 
   it('gives no individual energy to toddlers 1–2 and refers to a paediatrician', () => {

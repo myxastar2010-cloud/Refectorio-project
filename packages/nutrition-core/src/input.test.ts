@@ -88,6 +88,11 @@ describe('validateQuestionnaire', () => {
     expect(codes({ ...valid, heightCm: 200, weightKg: 30 })).toEqual(['weightKg:IMPLAUSIBLE_BMI']);
     expect(codes({ ...valid, heightCm: 100, weightKg: 300 })).toEqual(['weightKg:IMPLAUSIBLE_BMI']);
     expect(codes({ ...valid, heightCm: 30, weightKg: 300 })).toEqual(['heightCm:OUT_OF_RANGE']);
+    // Stricter for minors: BMI above 50 is almost certainly a typo.
+    expect(codes({ ...valid, ageYears: 6, heightCm: 110, weightKg: 70 })).toEqual([
+      'weightKg:IMPLAUSIBLE_BMI',
+    ]);
+    expect(codes({ ...valid, ageYears: 30, heightCm: 110, weightKg: 70 })).toEqual([]);
   });
 
   it('limits the free-text fields (prompt-injection surface)', () => {

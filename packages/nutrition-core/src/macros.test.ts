@@ -29,13 +29,14 @@ describe('protein (g/kg)', () => {
 });
 
 describe('fibre and water', () => {
-  it('fibre: 14 g/1000 kcal for adults, never below 25 g; WHO bands for children', () => {
+  it('fibre: 14 g/1000 kcal for adults, never below 25 g; WHO bands for children from 3 years', () => {
     expect(fiberTargetG(30, 2500)).toBeCloseTo(35, 9);
     expect(fiberTargetG(30, 1500)).toBe(25);
     expect(fiberTargetG(4, 1300)).toBe(15);
     expect(fiberTargetG(8, 1600)).toBe(21);
     expect(fiberTargetG(15, 2400)).toBe(25);
     expect(fiberTargetG(1.5, 1000)).toBeNull();
+    expect(fiberTargetG(2.5, 1100)).toBeNull();
   });
 
   it('water: EFSA total water by sex and age, plus pregnancy/lactation', () => {
@@ -51,10 +52,10 @@ describe('fibre and water', () => {
 
 describe('macro targets', () => {
   it('protein from g/kg, fat 30 %, carbs the rest; sugar and saturated-fat ceilings', () => {
-    const m = macroTargets({ ...base, ageYears: 30 }, 2000, 'maintain');
-    expect(m.proteinG).toBeCloseTo(49.8, 9);
+    const m = macroTargets({ ...base, ageYears: 30, weightKg: 70 }, 2000, 'maintain');
+    expect(m.proteinG).toBeCloseTo(0.83 * 70, 9);
     expect(m.fatG).toBeCloseTo(600 / 9, 9);
-    expect(m.carbG).toBeCloseTo((2000 - 49.8 * 4 - 600) / 4, 9);
+    expect(m.carbG).toBeCloseTo((2000 - 0.83 * 70 * 4 - 600) / 4, 9);
     expect(m.freeSugarsMaxG).toBeCloseTo(50, 9);
     expect(m.saturatedFatMaxG).toBeCloseTo(200 / 9, 9);
     const shares = energyShares(m.proteinG, m.fatG, m.carbG);
@@ -63,11 +64,39 @@ describe('macro targets', () => {
     expect(shares.carb).toBeLessThanOrEqual(AMDR.carb[1]);
   });
 
-  it('no added sugar under 2 years, carbs never negative', () => {
+  it('keeps protein at least 10 % of energy', () => {
+    const m = macroTargets({ ...base, ageYears: 30, weightKg: 50 }, 2500, 'maintain');
+    expect(energyShares(m.proteinG, m.fatG, m.carbG).protein).toBeCloseTo(0.1, 9);
+  });
+
+  it('caps protein at 35 % and lowers fat (not below 20 %) so carbs stay ≥ 45 %', () => {
+    const m = macroTargets({ ...base, ageYears: 30, weightKg: 200 }, 2000, 'gain');
+    const shares = energyShares(m.proteinG, m.fatG, m.carbG);
+    expect(shares.protein).toBeCloseTo(0.35, 9);
+    expect(shares.fat).toBeCloseTo(0.2, 9);
+    expect(shares.carb).toBeCloseTo(0.45, 9);
+  });
+
+  it('every macro share stays inside the AMDR for a range of inputs (property)', () => {
+    for (const weightKg of [40, 70, 120, 250]) {
+      for (const energyKcal of [1200, 2000, 3500]) {
+        for (const goal of ['maintain', 'lose', 'gain'] as const) {
+          const m = macroTargets({ ...base, ageYears: 30, weightKg }, energyKcal, goal);
+          const s = energyShares(m.proteinG, m.fatG, m.carbG);
+          expect(s.protein).toBeGreaterThanOrEqual(AMDR.protein[0] - 1e-9);
+          expect(s.protein).toBeLessThanOrEqual(AMDR.protein[1] + 1e-9);
+          expect(s.fat).toBeGreaterThanOrEqual(AMDR.fat[0] - 1e-9);
+          expect(s.fat).toBeLessThanOrEqual(AMDR.fat[1] + 1e-9);
+          expect(s.carb).toBeGreaterThanOrEqual(AMDR.carb[0] - 1e-9);
+        }
+      }
+    }
+  });
+
+  it('no added sugar under 2 years', () => {
     expect(
       macroTargets({ ...base, ageYears: 1.5, weightKg: 11 }, 900, 'maintain').freeSugarsMaxG,
     ).toBe(0);
-    expect(macroTargets({ ...base, ageYears: 30, weightKg: 200 }, 500, 'gain').carbG).toBe(0);
   });
 
   it('energy shares of zero intake are zero', () => {

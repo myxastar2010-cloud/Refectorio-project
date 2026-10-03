@@ -24,7 +24,7 @@ export const INPUT_LIMITS = {
   mealsPerDay: { min: 2, max: 6 },
   cookTimeMaxMin: { min: 5, max: 180 },
   /** BMI outside this range almost certainly means a typo in height or weight. */
-  bmi: { min: 10, max: 100 },
+  bmi: { min: 10, max: 100, maxUnder18: 50 },
   dislikesMaxItems: 20,
   dislikeMaxLength: 40,
   dislikesOtherMaxLength: 150,
@@ -107,7 +107,8 @@ export function validateQuestionnaire(
   const weightOk = !errors.some((e) => e.field === 'weightKg');
   if (heightOk && weightOk) {
     const bmi = input.weightKg / (input.heightCm / 100) ** 2;
-    if (bmi < INPUT_LIMITS.bmi.min || bmi > INPUT_LIMITS.bmi.max) {
+    const maxBmi = input.ageYears < 18 ? INPUT_LIMITS.bmi.maxUnder18 : INPUT_LIMITS.bmi.max;
+    if (bmi < INPUT_LIMITS.bmi.min || bmi > maxBmi) {
       errors.push({ field: 'weightKg', code: 'IMPLAUSIBLE_BMI' });
     }
   }
