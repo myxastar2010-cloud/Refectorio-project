@@ -31,11 +31,13 @@ export const SPRING = {
   tilt: { type: 'spring', stiffness: 180, damping: 20, mass: 0.6 },
   /** Team card expansion (shared element). */
   expand: { type: 'spring', visualDuration: 0.55, bounce: 0.12 },
-  /** Closing is faster than opening (≈70 %) and without overshoot: an exit should feel responsive. */
-  collapse: { type: 'spring', visualDuration: 0.4, bounce: 0 },
-  aboutTitle: { type: 'spring', visualDuration: 0.6, bounce: 0.1 },
+  /** Text of the opened team card rises into place with a light bounce. */
+  dialogContent: { type: 'spring', visualDuration: 0.45, bounce: 0.25 },
+  /** Part 1 settles back with a light overshoot. */
+  heroIn: { type: 'spring', visualDuration: 0.62, bounce: 0.2 },
+  aboutTitle: { type: 'spring', visualDuration: 0.6, bounce: 0.2 },
   /** Cards "fly in from the first person" with a light overshoot. */
-  aboutCards: { type: 'spring', visualDuration: 0.66, bounce: 0.22 },
+  aboutCards: { type: 'spring', visualDuration: 0.66, bounce: 0.3 },
 } as const;
 
 /** Scene transition hero ↔ about (ТЗ 6.6), times in ms from the start. */
@@ -50,8 +52,10 @@ export const SCENE = {
     blurCrossfadeEndMs: 600,
     /** The about scene may slow the food down. */
     speedFactor: 0.7,
+    /** …and its parallax is weaker: the layer has receded into the depth. */
+    parallaxFactor: 0.5,
   },
-  heroOut: { durationMs: 450, staggerMs: 40, blurPx: 12, scale: 0.96 },
+  heroOut: { durationMs: 450, staggerMs: 40, blurPx: 12, scale: 0.96, liftPx: 28 },
   /** Reverse path: part 1 reappears while the about cards fly towards the viewer. */
   heroIn: { delayMs: 320, durationMs: 620, staggerMs: 40 },
   aboutTitleIn: { delayMs: 350, fromScale: 1.2, fromBlurPx: 12, blurMs: 450 },
@@ -79,12 +83,16 @@ export const DIALOG = {
 } as const;
 
 export const TILT = {
-  featureCardMaxDeg: 6,
-  ctaMaxDeg: 4,
-  infoCardMaxDeg: 3.5,
-  perspectivePx: 1000,
-  glareOpacity: 0.2,
+  featureCardMaxDeg: 9,
+  ctaMaxDeg: 6,
+  infoCardMaxDeg: 6,
+  perspectivePx: 900,
+  glareOpacity: 0.28,
   glareSizeRatio: 0.9,
+  /** Parallax inside a tilting card: the content floats above the surface and shifts this far (px) at the edge. */
+  depthPx: 7,
+  /** The card rises a little towards the pointer. */
+  liftScale: 0.025,
 } as const;
 
 /** Wheel/touchpad and swipe gestures (ТЗ 6.5). */
@@ -98,4 +106,27 @@ export const GESTURE = {
   swipeMinPx: 50,
   swipeDominance: 1.2,
   lineHeightPx: 16,
+} as const;
+
+/**
+ * Corner morph of the team card (features/team-dialog/morph.ts), in the spirit of iOS 26: every corner flies on its
+ * own spring. Opening — the corners with the longest way lead and overshoot a little, the near ones follow firmly,
+ * so the card stretches open; closing is faster (≈70 %), the near corners snap back first and the far ones trail.
+ */
+export const MORPH = {
+  open: {
+    near: { stiffness: 260, damping: 25 },
+    far: { stiffness: 165, damping: 16 },
+    lagS: 0.07,
+    lead: 'far',
+  },
+  close: {
+    near: { stiffness: 340, damping: 33 },
+    far: { stiffness: 250, damping: 26 },
+    lagS: 0.06,
+    lead: 'near',
+  },
+  /** A corner rests when it is this close to its target (px). */
+  restPx: 0.5,
+  maxStepS: 0.05,
 } as const;

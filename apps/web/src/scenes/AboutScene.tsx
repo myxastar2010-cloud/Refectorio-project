@@ -1,8 +1,9 @@
 import { IconArrowUpRight, IconChevronUp } from '@tabler/icons-react';
 import { m, type MotionStyle } from 'motion/react';
-import { useRef, type Ref } from 'react';
+import { useEffect, useRef, type Ref } from 'react';
 import { site } from '../content/site.ru';
 import { TeamTile } from '../features/team-dialog/TeamTile';
+import { preloadTeamBackground } from '../features/team-dialog/preload';
 import { useCalmMotion } from '../motion/hooks';
 import { TILT } from '../motion/tokens';
 import { TiltGlare, type TiltHandle } from '../motion/TiltGlare';
@@ -21,7 +22,9 @@ type Props = {
   readonly titleRef: Ref<HTMLButtonElement>;
   readonly onBack: () => void;
   readonly teamOpen: boolean;
-  readonly teamTouched: boolean;
+  /** The team card is out of its icon (open or flying): the icon is empty and the card does not tilt. */
+  readonly teamOut: boolean;
+  readonly tileRef: Ref<HTMLDivElement>;
   readonly onOpenTeam: () => void;
   /** Receives the «Ещё» button so focus can return to it after the dialog closes. */
   readonly onMoreRef: (node: HTMLButtonElement | null) => void;
@@ -34,7 +37,8 @@ export function AboutScene({
   titleRef,
   onBack,
   teamOpen,
-  teamTouched,
+  teamOut,
+  tileRef,
   onOpenTeam,
   onMoreRef,
 }: Props) {
@@ -46,10 +50,15 @@ export function AboutScene({
   const initial = instant ? ({ initial: false } as const) : {};
 
   const openTeam = () => {
-    // The card must be flat before the shared-element measurement starts (ТЗ 6.4).
+    // The card must be flat before the icon is measured for the corner morph (ТЗ 6.4).
     teamTilt.current?.reset();
     onOpenTeam();
   };
+
+  // The card background is not on the first screen: fetch it once part 2 is shown, before the first opening.
+  useEffect(() => {
+    if (!hidden) preloadTeamBackground();
+  }, [hidden]);
 
   return (
     <section
@@ -91,10 +100,10 @@ export function AboutScene({
           ref={teamTilt}
           maxDeg={TILT.infoCardMaxDeg}
           className="info-surface"
-          disabled={teamOpen}
+          disabled={teamOut}
         >
           <p className="info-label at text-at">{team.label}</p>
-          <TeamTile open={teamOpen} still={!teamTouched} />
+          <TeamTile ref={tileRef} hidden={teamOut} />
           <h3 id="team-card-name" className="info-name at text-at">
             <Lines lines={team.nameLines} />
           </h3>

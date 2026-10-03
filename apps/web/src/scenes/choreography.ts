@@ -18,6 +18,8 @@ const ms = (value: number) => value / 1000;
 const blur = (px: number) => `blur(${px}px)`;
 // A full transform string (not Motion's independent `scale`) lets the browser run the animation off the main thread.
 const scaleTo = (value: number) => `scale(${value})`;
+/** Upward drift plus scale; the same functions on both ends keep the interpolation a straight one. */
+const liftTo = (upPx: number, scale: number) => `translate3d(0px, ${-upPx}px, 0px) scale(${scale})`;
 
 /** Leaving: scale on the expo curve, opacity and blur over the whole duration (see EASE_OUT_SOFT). */
 const leaving = (duration: number, delay = 0) => ({
@@ -53,24 +55,22 @@ export function heroVariants(index: number, calm: boolean): Variants {
   if (calm) return fade;
   const out = SCENE.heroOut;
   const back = SCENE.heroIn;
+  const delay = ms(back.delayMs + index * back.staggerMs);
   return {
+    // Part 1 drifts up as it dissolves (the camera moves on) and settles back with a light spring.
     hidden: {
       opacity: 0,
-      transform: scaleTo(out.scale),
+      transform: liftTo(out.liftPx, out.scale),
       filter: blur(out.blurPx),
       transition: leaving(ms(out.durationMs), ms(index * out.staggerMs)),
     },
     shown: {
       opacity: 1,
-      transform: scaleTo(1),
+      transform: liftTo(0, 1),
       filter: blur(0),
       transition: {
-        default: {
-          duration: ms(back.durationMs),
-          ease: EASE_OUT_EXPO,
-          delay: ms(back.delayMs + index * back.staggerMs),
-        },
-        ...appearing(ms(back.durationMs), ms(back.delayMs + index * back.staggerMs)),
+        default: { ...SPRING.heroIn, delay },
+        ...appearing(ms(back.durationMs), delay),
       },
     },
   };

@@ -97,6 +97,20 @@ export function maskHit(mask: Uint32Array, size: number, local: Vec): boolean {
 }
 
 /** Damped spring towards 1 for the click "bounce" (semi-implicit Euler, stable for dt ≤ 50 ms). */
+/** Exponential smoothing towards a target with time constant `tauS` (frame-rate independent). */
+export function smoothToward(current: number, target: number, dt: number, tauS: number): number {
+  if (tauS <= 0) return target;
+  return current + (target - current) * (1 - Math.exp(-dt / tauS));
+}
+
+/**
+ * Pointer parallax: `pointer` is the cursor position in −1…1 from the viewport centre; an item of `depth` (0…1,
+ * 1 — nearest) shifts the opposite way by up to `amplitudePx`, so the field seems to have depth.
+ */
+export function parallaxOffset(pointer: Vec, depth: number, amplitudePx: number): Vec {
+  return { x: -pointer.x * depth * amplitudePx, y: -pointer.y * depth * amplitudePx };
+}
+
 export type Spring = { value: number; velocity: number };
 export function stepSpring(spring: Spring, dt: number, stiffness: number, damping: number): Spring {
   const acceleration = -stiffness * (spring.value - 1) - damping * spring.velocity;

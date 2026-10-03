@@ -1,4 +1,4 @@
-import { LazyMotion, MotionConfig, domMax } from 'motion/react';
+import { LazyMotion, MotionConfig, domAnimation } from 'motion/react';
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import { Toast } from '../components/Toast';
 import { site } from '../content/site.ru';
@@ -18,7 +18,7 @@ const params = readTestParams(window.location.search);
 
 export function App() {
   return (
-    <LazyMotion features={domMax} strict>
+    <LazyMotion features={domAnimation} strict>
       <MotionConfig reducedMotion="user">
         <Page />
       </MotionConfig>
@@ -30,7 +30,9 @@ function Page() {
   const { scene, instant, go } = useScene();
   const calm = useCalmMotion();
   const [teamOpen, setTeamOpen] = useState(false);
-  const [teamTouched, setTeamTouched] = useState(false);
+  // From the click on «Ещё» until the closed card has landed back on its icon.
+  const [teamOut, setTeamOut] = useState(false);
+  const teamTileRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<string | null>(null);
   // Exposed as data-busy: e2e tests wait for the end of a transition by state, not by timeouts.
   const [busy, setBusy] = useState(false);
@@ -115,7 +117,7 @@ function Page() {
   }, [teamOpen]);
 
   const openTeam = () => {
-    setTeamTouched(true);
+    setTeamOut(true);
     setTeamOpen(true);
   };
 
@@ -154,7 +156,8 @@ function Page() {
                 goScene('hero');
               }}
               teamOpen={teamOpen}
-              teamTouched={teamTouched}
+              teamOut={teamOut}
+              tileRef={teamTileRef}
               onOpenTeam={openTeam}
               onMoreRef={setMoreRef}
             />
@@ -165,6 +168,10 @@ function Page() {
         open={teamOpen}
         onClose={() => {
           setTeamOpen(false);
+        }}
+        tileRef={teamTileRef}
+        onLanded={() => {
+          setTeamOut(false);
         }}
       />
       <Toast message={toast} />

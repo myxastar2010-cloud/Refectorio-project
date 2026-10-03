@@ -69,6 +69,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     const field = fieldRef.current;
     if (!field) return;
     field.setSpeedFactor(about ? SCENE.food.speedFactor : 1);
+    field.setParallaxFactor(about ? SCENE.food.parallaxFactor : 1);
     field.setObstacles(about ? [] : obstacles());
     if (about) field.ensureBlur();
   }, [scene, teamOpen, about]);
@@ -122,11 +123,27 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
       if (index >= 0) field.bounce(index);
     };
 
+    // Parallax follows the mouse only: taps on touch screens would make the food jump.
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse') return;
+      field.setPointer(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        (event.clientY / window.innerHeight) * 2 - 1,
+      );
+    };
+    const onPointerOut = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && !event.relatedTarget) field.setPointer(0, 0);
+    };
+
     window.addEventListener('resize', onResize);
     window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    document.addEventListener('pointerout', onPointerOut);
     return () => {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerout', onPointerOut);
       window.clearTimeout(resizeTimer);
       window.clearTimeout(preload);
       field.stop();

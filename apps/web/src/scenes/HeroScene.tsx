@@ -14,6 +14,8 @@ import { site } from '../content/site.ru';
 import { useCalmMotion } from '../motion/hooks';
 import { TILT } from '../motion/tokens';
 import { TiltGlare } from '../motion/TiltGlare';
+import { useWave } from '../motion/useWave';
+import { WaveLayer } from '../motion/WaveHover';
 import { heroVariants, type Phase } from './choreography';
 import { useViewport } from '../lib/useViewport';
 import { Lines } from '../components/Lines';
@@ -40,6 +42,7 @@ export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMen
   const viewport = useViewport();
   const hidden = phase === 'hidden';
   const [activeCard, setActiveCard] = useState(0);
+  const { setHost: ctaRef, handlers: ctaWave, clipPath: ctaClip } = useWave<HTMLAnchorElement>();
   const variants = (index: number) => heroVariants(index, calm);
   const motionProps = (index: number) => ({
     variants: variants(index),
@@ -69,9 +72,21 @@ export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMen
 
       <m.div className="cta-slot at box" data-opaque {...motionProps(2)}>
         <TiltGlare maxDeg={TILT.ctaMaxDeg} className="cta-tilt">
-          <a href={site.hero.cta.href} className="cta focus-ring" onClick={onCreateMenu}>
-            <span>{site.hero.cta.label}</span>
-            <IconCirclePlusFilled aria-hidden className="cta-icon" />
+          <a
+            ref={ctaRef}
+            href={site.hero.cta.href}
+            className="cta wave-host focus-ring"
+            onClick={onCreateMenu}
+            {...ctaWave}
+          >
+            <span className="wave-content">
+              <span>{site.hero.cta.label}</span>
+              <IconCirclePlusFilled aria-hidden className="cta-icon" />
+            </span>
+            <WaveLayer clipPath={ctaClip} className="wave-layer--ink">
+              <span>{site.hero.cta.label}</span>
+              <IconCirclePlusFilled aria-hidden className="cta-icon" />
+            </WaveLayer>
           </a>
         </TiltGlare>
       </m.div>

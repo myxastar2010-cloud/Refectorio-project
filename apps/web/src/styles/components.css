@@ -95,6 +95,24 @@
   pointer-events: none;
 }
 
+/* Parallax inside tilting cards (TiltGlare sets --depth-*): text floats above the surface, icons even higher. */
+.feature-title,
+.feature-text,
+.info-label,
+.info-name,
+.info-lead,
+.info-more,
+.info-links,
+.cta .wave-content > *,
+.cta .wave-layer > * {
+  translate: var(--depth-x, 0px) var(--depth-y, 0px);
+}
+
+.feature-icon,
+.info-tile {
+  translate: calc(var(--depth-x, 0px) * 1.8) calc(var(--depth-y, 0px) * 1.8);
+}
+
 /* ── Hero ────────────────────────────────────────────────────────────────────────────────── */
 
 .cta-slot,
@@ -117,6 +135,12 @@
 
 .cta-icon {
   flex: none;
+}
+
+/* The label and the icon keep the button's gap on both layers of the wave. */
+.cta .wave-content,
+.cta .wave-layer {
+  gap: inherit;
 }
 
 .features {
@@ -172,29 +196,31 @@
   object-fit: cover;
 }
 
-.team-tile {
-  overflow: visible;
+.team-tile-art {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
+/* The card at its final size; useCornerMorph draws it squeezed onto the icon with a projective transform. */
 .team-surface {
   position: absolute;
   inset: 0;
   overflow: hidden;
   background-color: var(--color-team-card);
+  transform-origin: 0 0;
+  will-change: transform;
 }
 
+.team-surface-bg,
 .team-surface-logo {
   position: absolute;
   inset: 0;
 }
 
-/* The background keeps the dialog size and is revealed by the growing window (counter-scaled by Motion). */
-.team-surface-bg {
-  position: absolute;
-  left: calc(50% - var(--dialog-w) * var(--sd) / 2);
-  top: calc(50% - var(--dialog-h) * var(--sd) / 2);
-  width: calc(var(--dialog-w) * var(--sd));
-  height: calc(var(--dialog-h) * var(--sd));
+/* Stretched to the card's proportions: squeezed back onto the square icon it is exactly the icon. */
+.team-surface-logo img {
+  object-fit: fill;
 }
 
 .info-links {
@@ -255,12 +281,17 @@
   background-color: var(--color-scrim);
 }
 
+/* The stage is always its own layer above the food. Without the z-index the blur under the open team card
+   (a filter creates a stacking context) re-stacked it below the food — the food jumped over the cards and back. */
 .page .stage {
+  z-index: var(--z-scene);
   transition: filter var(--motion-scrim, 350ms) var(--ease-out-expo);
 }
 
+/* The blur starts once the card is well on its way: its first frames must not compete with re-drawing the stage. */
 .page[data-team-open] .stage {
   filter: blur(4px);
+  transition-delay: 0.22s;
 }
 
 .team-dialog {
