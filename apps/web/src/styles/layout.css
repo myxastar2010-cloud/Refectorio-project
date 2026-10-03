@@ -1,0 +1,372 @@
+/*
+ * Page layout. Desktop (≥ 1024 px): the 1920×1080 mockup frame scaled by --s, every element placed in mockup px.
+ * Texts are placed by their baseline: top of the line box = baseline − leading / 2 − (ascent − descent) / 2 · size.
+ * Tablet and phone layouts — layout-responsive.css.
+ */
+
+.page {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+  background-color: var(--color-bg);
+}
+
+.food-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-food);
+  pointer-events: none;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-scene);
+}
+
+/* ── Shared building blocks ─────────────────────────────────────────────────────────────── */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.focus-ring:focus-visible,
+.focus-ring-within:has(:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.focus-ring-inverse:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color-inverse);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.line {
+  display: block;
+}
+
+@media (min-width: 64rem) {
+  .about-scroller {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .page[data-scene='about'] .about-scroller {
+    pointer-events: auto;
+  }
+
+  .stage {
+    --extra: calc(100svh - 1080 * var(--s));
+    --mid: calc(var(--extra) / 2);
+    --baseline-shift: calc((var(--font-ascent) - var(--font-descent)) / 2);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(50% - 960 * var(--s));
+    width: calc(1920 * var(--s));
+  }
+
+  /* Element at mockup coordinates (--x, --y) plus a vertical slack (--dy): 0 = top, mid = centre, extra = bottom. */
+  .at {
+    position: absolute;
+    left: calc(var(--x) * var(--s));
+    top: calc(var(--y) * var(--s) + var(--dy, 0px));
+  }
+
+  /* Text placed by its first baseline (--baseline), font size --size and line height --leading (mockup px). */
+  .text-at {
+    --leading: var(--size);
+    --y: calc(var(--baseline) - var(--leading) / 2 - var(--baseline-shift) * var(--size));
+    font-size: max(var(--min-size, 0px), calc(var(--size) * var(--s)));
+    line-height: calc(var(--leading) * var(--s));
+    white-space: nowrap;
+  }
+
+  .box {
+    width: calc(var(--w) * var(--s));
+    height: calc(var(--h) * var(--s));
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────────────────────────────────── */
+
+  .brand-icon {
+    --x: var(--hero-logo-icon-x);
+    --y: var(--hero-logo-icon-y);
+    --w: var(--hero-logo-icon-size);
+    --h: var(--hero-logo-icon-size);
+  }
+
+  .brand-name {
+    --x: var(--hero-brand-ink-x);
+    --baseline: var(--hero-brand-baseline);
+    --size: var(--type-brand-size);
+  }
+
+  .about-pill {
+    --x: var(--hero-about-x);
+    --y: var(--hero-about-y);
+    --w: var(--hero-about-w);
+    --h: var(--hero-about-h);
+    border-radius: calc(var(--radius-pill) * var(--s));
+    font-size: calc(var(--type-pill-label-size) * var(--s));
+    --outline-w: calc(var(--hero-about-border) * var(--s));
+  }
+
+  .hero-title {
+    --x: var(--hero-title-ink-x);
+    --baseline: var(--hero-title-baseline);
+    --size: var(--type-hero-title-size);
+    --leading: var(--type-hero-title-leading);
+    --dy: var(--mid);
+  }
+
+  .hero-lead {
+    --x: var(--hero-lead-ink-x);
+    --baseline: var(--hero-lead-baseline);
+    --size: var(--type-hero-lead-size);
+    --leading: var(--type-hero-lead-leading);
+    --min-size: var(--type-min-body);
+    --dy: var(--mid);
+  }
+
+  .cta-slot {
+    --x: var(--hero-cta-x);
+    --y: var(--hero-cta-y);
+    --w: var(--hero-cta-w);
+    --h: var(--hero-cta-h);
+    --dy: var(--mid);
+    border-radius: calc(var(--radius-pill) * var(--s));
+  }
+
+  .cta {
+    font-size: calc(var(--type-cta-label-size) * var(--s));
+    gap: calc(var(--hero-cta-gap) * var(--s));
+  }
+
+  .cta-icon {
+    width: calc(var(--hero-cta-icon-size) * var(--s));
+    height: calc(var(--hero-cta-icon-size) * var(--s));
+  }
+
+  .feature-card {
+    --x: calc(var(--hero-gutter) + var(--i) * (var(--hero-card-w) + var(--hero-card-gap)));
+    --y: var(--hero-cards-y);
+    --w: var(--hero-card-w);
+    --h: var(--hero-card-h);
+    --dy: var(--extra);
+    border-radius: calc(var(--radius-feature-card) * var(--s));
+  }
+
+  .feature-title {
+    --dy: 0px;
+    --x: var(--hero-card-pad-x);
+    --baseline: var(--hero-card-title-baseline);
+    --size: var(--type-card-title-size);
+    --min-size: var(--type-min-title);
+  }
+
+  .feature-text {
+    --dy: 0px;
+    --x: var(--hero-card-pad-x);
+    --baseline: var(--hero-card-text-baseline);
+    --size: var(--type-card-text-size);
+    --leading: var(--type-card-text-leading);
+    --min-size: var(--type-min-small);
+  }
+
+  .feature-icon {
+    position: absolute;
+    top: 50%;
+    right: calc(var(--hero-card-icon-inset) * var(--s));
+    width: calc(var(--hero-card-icon-size) * var(--s));
+    height: calc(var(--hero-card-icon-size) * var(--s));
+    translate: 0 -50%;
+  }
+
+  /* ── About ────────────────────────────────────────────────────────────────────────────── */
+
+  .about-title {
+    --baseline: var(--about-title-baseline);
+    --size: var(--type-about-title-size);
+    --dy: var(--mid);
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .about-title-button {
+    gap: calc(var(--about-chevron-gap) * var(--s));
+  }
+
+  .about-chevron {
+    width: calc(var(--about-chevron-size) * var(--s));
+    height: calc(var(--about-chevron-size) * var(--s));
+    translate: 0 calc(var(--about-chevron-dy) * var(--s));
+  }
+
+  .info-card {
+    --x: calc(var(--about-card-margin) + var(--i) * (var(--about-card-w) + var(--about-card-gap)));
+    --y: var(--about-cards-y);
+    --w: var(--about-card-w);
+    --h: var(--about-card-h);
+    --dy: var(--mid);
+    border-radius: calc(var(--radius-info-card) * var(--s));
+  }
+
+  .info-label {
+    --dy: 0px;
+    --baseline: var(--about-label-baseline);
+    --size: var(--type-info-label-size);
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+
+  .info-tile {
+    --dy: 0px;
+    --x: var(--about-tile-x);
+    --y: var(--about-tile-y);
+    --w: var(--about-tile-size);
+    --h: var(--about-tile-size);
+    border-radius: calc(var(--radius-tile) * var(--s));
+  }
+
+  .info-name {
+    --dy: 0px;
+    --x: var(--about-name-ink-x);
+    --baseline: var(--about-name-baseline);
+    --size: var(--type-info-name-size);
+    --leading: var(--type-info-name-leading);
+  }
+
+  .info-lead {
+    --dy: 0px;
+    --x: var(--about-lead-ink-x);
+    /* One-line names pull the lead up by one name line (the mockup shows a two-line placeholder). */
+    --baseline: calc(
+      var(--about-lead-baseline) - var(--type-info-name-leading) * (2 - var(--name-lines, 2))
+    );
+    --size: var(--type-info-lead-size);
+    --leading: var(--type-info-lead-leading);
+    --min-size: var(--type-min-small);
+  }
+
+  .info-more {
+    --dy: 0px;
+    --y: var(--about-more-y);
+    --w: var(--about-more-w);
+    --h: var(--about-more-h);
+    left: calc((var(--about-card-w) - var(--about-more-w)) / 2 * var(--s));
+    font-size: calc(var(--type-more-label-size) * var(--s));
+    --outline-w: calc(var(--about-more-border) * var(--s));
+  }
+
+  .info-links {
+    --dy: 0px;
+    --y: var(--about-links-y);
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--about-links-gap) * var(--s));
+    height: calc(var(--about-link-circle) * var(--s));
+  }
+
+  .info-link {
+    gap: calc(var(--about-link-gap) * var(--s));
+    font-size: max(var(--type-min-body), calc(var(--type-link-size) * var(--s)));
+  }
+
+  .info-link-circle {
+    width: calc(var(--about-link-circle) * var(--s));
+    height: calc(var(--about-link-circle) * var(--s));
+  }
+}
+
+/* ── Typography roles (all sizes) ───────────────────────────────────────────────────────── */
+
+.brand-name {
+  font-weight: var(--type-brand-weight);
+  letter-spacing: var(--type-brand-tracking);
+}
+
+.about-pill {
+  font-weight: var(--type-pill-label-weight);
+  letter-spacing: var(--type-pill-label-tracking);
+}
+
+.hero-title {
+  font-weight: var(--type-hero-title-weight);
+}
+
+.hero-title .line:nth-child(1) {
+  letter-spacing: var(--type-hero-title-tracking-1);
+}
+
+.hero-title .line:nth-child(2) {
+  letter-spacing: var(--type-hero-title-tracking-2);
+}
+
+.hero-title .line:nth-child(3) {
+  letter-spacing: var(--type-hero-title-tracking-3);
+}
+
+.hero-lead {
+  font-weight: var(--type-hero-lead-weight);
+  letter-spacing: var(--type-hero-lead-tracking);
+  color: var(--color-ink-muted);
+}
+
+.cta {
+  font-weight: var(--type-cta-label-weight);
+  letter-spacing: var(--type-cta-label-tracking);
+}
+
+.feature-title {
+  font-weight: var(--type-card-title-weight);
+  letter-spacing: var(--type-card-title-tracking);
+}
+
+.feature-text {
+  font-weight: var(--type-card-text-weight);
+  letter-spacing: var(--type-card-text-tracking);
+}
+
+.about-title {
+  font-weight: var(--type-about-title-weight);
+  letter-spacing: var(--type-about-title-tracking);
+  color: var(--color-accent);
+}
+
+.info-label {
+  font-weight: var(--type-info-label-weight);
+  letter-spacing: var(--type-info-label-tracking);
+}
+
+.info-name {
+  font-weight: var(--type-info-name-weight);
+  letter-spacing: var(--type-info-name-tracking);
+}
+
+.info-lead {
+  font-weight: var(--type-info-lead-weight);
+  letter-spacing: var(--type-info-lead-tracking);
+}
+
+.info-more {
+  font-weight: var(--type-more-label-weight);
+  letter-spacing: var(--type-more-label-tracking);
+}
+
+.info-link {
+  font-weight: var(--type-link-weight);
+  letter-spacing: var(--type-link-tracking);
+}

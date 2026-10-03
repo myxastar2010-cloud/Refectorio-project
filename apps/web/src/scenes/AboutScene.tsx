@@ -1,0 +1,216 @@
+import { IconArrowUpRight, IconChevronUp } from '@tabler/icons-react';
+import { m, type MotionStyle } from 'motion/react';
+import { useRef, type Ref } from 'react';
+import { site } from '../content/site.ru';
+import { TeamTile } from '../features/team-dialog/TeamTile';
+import { useCalmMotion } from '../motion/hooks';
+import { TILT } from '../motion/tokens';
+import { TiltGlare, type TiltHandle } from '../motion/TiltGlare';
+import { useWave } from '../motion/useWave';
+import { WaveLayer } from '../motion/WaveHover';
+import { images } from '../lib/assets';
+import { aboutCardVariants, aboutTitleVariants, type Phase } from './choreography';
+
+type Props = {
+  readonly phase: Phase;
+  readonly instant: boolean;
+  readonly titleRef: Ref<HTMLButtonElement>;
+  readonly onBack: () => void;
+  readonly teamOpen: boolean;
+  readonly teamTouched: boolean;
+  readonly onOpenTeam: () => void;
+  /** Receives the «Ещё» button so focus can return to it after the dialog closes. */
+  readonly onMoreRef: (node: HTMLButtonElement | null) => void;
+};
+
+/** Part 2 «О проекте»: the title (a button back to the start) and the team and project cards (ТЗ 6.3). */
+export function AboutScene({
+  phase,
+  instant,
+  titleRef,
+  onBack,
+  teamOpen,
+  teamTouched,
+  onOpenTeam,
+  onMoreRef,
+}: Props) {
+  const calm = useCalmMotion();
+  const hidden = phase === 'hidden';
+  const teamTilt = useRef<TiltHandle>(null);
+  const more = useWave<HTMLButtonElement>();
+  const { team, project } = site.about;
+  const initial = instant ? ({ initial: false } as const) : {};
+
+  const openTeam = () => {
+    // The card must be flat before the shared-element measurement starts (ТЗ 6.4).
+    teamTilt.current?.reset();
+    onOpenTeam();
+  };
+
+  return (
+    <section
+      className="scene scene--about"
+      aria-labelledby="about-title"
+      inert={hidden}
+      aria-hidden={hidden}
+      data-scene-active={!hidden}
+    >
+      <m.h2
+        id="about-title"
+        className="about-title at text-at"
+        variants={aboutTitleVariants(calm)}
+        {...initial}
+        animate={phase}
+      >
+        <button
+          ref={titleRef}
+          type="button"
+          className="about-title-button focus-ring"
+          aria-label={`${site.about.title}. ${site.about.backLabel}`}
+          onClick={onBack}
+        >
+          <span>{site.about.title}</span>
+          <IconChevronUp aria-hidden className="about-chevron" stroke={2.5} />
+        </button>
+      </m.h2>
+
+      <m.article
+        className="info-card at box"
+        style={{ '--i': 0, '--name-lines': team.nameLines.length } as MotionStyle}
+        aria-labelledby="team-card-name"
+        data-opaque
+        variants={aboutCardVariants(0, calm)}
+        {...initial}
+        animate={phase}
+      >
+        <TiltGlare
+          ref={teamTilt}
+          maxDeg={TILT.infoCardMaxDeg}
+          className="info-surface"
+          disabled={teamOpen}
+        >
+          <p className="info-label at text-at">{team.label}</p>
+          <TeamTile open={teamOpen} still={!teamTouched} />
+          <h3 id="team-card-name" className="info-name at text-at">
+            {team.nameLines.map((line) => (
+              <span key={line} className="line">
+                {line}
+              </span>
+            ))}
+          </h3>
+          <p className="info-lead at text-at">
+            {team.leadLines.map((line) => (
+              <span key={line} className="line">
+                {line}
+              </span>
+            ))}
+          </p>
+          <button
+            ref={(node) => {
+              more.setHost(node);
+              onMoreRef(node);
+            }}
+            type="button"
+            className="info-more at box wave-host focus-ring"
+            aria-label={team.moreLabel}
+            aria-haspopup="dialog"
+            aria-expanded={teamOpen}
+            onClick={openTeam}
+            {...more.handlers}
+          >
+            <span className="wave-content">{team.more}</span>
+            <WaveLayer clipPath={more.clipPath} className="wave-layer--ink wave-layer--outline">
+              {team.more}
+            </WaveLayer>
+          </button>
+        </TiltGlare>
+      </m.article>
+
+      <m.article
+        className="info-card at box"
+        style={{ '--i': 1, '--name-lines': project.nameLines.length } as MotionStyle}
+        aria-labelledby="project-card-name"
+        data-opaque
+        variants={aboutCardVariants(1, calm)}
+        {...initial}
+        animate={phase}
+      >
+        <TiltGlare maxDeg={TILT.infoCardMaxDeg} className="info-surface">
+          <p className="info-label at text-at">{project.label}</p>
+          <picture className="info-tile at box">
+            <source type="image/avif" srcSet={images[project.image].avifSrcSet} />
+            <img
+              src={images[project.image].fallback}
+              srcSet={images[project.image].webpSrcSet}
+              alt={project.imageAlt}
+            />
+          </picture>
+          <h3 id="project-card-name" className="info-name at text-at">
+            {project.nameLines.map((line) => (
+              <span key={line} className="line">
+                {line}
+              </span>
+            ))}
+          </h3>
+          <p className="info-lead at text-at">
+            {project.leadLines.map((line) => (
+              <span key={line} className="line">
+                {line}
+              </span>
+            ))}
+          </p>
+          <ul className="info-links at">
+            {project.links.map((link) => (
+              <li key={link.label}>
+                <SoonLink label={link.label} href={link.href} hint={link.soonHint} />
+              </li>
+            ))}
+          </ul>
+        </TiltGlare>
+      </m.article>
+    </section>
+  );
+}
+
+type SoonLinkProps = {
+  readonly label: string;
+  readonly href: string | null;
+  readonly hint: string;
+};
+
+/** Link with a round arrow; while the address is unknown it is disabled with a «Скоро» hint, the wave still works. */
+function SoonLink({ label, href, hint }: SoonLinkProps) {
+  const { setHost: linkRef, handlers: linkWave, clipPath: linkClip } = useWave<HTMLAnchorElement>();
+  const disabled = href === null;
+  const content = (tone: 'base' | 'wave') => (
+    <>
+      <span>{label}</span>
+      <span className={`info-link-circle info-link-circle--${tone}`}>
+        <IconArrowUpRight aria-hidden className="info-link-arrow" stroke={2.5} />
+      </span>
+    </>
+  );
+  return (
+    <a
+      ref={linkRef}
+      className="info-link wave-host focus-ring"
+      href={href ?? undefined}
+      role={disabled ? 'link' : undefined}
+      tabIndex={0}
+      aria-disabled={disabled || undefined}
+      title={disabled ? hint : undefined}
+      target={disabled ? undefined : '_blank'}
+      rel={disabled ? undefined : 'noreferrer'}
+      onClick={(event) => {
+        if (disabled) event.preventDefault();
+      }}
+      {...linkWave}
+    >
+      <span className="wave-content info-link-content">{content('base')}</span>
+      <WaveLayer clipPath={linkClip} className="wave-layer--accent info-link-content">
+        {content('wave')}
+      </WaveLayer>
+      {disabled && <span className="visually-hidden">{` (${hint})`}</span>}
+    </a>
+  );
+}

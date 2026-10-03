@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import './tokens.css';
+@import './layout.css';
+@import './components.css';
 
 @layer base {
   html {
@@ -13,5 +15,18 @@
 
   body {
     min-height: 100svh;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  button {
+    font: inherit;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
   }
 }

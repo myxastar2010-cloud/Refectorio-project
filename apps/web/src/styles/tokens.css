@@ -44,6 +44,8 @@
   /* ── Scale ─────────────────────────────────────────────────────────────────────────────── */
   /* One mockup pixel on the current screen: the 1920×1080 frame fits the viewport. */
   --s: min(100vw / 1920, 100svh / 1080);
+  /* Team dialog scale: tablets fit the 1401×844 card into 92 % of the screen; desktop uses --s (below). */
+  --sd: min(0.92 * 100vw / 1401, 0.92 * 100svh / 844);
 
   /* ── Z-layers (bottom → top), see ТЗ 6.1 ───────────────────────────────────────────────── */
   --z-food: 10;
@@ -190,6 +192,7 @@
   --about-title-ink-x: 777; /* group «О проекте ^» is centred: 777…1146 */
   --about-chevron-size: 58;
   --about-chevron-gap: 4; /* title box → chevron box; visible gap ≈ 16 */
+  --about-chevron-dy: 3.6; /* chevron centre sits on the x-height centre (Figma 105…163) */
   --about-cards-y: 419;
   --about-card-w: 754;
   --about-card-h: 487;
@@ -233,4 +236,10 @@
   --food-about-origin-x: 40.26%;
   --food-about-origin-y: 137.41%;
   --food-about-opacity: 0.6; /* fitted on mockup №2 (σ ≈ 7 px, opacity 0.6) */
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --sd: var(--s);
+  }
 }

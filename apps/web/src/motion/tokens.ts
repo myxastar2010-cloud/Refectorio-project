@@ -44,10 +44,13 @@ export const SCENE = {
     speedFactor: 0.7,
   },
   heroOut: { durationMs: 450, staggerMs: 40, blurPx: 12, scale: 0.96 },
-  aboutTitleIn: { delayMs: 350, fromScale: 1.2, fromBlurPx: 12 },
-  aboutCardsIn: { delayMs: 420, staggerMs: 80, fromScale: 1.6, fromBlurPx: 20 },
-  /** Reverse: about cards fly towards the viewer. */
-  aboutCardsOut: { durationMs: 420, toScale: 1.35, toBlurPx: 16 },
+  /** Reverse path: part 1 reappears while the about cards fly towards the viewer. */
+  heroIn: { delayMs: 320, durationMs: 620, staggerMs: 40 },
+  aboutTitleIn: { delayMs: 350, fromScale: 1.2, fromBlurPx: 12, blurMs: 450 },
+  aboutTitleOut: { durationMs: 320 },
+  aboutCardsIn: { delayMs: 420, staggerMs: 80, fromScale: 1.6, fromBlurPx: 20, blurMs: 520 },
+  /** Reverse: about cards fly towards the viewer (back to their entry scale and blur). */
+  aboutCardsOut: { durationMs: 420 },
 } as const;
 
 export const DIALOG = {

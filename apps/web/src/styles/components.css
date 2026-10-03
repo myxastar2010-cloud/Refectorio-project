@@ -1,0 +1,414 @@
+/* Visual styles of the main-page components (colours, surfaces, states). Geometry lives in layout.css. */
+
+.site-header {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-scene);
+  pointer-events: none;
+}
+
+.brand-icon {
+  color: var(--color-accent);
+}
+
+/* ── Wave hosts (ТЗ 6.8) ─────────────────────────────────────────────────────────────────── */
+
+.wave-host {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.wave-content {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wave-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.wave-layer--ink {
+  background-color: var(--color-ink);
+  color: var(--color-on-accent);
+}
+
+.wave-layer--accent {
+  justify-content: flex-start;
+  background-color: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.wave-layer--light {
+  background-color: var(--color-on-accent);
+  color: var(--color-ink);
+}
+
+/* Outlines are inset shadows, so the wave paints over them (a CSS border would stay on top). */
+.about-pill,
+.info-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 var(--outline-w, 2px) currentColor;
+}
+
+.about-pill {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 var(--outline-w, 2px) var(--color-ink-muted);
+}
+
+.info-more {
+  color: var(--color-on-accent);
+}
+
+/* ── Tilt and glare (ТЗ 6.9) ─────────────────────────────────────────────────────────────── */
+
+.tilt {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.tilt-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+/* ── Hero ────────────────────────────────────────────────────────────────────────────────── */
+
+.cta-slot,
+.feature-card,
+.info-card {
+  will-change: transform, opacity;
+}
+
+.cta {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  text-decoration: none;
+}
+
+.cta-icon {
+  flex: none;
+}
+
+.features {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feature-surface,
+.info-surface {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.feature-icon {
+  color: var(--color-on-accent);
+}
+
+/* ── About ───────────────────────────────────────────────────────────────────────────────── */
+
+.about-title-button {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.about-chevron {
+  flex: none;
+  transition: transform var(--motion-micro, 220ms) var(--ease-out-expo);
+}
+
+.about-title-button:hover .about-chevron,
+.about-title-button:focus-visible .about-chevron {
+  transform: translateY(-12%);
+}
+
+.info-tile {
+  overflow: hidden;
+}
+
+.info-tile img,
+.team-surface img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-tile {
+  overflow: visible;
+}
+
+.team-surface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: var(--color-team-card);
+}
+
+.team-surface-logo {
+  position: absolute;
+  inset: 0;
+}
+
+/* The background keeps the dialog size and is revealed by the growing window (counter-scaled by Motion). */
+.team-surface-bg {
+  position: absolute;
+  left: calc(50% - var(--dialog-w) * var(--sd) / 2);
+  top: calc(50% - var(--dialog-h) * var(--sd) / 2);
+  width: calc(var(--dialog-w) * var(--sd));
+  height: calc(var(--dialog-h) * var(--sd));
+}
+
+.info-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.info-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-on-accent);
+  text-decoration: none;
+}
+
+.info-link[aria-disabled='true'] {
+  cursor: default;
+}
+
+.info-link-content {
+  gap: inherit;
+}
+
+.info-link-circle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.info-link-circle--base {
+  background-color: var(--color-on-accent);
+  color: var(--color-accent);
+}
+
+.info-link-circle--wave {
+  background-color: var(--color-ink);
+  color: var(--color-on-accent);
+}
+
+.info-link-arrow {
+  width: 62%;
+  height: 62%;
+}
+
+/* ── Team dialog (ТЗ 6.4) ────────────────────────────────────────────────────────────────── */
+
+.team-dialog-root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+}
+
+.team-scrim {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-scrim);
+}
+
+.page .stage {
+  transition: filter var(--motion-scrim, 350ms) var(--ease-out-expo);
+}
+
+.page[data-team-open] .stage {
+  filter: blur(4px);
+}
+
+.team-dialog {
+  position: absolute;
+  left: calc(50% - var(--dialog-w) * var(--sd) / 2);
+  top: calc(50% - var(--dialog-h) * var(--sd) / 2);
+  width: calc(var(--dialog-w) * var(--sd));
+  height: calc(var(--dialog-h) * var(--sd));
+  color: var(--color-on-accent);
+}
+
+.team-dialog-content {
+  position: absolute;
+  inset: 0;
+  --baseline-shift: calc((var(--font-ascent) - var(--font-descent)) / 2);
+}
+
+.dialog-title,
+.dialog-lead,
+.dialog-members {
+  position: absolute;
+  left: calc(var(--dialog-pad-x) * var(--sd));
+  margin: 0;
+  white-space: nowrap;
+}
+
+.dialog-title {
+  top: calc(
+    (
+        var(--dialog-title-baseline) - var(--type-dialog-title-leading) / 2 -
+          var(--baseline-shift) * var(--type-dialog-title-size)
+      ) *
+      var(--sd)
+  );
+  font-size: calc(var(--type-dialog-title-size) * var(--sd));
+  line-height: calc(var(--type-dialog-title-leading) * var(--sd));
+  font-weight: var(--type-dialog-title-weight);
+  letter-spacing: var(--type-dialog-title-tracking);
+}
+
+.dialog-lead {
+  top: calc(
+    (
+        var(--dialog-lead-baseline) - var(--type-dialog-lead-leading) / 2 - var(--baseline-shift) *
+          var(--type-dialog-lead-size)
+      ) *
+      var(--sd)
+  );
+  font-size: calc(var(--type-dialog-lead-size) * var(--sd));
+  line-height: calc(var(--type-dialog-lead-leading) * var(--sd));
+  font-weight: var(--type-dialog-lead-weight);
+  letter-spacing: var(--type-dialog-lead-tracking);
+}
+
+.dialog-members {
+  left: calc(var(--dialog-members-x1) * var(--sd));
+  top: calc(
+    (
+        var(--dialog-members-baseline) - var(--type-member-row) / 2 - var(--baseline-shift) *
+          var(--type-member-size)
+      ) *
+      var(--sd)
+  );
+  display: grid;
+  grid-template-columns: calc(
+      (var(--dialog-members-x2) - var(--dialog-members-x1)) * var(--sd)
+    ) auto;
+  grid-auto-rows: calc(var(--type-member-row) * var(--sd));
+  padding: 0;
+  list-style: none;
+  font-size: calc(var(--type-member-size) * var(--sd));
+  line-height: calc(var(--type-member-row) * var(--sd));
+  font-weight: var(--type-member-weight);
+  letter-spacing: var(--type-member-tracking);
+}
+
+.dialog-member {
+  position: relative;
+}
+
+.dialog-member::before {
+  content: '•';
+  position: absolute;
+  left: calc(var(--dialog-bullet-offset) * var(--sd) * -1);
+  translate: -50% 0;
+}
+
+.dialog-close-slot {
+  position: absolute;
+  top: calc(var(--dialog-close-top) * var(--sd));
+  right: calc(var(--dialog-close-right) * var(--sd));
+  width: max(var(--touch-target-min), calc(var(--dialog-close-size) * var(--sd)));
+  height: max(var(--touch-target-min), calc(var(--dialog-close-size) * var(--sd)));
+}
+
+.dialog-close {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 max(1.5px, calc(2 * var(--sd))) var(--color-on-accent);
+  color: var(--color-on-accent);
+}
+
+.dialog-close-icon {
+  width: 62%;
+  height: 62%;
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────────────────────────── */
+
+.toast-region {
+  position: fixed;
+  left: 50%;
+  bottom: calc(32px + env(safe-area-inset-bottom));
+  z-index: var(--z-toast);
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+.toast {
+  margin: 0;
+  padding: 14px 24px;
+  border-radius: 9999px;
+  background-color: var(--color-ink);
+  color: var(--color-on-accent);
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Food layer ──────────────────────────────────────────────────────────────────────────── */
+
+.food-camera {
+  position: absolute;
+  inset: 0;
+  transform-origin: var(--food-about-origin-x) var(--food-about-origin-y);
+}
+
+.food-plane {
+  position: absolute;
+  inset: 0;
+}
+
+.food-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+.food-item picture,
+.food-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
