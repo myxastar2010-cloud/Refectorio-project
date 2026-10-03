@@ -79,9 +79,10 @@
     border-radius: 28px;
   }
 
+  /* White on #E63946 is 4.16:1: text must be "large" for WCAG (≥ 18.66 px bold or ≥ 24 px) — hence bold sizes ≥ 19 px. */
   .cta {
     gap: 8px;
-    font-size: 18px;
+    font-size: 19px;
   }
 
   .cta-icon {
@@ -124,6 +125,7 @@
 
   .feature-title {
     font-size: 22px;
+    font-weight: 700;
     line-height: 1.15;
   }
 
@@ -258,7 +260,8 @@
   .info-more {
     min-height: var(--touch-target-min);
     padding: 0 26px;
-    font-size: 17px;
+    font-size: 19px;
+    font-weight: 700;
   }
 
   .info-links {

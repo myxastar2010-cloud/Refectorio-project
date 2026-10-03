@@ -121,7 +121,7 @@ function Page() {
           }}
           onCreateMenu={onCreateMenu}
         />
-        <div className="about-scroller" ref={aboutRef}>
+        <div className="about-scroller" ref={aboutRef} inert={scene !== 'about'}>
           <AboutScene
             phase={scene === 'about' ? 'shown' : 'hidden'}
             instant={instant}

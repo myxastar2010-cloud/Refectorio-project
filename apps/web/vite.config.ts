@@ -45,18 +45,20 @@ function preloadFonts(): Plugin {
  * (Render sends the full set from render.yaml). frame-ancestors and upgrade-insecure-requests are header-only:
  * in <meta> they are ignored or break the local http preview.
  */
-const META_CSP = [
-  "default-src 'self'",
-  "script-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
-  "font-src 'self'",
-  "connect-src 'self'",
-  "manifest-src 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-].join('; ');
+const META_CSP =
+  [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "manifest-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    // The trailing ";" keeps the policy valid when antivirus web protection appends its own directive (seen with Kaspersky).
+  ].join('; ') + ';';
 
 function metaCsp(): Plugin {
   return {

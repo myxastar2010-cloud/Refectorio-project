@@ -18,6 +18,7 @@ import { TiltGlare } from '../motion/TiltGlare';
 import { useWave } from '../motion/useWave';
 import { WaveLayer } from '../motion/WaveHover';
 import { heroVariants, type Phase } from './choreography';
+import { useViewport } from '../lib/useViewport';
 import { Lines } from '../components/Lines';
 
 const FEATURE_ICONS: Record<FeatureIcon, Icon> = {
@@ -37,6 +38,7 @@ type Props = {
 /** Part 1: header, heading, lead, «Создать меню» and the four feature cards (ТЗ 6.2). */
 export function HeroScene({ phase, instant, onAbout, onCreateMenu }: Props) {
   const calm = useCalmMotion();
+  const viewport = useViewport();
   const hidden = phase === 'hidden';
   const [activeCard, setActiveCard] = useState(0);
   const {
@@ -97,9 +99,11 @@ export function HeroScene({ phase, instant, onAbout, onCreateMenu }: Props) {
         </m.div>
 
         <ul
-          className="features"
+          className="features focus-ring"
           aria-label={site.hero.featuresLabel}
           data-carousel
+          // On phones the cards scroll sideways: the list must be reachable by keyboard (arrows scroll it).
+          tabIndex={viewport.phone ? 0 : undefined}
           onScroll={(event) => {
             const list = event.currentTarget;
             const card = list.firstElementChild?.getBoundingClientRect().width ?? 1;

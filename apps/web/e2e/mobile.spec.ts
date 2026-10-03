@@ -60,3 +60,13 @@ test('everything of part 1 fits on one screen, the dialog is a full-screen sheet
   expect(box?.width).toBe(page.viewportSize()?.width);
   expect(await seriousViolations(page)).toEqual([]);
 });
+
+for (const hash of ['', '#about']) {
+  test(`no serious accessibility violations on a phone${hash ? ' in part 2' : ' in part 1'}`, async ({
+    page,
+  }) => {
+    await page.goto(`./?seed=1&freeze=1${hash}`);
+    await settled(page, hash ? 'about' : 'hero');
+    expect(await seriousViolations(page)).toEqual([]);
+  });
+}
