@@ -2,6 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, type Plugin } from 'vite';
+import { site } from './src/content/site.ru';
 
 /**
  * Preloads the Nunito subsets that the first screen needs (Cyrillic + Latin),
@@ -69,6 +70,26 @@ function metaCsp(): Plugin {
   };
 }
 
+/**
+ * Title, description and language come from the content file (single source of texts). Social images need an
+ * absolute URL: SITE_URL (Pages workflow) or RENDER_EXTERNAL_URL (set by Render during builds); locally — relative.
+ */
+function siteMeta(): Plugin {
+  const escape = (text: string) =>
+    text.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+  const origin = process.env.SITE_URL ?? process.env.RENDER_EXTERNAL_URL ?? '';
+  const siteUrl = origin ? `${origin.replace(/\/$/, '')}${base()}` : base();
+  return {
+    name: 'refectorio:site-meta',
+    transformIndexHtml: (html) =>
+      html
+        .replaceAll('%SITE_LANG%', site.meta.lang)
+        .replaceAll('%SITE_TITLE%', escape(site.meta.title))
+        .replaceAll('%SITE_DESCRIPTION%', escape(site.meta.description))
+        .replaceAll('%SITE_URL%', siteUrl),
+  };
+}
+
 /** "/" for Render, "/refectorio/" (or whatever Pages reports) for GitHub Pages. */
 function base(): string {
   const value = process.env.VITE_BASE ?? '/';
@@ -82,6 +103,7 @@ export default defineConfig({
     tailwindcss(),
     preloadFonts(),
     metaCsp(),
+    siteMeta(),
     process.env.ANALYZE
       ? visualizer({ filename: 'dist/stats.html', gzipSize: true, brotliSize: true })
       : null,

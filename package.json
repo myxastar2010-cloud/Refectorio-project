@@ -28,7 +28,9 @@
     "assets": "node scripts/optimize-assets.mjs",
     "lhci": "lhci autorun",
     "prepare": "husky",
-    "lhci:mobile": "lhci autorun --config=lighthouserc.mobile.json"
+    "lhci:mobile": "lhci autorun --config=lighthouserc.mobile.json",
+    "icons": "node scripts/make-icons.mjs",
+    "og-image": "node scripts/make-og-image.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
