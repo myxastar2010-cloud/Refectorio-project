@@ -91,8 +91,14 @@ export function energyShares(proteinG: number, fatG: number, carbG: number) {
   };
 }
 
+const range = (values: readonly number[]): readonly [number, number] => [
+  values[0] ?? 0,
+  values[1] ?? 0,
+];
+
+/** Acceptable macronutrient distribution ranges (shares of energy) for the menu validator. */
 export const AMDR = {
-  protein: data.energyShare.proteinRange,
-  fat: data.energyShare.fatRange,
-  carb: data.energyShare.carbRange,
+  protein: range(data.energyShare.proteinRange),
+  fat: range(data.energyShare.fatRange),
+  carb: range(data.energyShare.carbRange),
 } as const;
