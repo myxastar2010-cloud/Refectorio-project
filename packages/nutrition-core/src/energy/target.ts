@@ -25,6 +25,12 @@ export const VLCD_LIMIT_KCAL = 800;
 
 export const MINOR_UNDER_YEARS = 18;
 
+/**
+ * Below this resting/requirement energy the body data are implausible for a living person (a 30 kg adult already
+ * needs ≈ 800 kcal): no individual number is produced — fact-check of stage 0 code review.
+ */
+export const MIN_PLAUSIBLE_KCAL = 500;
+
 export type AdultEnergy = {
   readonly kind: 'adult';
   readonly method: 'mifflinStJeor' | 'katchMcArdle';
@@ -49,7 +55,12 @@ export type ChildEnergy = {
   readonly targetKcal: number;
 };
 
-export type NoEnergy = { readonly kind: 'none'; readonly reason: 'refused' | 'noIndividualEnergy' };
+export type NoEnergy = {
+  readonly kind: 'none';
+  /** refused / noIndividualEnergy — guardrails; implausibleBody — the data cannot be right;
+   * belowSafeMinimum — any target would be under the 800 kcal VLCD limit: only with a doctor. */
+  readonly reason: 'refused' | 'noIndividualEnergy' | 'implausibleBody' | 'belowSafeMinimum';
+};
 
 export type EnergyResult = AdultEnergy | ChildEnergy | NoEnergy;
 
@@ -61,7 +72,7 @@ function reproductiveExtraKcal(q: Questionnaire): number {
   return Math.max(mr.pregnancyExtraKcal[q.pregnancy], mr.lactationExtraKcal[q.lactation]);
 }
 
-function adultEnergy(q: Questionnaire, decision: GuardrailDecision): AdultEnergy {
+function adultEnergy(q: Questionnaire, decision: GuardrailDecision): AdultEnergy | NoEnergy {
   const method: AdultEnergy['method'] =
     q.bodyFatPct === undefined ? 'mifflinStJeor' : 'katchMcArdle';
   const bmrKcal =
@@ -73,7 +84,11 @@ function adultEnergy(q: Questionnaire, decision: GuardrailDecision): AdultEnergy
   const pal =
     q.ageYears >= mr.olderAdultsFromAgeYears ? Math.max(mr.palOlderAdults, groupPal) : groupPal;
   const extraKcal = reproductiveExtraKcal(q);
+  if (!Number.isFinite(bmrKcal) || bmrKcal < MIN_PLAUSIBLE_KCAL)
+    return { kind: 'none', reason: 'implausibleBody' };
   const tdeeKcal = bmrKcal * pal + extraKcal;
+  // Even maintenance below the VLCD limit means the numbers need a doctor, not an app (AHA/ACC/TOS 2013, rec. 4e).
+  if (tdeeKcal < VLCD_LIMIT_KCAL) return { kind: 'none', reason: 'belowSafeMinimum' };
 
   const goal: Goal = decision.allowedGoals.includes(q.goal) ? q.goal : 'maintain';
   const base = {
@@ -131,6 +146,8 @@ export function energyTarget(q: Questionnaire, decision: GuardrailDecision): Ene
   if (!decision.individualEnergy) return { kind: 'none', reason: 'noIndividualEnergy' };
   if (q.ageYears < MINOR_UNDER_YEARS) {
     const eerKcal = eerChildKcal(q);
+    if (!Number.isFinite(eerKcal) || eerKcal < MIN_PLAUSIBLE_KCAL)
+      return { kind: 'none', reason: 'implausibleBody' };
     const extraKcal = reproductiveExtraKcal(q);
     return {
       kind: 'child',

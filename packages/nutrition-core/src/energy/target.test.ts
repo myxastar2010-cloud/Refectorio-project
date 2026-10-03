@@ -139,6 +139,40 @@ describe('energy target: minors and refusals', () => {
     expect(run({ health: ['kidneyDisease'] })).toEqual({ kind: 'none', reason: 'refused' });
   });
 
+  it('implausible body data give no number instead of a negative one (code review, stage 0)', () => {
+    // Every field is in range on its own, but BMR would be −440 kcal.
+    expect(run({ ageYears: 120, heightCm: 45, weightKg: 3 })).toEqual({
+      kind: 'none',
+      reason: 'implausibleBody',
+    });
+    expect(run({ ageYears: 10, heightCm: 45, weightKg: 3, mode: 'family' })).toEqual({
+      kind: 'none',
+      reason: 'implausibleBody',
+    });
+  });
+
+  it('never returns a target below 800 kcal (VLCD): such cases go to a doctor', () => {
+    // BMR ≈ 383 kcal would pass the plausibility check only with a lower limit; maintenance ≈ 650 < 800.
+    const tiny = run({ ageYears: 80, heightCm: 110, weightKg: 25, activity: 'kfa1', goal: 'lose' });
+    expect(tiny.kind).toBe('none');
+    // A sweep over small bodies: every number that is produced respects the limit.
+    for (let weightKg = 20; weightKg <= 60; weightKg += 5) {
+      for (const heightCm of [100, 120, 140, 160]) {
+        for (const ageYears of [18, 50, 90]) {
+          const e = run({
+            weightKg,
+            heightCm,
+            ageYears,
+            activity: 'kfa1',
+            goal: 'lose',
+            ratePctPerWeek: 1,
+          });
+          if (e.kind === 'adult') expect(e.targetKcal).toBeGreaterThanOrEqual(800);
+        }
+      }
+    }
+  });
+
   it('target energy is never negative and grows with weight (property)', () => {
     let previous = 0;
     for (let weightKg = 40; weightKg <= 150; weightKg += 10) {

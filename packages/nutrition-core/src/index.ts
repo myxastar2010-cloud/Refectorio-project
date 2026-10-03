@@ -28,6 +28,7 @@ export {
 export {
   CALORIE_FLOOR_KCAL,
   ENERGY_PER_KG_KCAL,
+  MIN_PLAUSIBLE_KCAL,
   RATE_PCT_PER_WEEK,
   VLCD_LIMIT_KCAL,
   energyTarget,
