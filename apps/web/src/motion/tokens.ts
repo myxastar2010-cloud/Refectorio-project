@@ -69,6 +69,8 @@ export const DIALOG = {
   /** Content appears after this share of the expansion. */
   contentRevealAt: 0.6,
   contentStaggerMs: 50,
+  /** On closing the text goes first and fast: the card it lies on starts shrinking at once. */
+  contentExitS: 0.12,
   /** The team logo cross-fades into the card background during the first part of the expansion. */
   logoCrossfadeEnd: 0.18,
   /**

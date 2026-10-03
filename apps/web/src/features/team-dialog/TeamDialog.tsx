@@ -106,7 +106,7 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
               opacity: { duration: 0.35, ease: EASE_OUT_SOFT, delay },
             },
       },
-      exit: { opacity: 0, transition: { duration: DURATION.micro } },
+      exit: { opacity: 0, transition: { duration: DIALOG.contentExitS } },
     };
   };
 
