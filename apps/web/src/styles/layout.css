@@ -104,7 +104,7 @@
   }
 
   .brand-name {
-    --x: var(--hero-brand-ink-x);
+    --x: var(--hero-brand-x);
     --baseline: var(--hero-brand-baseline);
     --size: var(--type-brand-size);
   }
@@ -120,7 +120,7 @@
   }
 
   .hero-title {
-    --x: var(--hero-title-ink-x);
+    --x: var(--hero-title-x);
     --baseline: var(--hero-title-baseline);
     --size: var(--type-hero-title-size);
     --leading: var(--type-hero-title-leading);
@@ -128,7 +128,7 @@
   }
 
   .hero-lead {
-    --x: var(--hero-lead-ink-x);
+    --x: var(--hero-lead-x);
     --baseline: var(--hero-lead-baseline);
     --size: var(--type-hero-lead-size);
     --leading: var(--type-hero-lead-leading);
@@ -241,7 +241,7 @@
 
   .info-name {
     --dy: 0px;
-    --x: var(--about-name-ink-x);
+    --x: var(--about-name-x);
     --baseline: var(--about-name-baseline);
     --size: var(--type-info-name-size);
     --leading: var(--type-info-name-leading);
@@ -249,7 +249,7 @@
 
   .info-lead {
     --dy: 0px;
-    --x: var(--about-lead-ink-x);
+    --x: var(--about-lead-x);
     /* One-line names pull the lead up by one name line (the mockup shows a two-line placeholder). */
     --baseline: calc(
       var(--about-lead-baseline) - var(--type-info-name-leading) * (2 - var(--name-lines, 2))

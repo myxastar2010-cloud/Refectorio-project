@@ -61,80 +61,81 @@
   --focus-ring-color-inverse: var(--color-on-accent);
   --touch-target-min: 44px;
 
-  /* ── Typography roles (Figma SF Pro Rounded → Nunito; fitted to mockup line widths) ────── */
+  /* ── Typography roles (Figma SF Pro Rounded → Nunito; fitted to mockup line widths in Chromium with the real
+     self-hosted Nunito — design/analysis/06_font_fit.mjs) ───────────────────────────────────── */
   /* size and line-height in mockup px; tracking in em (scales with the size). */
-  --type-brand-size: 50.6;
+  --type-brand-size: 47.35;
   --type-brand-weight: 700;
-  --type-brand-tracking: 0em;
+  --type-brand-tracking: 0.0047em;
 
-  --type-pill-label-size: 23.55; /* «О проекте» */
+  --type-pill-label-size: 22.8; /* «О проекте» */
   --type-pill-label-weight: 700;
-  --type-pill-label-tracking: 0.036em;
+  --type-pill-label-tracking: 0.0087em;
 
-  --type-hero-title-size: 77;
+  --type-hero-title-size: 75.5;
   --type-hero-title-weight: 900;
   --type-hero-title-leading: 84.5;
-  --type-hero-title-tracking-1: 0.0065em; /* «Питаться» */
-  --type-hero-title-tracking-2: 0.038em; /* «полезно и» */
-  --type-hero-title-tracking-3: 0.039em; /* «вкусно сейчас» */
+  --type-hero-title-tracking-1: -0.0215em; /* «Питаться» (per line: exact widths) */
+  --type-hero-title-tracking-2: -0.042em; /* «полезно и» */
+  --type-hero-title-tracking-3: -0.0174em; /* «вкусно сейчас» */
 
-  --type-hero-lead-size: 23.55;
+  --type-hero-lead-size: 22.8;
   --type-hero-lead-weight: 600;
   --type-hero-lead-leading: 29;
-  --type-hero-lead-tracking: 0.018em;
+  --type-hero-lead-tracking: 0.0094em;
 
-  --type-cta-label-size: 26.7; /* «Создать меню» */
+  --type-cta-label-size: 24.7; /* «Создать меню» */
   --type-cta-label-weight: 700;
-  --type-cta-label-tracking: 0.036em;
+  --type-cta-label-tracking: 0.033em;
 
-  --type-card-title-size: 32.65;
+  --type-card-title-size: 30.4;
   --type-card-title-weight: 600;
-  --type-card-title-tracking: -0.0087em;
+  --type-card-title-tracking: 0.0206em;
 
-  --type-card-text-size: 20.5;
+  --type-card-text-size: 20;
   --type-card-text-weight: 600;
   --type-card-text-leading: 24;
-  --type-card-text-tracking: -0.0043em;
+  --type-card-text-tracking: -0.018em;
 
-  --type-about-title-size: 65.55;
+  --type-about-title-size: 63.3;
   --type-about-title-weight: 700;
-  --type-about-title-tracking: 0.0125em;
+  --type-about-title-tracking: -0.009em;
 
-  --type-info-label-size: 36.7; /* «Команда:», «Проект:» */
+  --type-info-label-size: 35.2; /* «Команда:», «Проект:» */
   --type-info-label-weight: 700;
-  --type-info-label-tracking: 0.0123em;
+  --type-info-label-tracking: 0.0098em;
 
-  --type-info-name-size: 50.6;
+  --type-info-name-size: 47.35;
   --type-info-name-weight: 700;
   --type-info-name-leading: 57;
-  --type-info-name-tracking: -0.0166em;
+  --type-info-name-tracking: 0.0007em;
 
-  --type-info-lead-size: 25.55;
+  --type-info-lead-size: 22.8;
   --type-info-lead-weight: 400;
   --type-info-lead-leading: 29;
-  --type-info-lead-tracking: -0.0156em;
+  --type-info-lead-tracking: -0.0245em;
 
-  --type-more-label-size: 27.65; /* «Ещё» */
+  --type-more-label-size: 25.65; /* «Ещё» */
   --type-more-label-weight: 600;
-  --type-more-label-tracking: -0.0865em;
+  --type-more-label-tracking: 0.0062em;
 
-  --type-link-size: 24.55;
+  --type-link-size: 23.05;
   --type-link-weight: 400;
-  --type-link-tracking: 0.0052em;
+  --type-link-tracking: -0.0178em;
 
-  --type-dialog-title-size: 66.55;
+  --type-dialog-title-size: 63.3;
   --type-dialog-title-weight: 700;
   --type-dialog-title-leading: 76;
-  --type-dialog-title-tracking: -0.0083em;
+  --type-dialog-title-tracking: 0.0009em;
 
-  --type-dialog-lead-size: 32.65;
+  --type-dialog-lead-size: 31.15;
   --type-dialog-lead-weight: 400;
   --type-dialog-lead-leading: 38;
-  --type-dialog-lead-tracking: 0.0113em;
+  --type-dialog-lead-tracking: -0.0384em;
 
-  --type-member-size: 32.65;
+  --type-member-size: 31.4;
   --type-member-weight: 400;
-  --type-member-tracking: -0.0079em;
+  --type-member-tracking: -0.0313em;
   --type-member-row: 84;
 
   /* Minimum rendered sizes on small desktops (the frame scales down to 0.53 at 1024 px). */
@@ -159,16 +160,16 @@
   --hero-logo-icon-x: 23;
   --hero-logo-icon-y: 19;
   --hero-logo-icon-size: 97; /* Tabler 24-unit box → visible apple ≈ 73×78 */
-  --hero-brand-ink-x: 129;
+  --hero-brand-x: 126;
   --hero-brand-baseline: 92;
   --hero-about-x: 1675;
   --hero-about-y: 19;
   --hero-about-w: 189;
   --hero-about-h: 83;
   --hero-about-border: 2;
-  --hero-title-ink-x: 51;
-  --hero-title-baseline: 279;
-  --hero-lead-ink-x: 48;
+  --hero-title-x: 47;
+  --hero-title-baseline: 278.5;
+  --hero-lead-x: 47;
   --hero-lead-baseline: 518;
   --hero-cta-x: 48;
   --hero-cta-y: 595;
@@ -181,7 +182,7 @@
   --hero-card-h: 161;
   --hero-card-gap: 21;
   --hero-cards-bottom: 86; /* space under the cards */
-  --hero-card-pad-x: 55; /* ink left of the texts */
+  --hero-card-pad-x: 53; /* text origin of title and text (ink + side bearing) */
   --hero-card-title-baseline: 54; /* from the card top */
   --hero-card-text-baseline: 86;
   --hero-card-icon-size: 73;
@@ -189,7 +190,6 @@
 
   /* ── About (scene 2) ───────────────────────────────────────────────────────────────────── */
   --about-title-baseline: 152;
-  --about-title-ink-x: 777; /* group «О проекте ^» is centred: 777…1146 */
   --about-chevron-size: 58;
   --about-chevron-gap: 4; /* title box → chevron box; visible gap ≈ 16 */
   --about-chevron-dy: 3.6; /* chevron centre sits on the x-height centre (Figma 105…163) */
@@ -202,9 +202,9 @@
   --about-tile-x: 143;
   --about-tile-y: 138;
   --about-tile-size: 187;
-  --about-name-ink-x: 375;
+  --about-name-x: 372;
   --about-name-baseline: 184;
-  --about-lead-ink-x: 372;
+  --about-lead-x: 372;
   --about-lead-baseline: 285;
   --about-more-y: 376;
   --about-more-w: 113;
@@ -218,11 +218,12 @@
   /* ── Team dialog (expanded card) ───────────────────────────────────────────────────────── */
   --dialog-w: 1401;
   --dialog-h: 844;
-  --dialog-pad-x: 105; /* ink left of title and lead */
+  --dialog-pad-x: 101; /* title origin; the lead starts at 105 (no side bearing) */
+  --dialog-lead-x: 105;
   --dialog-title-baseline: 357;
   --dialog-lead-baseline: 489;
-  --dialog-members-x1: 363; /* ink left of names, column 1 */
-  --dialog-members-x2: 819;
+  --dialog-members-x1: 362; /* name origins, columns 1 and 2 */
+  --dialog-members-x2: 818;
   --dialog-bullet-offset: 27; /* bullet centre → name ink */
   --dialog-members-baseline: 582;
   --dialog-close-size: 51;

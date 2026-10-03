@@ -2,8 +2,15 @@ import { m } from 'motion/react';
 import { images } from '../../lib/assets';
 import { DIALOG, SPRING } from '../../motion/tokens';
 import { useCalmMotion } from '../../motion/hooks';
+import { useViewport } from '../../lib/useViewport';
 
 export const TEAM_LAYOUT_ID = 'team-card';
+
+/** Mockup radii (tokens.css --radius-tile / --radius-dialog); phones use a sheet-like radius. */
+const TILE_RADIUS = 45;
+const DIALOG_RADIUS = 217;
+const PHONE_DIALOG_RADIUS_PX = 28;
+const PHONE_FRAME_WIDTH = 390;
 
 type Props = {
   readonly mode: 'tile' | 'dialog';
@@ -19,7 +26,14 @@ type Props = {
  */
 export function TeamSurface({ mode, still }: Props) {
   const calm = useCalmMotion();
+  const viewport = useViewport();
   const dialog = mode === 'dialog';
+  // Motion animates and corrects the radius only from pixel values.
+  const radius = dialog
+    ? viewport.phone
+      ? PHONE_DIALOG_RADIUS_PX
+      : DIALOG_RADIUS * viewport.sd
+    : TILE_RADIUS * (viewport.phone ? viewport.width / PHONE_FRAME_WIDTH : viewport.s);
   const expand = calm ? { duration: 0.2 } : SPRING.expand;
   const crossfade = calm ? 0.2 : SPRING.expand.visualDuration * DIALOG.logoCrossfadeEnd;
   // Closing: the logo comes back at the very end of the way.
@@ -29,7 +43,7 @@ export function TeamSurface({ mode, still }: Props) {
     <m.div
       layoutId={TEAM_LAYOUT_ID}
       className={dialog ? 'team-surface team-surface--dialog' : 'team-surface'}
-      style={{ borderRadius: 'var(--team-surface-radius)' }}
+      style={{ borderRadius: radius }}
       transition={expand}
     >
       <m.picture

@@ -293,6 +293,7 @@
 }
 
 .dialog-lead {
+  left: calc(var(--dialog-lead-x) * var(--sd));
   top: calc(
     (
         var(--dialog-lead-baseline) - var(--type-dialog-lead-leading) / 2 - var(--baseline-shift) *
@@ -316,9 +317,9 @@
       var(--sd)
   );
   display: grid;
-  grid-template-columns: calc(
-      (var(--dialog-members-x2) - var(--dialog-members-x1)) * var(--sd)
-    ) auto;
+  grid-template-columns:
+    calc((var(--dialog-members-x2) - var(--dialog-members-x1)) * var(--sd))
+    auto;
   grid-auto-rows: calc(var(--type-member-row) * var(--sd));
   padding: 0;
   list-style: none;
