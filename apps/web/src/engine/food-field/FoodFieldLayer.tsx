@@ -151,7 +151,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
       <m.div
         className="food-camera"
         initial={false}
-        animate={{ scale: about ? food.scale : 1 }}
+        animate={{ transform: `scale(${about ? food.scale : 1})` }}
         transition={camera}
       >
         <m.div

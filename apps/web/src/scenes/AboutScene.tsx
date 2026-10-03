@@ -12,6 +12,9 @@ import { images } from '../lib/assets';
 import { aboutCardVariants, aboutTitleVariants, type Phase } from './choreography';
 import { Lines } from '../components/Lines';
 
+/** The team card and the project card. */
+const ABOUT_CARDS = 2;
+
 type Props = {
   readonly phase: Phase;
   readonly instant: boolean;
@@ -80,7 +83,7 @@ export function AboutScene({
         style={{ '--i': 0, '--name-lines': team.nameLines.length } as MotionStyle}
         aria-labelledby="team-card-name"
         data-opaque
-        variants={aboutCardVariants(0, calm)}
+        variants={aboutCardVariants(0, ABOUT_CARDS, calm)}
         {...initial}
         animate={phase}
       >
@@ -124,7 +127,7 @@ export function AboutScene({
         style={{ '--i': 1, '--name-lines': project.nameLines.length } as MotionStyle}
         aria-labelledby="project-card-name"
         data-opaque
-        variants={aboutCardVariants(1, calm)}
+        variants={aboutCardVariants(1, ABOUT_CARDS, calm)}
         {...initial}
         animate={phase}
       >

@@ -6,6 +6,12 @@
 
 export const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 export const EASE_IN_OUT = [0.65, 0, 0.35, 1] as const;
+/**
+ * Opacity and blur of appearing content. With the expo curve they reach ~90 % in the first third of the duration,
+ * so a 40–80 ms cascade collapses into one frame; leaving content fades with EASE_IN_OUT for the same reason
+ * (it also lingers long enough to cross-fade with the next scene instead of leaving an empty screen).
+ */
+export const EASE_OUT_SOFT = [0.33, 1, 0.68, 1] as const;
 
 export const DURATION = {
   /** Hover/press feedback of small controls. */
