@@ -30,7 +30,8 @@
     "prepare": "husky",
     "lhci:mobile": "lhci autorun --config=lighthouserc.mobile.json",
     "icons": "node scripts/make-icons.mjs",
-    "og-image": "node scripts/make-og-image.mjs"
+    "og-image": "node scripts/make-og-image.mjs",
+    "compare-design": "node scripts/compare-with-design.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

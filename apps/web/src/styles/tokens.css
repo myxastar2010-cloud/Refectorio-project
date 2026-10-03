@@ -199,6 +199,8 @@
   --about-card-margin: 104;
   --about-card-gap: 204;
   --about-label-baseline: 85; /* from the card top, centred horizontally */
+  /* «Команда:» and «Ещё» are centred over the tile + name group, not over the card (Figma: 9 px right of centre) */
+  --about-team-content-dx: 9;
   --about-tile-x: 143;
   --about-tile-y: 138;
   --about-tile-size: 187;

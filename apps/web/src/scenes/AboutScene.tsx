@@ -76,7 +76,7 @@ export function AboutScene({
       </m.h2>
 
       <m.article
-        className="info-card at box"
+        className="info-card info-card--team at box"
         style={{ '--i': 0, '--name-lines': team.nameLines.length } as MotionStyle}
         aria-labelledby="team-card-name"
         data-opaque

@@ -221,11 +221,16 @@
     border-radius: calc(var(--radius-info-card) * var(--s));
   }
 
+  .info-card--team {
+    --content-dx: var(--about-team-content-dx);
+  }
+
   .info-label {
     --dy: 0px;
     --baseline: var(--about-label-baseline);
     --size: var(--type-info-label-size);
-    left: 0;
+    /* Centred over the card, moved by --content-dx. */
+    left: calc(2 * var(--content-dx, 0) * var(--s));
     right: 0;
     text-align: center;
   }
@@ -264,7 +269,7 @@
     --y: var(--about-more-y);
     --w: var(--about-more-w);
     --h: var(--about-more-h);
-    left: calc((var(--about-card-w) - var(--about-more-w)) / 2 * var(--s));
+    left: calc(((var(--about-card-w) - var(--about-more-w)) / 2 + var(--content-dx, 0)) * var(--s));
     font-size: calc(var(--type-more-label-size) * var(--s));
     --outline-w: calc(var(--about-more-border) * var(--s));
   }
