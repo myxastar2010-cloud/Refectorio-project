@@ -1,0 +1,448 @@
+/*
+ * Tablets (768–1023 px and touch tablets in landscape) and phones (< 768 px), ТЗ 6.10.
+ * Mobile-first flow layout; the desktop frame (layout.css) only applies to wide screens with a hovering pointer.
+ */
+
+@media not ((min-width: 64rem) and (hover: hover)) {
+  .stage {
+    position: absolute;
+    inset: 0;
+  }
+
+  .scene {
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  }
+
+  /* ── Header ───────────────────────────────────────────────────────────────────────────── */
+
+  .site-header {
+    bottom: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(12px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-name {
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .about-pill {
+    min-height: var(--touch-target-min);
+    padding: 0 18px;
+    font-size: 16px;
+    --outline-w: 1.5px;
+  }
+
+  /* ── Part 1 ───────────────────────────────────────────────────────────────────────────── */
+
+  .scene--hero {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: calc(88px + env(safe-area-inset-top));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .hero-title {
+    font-size: clamp(36px, 10.4vw, 44px);
+    line-height: 1.08;
+  }
+
+  .hero-lead {
+    max-width: 30em;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .hero-lead .line,
+  .feature-text .line {
+    display: inline;
+  }
+
+  .hero-lead .line + .line::before,
+  .feature-text .line + .line::before {
+    content: ' ';
+  }
+
+  .cta-slot {
+    height: 56px;
+    margin-top: 8px;
+    border-radius: 28px;
+  }
+
+  .cta {
+    gap: 8px;
+    font-size: 18px;
+  }
+
+  .cta-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Carousel with scroll-snap; the next card peeks in. */
+  .features {
+    display: flex;
+    gap: 12px;
+    margin: auto calc(-1 * max(16px, env(safe-area-inset-left))) 0;
+    padding: 0 max(16px, env(safe-area-inset-left));
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: max(16px, env(safe-area-inset-left));
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .features::-webkit-scrollbar {
+    display: none;
+  }
+
+  .feature-card {
+    flex: 0 0 82%;
+    height: 128px;
+    border-radius: 40px;
+    scroll-snap-align: start;
+  }
+
+  .feature-surface {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 84px 0 26px;
+    overflow: hidden;
+  }
+
+  .feature-title {
+    font-size: 22px;
+    line-height: 1.15;
+  }
+
+  .feature-text {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .feature-icon {
+    position: absolute;
+    top: 50%;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    translate: 0 -50%;
+  }
+
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 4px;
+  }
+
+  .carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    opacity: 0.3;
+    transition: opacity var(--motion-micro, 220ms) var(--ease-out-expo);
+  }
+
+  .carousel-dot[data-active='true'] {
+    opacity: 1;
+  }
+
+  /* ── Part 2: title and cards one under another, scrolling inside ─────────────────────── */
+
+  .about-scroller {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: none;
+  }
+
+  .page[data-scene='about'] .about-scroller {
+    pointer-events: auto;
+  }
+
+  .scene--about {
+    position: relative;
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: calc(28px + env(safe-area-inset-top));
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+
+  .about-title {
+    display: flex;
+    justify-content: center;
+    font-size: 40px;
+    line-height: 1.2;
+  }
+
+  .about-title-button {
+    gap: 4px;
+    min-height: var(--touch-target-min);
+  }
+
+  .about-chevron {
+    width: 34px;
+    height: 34px;
+  }
+
+  .info-card {
+    position: relative;
+    border-radius: 44px;
+  }
+
+  .info-surface {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    grid-template-areas:
+      'label label'
+      'tile name'
+      'tile lead'
+      'action action';
+    align-items: start;
+    gap: 8px 18px;
+    padding: 28px 24px 30px;
+  }
+
+  .info-label {
+    grid-area: label;
+    padding-bottom: 8px;
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .info-tile {
+    position: relative;
+    grid-area: tile;
+    width: 96px;
+    height: 96px;
+    border-radius: 23px;
+  }
+
+  .info-name {
+    grid-area: name;
+    align-self: end;
+    font-size: 26px;
+    line-height: 1.1;
+  }
+
+  .info-lead {
+    grid-area: lead;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .info-more,
+  .info-links {
+    grid-area: action;
+    justify-self: center;
+    margin-top: 16px;
+  }
+
+  .info-more {
+    min-height: var(--touch-target-min);
+    padding: 0 26px;
+    font-size: 17px;
+  }
+
+  .info-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 24px;
+  }
+
+  .info-link {
+    min-height: var(--touch-target-min);
+    gap: 8px;
+    font-size: 16px;
+  }
+
+  .info-link-circle {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ── Tablet: larger type, 2×2 cards, part 2 side by side in landscape ───────────────────── */
+
+@media (min-width: 48rem) and (not ((min-width: 64rem) and (hover: hover))) {
+  .site-header {
+    padding-top: calc(24px + env(safe-area-inset-top));
+    padding-inline: 32px;
+  }
+
+  .scene {
+    padding-inline: 32px;
+  }
+
+  .scene--hero {
+    gap: 20px;
+    padding-top: calc(120px + env(safe-area-inset-top));
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+
+  .hero-title {
+    font-size: clamp(52px, 7vw, 72px);
+  }
+
+  .hero-lead {
+    font-size: 20px;
+  }
+
+  .cta-slot {
+    max-width: 480px;
+    height: 64px;
+    border-radius: 32px;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: auto 0 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .feature-card {
+    height: 140px;
+  }
+
+  .feature-title {
+    font-size: 26px;
+  }
+
+  .feature-text {
+    font-size: 16px;
+  }
+
+  .carousel-dots {
+    display: none;
+  }
+
+  .scene--about {
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .about-title {
+    font-size: 56px;
+  }
+
+  .info-surface {
+    grid-template-columns: 140px 1fr;
+    padding: 40px 48px 44px;
+  }
+
+  .info-tile {
+    width: 140px;
+    height: 140px;
+    border-radius: 34px;
+  }
+
+  .info-name {
+    font-size: 36px;
+  }
+
+  .info-lead {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 48rem) and (orientation: landscape) and (not ((min-width: 64rem) and (hover: hover))) {
+  .scene--about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-content: center;
+  }
+
+  .about-title {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── Phones: the team dialog becomes a full-screen sheet with scrolling content ─────────── */
+
+@media (max-width: 47.99rem) {
+  .carousel-dots {
+    display: flex;
+  }
+
+  .team-dialog {
+    inset: 0;
+    width: auto;
+    height: auto;
+  }
+
+  .team-surface-bg {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .team-dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: calc(84px + env(safe-area-inset-top)) 28px calc(32px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .dialog-title,
+  .dialog-lead,
+  .dialog-members {
+    position: static;
+    white-space: normal;
+  }
+
+  .dialog-title {
+    font-size: 40px;
+    line-height: 1.1;
+  }
+
+  .dialog-lead {
+    font-size: 18px;
+    line-height: 1.35;
+  }
+
+  .dialog-members {
+    display: block;
+    margin-top: 16px;
+    padding-left: 22px;
+    font-size: 19px;
+    line-height: 2;
+  }
+
+  .dialog-member::before {
+    left: -14px;
+  }
+
+  .dialog-close-slot {
+    top: calc(16px + env(safe-area-inset-top));
+    right: 16px;
+    width: 48px;
+    height: 48px;
+  }
+}

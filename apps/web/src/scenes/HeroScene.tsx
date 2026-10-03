@@ -9,7 +9,7 @@ import {
 } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { m, type MotionStyle } from 'motion/react';
-import type { MouseEvent } from 'react';
+import { useState, type MouseEvent } from 'react';
 import type { FeatureIcon } from '../content/schema';
 import { site } from '../content/site.ru';
 import { useCalmMotion } from '../motion/hooks';
@@ -37,6 +37,7 @@ type Props = {
 export function HeroScene({ phase, instant, onAbout, onCreateMenu }: Props) {
   const calm = useCalmMotion();
   const hidden = phase === 'hidden';
+  const [activeCard, setActiveCard] = useState(0);
   const {
     setHost: aboutPillRef,
     handlers: aboutPillWave,
@@ -102,7 +103,16 @@ export function HeroScene({ phase, instant, onAbout, onCreateMenu }: Props) {
           </TiltGlare>
         </m.div>
 
-        <ul className="features" aria-label={site.hero.featuresLabel}>
+        <ul
+          className="features"
+          aria-label={site.hero.featuresLabel}
+          data-carousel
+          onScroll={(event) => {
+            const list = event.currentTarget;
+            const card = list.firstElementChild?.getBoundingClientRect().width ?? 1;
+            setActiveCard(Math.round(list.scrollLeft / Math.max(1, card)));
+          }}
+        >
           {site.hero.features.map((feature, index) => {
             const FeatureIconComponent = FEATURE_ICONS[feature.icon];
             return (
@@ -128,6 +138,11 @@ export function HeroScene({ phase, instant, onAbout, onCreateMenu }: Props) {
             );
           })}
         </ul>
+        <m.div className="carousel-dots" aria-hidden {...motionProps(3)}>
+          {site.hero.features.map((feature, index) => (
+            <span key={feature.title} className="carousel-dot" data-active={index === activeCard} />
+          ))}
+        </m.div>
       </section>
     </>
   );

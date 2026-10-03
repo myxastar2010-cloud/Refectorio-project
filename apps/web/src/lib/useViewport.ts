@@ -17,8 +17,9 @@ function read(): Viewport {
   const width = window.innerWidth;
   const height = window.innerHeight;
   const s = Math.min(width / 1920, height / 1080);
-  const sd =
-    width >= DESKTOP_MIN_WIDTH ? s : Math.min((0.92 * width) / 1401, (0.92 * height) / 844);
+  // Same condition as the desktop layout in layout.css: wide screen with a hovering pointer.
+  const desktop = width >= DESKTOP_MIN_WIDTH && window.matchMedia('(hover: hover)').matches;
+  const sd = desktop ? s : Math.min((0.92 * width) / 1401, (0.92 * height) / 844);
   return { width, height, s, sd, phone: width <= PHONE_MAX_WIDTH };
 }
 

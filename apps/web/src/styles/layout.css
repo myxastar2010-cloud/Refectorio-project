@@ -1,7 +1,7 @@
 /*
  * Page layout. Desktop (≥ 1024 px): the 1920×1080 mockup frame scaled by --s, every element placed in mockup px.
  * Texts are placed by their baseline: top of the line box = baseline − leading / 2 − (ascent − descent) / 2 · size.
- * Tablet and phone layouts — layout-responsive.css.
+ * Tablets (incl. touch tablets in landscape) and phones — layout-responsive.css.
  */
 
 .page {
@@ -51,7 +51,7 @@
   display: block;
 }
 
-@media (min-width: 64rem) {
+@media (min-width: 64rem) and (hover: hover) {
   .about-scroller {
     position: absolute;
     inset: 0;

@@ -3,7 +3,8 @@
 .site-header {
   position: absolute;
   inset: 0;
-  z-index: var(--z-scene);
+  /* Above the scenes (they cover the whole stage); the header itself lets clicks through except on the pill. */
+  z-index: calc(var(--z-scene) + 1);
   pointer-events: none;
 }
 
@@ -119,6 +120,11 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* Carousel indicators exist only on phones (layout-responsive.css). */
+.carousel-dots {
+  display: none;
 }
 
 .feature-surface,
