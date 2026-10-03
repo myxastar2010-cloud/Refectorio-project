@@ -366,6 +366,7 @@ export function createFoodField(options: FieldOptions) {
         x: item.x,
         y: item.y,
         size: item.size,
+        scale: item.bounce.value,
         hidden: item.hidden,
       }));
     },

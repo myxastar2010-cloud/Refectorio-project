@@ -31,10 +31,13 @@ function Page() {
   const [teamOpen, setTeamOpen] = useState(false);
   const [teamTouched, setTeamTouched] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  // Exposed as data-busy: e2e tests wait for the end of a transition by state, not by timeouts.
+  const [busy, setBusy] = useState(false);
   const lockedUntil = useRef(0);
   const aboutTitleRef = useRef<HTMLButtonElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
   const teamOpenRef = useRef(teamOpen);
   useEffect(() => {
     teamOpenRef.current = teamOpen;
@@ -48,7 +51,12 @@ function Page() {
   const goScene = useCallback(
     (next: Scene) => {
       if (locked()) return;
-      lockedUntil.current = performance.now() + (calm ? DURATION.fade * 1000 : SCENE.inputLockMs);
+      const lockMs = calm ? DURATION.fade * 1000 : SCENE.inputLockMs;
+      lockedUntil.current = performance.now() + lockMs;
+      setBusy(true);
+      window.setTimeout(() => {
+        setBusy(false);
+      }, lockMs);
       go(next);
     },
     [calm, go, locked],
@@ -64,6 +72,10 @@ function Page() {
   }, [scene]);
 
   useSceneInput({ scene, go: goScene, locked, aboutScroller: () => aboutRef.current });
+  // Effects run in order, so the input listeners above are attached by now; e2e tests wait for this mark.
+  useEffect(() => {
+    pageRef.current?.setAttribute('data-ready', '');
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -92,7 +104,13 @@ function Page() {
   };
 
   return (
-    <div className="page" data-scene={scene} data-team-open={teamOpen || undefined}>
+    <div
+      ref={pageRef}
+      className="page"
+      data-scene={scene}
+      data-team-open={teamOpen || undefined}
+      data-busy={busy || undefined}
+    >
       <FoodFieldLayer scene={scene} params={params} teamOpen={teamOpen} />
       <div className="stage" inert={teamOpen}>
         <HeroScene

@@ -10,6 +10,10 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   // A test that fails "sometimes" is a bug — fix the cause instead of retrying.
   retries: 0,
+  // Every page renders a full-screen animated scene without a GPU: more parallel browsers only starve each other.
+  workers: process.env.CI ? 2 : 4,
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
   reporter: process.env.CI
     ? [['github'], ['html', { open: 'never' }]]
     : [['list'], ['html', { open: 'never' }]],

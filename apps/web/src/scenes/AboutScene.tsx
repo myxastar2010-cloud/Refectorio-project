@@ -10,6 +10,7 @@ import { useWave } from '../motion/useWave';
 import { WaveLayer } from '../motion/WaveHover';
 import { images } from '../lib/assets';
 import { aboutCardVariants, aboutTitleVariants, type Phase } from './choreography';
+import { Lines } from '../components/Lines';
 
 type Props = {
   readonly phase: Phase;
@@ -92,18 +93,10 @@ export function AboutScene({
           <p className="info-label at text-at">{team.label}</p>
           <TeamTile open={teamOpen} still={!teamTouched} />
           <h3 id="team-card-name" className="info-name at text-at">
-            {team.nameLines.map((line) => (
-              <span key={line} className="line">
-                {line}
-              </span>
-            ))}
+            <Lines lines={team.nameLines} />
           </h3>
           <p className="info-lead at text-at">
-            {team.leadLines.map((line) => (
-              <span key={line} className="line">
-                {line}
-              </span>
-            ))}
+            <Lines lines={team.leadLines} />
           </p>
           <button
             ref={(node) => {
@@ -146,18 +139,10 @@ export function AboutScene({
             />
           </picture>
           <h3 id="project-card-name" className="info-name at text-at">
-            {project.nameLines.map((line) => (
-              <span key={line} className="line">
-                {line}
-              </span>
-            ))}
+            <Lines lines={project.nameLines} />
           </h3>
           <p className="info-lead at text-at">
-            {project.leadLines.map((line) => (
-              <span key={line} className="line">
-                {line}
-              </span>
-            ))}
+            <Lines lines={project.leadLines} />
           </p>
           <ul className="info-links at">
             {project.links.map((link) => (

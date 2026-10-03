@@ -18,6 +18,7 @@ import { TiltGlare } from '../motion/TiltGlare';
 import { useWave } from '../motion/useWave';
 import { WaveLayer } from '../motion/WaveHover';
 import { heroVariants, type Phase } from './choreography';
+import { Lines } from '../components/Lines';
 
 const FEATURE_ICONS: Record<FeatureIcon, Icon> = {
   school: IconSchoolFilled,
@@ -79,19 +80,11 @@ export function HeroScene({ phase, instant, onAbout, onCreateMenu }: Props) {
         data-scene-active={!hidden}
       >
         <m.h1 id="hero-title" className="hero-title at text-at" data-food-avoid {...motionProps(1)}>
-          {site.hero.titleLines.map((line) => (
-            <span key={line} className="line">
-              {line}
-            </span>
-          ))}
+          <Lines lines={site.hero.titleLines} />
         </m.h1>
 
         <m.p className="hero-lead at text-at" data-food-avoid {...motionProps(2)}>
-          {site.hero.leadLines.map((line) => (
-            <span key={line} className="line">
-              {line}
-            </span>
-          ))}
+          <Lines lines={site.hero.leadLines} />
         </m.p>
 
         <m.div className="cta-slot at box" data-opaque {...motionProps(2)}>
@@ -126,11 +119,7 @@ export function HeroScene({ phase, instant, onAbout, onCreateMenu }: Props) {
                 <TiltGlare maxDeg={TILT.featureCardMaxDeg} className="feature-surface">
                   <p className="feature-title at text-at">{feature.title}</p>
                   <p className="feature-text at text-at">
-                    {feature.textLines.map((line) => (
-                      <span key={line} className="line">
-                        {line}
-                      </span>
-                    ))}
+                    <Lines lines={feature.textLines} />
                   </p>
                   <FeatureIconComponent aria-hidden className="feature-icon" />
                 </TiltGlare>

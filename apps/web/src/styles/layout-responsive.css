@@ -73,11 +73,6 @@
     display: inline;
   }
 
-  .hero-lead .line + .line::before,
-  .feature-text .line + .line::before {
-    content: ' ';
-  }
-
   .cta-slot {
     height: 56px;
     margin-top: 8px;

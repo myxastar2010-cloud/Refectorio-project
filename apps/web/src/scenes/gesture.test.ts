@@ -6,6 +6,7 @@ const options = {
   thresholdPx: GESTURE.wheelThresholdPx,
   windowMs: GESTURE.wheelWindowMs,
   quietMs: GESTURE.wheelQuietMs,
+  reverseMinPx: GESTURE.wheelReverseMinPx,
 };
 
 describe('normalizeWheelDelta', () => {
@@ -60,6 +61,30 @@ describe('wheel gesture', () => {
     expect(g.push(100, 0, true)).toBeNull();
     expect(g.push(100, 100, false)).toBeNull();
     expect(g.push(100, 100 + GESTURE.wheelQuietMs + 1, false)).toBe('down');
+  });
+
+  it('a stream reversed after the transition is a new gesture: inertia never changes direction', () => {
+    const g = createWheelGesture(options);
+    expect(g.push(90, 0, false)).toBe('down');
+    // The tail goes on without a pause past the end of the lock…
+    for (let t = 16; t <= 1200; t += 16) expect(g.push(20, t, t < 1150)).toBeNull();
+    // …and the user flicks back at once: no quiet gap is needed.
+    expect(g.push(-60, 1216, false)).toBe('up');
+    expect(g.push(-50, 1232, false)).toBeNull();
+  });
+
+  it('a reversal during the running transition is swallowed with the rest of its stream', () => {
+    const g = createWheelGesture(options);
+    expect(g.push(100, 0, false)).toBe('down');
+    expect(g.push(-60, 100, true)).toBeNull();
+    expect(g.push(-60, 116, false)).toBeNull();
+  });
+
+  it('tiny opposite jitter inside a tail does not start a new gesture', () => {
+    const g = createWheelGesture(options);
+    expect(g.push(100, 0, false)).toBe('down');
+    expect(g.push(-(GESTURE.wheelReverseMinPx - 1), 16, false)).toBeNull();
+    expect(g.push(60, 32, false)).toBeNull();
   });
 
   it('a key or button transition consumes the current gesture', () => {

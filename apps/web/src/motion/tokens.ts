@@ -76,6 +76,8 @@ export const GESTURE = {
   wheelWindowMs: 200,
   /** Inertia silencer: a new transition needs this much silence in wheel events. */
   wheelQuietMs: 220,
+  /** A delta this big against the current gesture starts a new one (inertia never reverses). */
+  wheelReverseMinPx: 4,
   swipeMinPx: 50,
   swipeDominance: 1.2,
   lineHeightPx: 16,

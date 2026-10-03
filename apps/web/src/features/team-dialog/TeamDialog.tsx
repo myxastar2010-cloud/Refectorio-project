@@ -7,6 +7,7 @@ import { DIALOG, DURATION, SPRING } from '../../motion/tokens';
 import { useWave } from '../../motion/useWave';
 import { WaveLayer } from '../../motion/WaveHover';
 import { TeamSurface } from './TeamSurface';
+import { Lines } from '../../components/Lines';
 
 type Props = {
   readonly open: boolean;
@@ -89,18 +90,10 @@ export function TeamDialog({ open, onClose, onClosed }: Props) {
             <TeamSurface mode="dialog" still={false} />
             <div className="team-dialog-content">
               <m.h2 id="team-dialog-title" className="dialog-title" {...content(0)}>
-                {teamDialog.nameLines.map((line) => (
-                  <span key={line} className="line">
-                    {line}
-                  </span>
-                ))}
+                <Lines lines={teamDialog.nameLines} />
               </m.h2>
               <m.p className="dialog-lead" {...content(1)}>
-                {teamDialog.leadLines.map((line) => (
-                  <span key={line} className="line">
-                    {line}
-                  </span>
-                ))}
+                <Lines lines={teamDialog.leadLines} />
               </m.p>
               <m.ul className="dialog-members" aria-label={teamDialog.membersLabel} {...content(2)}>
                 {teamDialog.members.flatMap((column, columnIndex) =>

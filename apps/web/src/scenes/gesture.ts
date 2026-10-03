@@ -5,6 +5,7 @@
  * is one gesture. Within a gesture, deltas inside a sliding `windowMs` are summed; reaching `thresholdPx` triggers
  * at most one transition. Events that arrive while a transition is running consume the gesture, so the inertia
  * tail after the transition can never trigger a second one: a new transition needs a pause ≥ `quietMs`.
+ * Inertia never changes direction, so a delta of at least `reverseMinPx` against the gesture is a new gesture too.
  */
 
 export type Direction = 'down' | 'up';
@@ -13,6 +14,7 @@ export type WheelGestureOptions = {
   readonly thresholdPx: number;
   readonly windowMs: number;
   readonly quietMs: number;
+  readonly reverseMinPx: number;
 };
 
 const LINE_PX = 16;
@@ -28,10 +30,17 @@ export function normalizeWheelDelta(
   return deltaY;
 }
 
-export function createWheelGesture({ thresholdPx, windowMs, quietMs }: WheelGestureOptions) {
+export function createWheelGesture({
+  thresholdPx,
+  windowMs,
+  quietMs,
+  reverseMinPx,
+}: WheelGestureOptions) {
   let lastEventMs = Number.NEGATIVE_INFINITY;
   let consumed = false;
   let recent: { timeMs: number; deltaPx: number }[] = [];
+  /** Direction of the current gesture: 1 down, -1 up, 0 not known yet. */
+  let sign = 0;
 
   return {
     /**
@@ -39,11 +48,15 @@ export function createWheelGesture({ thresholdPx, windowMs, quietMs }: WheelGest
      * Returns the direction when this event completes a gesture that should switch the scene.
      */
     push(deltaPx: number, nowMs: number, locked: boolean): Direction | null {
-      if (nowMs - lastEventMs > quietMs) {
+      const reversed =
+        sign !== 0 && Math.sign(deltaPx) === -sign && Math.abs(deltaPx) >= reverseMinPx;
+      if (nowMs - lastEventMs > quietMs || reversed) {
         consumed = false;
         recent = [];
+        sign = 0;
       }
       lastEventMs = nowMs;
+      if (sign === 0) sign = Math.sign(deltaPx);
       if (locked) consumed = true;
       if (consumed || deltaPx === 0) return null;
 

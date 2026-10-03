@@ -9,8 +9,10 @@ import {
   type Direction,
 } from './gesture';
 
-const INTERACTIVE =
-  'button, a[href], a[role="link"], input, textarea, select, [contenteditable="true"], [role="button"]';
+/** Elements that need every key themselves (typing, the carousel's own arrow scrolling). */
+const OWNS_KEYS = 'input, textarea, select, [contenteditable="true"], [data-carousel]';
+/** Space presses these; the other scene keys still switch scenes from them. */
+const CONTROL = 'button, a[href], a[role="link"], [role="button"]';
 
 type Options = {
   readonly scene: Scene;
@@ -35,6 +37,7 @@ export function useSceneInput({ scene, go, locked, aboutScroller }: Options) {
       thresholdPx: GESTURE.wheelThresholdPx,
       windowMs: GESTURE.wheelWindowMs,
       quietMs: GESTURE.wheelQuietMs,
+      reverseMinPx: GESTURE.wheelReverseMinPx,
     });
 
     const navigate = (direction: Direction) => {
@@ -64,9 +67,10 @@ export function useSceneInput({ scene, go, locked, aboutScroller }: Options) {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       const target = event.target as Element | null;
-      if (target?.closest(INTERACTIVE)) return;
+      if (target?.closest(OWNS_KEYS)) return;
       const direction = keyDirection(event.key, event.shiftKey);
       if (!direction) return;
+      if (event.key === ' ' && target?.closest(CONTROL)) return;
       event.preventDefault();
       if (!locked()) navigate(direction);
     };
