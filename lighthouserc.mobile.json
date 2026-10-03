@@ -4,7 +4,8 @@
       "staticDistDir": "./apps/web/dist",
       "numberOfRuns": 3,
       "settings": {
-        "skipAudits": ["is-on-https"]
+        "skipAudits": ["is-on-https"],
+        "blockedUrlPatterns": ["*kaspersky-labs.com*"]
       }
     },
     "assert": {
