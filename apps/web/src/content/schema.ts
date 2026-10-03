@@ -33,7 +33,6 @@ export const siteContentSchema = z.object({
     featuresLabel: text,
     features: z.array(z.object({ title: text, textLines: lines, icon: featureIcon })).length(4),
     carouselLabel: text,
-    carouselDotLabel: text,
   }),
   about: z.object({
     title: text,

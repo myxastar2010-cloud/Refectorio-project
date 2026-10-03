@@ -46,7 +46,6 @@ export const site = {
       },
     ],
     carouselLabel: 'Возможности, листайте вбок',
-    carouselDotLabel: 'Карточка',
   },
   about: {
     title: 'О проекте',

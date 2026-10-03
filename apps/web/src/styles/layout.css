@@ -146,7 +146,8 @@
   }
 
   .cta {
-    font-size: calc(var(--type-cta-label-size) * var(--s));
+    /* White on #E63946 needs large text (≥ 18.66 px bold): small laptops get at least 19 px. */
+    font-size: max(19px, calc(var(--type-cta-label-size) * var(--s)));
     gap: calc(var(--hero-cta-gap) * var(--s));
   }
 

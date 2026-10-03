@@ -86,6 +86,28 @@ export function swipeDirection(
   return dy < 0 ? 'down' : 'up';
 }
 
+/** A scroll container's position (part 1 or part 2 when it does not fit the screen). */
+export type ScrollBox = {
+  readonly scrollTop: number;
+  readonly clientHeight: number;
+  readonly scrollHeight: number;
+};
+
+/** Whether the content can still move in this direction; at the edge, the next movement switches scenes. */
+export function hasScrollRoom(box: ScrollBox, direction: Direction): boolean {
+  if (box.scrollHeight <= box.clientHeight + 1) return false;
+  return direction === 'up'
+    ? box.scrollTop > 0.5
+    : box.scrollTop + box.clientHeight < box.scrollHeight - 1;
+}
+
+/** One key press of scrolling inside a scene: arrows a short step, the other keys almost a screen. */
+export function keyScrollStepPx(key: string, viewportPx: number): number {
+  return key === 'ArrowDown' || key === 'ArrowUp'
+    ? Math.max(40, viewportPx * 0.15)
+    : viewportPx * 0.85;
+}
+
 /** Keys that switch scenes (only when focus is not on an interactive element). */
 export function keyDirection(key: string, shiftKey: boolean): Direction | null {
   switch (key) {

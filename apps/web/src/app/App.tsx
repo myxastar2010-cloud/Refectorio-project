@@ -9,6 +9,7 @@ import { useCalmMotion } from '../motion/hooks';
 import { DURATION, SCENE } from '../motion/tokens';
 import { AboutScene } from '../scenes/AboutScene';
 import { HeroScene } from '../scenes/HeroScene';
+import { SiteHeader } from '../scenes/SiteHeader';
 import { useSceneInput } from '../scenes/useSceneInput';
 import { useScene, type Scene } from './useScene';
 
@@ -37,6 +38,8 @@ function Page() {
   const aboutTitleRef = useRef<HTMLButtonElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const [heroScrolled, setHeroScrolled] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
   const teamOpenRef = useRef(teamOpen);
   useEffect(() => {
@@ -71,7 +74,12 @@ function Page() {
     else document.querySelector<HTMLButtonElement>('.about-pill')?.focus({ preventScroll: true });
   }, [scene]);
 
-  useSceneInput({ scene, go: goScene, locked, aboutScroller: () => aboutRef.current });
+  // Stable: a new function on every render would re-create the input listeners and reset the wheel gesture.
+  const scrollerOf = useCallback(
+    (of: Scene): HTMLElement | null => (of === 'hero' ? heroRef.current : aboutRef.current),
+    [],
+  );
+  useSceneInput({ scene, go: goScene, locked, scrollerOf });
   // Effects run in order, so the input listeners above are attached by now; e2e tests wait for this mark.
   useEffect(() => {
     pageRef.current?.setAttribute('data-ready', '');
@@ -98,6 +106,14 @@ function Page() {
     moreRef.current = node;
   }, []);
 
+  // Closing the team card returns focus to «Ещё» at once: the page is interactive again right away,
+  // while the card's shape still settles back into the tile.
+  const wasTeamOpen = useRef(teamOpen);
+  useEffect(() => {
+    if (wasTeamOpen.current && !teamOpen) moreRef.current?.focus({ preventScroll: true });
+    wasTeamOpen.current = teamOpen;
+  }, [teamOpen]);
+
   const openTeam = () => {
     setTeamTouched(true);
     setTeamOpen(true);
@@ -113,36 +129,42 @@ function Page() {
     >
       <FoodFieldLayer scene={scene} params={params} teamOpen={teamOpen} />
       <div className="stage" inert={teamOpen}>
-        <HeroScene
+        <SiteHeader
           phase={scene === 'hero' ? 'shown' : 'hidden'}
           instant={instant}
+          scrolled={heroScrolled && scene === 'hero'}
           onAbout={() => {
             goScene('about');
           }}
-          onCreateMenu={onCreateMenu}
         />
-        <div className="about-scroller" ref={aboutRef} inert={scene !== 'about'}>
-          <AboutScene
-            phase={scene === 'about' ? 'shown' : 'hidden'}
+        <main className="scenes">
+          <HeroScene
+            phase={scene === 'hero' ? 'shown' : 'hidden'}
             instant={instant}
-            titleRef={aboutTitleRef}
-            onBack={() => {
-              goScene('hero');
-            }}
-            teamOpen={teamOpen}
-            teamTouched={teamTouched}
-            onOpenTeam={openTeam}
-            onMoreRef={setMoreRef}
+            scrollerRef={heroRef}
+            onScrolled={setHeroScrolled}
+            onCreateMenu={onCreateMenu}
           />
-        </div>
+          <div className="about-scroller" ref={aboutRef} inert={scene !== 'about'}>
+            <AboutScene
+              phase={scene === 'about' ? 'shown' : 'hidden'}
+              instant={instant}
+              titleRef={aboutTitleRef}
+              onBack={() => {
+                goScene('hero');
+              }}
+              teamOpen={teamOpen}
+              teamTouched={teamTouched}
+              onOpenTeam={openTeam}
+              onMoreRef={setMoreRef}
+            />
+          </div>
+        </main>
       </div>
       <TeamDialog
         open={teamOpen}
         onClose={() => {
           setTeamOpen(false);
-        }}
-        onClosed={() => {
-          moreRef.current?.focus({ preventScroll: true });
         }}
       />
       <Toast message={toast} />

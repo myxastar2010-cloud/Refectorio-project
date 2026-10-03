@@ -12,8 +12,6 @@ import { Lines } from '../../components/Lines';
 type Props = {
   readonly open: boolean;
   readonly onClose: () => void;
-  /** Called when the closing animation has finished (focus returns to «Ещё»). */
-  readonly onClosed: () => void;
 };
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -22,7 +20,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1
  * Expanded team card (ТЗ 6.4): role="dialog", aria-modal, focus trap, Esc / ✕ / click outside close it.
  * The rest of the page is made inert by the App while the dialog is open.
  */
-export function TeamDialog({ open, onClose, onClosed }: Props) {
+export function TeamDialog({ open, onClose }: Props) {
   const calm = useCalmMotion();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -68,7 +66,7 @@ export function TeamDialog({ open, onClose, onClosed }: Props) {
   });
 
   return (
-    <AnimatePresence onExitComplete={onClosed}>
+    <AnimatePresence>
       {open && (
         <div className="team-dialog-root" key="team-dialog">
           <m.div

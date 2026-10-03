@@ -3,7 +3,9 @@ import { GESTURE } from '../motion/tokens';
 import type { Scene } from '../app/useScene';
 import {
   createWheelGesture,
+  hasScrollRoom,
   keyDirection,
+  keyScrollStepPx,
   normalizeWheelDelta,
   swipeDirection,
   type Direction,
@@ -19,14 +21,15 @@ type Options = {
   readonly go: (scene: Scene) => void;
   /** True while a transition is running (input is locked) or the team dialog is open. */
   readonly locked: () => boolean;
-  /** Scroll container of part 2 on phones: a swipe down goes back only when it is scrolled to the top. */
-  readonly aboutScroller: () => HTMLElement | null;
+  /** The element that scrolls a scene's content when it does not fit (phones, tablets, small windows). */
+  readonly scrollerOf: (scene: Scene) => HTMLElement | null;
 };
 
 /**
  * Scene switching by wheel/touchpad, keys and swipes (ТЗ 6.5). One movement — exactly one transition.
+ * A scene taller than the screen scrolls first; only a movement that starts at its edge switches scenes.
  */
-export function useSceneInput({ scene, go, locked, aboutScroller }: Options) {
+export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
   const sceneRef = useRef(scene);
   useEffect(() => {
     sceneRef.current = scene;
@@ -49,17 +52,31 @@ export function useSceneInput({ scene, go, locked, aboutScroller }: Options) {
       return true;
     };
 
+    /** The active scene's scroll container, only while it really scrolls (the CSS of the layout decides). */
+    const activeScroller = () => {
+      const element = scrollerOf(sceneRef.current);
+      if (!element) return null;
+      const { overflowY } = getComputedStyle(element);
+      return overflowY === 'auto' || overflowY === 'scroll' ? element : null;
+    };
+
+    // A wheel gesture that starts where the content can still scroll belongs to the browser to its very end
+    // (inertia included); only a gesture that starts at the edge switches scenes.
+    let nativeUntilMs = Number.NEGATIVE_INFINITY;
+
     const onWheel = (event: WheelEvent) => {
-      const scroller = aboutScroller();
-      // Phone part 2 scrolls internally: let the browser scroll it.
+      // Sideways scrolling (the phone carousel) is the browser's.
+      if (event.deltaY === 0) return;
+      const delta = normalizeWheelDelta(event.deltaY, event.deltaMode, window.innerHeight);
+      const scroller = activeScroller();
       if (
         scroller &&
-        sceneRef.current === 'about' &&
-        scroller.scrollHeight > scroller.clientHeight + 1
-      )
+        (hasScrollRoom(scroller, delta < 0 ? 'up' : 'down') || event.timeStamp < nativeUntilMs)
+      ) {
+        nativeUntilMs = event.timeStamp + GESTURE.wheelQuietMs;
         return;
+      }
       event.preventDefault();
-      const delta = normalizeWheelDelta(event.deltaY, event.deltaMode, window.innerHeight);
       const direction = wheel.push(delta, event.timeStamp, locked());
       if (direction) navigate(direction);
     };
@@ -72,10 +89,25 @@ export function useSceneInput({ scene, go, locked, aboutScroller }: Options) {
       if (!direction) return;
       if (event.key === ' ' && target?.closest(CONTROL)) return;
       event.preventDefault();
-      if (!locked()) navigate(direction);
+      if (locked()) return;
+      // Home and End jump between the scenes; the other keys first scroll a scene that does not fit.
+      const scroller = event.key === 'Home' || event.key === 'End' ? null : activeScroller();
+      if (scroller && hasScrollRoom(scroller, direction)) {
+        const step = keyScrollStepPx(event.key, scroller.clientHeight);
+        scroller.scrollBy({ top: direction === 'down' ? step : -step });
+        return;
+      }
+      // A held key scrolls to the edge and stops there; the next press switches scenes.
+      if (!scroller || !event.repeat) navigate(direction);
     };
 
-    let touch: { x: number; y: number; inCarousel: boolean; scrollTop: number } | null = null;
+    type TouchStart = {
+      readonly x: number;
+      readonly y: number;
+      readonly inCarousel: boolean;
+      readonly room: Readonly<Record<Direction, boolean>>;
+    };
+    let touch: TouchStart | null = null;
     const onTouchStart = (event: TouchEvent) => {
       const point = event.touches[0];
       if (!point || event.touches.length > 1) {
@@ -83,11 +115,15 @@ export function useSceneInput({ scene, go, locked, aboutScroller }: Options) {
         return;
       }
       const target = event.target as Element | null;
+      const scroller = activeScroller();
       touch = {
         x: point.clientX,
         y: point.clientY,
         inCarousel: Boolean(target?.closest('[data-carousel]')),
-        scrollTop: aboutScroller()?.scrollTop ?? 0,
+        room: {
+          up: scroller ? hasScrollRoom(scroller, 'up') : false,
+          down: scroller ? hasScrollRoom(scroller, 'down') : false,
+        },
       };
     };
     const onTouchEnd = (event: TouchEvent) => {
@@ -99,9 +135,8 @@ export function useSceneInput({ scene, go, locked, aboutScroller }: Options) {
         minPx: GESTURE.swipeMinPx,
         dominance: GESTURE.swipeDominance,
       });
-      if (!direction) return;
-      // Back from part 2 only from the very top of its scroll.
-      if (direction === 'up' && sceneRef.current === 'about' && start.scrollTop > 0) return;
+      // A swipe that started with room to scroll was a scroll, not a scene change.
+      if (!direction || start.room[direction]) return;
       navigate(direction);
     };
 
@@ -115,5 +150,5 @@ export function useSceneInput({ scene, go, locked, aboutScroller }: Options) {
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchend', onTouchEnd);
     };
-  }, [go, locked, aboutScroller]);
+  }, [go, locked, scrollerOf]);
 }

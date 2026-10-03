@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { GESTURE } from '../motion/tokens';
-import { createWheelGesture, keyDirection, normalizeWheelDelta, swipeDirection } from './gesture';
+import {
+  createWheelGesture,
+  hasScrollRoom,
+  keyDirection,
+  keyScrollStepPx,
+  normalizeWheelDelta,
+  swipeDirection,
+} from './gesture';
 
 const options = {
   thresholdPx: GESTURE.wheelThresholdPx,
@@ -96,6 +103,33 @@ describe('wheel gesture', () => {
 
   it('zero deltas are ignored', () => {
     expect(createWheelGesture(options).push(0, 0, false)).toBeNull();
+  });
+});
+
+describe('scrolling inside a scene', () => {
+  const box = (scrollTop: number) => ({ scrollTop, clientHeight: 500, scrollHeight: 800 });
+
+  it('has room until the edge, in each direction', () => {
+    expect(hasScrollRoom(box(0), 'up')).toBe(false);
+    expect(hasScrollRoom(box(0), 'down')).toBe(true);
+    expect(hasScrollRoom(box(150), 'up')).toBe(true);
+    expect(hasScrollRoom(box(300), 'down')).toBe(false);
+    // Sub-pixel scroll positions on high-density screens still count as the edge.
+    expect(hasScrollRoom(box(299.5), 'down')).toBe(false);
+    expect(hasScrollRoom(box(0.4), 'up')).toBe(false);
+  });
+
+  it('content that fits has no room at all', () => {
+    expect(hasScrollRoom({ scrollTop: 0, clientHeight: 500, scrollHeight: 501 }, 'down')).toBe(
+      false,
+    );
+  });
+
+  it('arrows scroll a short step, page keys almost a screen', () => {
+    expect(keyScrollStepPx('ArrowDown', 500)).toBe(75);
+    expect(keyScrollStepPx('ArrowUp', 200)).toBe(40);
+    expect(keyScrollStepPx('PageDown', 500)).toBe(425);
+    expect(keyScrollStepPx(' ', 500)).toBe(425);
   });
 });
 

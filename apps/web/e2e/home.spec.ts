@@ -100,6 +100,59 @@ test.describe('scenes', () => {
   });
 });
 
+test.describe('small window: part 2 scrolls inside', () => {
+  test.use({ viewport: { width: 600, height: 500 } });
+
+  test('the wheel scrolls part 2; back to part 1 only with a new gesture from the very top', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'native wheel scrolling of an inner container; one engine is enough',
+    );
+    await page.goto('./?seed=1#about');
+    await settled(page, 'about');
+    const scroller = page.locator('.about-scroller');
+    const scrollable = await scroller.evaluate(
+      (element) => element.scrollHeight > element.clientHeight + 1,
+    );
+    expect(scrollable).toBe(true);
+    const changes = await countSceneChanges(page);
+    await page.mouse.move(300, 250);
+    await page.mouse.wheel(0, 300);
+    await expect.poll(() => scroller.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+    // Scrolling back up to the top and on (the same gesture, as with touchpad inertia) stays in part 2…
+    await page.mouse.wheel(0, -1000);
+    await page.mouse.wheel(0, -100);
+    await expect.poll(() => scroller.evaluate((element) => element.scrollTop)).toBe(0);
+    await page.waitForTimeout(300);
+    expect(await changes()).toBe(0);
+    // …and a new gesture after a pause goes back.
+    await page.mouse.wheel(0, -120);
+    await settled(page, 'hero');
+  });
+
+  test('keys scroll part 2 first and switch scenes only from its edge', async ({ page }) => {
+    await page.goto('./?seed=1#about');
+    await settled(page, 'about');
+    const scroller = page.locator('.about-scroller');
+    const top = () => scroller.evaluate((element) => element.scrollTop);
+    await page.keyboard.press('ArrowDown');
+    await expect.poll(top).toBeGreaterThan(0);
+    await expect(scene(page)).toHaveAttribute('data-scene', 'about');
+    // Back up to the top step by step, then one more press goes to part 1.
+    for (let i = 0; i < 10 && (await top()) > 0; i += 1) {
+      await page.keyboard.press('ArrowUp');
+      await page.waitForTimeout(150);
+    }
+    expect(await top()).toBe(0);
+    await expect(scene(page)).toHaveAttribute('data-scene', 'about');
+    await page.keyboard.press('ArrowUp');
+    await settled(page, 'hero');
+  });
+});
+
 test.describe('team dialog', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('./?seed=1#about');
@@ -159,44 +212,46 @@ test.describe('food', () => {
     );
     await page.goto('./?pose=design');
     await settled(page, 'hero');
-    const target = await page.evaluate(() => {
-      const food = (
-        window as Window & {
-          __refectorioFood?: { snapshot: () => Item[]; hitTest: (x: number, y: number) => number };
-        }
-      ).__refectorioFood;
-      if (!food) return null;
-      const items = food.snapshot();
-      // An item whose centre is open (no card/button above it) and a point of an item hidden under a card.
-      type Spot = { x: number; y: number; index: number };
-      const found: { open: Spot | null; covered: Spot | null } = { open: null, covered: null };
-      items.forEach((item, index) => {
-        for (let dy = -0.4; dy <= 0.4; dy += 0.1) {
-          for (let dx = -0.4; dx <= 0.4; dx += 0.1) {
-            const x = item.x + dx * item.size;
-            const y = item.y + dy * item.size;
-            if (food.hitTest(x, y) !== index) continue;
-            const blocked = document.elementFromPoint(x, y)?.closest('[data-opaque], button, a');
-            if (!blocked && !found.open) found.open = { x, y, index };
-            if (blocked?.matches('[data-opaque]') && !found.covered)
-              found.covered = { x, y, index };
+    // The food drifts: the spot is found and pressed in one go, at the element really under it (as a real click).
+    const press = (wanted: 'open' | 'covered') =>
+      page.evaluate((wanted) => {
+        type Food = { snapshot: () => Item[]; hitTest: (x: number, y: number) => number };
+        const food = (window as Window & { __refectorioFood?: Food }).__refectorioFood;
+        if (!food) return null;
+        const items = food.snapshot();
+        for (const [index, item] of items.entries()) {
+          for (let dy = -0.4; dy <= 0.4; dy += 0.1) {
+            for (let dx = -0.4; dx <= 0.4; dx += 0.1) {
+              const x = item.x + dx * item.size;
+              const y = item.y + dy * item.size;
+              if (food.hitTest(x, y) !== index) continue;
+              const target = document.elementFromPoint(x, y);
+              const blocked = target?.closest('[data-opaque], button, a');
+              const kind = !blocked ? 'open' : blocked.matches('[data-opaque]') ? 'covered' : null;
+              if (kind !== wanted || !target) continue;
+              target.dispatchEvent(
+                new PointerEvent('pointerdown', {
+                  clientX: x,
+                  clientY: y,
+                  button: 0,
+                  bubbles: true,
+                }),
+              );
+              return index;
+            }
           }
         }
-      });
-      return found;
-    });
-    expect(target?.open).toBeTruthy();
-    if (!target?.open) return;
-    await page.mouse.click(target.open.x, target.open.y);
-    const openIndex = target.open.index;
-    await expect
-      .poll(async () => (await snapshot(page))[openIndex]?.scale ?? 1)
-      .toBeGreaterThan(1.03);
-    if (target.covered) {
-      const coveredIndex = target.covered.index;
-      await page.mouse.click(target.covered.x, target.covered.y);
+        return null;
+      }, wanted);
+
+    const open = await press('open');
+    expect(open).not.toBeNull();
+    if (open === null) return;
+    await expect.poll(async () => (await snapshot(page))[open]?.scale ?? 1).toBeGreaterThan(1.03);
+    const covered = await press('covered');
+    if (covered !== null && covered !== open) {
       await page.waitForTimeout(120);
-      expect((await snapshot(page))[coveredIndex]?.scale ?? 1).toBeLessThan(1.01);
+      expect((await snapshot(page))[covered]?.scale ?? 1).toBeLessThan(1.01);
     }
   });
 });

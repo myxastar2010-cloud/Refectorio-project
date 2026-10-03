@@ -43,18 +43,41 @@
   .about-pill {
     min-height: var(--touch-target-min);
     padding: 0 18px;
+    border-radius: 9999px;
     font-size: 16px;
     --outline-w: 1.5px;
   }
 
   /* ── Part 1 ───────────────────────────────────────────────────────────────────────────── */
 
+  /* Part 1 fits one screen on usual phones and tablets; when it does not (landscape phones, zoomed windows),
+     it scrolls, and the scene switches only from its edge (useSceneInput). */
   .scene--hero {
     display: flex;
     flex-direction: column;
     gap: 16px;
     padding-top: calc(88px + env(safe-area-inset-top));
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* When part 1 does not fit, it scrolls instead of squeezing the button and the cards. */
+  .scene--hero > * {
+    flex-shrink: 0;
+  }
+
+  .scene--hero,
+  .about-scroller {
+    scroll-behavior: smooth;
+  }
+
+  /* Content scrolled under the header: the header gets a frosted background of the page colour. */
+  .site-header[data-scrolled] {
+    padding-bottom: 12px;
+    background-color: color-mix(in srgb, var(--color-bg) 88%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   .hero-title {
@@ -315,11 +338,16 @@
     border-radius: 32px;
   }
 
+  /* The whole block is centred in the free height (auto margins never push content out of reach). */
+  .hero-title {
+    margin-top: auto;
+  }
+
   .features {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    margin: auto 0 0;
+    margin: clamp(32px, 6svh, 88px) 0 auto;
     padding: 0;
     overflow: visible;
   }
@@ -370,6 +398,23 @@
 }
 
 @media (min-width: 48rem) and (orientation: landscape) and (not ((min-width: 64rem) and (hover: hover))) {
+  /* Tablets on their side: a slightly tighter part 1, so it fits without scrolling (e.g. 1180×820). */
+  .scene--hero {
+    padding-top: calc(96px + env(safe-area-inset-top));
+  }
+
+  .hero-title {
+    font-size: clamp(44px, 7.6svh, 64px);
+  }
+
+  .features {
+    margin-top: clamp(24px, 4svh, 48px);
+  }
+
+  .feature-card {
+    height: 120px;
+  }
+
   .scene--about {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -378,6 +423,100 @@
 
   .about-title {
     grid-column: 1 / -1;
+  }
+}
+
+/* ── Low landscape screens (phones on their side, zoomed-in windows): text on the left, cards on the right ─── */
+
+@media (orientation: landscape) and (max-height: 35rem) and (not ((min-width: 64rem) and (hover: hover))) {
+  .site-header {
+    padding-top: calc(8px + env(safe-area-inset-top));
+  }
+
+  /* The text block sits in the middle rows; the free height goes to the first and the last row. */
+  .scene--hero {
+    display: grid;
+    grid-template-rows: 1fr auto auto auto 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 24px;
+    row-gap: 12px;
+    padding-top: calc(60px + env(safe-area-inset-top));
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .hero-title,
+  .hero-lead,
+  .cta-slot {
+    grid-column: 1;
+  }
+
+  .hero-title {
+    grid-row: 2;
+  }
+
+  .hero-lead {
+    grid-row: 3;
+  }
+
+  .cta-slot {
+    grid-row: 4;
+  }
+
+  .hero-title {
+    margin-top: 0;
+    font-size: clamp(28px, 8svh, 40px);
+  }
+
+  .hero-lead {
+    font-size: 14px;
+  }
+
+  .cta-slot {
+    max-width: none;
+    height: 48px;
+    margin-top: 4px;
+  }
+
+  .features {
+    display: flex;
+    flex-direction: column;
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .feature-card {
+    flex: none;
+    height: auto;
+    min-height: 64px;
+    border-radius: 24px;
+  }
+
+  .feature-surface {
+    padding: 10px 64px 10px 20px;
+  }
+
+  /* 19 px bold is still "large" text for white on #E63946. */
+  .feature-title {
+    font-size: 19px;
+  }
+
+  .feature-text {
+    font-size: 13px;
+  }
+
+  .feature-icon {
+    right: 18px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .carousel-dots {
+    display: none;
   }
 }
 

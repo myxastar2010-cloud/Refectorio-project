@@ -41,7 +41,8 @@ function frame() {
 function obstacles(): Rect[] {
   return [
     ...document.querySelectorAll<HTMLElement>(
-      '[data-scene-active="true"] [data-food-avoid], .site-header [data-food-avoid]',
+      // The header belongs to part 1: it is inert (and invisible) in part 2.
+      '[data-scene-active="true"] [data-food-avoid], .site-header:not([inert]) [data-food-avoid]',
     ),
   ]
     .map((element) => element.getBoundingClientRect())
