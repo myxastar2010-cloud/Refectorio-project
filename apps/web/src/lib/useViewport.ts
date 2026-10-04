@@ -10,7 +10,7 @@ export type Viewport = {
   readonly phone: boolean;
 };
 
-const DESKTOP_MIN_WIDTH = 1024;
+const DESKTOP_MIN_WIDTH = 1280;
 const PHONE_MAX_WIDTH = 767;
 
 function read(): Viewport {

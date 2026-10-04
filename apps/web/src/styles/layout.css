@@ -1,5 +1,6 @@
 /*
- * Page layout. Desktop (≥ 1024 px): the 1920×1080 mockup frame scaled by --s, every element placed in mockup px.
+ * Page layout. Desktop (≥ 1280 px with a mouse): the 1920×1080 mockup frame scaled by --s, every element placed in
+ * mockup px. Narrower windows get the tablet layout (layout-responsive.css): four cards in a row get too tight there.
  * Texts are placed by their baseline: top of the line box = baseline − leading / 2 − (ascent − descent) / 2 · size.
  * Tablets (incl. touch tablets in landscape) and phones — layout-responsive.css.
  */
@@ -51,7 +52,7 @@
   display: block;
 }
 
-@media (min-width: 64rem) and (hover: hover) {
+@media (min-width: 80rem) and (hover: hover) {
   .about-scroller {
     position: absolute;
     inset: 0;
@@ -375,4 +376,157 @@
 .info-link {
   font-weight: var(--type-link-weight);
   letter-spacing: var(--type-link-tracking);
+}
+
+/*
+ * ── Laptops ───────────────────────────────────────────────────────────────────────────────
+ * The mockup is drawn for 1920×1080. On smaller screens the whole frame shrinks with --s, and the type and buttons
+ * would get small, so they shrink less: --boost grows in steps as the frame scale s = min(w / 1920, h / 1080) drops
+ * (1 at 1920×1080 — exactly the mockup). Card texts grow half as much: their boxes are fixed by the rows of cards.
+ */
+@media (min-width: 80rem) and (hover: hover) {
+  .stage {
+    --boost: 1;
+    --boost-soft: calc(1 + (var(--boost) - 1) / 2);
+  }
+
+  @media (max-width: 1799.98px), (max-height: 1012.49px) {
+    .stage {
+      --boost: 1.05; /* s < 0.94: 1600×900 */
+    }
+  }
+
+  @media (max-width: 1593.59px), (max-height: 896.39px) {
+    .stage {
+      --boost: 1.1; /* s < 0.83: 1536×864, 1440×900 */
+    }
+  }
+
+  @media (max-width: 1420.79px), (max-height: 799.19px) {
+    .stage {
+      --boost: 1.15; /* s < 0.74: 1366×768, 1280×720 */
+    }
+  }
+
+  @media (max-width: 1247.99px), (max-height: 701.99px) {
+    .stage {
+      --boost: 1.2; /* s < 0.65: 1280×700 */
+    }
+  }
+
+  /* Part 1: the title, the lead and the button grow; the lines below move down by what grew above them. */
+  .hero-title {
+    --size: calc(var(--type-hero-title-size) * var(--boost));
+    --leading: calc(var(--type-hero-title-leading) * var(--boost));
+  }
+
+  .hero-lead {
+    --baseline: calc(
+      var(--hero-lead-baseline) +
+        (2 * var(--type-hero-title-leading) + var(--type-hero-lead-size)) * (var(--boost) - 1)
+    );
+    --size: calc(var(--type-hero-lead-size) * var(--boost));
+    --leading: calc(var(--type-hero-lead-leading) * var(--boost));
+  }
+
+  .cta-slot {
+    --y: calc(
+      var(--hero-cta-y) +
+        (
+          2 * var(--type-hero-title-leading) + var(--type-hero-lead-size) +
+            var(--type-hero-lead-leading)
+        ) *
+        (var(--boost) - 1)
+    );
+    --w: calc(var(--hero-cta-w) * var(--boost));
+    --h: calc(var(--hero-cta-h) * var(--boost));
+    border-radius: calc(var(--radius-pill) * var(--boost) * var(--s));
+  }
+
+  .cta {
+    font-size: max(19px, calc(var(--type-cta-label-size) * var(--boost) * var(--s)));
+    gap: calc(var(--hero-cta-gap) * var(--boost) * var(--s));
+  }
+
+  .cta-icon {
+    width: calc(var(--hero-cta-icon-size) * var(--boost) * var(--s));
+    height: calc(var(--hero-cta-icon-size) * var(--boost) * var(--s));
+  }
+
+  /* The cards grow upwards, keeping the space under them. */
+  .feature-card {
+    --y: calc(var(--hero-cards-y) - var(--hero-card-h) * (var(--boost-soft) - 1));
+    --h: calc(var(--hero-card-h) * var(--boost-soft));
+  }
+
+  .feature-title {
+    --baseline: calc(var(--hero-card-title-baseline) * var(--boost-soft));
+    --size: calc(var(--type-card-title-size) * var(--boost-soft));
+  }
+
+  .feature-text {
+    --baseline: calc(var(--hero-card-text-baseline) * var(--boost-soft));
+    --size: calc(var(--type-card-text-size) * var(--boost-soft));
+    --leading: calc(var(--type-card-text-leading) * var(--boost-soft));
+  }
+
+  .feature-icon {
+    width: calc(var(--hero-card-icon-size) * var(--boost-soft) * var(--s));
+    height: calc(var(--hero-card-icon-size) * var(--boost-soft) * var(--s));
+  }
+
+  /* Part 2: the title grows like the one of part 1, the texts in the cards half as much. */
+  .about-title {
+    --size: calc(var(--type-about-title-size) * var(--boost));
+  }
+
+  .about-chevron {
+    width: calc(var(--about-chevron-size) * var(--boost) * var(--s));
+    height: calc(var(--about-chevron-size) * var(--boost) * var(--s));
+  }
+
+  .info-label {
+    --size: calc(var(--type-info-label-size) * var(--boost-soft));
+  }
+
+  .info-name {
+    --size: calc(var(--type-info-name-size) * var(--boost-soft));
+    --leading: calc(var(--type-info-name-leading) * var(--boost-soft));
+  }
+
+  .info-lead {
+    --baseline: calc(
+      var(--about-lead-baseline) - var(--type-info-name-leading) * (2 - var(--name-lines, 2)) +
+        (var(--type-info-name-leading) * (var(--name-lines, 2) - 1) + var(--type-info-lead-size)) *
+        (var(--boost-soft) - 1)
+    );
+    --size: calc(var(--type-info-lead-size) * var(--boost-soft));
+    --leading: calc(var(--type-info-lead-leading) * var(--boost-soft));
+  }
+
+  .info-more {
+    --w: calc(var(--about-more-w) * var(--boost-soft));
+    --h: calc(var(--about-more-h) * var(--boost-soft));
+    left: calc(
+      ((var(--about-card-w) - var(--about-more-w) * var(--boost-soft)) / 2 + var(--content-dx, 0)) *
+        var(--s)
+    );
+    font-size: calc(var(--type-more-label-size) * var(--boost-soft) * var(--s));
+  }
+
+  .info-link {
+    font-size: max(
+      var(--type-min-body),
+      calc(var(--type-link-size) * var(--boost-soft) * var(--s))
+    );
+  }
+
+  .info-link-circle {
+    width: calc(var(--about-link-circle) * var(--boost-soft) * var(--s));
+    height: calc(var(--about-link-circle) * var(--boost-soft) * var(--s));
+  }
+
+  .info-links {
+    height: calc(var(--about-link-circle) * var(--boost-soft) * var(--s));
+  }
 }

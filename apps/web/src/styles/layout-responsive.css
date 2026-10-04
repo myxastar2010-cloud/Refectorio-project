@@ -1,9 +1,9 @@
 /*
- * Tablets (768–1023 px and touch tablets in landscape) and phones (< 768 px), ТЗ 6.10.
+ * Tablets and narrow windows (768–1279 px, touch tablets of any width) and phones (< 768 px), ТЗ 6.10.
  * Mobile-first flow layout; the desktop frame (layout.css) only applies to wide screens with a hovering pointer.
  */
 
-@media not ((min-width: 64rem) and (hover: hover)) {
+@media not ((min-width: 80rem) and (hover: hover)) {
   .stage {
     position: absolute;
     inset: 0;
@@ -311,7 +311,7 @@
 
 /* ── Tablet: larger type, 2×2 cards, part 2 side by side in landscape ───────────────────── */
 
-@media (min-width: 48rem) and (not ((min-width: 64rem) and (hover: hover))) {
+@media (min-width: 48rem) and (not ((min-width: 80rem) and (hover: hover))) {
   .site-header {
     padding-top: calc(24px + env(safe-area-inset-top));
     padding-inline: 32px;
@@ -400,7 +400,7 @@
   }
 }
 
-@media (min-width: 48rem) and (orientation: landscape) and (not ((min-width: 64rem) and (hover: hover))) {
+@media (min-width: 48rem) and (orientation: landscape) and (not ((min-width: 80rem) and (hover: hover))) {
   /* Tablets on their side: a slightly tighter part 1, so it fits without scrolling (e.g. 1180×820). */
   .scene--hero {
     --hero-top: calc(96px + env(safe-area-inset-top));
@@ -431,7 +431,7 @@
 
 /* ── Low landscape screens (phones on their side, zoomed-in windows): text on the left, cards on the right ─── */
 
-@media (orientation: landscape) and (max-height: 35rem) and (not ((min-width: 64rem) and (hover: hover))) {
+@media (orientation: landscape) and (max-height: 35rem) and (not ((min-width: 80rem) and (hover: hover))) {
   .site-header {
     padding-top: calc(8px + env(safe-area-inset-top));
   }
