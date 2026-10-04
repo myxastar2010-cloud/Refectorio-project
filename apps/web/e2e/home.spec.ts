@@ -186,11 +186,12 @@ test.describe('team dialog', () => {
     );
     await more(page).click();
     const name = page.locator('.name-flip');
-    await expect(name).toHaveText(/Modern\s*Manifesto/);
+    const shown = name.locator('[data-shown="true"]');
+    await expect(shown).toHaveText(/Modern\s*Manifesto/);
     await name.hover();
-    await expect(name).toHaveText(/Современное\s*Проявление/);
+    await expect(shown).toHaveText(/Современное\s*Проявление/);
     await page.mouse.move(5, 5);
-    await expect(name).toHaveText(/Modern\s*Manifesto/);
+    await expect(shown).toHaveText(/Modern\s*Manifesto/);
     // The dialog keeps its accessible name in English.
     await expect(page.getByRole('dialog', { name: 'Modern Manifesto' })).toBeVisible();
   });

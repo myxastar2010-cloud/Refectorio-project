@@ -77,7 +77,13 @@ export function NameFlip({ lines, translation }: Props) {
           if (!byMouse(event)) flipTo(!target.current);
         }}
       >
-        <Lines lines={translated ? translation : lines} />
+        {/* Both names stay in the DOM (one hidden): replacing the text under the pointer would lose its leave. */}
+        <span className="name-flip-text" data-shown={!translated}>
+          <Lines lines={lines} />
+        </span>
+        <span className="name-flip-text" data-shown={translated}>
+          <Lines lines={translation} />
+        </span>
       </span>
     </>
   );
