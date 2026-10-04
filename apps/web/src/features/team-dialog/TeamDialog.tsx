@@ -120,7 +120,7 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
         onClick={onClose}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { duration: DURATION.scrim } }}
-        exit={{ opacity: 0, transition: { duration: DURATION.scrim } }}
+        exit={{ opacity: 0, transition: { duration: DURATION.scrimOut } }}
       />
       <div
         ref={dialogRef}

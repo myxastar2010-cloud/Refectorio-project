@@ -23,6 +23,8 @@ export const DURATION = {
   /** Reduced motion: every transition becomes a cross-fade of this length. */
   fade: 0.2,
   scrim: 0.35,
+  /** The scrim leaves with the closing card (1.5× faster than opening). */
+  scrimOut: 0.26,
   toast: 0.3,
 } as const;
 
@@ -125,10 +127,14 @@ export const MORPH = {
     lagS: 0.08,
     lead: 'far',
   },
+  /*
+   * Closing is 1.5× faster than opening (95 % of the way: ≈0.26 s against ≈0.39 s) and more pronounced: the near
+   * corners snap back to the icon at once (≈0.17 s), the far ones trail by 70 ms — the card is visibly sucked in.
+   */
   close: {
-    near: { stiffness: 200, damping: 28.3 },
-    far: { stiffness: 135, damping: 23.2 },
-    lagS: 0.11,
+    near: { stiffness: 780, damping: 55.9 },
+    far: { stiffness: 620, damping: 49.8 },
+    lagS: 0.07,
     lead: 'near',
   },
   /** A corner rests when it is this close to its target (px). */
@@ -139,13 +145,24 @@ export const MORPH = {
 } as const;
 
 /**
- * The team name «translates» under the pointer: a push with a blur, the text is swapped at the peak of the blur
- * and settles back.
+ * The team name «translates» itself under the mouse (features/team-dialog/NameFlip.tsx): a blur wave runs from the
+ * cursor through the letters — each one is pushed away from it, blurs and fades (nearer letters first and harder),
+ * and the letters of the other name fly into place behind the wave with a light bounce.
  */
 export const NAME_FLIP = {
-  durationS: 0.5,
-  /** Share of the duration at which the text is swapped (the blur is at its peak). */
-  swapAt: 0.42,
-  pushScale: 1.07,
+  /** How fast the wave runs from the cursor through the letters (≈0.3 s across the name). */
+  waveSpeedPxS: 1100,
+  pushPx: 22,
+  spinDeg: 12,
   blurPx: 8,
+  outScale: 0.86,
+  outS: 0.32,
+  /** An impulse: a sharp start and a soft end. */
+  outEase: [0.22, 1, 0.36, 1],
+  /** Incoming letters start from this share of the push, slightly enlarged, and settle with a bounce. */
+  inFromShare: 0.8,
+  inScale: 1.14,
+  inS: 0.5,
+  inBounce: 0.32,
+  inLagS: 0.07,
 } as const;

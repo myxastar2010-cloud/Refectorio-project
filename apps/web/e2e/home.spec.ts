@@ -186,12 +186,23 @@ test.describe('team dialog', () => {
     );
     await more(page).click();
     const name = page.locator('.name-flip');
-    const shown = name.locator('[data-shown="true"]');
-    await expect(shown).toHaveText(/Modern\s*Manifesto/);
+    // Mean opacity of the letters of each name: [original, translation].
+    const shown = () =>
+      name.evaluate((root) =>
+        [...root.querySelectorAll('.name-flip-text')].map((layer) => {
+          const letters = [...layer.querySelectorAll('.flip-char')];
+          const sum = letters.reduce(
+            (total, letter) => total + Number(getComputedStyle(letter).opacity),
+            0,
+          );
+          return Math.round((sum / letters.length) * 100) / 100;
+        }),
+      );
+    await expect.poll(shown).toEqual([1, 0]);
     await name.hover();
-    await expect(shown).toHaveText(/Современное\s*Проявление/);
+    await expect.poll(shown).toEqual([0, 1]);
     await page.mouse.move(5, 5);
-    await expect(shown).toHaveText(/Modern\s*Manifesto/);
+    await expect.poll(shown).toEqual([1, 0]);
     // The dialog keeps its accessible name in English.
     await expect(page.getByRole('dialog', { name: 'Modern Manifesto' })).toBeVisible();
   });

@@ -461,22 +461,24 @@
   }
 }
 
-/* The team name that «translates» itself on hover: pushed from its left edge. Both names share one grid cell,
-   so the hover area is the same for either of them. */
+/* The team name that «translates» itself on hover: both names share one grid cell (the same hover area for either);
+   every letter is its own box, so the blur wave can push each one away from the cursor. */
 .name-flip {
   display: inline-grid;
-  transform-origin: 0% 50%;
   cursor: default;
 }
 
 .name-flip-text {
   grid-area: 1 / 1;
+  pointer-events: none;
 }
 
-.name-flip-text[data-shown='false'] {
-  visibility: hidden;
-}
-
-.name-flip .line {
+.name-flip-line {
   display: block;
+  white-space: nowrap;
+}
+
+.flip-char {
+  display: inline-block;
+  will-change: transform, filter, opacity;
 }
