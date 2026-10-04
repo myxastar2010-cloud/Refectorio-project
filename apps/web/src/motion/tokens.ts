@@ -53,8 +53,6 @@ export const SCENE = {
     blurCrossfadeEndMs: 600,
     /** The about scene may slow the food down. */
     speedFactor: 0.7,
-    /** …and its parallax is weaker: the layer has receded into the depth. */
-    parallaxFactor: 0.5,
   },
   heroOut: { durationMs: 450, staggerMs: 40, blurPx: 12, scale: 0.96, liftPx: 28 },
   /** Reverse path: part 1 reappears while the about cards fly towards the viewer. */
@@ -77,6 +75,14 @@ export const DIALOG = {
   contentExitS: 0.12,
   /** The team logo cross-fades into the card background during the first part of the expansion. */
   logoCrossfadeEnd: 0.18,
+  /**
+   * Where the team icon's picture lies in the card background, in shares of the background's width and height
+   * (measured by the core of the star: the icon is the same star seen from 4.7× further). While the card is small,
+   * the background is drawn zoomed onto this square, so its star docks exactly onto the icon's star.
+   */
+  starDock: { x: 0.237, y: -0.2876, width: 0.6274, height: 1.0415 },
+  /** …and its top edge, which then comes into view, melts into the card colour over this share of its height. */
+  starDockFadePct: 9,
   /**
    * Radii of the shared element in mockup px (mirror of --radius-tile / --radius-dialog in tokens.css, checked by
    * tokens.test.ts): Motion animates and corrects the radius only from pixel values. Phones use a sheet radius.

@@ -3,9 +3,7 @@ import {
   assignSprites,
   createRandom,
   maskHit,
-  parallaxOffset,
   repulsion,
-  smoothToward,
   scatter,
   stepSpring,
   toLocal,
@@ -132,23 +130,5 @@ describe('placement', () => {
           expect(sprites[i]).not.toBe(sprites[j]);
       });
     });
-  });
-});
-
-describe('pointer parallax', () => {
-  it('moves opposite to the pointer, nearer items further', () => {
-    expect(parallaxOffset({ x: 1, y: -0.5 }, 1, 40)).toEqual({ x: -40, y: 20 });
-    expect(parallaxOffset({ x: 1, y: 0 }, 0.5, 40).x).toBe(-20);
-    expect(parallaxOffset({ x: 0, y: 0 }, 1, 40)).toEqual({ x: -0, y: -0 });
-  });
-
-  it('smooths towards the target independently of the frame rate', () => {
-    // Two half steps land where one full step lands.
-    const one = smoothToward(0, 1, 0.1, 0.4);
-    const two = smoothToward(smoothToward(0, 1, 0.05, 0.4), 1, 0.05, 0.4);
-    expect(two).toBeCloseTo(one, 10);
-    expect(one).toBeGreaterThan(0);
-    expect(one).toBeLessThan(1);
-    expect(smoothToward(0.3, 1, 0.1, 0)).toBe(1);
   });
 });

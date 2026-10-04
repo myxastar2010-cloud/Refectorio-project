@@ -135,3 +135,43 @@ export function openness(quad: Quad, tile: Box, dialog: Box): number {
     (along(width, tile.width, dialog.width) + along(height, tile.height, dialog.height)) / 2;
   return Math.min(1, Math.max(0, t));
 }
+
+export type DockRect = {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+};
+
+const smoothstep = (t: number) => {
+  const c = Math.min(1, Math.max(0, t));
+  return c * c * (3 - 2 * c);
+};
+
+/**
+ * Transform of the card background (transform-origin 0 0, the background filling a w×h card) that zooms it onto
+ * `dock` — the square of the background that the icon shows. 1 — as it is (open card), 0 — the square fills the card,
+ * so squeezed onto the icon it is the icon's picture. Fully docked from `dockedBelow` openness down, where the
+ * icon's logo fades in on top: the two stars are one.
+ */
+/** How docked the background is: 0 — open card, 1 — from `dockedBelow` openness down. */
+export const dockAmount = (openness: number, dockedBelow: number) =>
+  smoothstep((1 - openness) / (1 - dockedBelow));
+
+export function dockMatrix(
+  openness: number,
+  w: number,
+  h: number,
+  dock: DockRect,
+  dockedBelow: number,
+): number[] {
+  const k = dockAmount(openness, dockedBelow);
+  const sx = 1 + (1 / dock.width - 1) * k;
+  const sy = 1 + (1 / dock.height - 1) * k;
+  const tx = (-dock.x * w * k) / dock.width;
+  const ty = (-dock.y * h * k) / dock.height;
+  return [sx, 0, 0, sy, tx, ty];
+}
+
+export const matrix2dCss = (m: readonly number[]) =>
+  `matrix(${m.map((n) => Number(n.toFixed(6))).join(',')})`;

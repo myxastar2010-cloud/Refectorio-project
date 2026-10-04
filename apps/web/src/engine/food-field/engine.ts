@@ -4,9 +4,7 @@ import {
   assignSprites,
   createRandom,
   maskHit,
-  parallaxOffset,
   repulsion,
-  smoothToward,
   scatter,
   stepSpring,
   toLocal,
@@ -39,10 +37,6 @@ export const FIELD = {
   maxStepS: 0.05,
   fpsProbeMs: 2000,
   minFps: 50,
-  /** Pointer parallax (desktop mouse): the nearest items shift this far (frame px) away from the cursor. */
-  parallaxFramePx: 48,
-  parallaxDepth: [0.3, 1] as const,
-  parallaxSmoothS: 0.45,
 } as const;
 
 export type Device = 'desktop' | 'tablet' | 'phone';
@@ -76,8 +70,6 @@ type Item = {
   impulseY: number;
   spinKick: number;
   bounce: Spring;
-  /** 0…1, 1 — nearest: how strongly the item follows the pointer parallax. */
-  depth: number;
   sharp: HTMLElement;
   blur: HTMLElement | null;
   hidden: boolean;
@@ -124,10 +116,6 @@ export function createFoodField(options: FieldOptions) {
   let quality = 0;
   let probe = { start: -1, frames: 0 };
   let blurMounted = false;
-  let pointer = { x: 0, y: 0 };
-  let parallax = { x: 0, y: 0 };
-  let parallaxFactor = 1;
-  let parallaxPx = 0;
 
   const motionless = options.reduced || options.frozen;
 
@@ -222,21 +210,14 @@ export function createFoodField(options: FieldOptions) {
       impulseY: 0,
       spinKick: 0,
       bounce: { value: 1, velocity: 0 },
-      depth: random.range(FIELD.parallaxDepth[0], FIELD.parallaxDepth[1]),
       sharp,
       blur: null,
       hidden: false,
     };
   }
 
-  /** Where the item is drawn: its position plus the pointer parallax. */
-  function drawn(item: Item) {
-    const shift = parallaxOffset(parallax, item.depth, parallaxPx * parallaxFactor);
-    return { x: item.x + shift.x, y: item.y + shift.y };
-  }
-
   function render(item: Item) {
-    const { x, y } = drawn(item);
+    const { x, y } = item;
     const transform = `translate3d(${(x - item.size / 2).toFixed(2)}px, ${(y - item.size / 2).toFixed(2)}px, 0) rotate(${item.angle.toFixed(2)}deg) scale(${item.bounce.value.toFixed(4)})`;
     item.sharp.style.transform = transform;
     if (item.blur) {
@@ -315,11 +296,6 @@ export function createFoodField(options: FieldOptions) {
     const dt = Math.min((now - last) / 1000, FIELD.maxStepS);
     last = now;
     measureFps(now);
-    parallaxPx = FIELD.parallaxFramePx * options.frame().scale;
-    parallax = {
-      x: smoothToward(parallax.x, pointer.x, dt, FIELD.parallaxSmoothS),
-      y: smoothToward(parallax.y, pointer.y, dt, FIELD.parallaxSmoothS),
-    };
     step(motionless ? 0 : dt);
   };
 
@@ -359,15 +335,6 @@ export function createFoodField(options: FieldOptions) {
     setSpeedFactor(factor: number) {
       speedFactor = factor;
     },
-    /** Mouse position in −1…1 from the viewport centre (0, 0 — no parallax). Ignored when the field is still. */
-    setPointer(x: number, y: number) {
-      if (motionless) return;
-      pointer = { x: Math.max(-1, Math.min(1, x)), y: Math.max(-1, Math.min(1, y)) };
-    },
-    /** Part 2 recedes into the depth: the parallax there is weaker. */
-    setParallaxFactor(factor: number) {
-      parallaxFactor = factor;
-    },
     /** Pre-blurred copies are created lazily — only before the first visit to part 2. */
     ensureBlur() {
       if (blurMounted) return;
@@ -379,7 +346,7 @@ export function createFoodField(options: FieldOptions) {
       for (let index = items.length - 1; index >= 0; index -= 1) {
         const item = items[index];
         if (!item || item.hidden) continue;
-        const local = toLocal({ x, y }, drawn(item), item.size * item.bounce.value, item.angle);
+        const local = toLocal({ x, y }, item, item.size * item.bounce.value, item.angle);
         if (local && maskHit(item.sprite.mask, item.sprite.mask.length, local)) return index;
       }
       return -1;
@@ -397,8 +364,8 @@ export function createFoodField(options: FieldOptions) {
     snapshot() {
       return items.map((item) => ({
         slug: item.sprite.slug,
-        x: drawn(item).x,
-        y: drawn(item).y,
+        x: item.x,
+        y: item.y,
         size: item.size,
         scale: item.bounce.value,
         hidden: item.hidden,

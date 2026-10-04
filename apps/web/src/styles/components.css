@@ -218,6 +218,12 @@
   inset: 0;
 }
 
+/* While the card is small the background is zoomed onto the icon's star (useCornerMorph). */
+.team-surface-bg {
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
 /* Stretched to the card's proportions: squeezed back onto the square icon it is exactly the icon. */
 .team-surface-logo img {
   object-fit: fill;

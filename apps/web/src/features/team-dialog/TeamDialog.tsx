@@ -47,6 +47,7 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLPictureElement>(null);
+  const backgroundRef = useRef<HTMLPictureElement>(null);
   const close = useWave<HTMLButtonElement>();
   const { teamDialog } = site;
 
@@ -58,6 +59,7 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
   useCornerMorph({
     surface: surfaceRef,
     logo: logoRef,
+    background: backgroundRef,
     tile: tileRef,
     present,
     calm,
@@ -130,7 +132,12 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
         aria-labelledby="team-dialog-title"
         onKeyDown={onKeyDown}
       >
-        <TeamDialogSurface surfaceRef={surfaceRef} logoRef={logoRef} radiusPx={radii.dialogPx} />
+        <TeamDialogSurface
+          surfaceRef={surfaceRef}
+          logoRef={logoRef}
+          backgroundRef={backgroundRef}
+          radiusPx={radii.dialogPx}
+        />
         <div className="team-dialog-content">
           <m.h2 id="team-dialog-title" className="dialog-title" {...content(0)}>
             <NameFlip lines={teamDialog.nameLines} translation={teamDialog.nameTranslationLines} />

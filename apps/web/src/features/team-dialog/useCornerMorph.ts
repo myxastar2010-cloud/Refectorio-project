@@ -3,7 +3,10 @@ import { DIALOG, DURATION, MORPH } from '../../motion/tokens';
 import {
   atRest,
   boxCorners,
+  dockAmount,
   cornerSprings,
+  dockMatrix,
+  matrix2dCss,
   matrixCss,
   openness,
   quadMatrix,
@@ -21,6 +24,8 @@ type Options = {
   readonly surface: RefObject<HTMLElement | null>;
   /** The logo layer inside it: visible while the card is small. */
   readonly logo: RefObject<HTMLElement | null>;
+  /** The background layer: zoomed onto the icon's star while the card is small. */
+  readonly background: RefObject<HTMLElement | null>;
   /** The team icon in part 2 — where the card comes from and returns to. */
   readonly tile: RefObject<HTMLElement | null>;
   /** False once the dialog is closing. */
@@ -156,6 +161,21 @@ export function useCornerMorph(options: Options) {
       element.style.borderRadius = `${rx.toFixed(2)}px / ${ry.toFixed(2)}px`;
       const logoLayer = latest.current.logo.current;
       if (logoLayer) logoLayer.style.opacity = String(1 - clamp01(open / DIALOG.logoCrossfadeEnd));
+      const backgroundLayer = latest.current.background.current;
+      if (backgroundLayer) {
+        backgroundLayer.style.transform = matrix2dCss(
+          dockMatrix(open, box.width, box.height, DIALOG.starDock, DIALOG.logoCrossfadeEnd),
+        );
+        // Docked, the top edge of the picture comes into the card (the icon shows more sky than the background
+        // has): it melts into the card colour instead of cutting the rays with a straight line.
+        const dock = dockAmount(open, DIALOG.logoCrossfadeEnd);
+        const mask =
+          dock > 0.001
+            ? `linear-gradient(to bottom, rgb(0 0 0 / ${(1 - dock).toFixed(3)}) 0%, #000 ${String(DIALOG.starDockFadePct)}%)`
+            : '';
+        backgroundLayer.style.setProperty('mask-image', mask);
+        backgroundLayer.style.setProperty('-webkit-mask-image', mask);
+      }
     };
 
     const finish = () => {
@@ -170,6 +190,12 @@ export function useCornerMorph(options: Options) {
       }
       s.corners = null;
       element.style.transform = '';
+      const backgroundLayer = latest.current.background.current;
+      if (backgroundLayer) {
+        backgroundLayer.style.transform = '';
+        backgroundLayer.style.setProperty('mask-image', '');
+        backgroundLayer.style.setProperty('-webkit-mask-image', '');
+      }
       element.style.borderRadius = `${latest.current.radii.dialogPx}px`;
       const logoLayer = latest.current.logo.current;
       if (logoLayer) logoLayer.style.opacity = '0';

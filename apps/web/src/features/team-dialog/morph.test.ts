@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyMatrix,
+  dockMatrix,
   atRest,
   boxCorners,
   cornerSprings,
@@ -107,5 +108,31 @@ describe('corner springs', () => {
     expect(openness(boxCorners(dialogBox), tileBox, dialogBox)).toBe(1);
     const half = { left: 250, top: 300, width: 794, height: 515.5 };
     expect(openness(boxCorners(half), tileBox, dialogBox)).toBeCloseTo(0.5, 6);
+  });
+});
+
+describe('docking the background star onto the icon', () => {
+  const dock = { x: 0.237, y: -0.2876, width: 0.6274, height: 1.0415 };
+
+  it('an open card shows the background as it is', () => {
+    // `+ 0` turns −0 into 0.
+    expect(dockMatrix(1, 1400, 840, dock, 0.18).map((n) => n + 0)).toEqual([1, 0, 0, 1, 0, 0]);
+  });
+
+  it('from the logo cross-fade down, the dock square fills the card exactly', () => {
+    for (const open of [0.18, 0.1, 0]) {
+      const [sx, , , sy, tx, ty] = dockMatrix(open, 1400, 840, dock, 0.18);
+      // The square's corners land on the card's corners: x → 0…w, y → 0…h.
+      expect(dock.x * 1400 * (sx ?? 0) + (tx ?? 0)).toBeCloseTo(0, 6);
+      expect((dock.x + dock.width) * 1400 * (sx ?? 0) + (tx ?? 0)).toBeCloseTo(1400, 6);
+      expect(dock.y * 840 * (sy ?? 0) + (ty ?? 0)).toBeCloseTo(0, 6);
+      expect((dock.y + dock.height) * 840 * (sy ?? 0) + (ty ?? 0)).toBeCloseTo(840, 6);
+    }
+  });
+
+  it('half open: half way between', () => {
+    const [sx] = dockMatrix(0.59, 1400, 840, dock, 0.18);
+    expect(sx).toBeGreaterThan(1);
+    expect(sx).toBeLessThan(1 / dock.width);
   });
 });

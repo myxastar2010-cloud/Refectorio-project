@@ -5,6 +5,7 @@ import { DIALOG_SIZES } from './preload';
 type DialogSurfaceProps = {
   readonly surfaceRef: Ref<HTMLDivElement>;
   readonly logoRef: Ref<HTMLPictureElement>;
+  readonly backgroundRef: Ref<HTMLPictureElement>;
   readonly radiusPx: number;
 };
 
@@ -13,14 +14,19 @@ type DialogSurfaceProps = {
  * open; the logo on top fades into the card background during the first part of the way. The logo is stretched to
  * the card's proportions (object-fit: fill), so squeezed back onto the square icon it looks exactly like the icon.
  */
-export function TeamDialogSurface({ surfaceRef, logoRef, radiusPx }: DialogSurfaceProps) {
+export function TeamDialogSurface({
+  surfaceRef,
+  logoRef,
+  backgroundRef,
+  radiusPx,
+}: DialogSurfaceProps) {
   return (
     <div
       ref={surfaceRef}
       className="team-surface team-surface--dialog"
       style={{ borderRadius: radiusPx }}
     >
-      <picture className="team-surface-bg">
+      <picture ref={backgroundRef} className="team-surface-bg">
         <source type="image/avif" srcSet={images.teamBackground.avifSrcSet} sizes={DIALOG_SIZES} />
         <img
           src={images.teamBackground.fallback}
