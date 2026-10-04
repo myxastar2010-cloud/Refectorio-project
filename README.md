@@ -49,7 +49,7 @@ npm run build   # сборка
 
 ## Технологии
 
-Vite 8 · React 19.3 · TypeScript 6 · Tailwind CSS 4.3 · Motion 13 · Nunito · Tabler Icons · Vitest · Playwright · Lighthouse CI.
+Vite 8 · React 19.3 · TypeScript 6 · Tailwind CSS 4.3 · Motion 13 · Open Runde · Tabler Icons · Vitest · Playwright · Lighthouse CI.
 Хостинг — Render Static Site и GitHub Pages.
 
 ## Важно о здоровье
@@ -59,6 +59,6 @@ Refectorio не ставит диагнозы и не заменяет врач�
 
 ## Лицензия
 
-Код — [MIT](LICENSE). Шрифт Nunito — SIL Open Font License 1.1. Иконки Tabler — MIT.
+Код — [MIT](LICENSE). Шрифт Open Runde (скруглённый Inter) — SIL Open Font License 1.1. Иконки Tabler — MIT.
 Иллюстрации еды и фон карточки команды в `assets-src/` предоставлены командой; их лицензия уточняется
 (подробности — в [`assets-src/README.md`](assets-src/README.md)).

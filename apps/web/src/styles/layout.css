@@ -312,6 +312,9 @@
 
 .hero-title {
   font-weight: var(--type-hero-title-weight);
+  /* The mockup's title is Black; Open Runde stops at Bold — a stroke of the same colour adds the missing weight. */
+  -webkit-text-stroke: var(--type-hero-title-stroke) currentColor;
+  paint-order: stroke fill;
 }
 
 .hero-title .line:nth-child(1) {

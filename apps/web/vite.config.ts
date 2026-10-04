@@ -5,11 +5,11 @@ import { defineConfig, type Plugin } from 'vite';
 import { site } from './src/content/site.ru';
 
 /**
- * Preloads the Nunito subsets that the first screen needs (Cyrillic + Latin),
+ * Preloads the Open Runde weights that the first screen needs (bold titles and buttons, semibold lead and cards),
  * so text renders in the final font before the first paint whenever possible.
  */
 function preloadFonts(): Plugin {
-  const SUBSETS = ['nunito-cyrillic-wght-normal', 'nunito-latin-wght-normal'];
+  const SUBSETS = ['open-runde-700', 'open-runde-600'];
   return {
     name: 'refectorio:preload-fonts',
     apply: 'build',
@@ -92,7 +92,7 @@ function siteMeta(): Plugin {
   };
 }
 
-/** "/" for Render, "/refectorio/" (or whatever Pages reports) for GitHub Pages. */
+/** "/" for Render, "/Refectorio-project/" (whatever Pages reports) for GitHub Pages. */
 function base(): string {
   const value = process.env.VITE_BASE ?? '/';
   return value.endsWith('/') ? value : `${value}/`;

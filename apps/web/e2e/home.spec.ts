@@ -122,13 +122,18 @@ test.describe('small window: part 2 scrolls inside', () => {
     await page.mouse.move(300, 250);
     await page.mouse.wheel(0, 300);
     await expect.poll(() => scroller.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
-    // Scrolling back up to the top and on (the same gesture, as with touchpad inertia) stays in part 2…
-    await page.mouse.wheel(0, -1000);
-    await page.mouse.wheel(0, -100);
-    await expect.poll(() => scroller.evaluate((element) => element.scrollTop)).toBe(0);
-    await page.waitForTimeout(300);
+    // A wheel gesture that starts with room to scroll belongs to the browser to its end: up to the top and on (a
+    // touchpad's inertia tail). Sent inside the page in one go, so no pause can split the gesture on a busy machine.
+    await scroller.evaluate((element) => {
+      const send = (deltaY: number) =>
+        element.dispatchEvent(new WheelEvent('wheel', { deltaY, bubbles: true, cancelable: true }));
+      send(-200); // starts with room above: the browser's gesture
+      element.scrollTop = 0; // the browser has scrolled it to the top
+      for (let i = 0; i < 12; i += 1) send(-60); // the tail goes on at the top
+    });
     expect(await changes()).toBe(0);
     // …and a new gesture after a pause goes back.
+    await page.waitForTimeout(300);
     await page.mouse.wheel(0, -120);
     await settled(page, 'hero');
   });
@@ -288,14 +293,14 @@ test.describe('food', () => {
 });
 
 test.describe('quality', () => {
-  test('no console errors, Nunito is used', async ({ page }) => {
+  test('no console errors, Open Runde is used', async ({ page }) => {
     const errors = collectErrors(page);
     await page.goto('./?seed=1');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Питаться полезно и вкусно сейчас',
     );
     const faces = await page.evaluate(async () => {
-      const loaded = await document.fonts.load('900 16px "Nunito Variable"', 'Питаться Refectorio');
+      const loaded = await document.fonts.load('700 16px "Open Runde"', 'Питаться Refectorio');
       return loaded.filter((face) => face.status === 'loaded').length;
     });
     expect(faces).toBeGreaterThan(0);

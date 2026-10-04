@@ -25,8 +25,9 @@ paths:
 ## Картинки и шрифт
 
 - Картинки — только из `src/assets/generated/` (AVIF/WebP, 1× и 2×), через манифест. Исходники — `assets-src/`, пересборка `npm run assets`.
-- Файлы из `public/` — через `import.meta.env.BASE_URL` (сайт живёт и на `/`, и на `/refectorio/`).
-- Nunito Variable подключается один раз в `main.tsx`; кириллица предзагружается; `font-display: swap` + метрики-запаска против сдвига макета.
+- Файлы из `public/` — через `import.meta.env.BASE_URL` (сайт живёт и на `/`, и на `/Refectorio-project/` — Pages).
+- Open Runde подключается в `styles/fonts.css` (подмножества из `npm run fonts`); 600 и 700 предзагружаются; `font-display: swap`
+  + метрики-запаска против сдвига макета.
 
 ## Контент
 

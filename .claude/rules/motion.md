@@ -7,10 +7,11 @@ paths:
 
 ## Библиотека
 
-- Импорт только из `motion/react`. Корень приложения: `LazyMotion features={domMax} strict` + `MotionConfig reducedMotion="user"`;
+- Импорт только из `motion/react`. Корень приложения: `LazyMotion features={domAnimation} strict` + `MotionConfig reducedMotion="user"`;
   в компонентах — `m.div`, а не `motion.div` (иначе LazyMotion не уменьшит бандл).
-- Shared-element (раскрытие карточки команды) — `layoutId`; радиус скругления задаётся через `style={{ borderRadius }}`,
-  чтобы Motion корректировал его при layout-анимации без искажений.
+- Раскрытие карточки команды — свой морф по четырём углам (`features/team-dialog/morph.ts`, `useCornerMorph`): карточка
+  в итоговом размере, проективное преобразование, пружины без отскока; радиус пересчитывается под растяжение, фон
+  «стыкуется» со звездой значка (`DIALOG.starDock`). `layoutId` Motion не используется.
 - Вторую анимационную библиотеку (GSAP) не подключать без доказанной необходимости.
 
 ## Токены

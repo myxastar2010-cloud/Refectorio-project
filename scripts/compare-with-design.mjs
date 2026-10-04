@@ -5,7 +5,7 @@
 // is cropped). Geometry of key elements is checked to ±4 px:
 // - boxes (buttons, cards, tiles, the dialog) — the element's box on the page against the Figma frame;
 // - text and icons — by "ink": the same pixel measurement on the mockup and on a page screenshot without food
-//   (left edge, cap top, baseline). Ink width is reported but not judged: Nunito ≠ SF Pro Rounded (allowed by the brief).
+//   (left edge, cap top, baseline). Ink width is reported but not judged: Open Runde ≠ SF Pro Rounded (allowed by the brief).
 //
 // Needs the built site served locally: npm run build && npm run preview, then
 //   npm run compare-design -- [--url http://localhost:4173/] [--mockups <dir>] [--out <dir>]
@@ -341,7 +341,7 @@ const md = [
   '# Сравнение с макетами (1920×1080, `?pose=design&freeze=1&seed=1`)',
   '',
   `Допуск геометрии — ±${TOLERANCE_PX} px. Рамки — по Figma; текст и иконки — по «чернилам» одинаковым замером на макете`,
-  'и на скриншоте без еды: левый край, верх прописных, базовая линия. Ширина строк — для сведения (Nunito ≠ SF Pro Rounded).',
+  'и на скриншоте без еды: левый край, верх прописных, базовая линия. Ширина строк — для сведения (Open Runde ≠ SF Pro Rounded).',
   '',
 ];
 let failures = 0;

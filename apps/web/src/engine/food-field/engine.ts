@@ -49,6 +49,11 @@ export type FieldOptions = {
   readonly reduced: boolean;
   readonly frozen: boolean;
   readonly designPose: boolean;
+  /**
+   * Lower the quality on a slow device (FPS probe). Off in the test modes (?seed, ?pose): the same field must not
+   * depend on how busy the machine running the tests is.
+   */
+  readonly adaptiveQuality: boolean;
   /** Mockup frame → viewport: px per frame px and frame origin in the viewport. */
   readonly frame: () => { scale: number; left: number; top: number };
   readonly device: () => Device;
@@ -264,7 +269,7 @@ export function createFoodField(options: FieldOptions) {
   }
 
   function measureFps(now: number) {
-    if (quality >= 2 || motionless) return;
+    if (quality >= 2 || motionless || !options.adaptiveQuality) return;
     if (probe.start < 0) {
       probe = { start: now, frames: 0 };
       return;

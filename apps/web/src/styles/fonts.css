@@ -1,0 +1,40 @@
+/*
+ * Open Runde — a rounded Inter (SIL OFL 1.1, see ../assets/fonts/OFL.txt), the closest open font to SF Pro Rounded
+ * of the mockups. Self-hosted subsets (Latin, Cyrillic, punctuation: npm run fonts), ≈30 KB per weight.
+ */
+@font-face {
+  font-family: 'Open Runde';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/open-runde-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Open Runde';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/open-runde-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Open Runde';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/open-runde-700.woff2') format('woff2');
+}
+
+/*
+ * Metric-compatible fallback while Open Runde loads: about the same width (size-adjust) and the same line box
+ * (ascent 2728 / descent 680 of 2816 units, divided by size-adjust) → no layout shift.
+ */
+@font-face {
+  font-family: 'Open Runde Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
+  size-adjust: 103%;
+  ascent-override: 94.05%;
+  descent-override: 23.45%;
+  line-gap-override: 0%;
+}

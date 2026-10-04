@@ -7,16 +7,6 @@
  * lengths with the scale unit --s:  calc(var(--hero-card-y) * var(--s)).
  */
 
-/* Metric-compatible fallback while Nunito loads: same width (size-adjust) and same line box (overrides) → no CLS. */
-@font-face {
-  font-family: 'Nunito Fallback';
-  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
-  size-adjust: 91.5%;
-  ascent-override: 110.5%;
-  descent-override: 38.6%;
-  line-gap-override: 0%;
-}
-
 @theme {
   --color-*: initial;
   --color-bg: #fef9f7;
@@ -28,7 +18,7 @@
   --color-team-card: #08050a;
 
   --font-*: initial;
-  --font-sans: 'Nunito Variable', 'Nunito Fallback', ui-rounded, system-ui, sans-serif;
+  --font-sans: 'Open Runde', 'Open Runde Fallback', ui-rounded, system-ui, sans-serif;
 
   --breakpoint-*: initial;
   --breakpoint-tablet: 48rem; /* 768 px */
@@ -62,81 +52,83 @@
   --focus-ring-color-inverse: var(--color-on-accent);
   --touch-target-min: 44px;
 
-  /* ── Typography roles (Figma SF Pro Rounded → Nunito; fitted to mockup line widths in Chromium with the real
-     self-hosted Nunito — design/analysis/06_font_fit.mjs) ───────────────────────────────────── */
+  /* ── Typography roles (Figma SF Pro Rounded → Open Runde; fitted to mockup line widths in Chromium with the real
+     self-hosted Open Runde — design/analysis/07_font_fit_open_runde.mjs) ───────────────────────── */
   /* size and line-height in mockup px; tracking in em (scales with the size). */
-  --type-brand-size: 47.35;
+  --type-brand-size: 45.6;
   --type-brand-weight: 700;
-  --type-brand-tracking: 0.0047em;
+  --type-brand-tracking: -0.017em;
 
   --type-pill-label-size: 22.8; /* «О проекте» */
   --type-pill-label-weight: 700;
-  --type-pill-label-tracking: 0.0087em;
+  --type-pill-label-tracking: -0.0131em;
 
-  --type-hero-title-size: 75.5;
-  --type-hero-title-weight: 900;
+  --type-hero-title-size: 72.25;
+  --type-hero-title-weight: 700; /* Open Runde has no Black: Bold is its heaviest… */
+  --type-hero-title-stroke: 0.045em; /* …and this outline brings it to the weight of the mockup;
+     the tracking below gives back +0.018em of the space the outline takes between letters */
   --type-hero-title-leading: 84.5;
-  --type-hero-title-tracking-1: -0.0215em; /* «Питаться» (per line: exact widths) */
-  --type-hero-title-tracking-2: -0.042em; /* «полезно и» */
-  --type-hero-title-tracking-3: -0.0174em; /* «вкусно сейчас» */
+  --type-hero-title-tracking-1: 0.0145em; /* «Питаться» (per line: exact widths) */
+  --type-hero-title-tracking-2: 0.021em; /* «полезно и» */
+  --type-hero-title-tracking-3: 0.0143em; /* «вкусно сейчас» */
 
   --type-hero-lead-size: 22.8;
   --type-hero-lead-weight: 600;
   --type-hero-lead-leading: 29;
-  --type-hero-lead-tracking: 0.0094em;
+  --type-hero-lead-tracking: -0.0203em;
 
   --type-cta-label-size: 24.7; /* «Создать меню» */
   --type-cta-label-weight: 700;
-  --type-cta-label-tracking: 0.033em;
+  --type-cta-label-tracking: -0.0051em;
 
   --type-card-title-size: 30.4;
   --type-card-title-weight: 600;
-  --type-card-title-tracking: 0.0206em;
+  --type-card-title-tracking: -0.0157em;
 
-  --type-card-text-size: 20;
+  --type-card-text-size: 19;
   --type-card-text-weight: 600;
   --type-card-text-leading: 24;
-  --type-card-text-tracking: -0.018em;
+  --type-card-text-tracking: -0.022em;
 
-  --type-about-title-size: 63.3;
+  --type-about-title-size: 61.3;
   --type-about-title-weight: 700;
-  --type-about-title-tracking: -0.009em;
+  --type-about-title-tracking: -0.0157em;
 
-  --type-info-label-size: 35.2; /* «Команда:», «Проект:» */
+  --type-info-label-size: 34.2; /* «Команда:», «Проект:» */
   --type-info-label-weight: 700;
-  --type-info-label-tracking: 0.0098em;
+  --type-info-label-tracking: -0.0082em;
 
-  --type-info-name-size: 47.35;
+  --type-info-name-size: 45.6;
   --type-info-name-weight: 700;
   --type-info-name-leading: 57;
-  --type-info-name-tracking: 0.0007em;
+  --type-info-name-tracking: -0.0076em;
 
   --type-info-lead-size: 22.8;
   --type-info-lead-weight: 400;
   --type-info-lead-leading: 29;
-  --type-info-lead-tracking: -0.0245em;
+  --type-info-lead-tracking: -0.0307em;
 
   --type-more-label-size: 25.65; /* «Ещё» */
   --type-more-label-weight: 600;
-  --type-more-label-tracking: 0.0062em;
+  --type-more-label-tracking: -0.0594em;
 
-  --type-link-size: 23.05;
+  --type-link-size: 22.8;
   --type-link-weight: 400;
-  --type-link-tracking: -0.0178em;
+  --type-link-tracking: -0.0396em;
 
-  --type-dialog-title-size: 63.3;
+  --type-dialog-title-size: 61.3;
   --type-dialog-title-weight: 700;
   --type-dialog-title-leading: 76;
-  --type-dialog-title-tracking: 0.0009em;
+  --type-dialog-title-tracking: -0.0262em;
 
   --type-dialog-lead-size: 31.15;
   --type-dialog-lead-weight: 400;
   --type-dialog-lead-leading: 38;
-  --type-dialog-lead-tracking: -0.0384em;
+  --type-dialog-lead-tracking: -0.0476em;
 
-  --type-member-size: 31.4;
+  --type-member-size: 30.4;
   --type-member-weight: 400;
-  --type-member-tracking: -0.0313em;
+  --type-member-tracking: -0.0321em;
   --type-member-row: 84;
 
   /* Minimum rendered sizes on small desktops (the frame scales down to ≈0.6 at 1280×700). */
@@ -144,9 +136,9 @@
   --type-min-body: 14px;
   --type-min-title: 17px;
 
-  /* Nunito vertical metrics (UPM 1000, USE_TYPO_METRICS): ascent 1011, descent 353, cap 705, x 484. */
-  --font-ascent: 1.011;
-  --font-descent: 0.353;
+  /* Open Runde vertical metrics (UPM 2816, USE_TYPO_METRICS): ascent 2728, descent 680, cap 2048, x 1536. */
+  --font-ascent: 0.96875;
+  --font-descent: 0.24148;
   --font-cap-height: 0.705;
 
   /* ── Radii (mockup px; Figma, no corner smoothing) ─────────────────────────────────────── */

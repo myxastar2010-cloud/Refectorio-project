@@ -66,8 +66,16 @@ export const site = {
       image: 'teamLogo',
       imageAlt: 'Логотип проекта (временный)',
       links: [
-        { label: 'Исходный код', href: null, soonHint: 'Скоро' },
-        { label: 'Документация', href: null, soonHint: 'Скоро' },
+        {
+          label: 'Исходный код',
+          href: 'https://github.com/myxastar2010-cloud/Refectorio-project',
+          soonHint: 'Скоро',
+        },
+        {
+          label: 'Документация',
+          href: 'https://github.com/myxastar2010-cloud/Refectorio-project/tree/main/docs',
+          soonHint: 'Скоро',
+        },
       ],
     },
   },

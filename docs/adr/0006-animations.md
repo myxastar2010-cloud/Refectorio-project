@@ -12,7 +12,7 @@
 ## Решение
 
 - **Motion 13** для UI-анимаций: пружины, `layoutId` (shared element с анимацией радиуса без искажений), `AnimatePresence`,
-  `MotionConfig reducedMotion="user"`; подключение через `LazyMotion` + `domMax`, в компонентах — `m.*`.
+  `MotionConfig reducedMotion="user"`; подключение через `LazyMotion` + `domAnimation`, в компонентах — `m.*`.
 - **Летающая еда — собственный движок** `engine/food-field` на чистом TypeScript: один цикл `requestAnimationFrame`, состояние
   в обычных объектах, запись напрямую в `style.transform` (`translate3d + rotate + scale`), шаг времени ≤ 50 мс, пауза при
   скрытой вкладке, автоматическое понижение качества при < 50 fps, детерминизм по seed (для тестов). React — тонкая обёртка.

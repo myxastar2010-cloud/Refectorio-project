@@ -10,12 +10,13 @@
 ## Стек
 
 - Node.js 24 LTS, npm 11 workspaces (без pnpm и yarn).
-- `apps/web`: Vite 8 + React 19.3 + TypeScript 6.0 (strict) + Tailwind CSS 4.3 + Motion 13 (`motion/react`, `LazyMotion` + `domMax`).
-- Шрифт — Nunito Variable (`@fontsource-variable/nunito`, самохостинг). SF Pro Rounded не встраивать — запрещено лицензией Apple.
+- `apps/web`: Vite 8 + React 19.3 + TypeScript 6.0 (strict) + Tailwind CSS 4.3 + Motion 13 (`motion/react`, `LazyMotion` + `domAnimation`).
+- Шрифт — Open Runde (скруглённый Inter, OFL; подмножества латиница + кириллица в `apps/web/src/assets/fonts/`, `npm run fonts`).
+  SF Pro Rounded не встраивать — запрещено лицензией Apple.
 - Иконки — Tabler (`@tabler/icons-react`, MIT). Схемы данных — zod 4.
 - `packages/nutrition-core`: чистый TypeScript без зависимостей от UI и ИИ.
 - Тесты: Vitest 5, Playwright 1.63 (Chromium, Firefox, WebKit), `@axe-core/playwright`, Lighthouse CI.
-- Хостинг: Render Static Site (основной, base `/`) и GitHub Pages (зеркало, base `/refectorio/`).
+- Хостинг: Render Static Site (основной, base `/`) и GitHub Pages (зеркало, base — имя репозитория: `/Refectorio-project/`).
 
 ## Команды (из корня `refectorio-app/`)
 

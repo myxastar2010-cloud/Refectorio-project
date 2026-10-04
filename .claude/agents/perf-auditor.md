@@ -12,7 +12,7 @@ color: orange
 
 - Lighthouse, десктоп: Performance, Accessibility, Best Practices, SEO ≥ 95. Мобильный профиль: Performance ≥ 85.
 - LCP ≤ 2,0 с (десктоп), CLS ≤ 0,02, TBT ≤ 150 мс.
-- Начальный JavaScript ≤ 150 КБ gzip (Motion — через `LazyMotion` + `domMax`).
+- Начальный JavaScript ≤ 150 КБ gzip (Motion — через `LazyMotion` + `domAnimation`).
 - 60 fps на среднем ноутбуке; ≥ 45 fps при 4× замедлении CPU; во время анимаций нет долгих задач > 50 мс.
 - Картинки — AVIF/WebP нужного размера; шрифт — предзагрузка кириллицы.
 

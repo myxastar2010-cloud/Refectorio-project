@@ -31,11 +31,13 @@
     "lhci:mobile": "lhci autorun --config=lighthouserc.mobile.json",
     "icons": "node scripts/make-icons.mjs",
     "og-image": "node scripts/make-og-image.mjs",
-    "compare-design": "node scripts/compare-with-design.mjs"
+    "compare-design": "node scripts/compare-with-design.mjs",
+    "fonts": "node scripts/subset-fonts.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
+    "@fontsource/open-runde": "^5.3.0",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "~1.63.0",
     "@types/node": "^24.19.0",
@@ -52,6 +54,7 @@
     "prettier-plugin-tailwindcss": "^0.8.1",
     "rollup-plugin-visualizer": "^7.1.1",
     "sharp": "^0.35.4",
+    "subset-font": "^2.9.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.70.1",
     "vitest": "^5.0.2"

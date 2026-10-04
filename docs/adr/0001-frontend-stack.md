@@ -15,8 +15,9 @@
 - **React 19.3 + TypeScript 6.0 (strict)** — компонентный UI, строгие типы. TypeScript 7 не берём: typescript-eslint 8.70
   поддерживает только < 6.1.
 - **Tailwind CSS 4.3** — утилиты и токены через `@theme`; сложная масштабируемая геометрия сцен — в CSS на токенах.
-- **Motion 13** (`motion/react`, `LazyMotion` + `domMax`) — пружины, `layoutId` для shared-element, `AnimatePresence`.
-- **Nunito Variable** (самохостинг, OFL), **Tabler Icons** (MIT), **zod 4** для схемы контента.
+- **Motion 13** (`motion/react`, `LazyMotion` + `domAnimation`) — пружины, `AnimatePresence`; раскрытие карточки команды — свой морф по углам (`features/team-dialog/morph.ts`), `layoutId` не используется.
+- **Open Runde** (скруглённый Inter, самохостинг, OFL; до 04.10.2026 — Nunito Variable, заменён по решению команды как более
+  близкий к SF Pro Rounded), **Tabler Icons** (MIT), **zod 4** для схемы контента.
 - npm workspaces (`apps/*`, `packages/*`) без pnpm/yarn — меньше установок у команды.
 
 ## Альтернативы

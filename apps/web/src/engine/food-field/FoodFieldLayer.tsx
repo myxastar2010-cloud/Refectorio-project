@@ -85,6 +85,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
       reduced: calm,
       frozen: params.freeze,
       designPose: params.designPose,
+      adaptiveQuality: params.seed === null && !params.designPose,
       frame,
       device,
     });

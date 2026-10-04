@@ -1,4 +1,4 @@
-import '@fontsource-variable/nunito/wght.css';
+import './styles/fonts.css';
 import './styles/globals.css';
 
 import { StrictMode } from 'react';
