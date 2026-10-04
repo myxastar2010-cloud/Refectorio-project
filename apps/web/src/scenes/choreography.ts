@@ -76,53 +76,60 @@ export function heroVariants(index: number, calm: boolean): Variants {
   };
 }
 
-/** Part 2 title: appears from above, slightly larger and blurred. */
+/** Part 2 title: comes into focus from a blur, at its own size. */
 export function aboutTitleVariants(calm: boolean): Variants {
   if (calm) return fade;
   const into = SCENE.aboutTitleIn;
+  const out = ms(SCENE.aboutTitleOut.durationMs);
   return {
     hidden: {
       opacity: 0,
-      transform: scaleTo(into.fromScale),
       filter: blur(into.fromBlurPx),
-      transition: leaving(ms(SCENE.aboutTitleOut.durationMs)),
+      transition: {
+        filter: { duration: out, ease: EASE_IN_OUT },
+        opacity: { duration: out, ease: EASE_IN_OUT },
+      },
     },
     shown: {
       opacity: 1,
-      transform: scaleTo(1),
       filter: blur(0),
       transition: {
-        default: { ...SPRING.aboutTitle, delay: ms(into.delayMs) },
-        ...appearing(ms(into.blurMs), ms(into.delayMs)),
+        filter: { duration: ms(into.blurMs), ease: EASE_OUT_SOFT, delay: ms(into.delayMs) },
+        opacity: { duration: ms(into.fadeMs), ease: 'linear', delay: ms(into.delayMs) },
       },
     },
   };
 }
 
 /**
- * Part 2 cards «fly in from the first person» and leave towards the viewer. The way back is a mirror (ТЗ 6.6):
- * the card that came last leaves first.
+ * Part 2 cards come into focus: a strong blur resolves to sharp at their own size — they neither grow nor dim, the
+ * fade is only a short start. The way back is a mirror (ТЗ 6.6): the card that came last blurs away first.
  */
 export function aboutCardVariants(index: number, count: number, calm: boolean): Variants {
   if (calm) return fade;
   const into = SCENE.aboutCardsIn;
   const out = SCENE.aboutCardsOut;
   const delay = ms(into.delayMs + index * into.staggerMs);
+  const exitDelay = ms((count - 1 - index) * into.staggerMs);
   return {
-    // One hidden state for both directions: entering from it and leaving to it both mean "close to the viewer".
     hidden: {
       opacity: 0,
-      transform: scaleTo(into.fromScale),
       filter: blur(into.fromBlurPx),
-      transition: leaving(ms(out.durationMs), ms((count - 1 - index) * into.staggerMs)),
+      transition: {
+        filter: { duration: ms(out.durationMs), ease: EASE_IN_OUT, delay: exitDelay },
+        opacity: {
+          duration: ms(out.fadeMs),
+          ease: EASE_IN_OUT,
+          delay: exitDelay + ms(out.durationMs - out.fadeMs),
+        },
+      },
     },
     shown: {
       opacity: 1,
-      transform: scaleTo(1),
       filter: blur(0),
       transition: {
-        default: { ...SPRING.aboutCards, delay },
-        ...appearing(ms(into.blurMs), delay),
+        filter: { duration: ms(into.blurMs), ease: EASE_OUT_SOFT, delay },
+        opacity: { duration: ms(into.fadeMs), ease: 'linear', delay },
       },
     },
   };

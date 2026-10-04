@@ -113,7 +113,7 @@ export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMen
               data-opaque
               {...motionProps(3)}
             >
-              <TiltGlare maxDeg={TILT.featureCardMaxDeg} className="feature-surface">
+              <TiltGlare maxDeg={TILT.featureCardMaxDeg} className="feature-surface" glare>
                 <p className="feature-title at text-at">{feature.title}</p>
                 <p className="feature-text at text-at">
                   <Lines lines={feature.textLines} />

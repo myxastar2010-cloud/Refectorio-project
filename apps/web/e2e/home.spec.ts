@@ -176,6 +176,25 @@ test.describe('team dialog', () => {
     await expect(more(page)).toBeFocused();
   });
 
+  test('the team name «translates» itself under the mouse and back', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName === 'webkit',
+      'hover is the same everywhere; WebKit on Windows is slow for it',
+    );
+    await more(page).click();
+    const name = page.locator('.name-flip');
+    await expect(name).toHaveText(/Modern\s*Manifesto/);
+    await name.hover();
+    await expect(name).toHaveText(/Современное\s*Проявление/);
+    await page.mouse.move(5, 5);
+    await expect(name).toHaveText(/Modern\s*Manifesto/);
+    // The dialog keeps its accessible name in English.
+    await expect(page.getByRole('dialog', { name: 'Modern Manifesto' })).toBeVisible();
+  });
+
   test('closes with ✕ and with a click outside the card; scenes do not switch while open', async ({
     page,
   }) => {

@@ -8,6 +8,7 @@ import { DIALOG, DURATION, EASE_OUT_SOFT, SPRING } from '../../motion/tokens';
 import { useWave } from '../../motion/useWave';
 import { WaveLayer } from '../../motion/WaveHover';
 import { TeamDialogSurface } from './TeamSurface';
+import { NameFlip } from './NameFlip';
 import { useCornerMorph } from './useCornerMorph';
 import { Lines } from '../../components/Lines';
 
@@ -132,7 +133,7 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
         <TeamDialogSurface surfaceRef={surfaceRef} logoRef={logoRef} radiusPx={radii.dialogPx} />
         <div className="team-dialog-content">
           <m.h2 id="team-dialog-title" className="dialog-title" {...content(0)}>
-            <Lines lines={teamDialog.nameLines} />
+            <NameFlip lines={teamDialog.nameLines} translation={teamDialog.nameTranslationLines} />
           </m.h2>
           <m.p className="dialog-lead" {...content(1)}>
             <Lines lines={teamDialog.leadLines} />

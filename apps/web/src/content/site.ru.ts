@@ -73,6 +73,8 @@ export const site = {
   },
   teamDialog: {
     nameLines: ['Modern', 'Manifesto'],
+    /** Shown while the pointer is over the name — a small «translation». */
+    nameTranslationLines: ['Современное', 'Проявление'],
     leadLines: ['Учащиеся школы', '#2107'],
     membersLabel: 'Участники команды',
     members: [

@@ -29,15 +29,14 @@ export const DURATION = {
 export const SPRING = {
   press: { type: 'spring', stiffness: 520, damping: 34, mass: 0.7 },
   tilt: { type: 'spring', stiffness: 180, damping: 20, mass: 0.6 },
+  /** The glare glides after the pointer, softer than the tilt. */
+  glare: { type: 'spring', stiffness: 110, damping: 21, mass: 0.6 },
   /** Team card expansion (shared element). */
   expand: { type: 'spring', visualDuration: 0.55, bounce: 0.12 },
   /** Text of the opened team card rises into place with a light bounce. */
   dialogContent: { type: 'spring', visualDuration: 0.45, bounce: 0.25 },
   /** Part 1 settles back with a light overshoot. */
   heroIn: { type: 'spring', visualDuration: 0.62, bounce: 0.2 },
-  aboutTitle: { type: 'spring', visualDuration: 0.6, bounce: 0.2 },
-  /** Cards "fly in from the first person" with a light overshoot. */
-  aboutCards: { type: 'spring', visualDuration: 0.66, bounce: 0.3 },
 } as const;
 
 /** Scene transition hero ↔ about (ТЗ 6.6), times in ms from the start. */
@@ -58,11 +57,14 @@ export const SCENE = {
   heroOut: { durationMs: 450, staggerMs: 40, blurPx: 12, scale: 0.96, liftPx: 28 },
   /** Reverse path: part 1 reappears while the about cards fly towards the viewer. */
   heroIn: { delayMs: 320, durationMs: 620, staggerMs: 40 },
-  aboutTitleIn: { delayMs: 350, fromScale: 1.2, fromBlurPx: 12, blurMs: 450 },
+  /** Part 2 title comes into focus like the cards: blur only, no change of size. */
+  aboutTitleIn: { delayMs: 330, fromBlurPx: 16, blurMs: 560, fadeMs: 180 },
   aboutTitleOut: { durationMs: 320 },
-  aboutCardsIn: { delayMs: 420, staggerMs: 80, fromScale: 1.6, fromBlurPx: 20, blurMs: 520 },
+  /** Part 2 cards come into focus from a strong blur — no scale, no dimming: a short fade, a long sharpening. */
+  aboutCardsIn: { delayMs: 380, staggerMs: 80, fromBlurPx: 28, blurMs: 720, fadeMs: 160 },
   /** Reverse: about cards fly towards the viewer (back to their entry scale and blur). */
-  aboutCardsOut: { durationMs: 420 },
+  /** …and leave by blurring away; they fade only in the last part of it. */
+  aboutCardsOut: { durationMs: 380, fadeMs: 170 },
 } as const;
 
 export const DIALOG = {
@@ -85,14 +87,14 @@ export const DIALOG = {
 } as const;
 
 export const TILT = {
-  featureCardMaxDeg: 9,
-  ctaMaxDeg: 6,
-  infoCardMaxDeg: 6,
-  perspectivePx: 900,
-  glareOpacity: 0.28,
-  glareSizeRatio: 0.9,
-  /** Parallax inside a tilting card: the content floats above the surface and shifts this far (px) at the edge. */
-  depthPx: 7,
+  featureCardMaxDeg: 11,
+  ctaMaxDeg: 7,
+  infoCardMaxDeg: 8,
+  perspectivePx: 800,
+  /** The glare's brightness away from the light (0…1); at the top-left corner it is full. */
+  glareFloor: 0.3,
+  /** Light from the top left: the full shine fades out until px + py reaches this (0…2). */
+  lightReach: 1.2,
   /** The card rises a little towards the pointer. */
   liftScale: 0.025,
 } as const;
@@ -111,24 +113,39 @@ export const GESTURE = {
 } as const;
 
 /**
- * Corner morph of the team card (features/team-dialog/morph.ts), in the spirit of iOS 26: every corner flies on its
- * own spring. Opening — the corners with the longest way lead and overshoot a little, the near ones follow firmly,
- * so the card stretches open; closing is faster (≈70 %), the near corners snap back first and the far ones trail.
+ * Corner morph of the team card (features/team-dialog/morph.ts), in the spirit of iOS 26: every corner is drawn to its
+ * place on its own critically damped spring (damping = 2·√stiffness) — no bounce, like attracted by a magnet. Opening —
+ * the corners with the longest way go first and the card stretches towards its place, the near ones follow; closing —
+ * the near corners return to the icon first and the far ones trail well behind, so the card visibly stretches back.
  */
 export const MORPH = {
   open: {
-    near: { stiffness: 260, damping: 25 },
-    far: { stiffness: 165, damping: 16 },
-    lagS: 0.07,
+    near: { stiffness: 230, damping: 30.3 },
+    far: { stiffness: 150, damping: 24.5 },
+    lagS: 0.08,
     lead: 'far',
   },
   close: {
-    near: { stiffness: 340, damping: 33 },
-    far: { stiffness: 250, damping: 26 },
-    lagS: 0.06,
+    near: { stiffness: 200, damping: 28.3 },
+    far: { stiffness: 135, damping: 23.2 },
+    lagS: 0.11,
     lead: 'near',
   },
   /** A corner rests when it is this close to its target (px). */
   restPx: 0.5,
   maxStepS: 0.05,
+  /** Opening waits at most this long for the card picture to be decoded before the flight starts. */
+  startWaitMs: 120,
+} as const;
+
+/**
+ * The team name «translates» under the pointer: a push with a blur, the text is swapped at the peak of the blur
+ * and settles back.
+ */
+export const NAME_FLIP = {
+  durationS: 0.5,
+  /** Share of the duration at which the text is swapped (the blur is at its peak). */
+  swapAt: 0.42,
+  pushScale: 1.07,
+  blurPx: 8,
 } as const;

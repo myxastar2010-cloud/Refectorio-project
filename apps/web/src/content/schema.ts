@@ -57,6 +57,7 @@ export const siteContentSchema = z.object({
   }),
   teamDialog: z.object({
     nameLines: lines,
+    nameTranslationLines: lines,
     leadLines: lines,
     membersLabel: text,
     members: z.array(z.array(text).min(1)).length(2),

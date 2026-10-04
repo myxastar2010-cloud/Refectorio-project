@@ -87,32 +87,32 @@
   border-radius: inherit;
 }
 
+/* The glare: a round soft light larger than the card, moved by a transform and clipped by the card's corners. */
+.tilt--glare {
+  overflow: hidden;
+}
+
 .tilt-glare {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  mix-blend-mode: soft-light;
+  top: 0;
+  left: 0;
+  width: 150%;
+  aspect-ratio: 1;
+  /* Centred on the pointer: half of its own size back (margins in % are of the card width, both ways). */
+  margin: -75% 0 0 -75%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 255 255 / 0.8),
+    rgb(255 255 255 / 0.58) 16%,
+    rgb(255 255 255 / 0.32) 38%,
+    rgb(255 255 255 / 0.12) 62%,
+    rgb(255 255 255 / 0) 100%
+  );
+  mix-blend-mode: overlay;
   pointer-events: none;
+  will-change: transform, opacity;
 }
-
-/* Parallax inside tilting cards (TiltGlare sets --depth-*): text floats above the surface, icons even higher. */
-.feature-title,
-.feature-text,
-.info-label,
-.info-name,
-.info-lead,
-.info-more,
-.info-links,
-.cta .wave-content > *,
-.cta .wave-layer > * {
-  translate: var(--depth-x, 0px) var(--depth-y, 0px);
-}
-
-.feature-icon,
-.info-tile {
-  translate: calc(var(--depth-x, 0px) * 1.8) calc(var(--depth-y, 0px) * 1.8);
-}
-
 /* ── Hero ────────────────────────────────────────────────────────────────────────────────── */
 
 .cta-slot,
@@ -459,4 +459,15 @@
   .about-scroller {
     scroll-behavior: auto;
   }
+}
+
+/* The team name that «translates» itself on hover: pushed from its left edge, one block for both lines. */
+.name-flip {
+  display: inline-block;
+  transform-origin: 0% 50%;
+  cursor: default;
+}
+
+.name-flip .line {
+  display: block;
 }

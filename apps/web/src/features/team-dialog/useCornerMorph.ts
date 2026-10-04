@@ -55,7 +55,8 @@ function layoutBox(element: HTMLElement): Box {
 /**
  * Opens and closes the team card by the corner morph (see morph.ts): one requestAnimationFrame loop while it moves,
  * transform and radius written straight to the element. Interruptible: a new direction starts from the current
- * corners and their velocities.
+ * corners and their velocities. Critically damped springs: the card is drawn to its place like by a magnet —
+ * no bounce.
  */
 export function useCornerMorph(options: Options) {
   const latest = useRef(options);
@@ -125,9 +126,14 @@ export function useCornerMorph(options: Options) {
     s.targets = present ? boxCorners(dialog) : boxCorners(from);
     const style: MorphStyle = present ? MORPH.open : MORPH.close;
     s.springs = cornerSprings(current, s.targets, style);
+    const fromRest =
+      present &&
+      !s.closing &&
+      current.every((point, i) => {
+        const start = boxCorners(from)[i];
+        return start !== undefined && point.x === start.x && point.y === start.y;
+      });
     s.closing = !present;
-    s.startedAt = performance.now();
-    s.last = s.startedAt;
 
     const draw = () => {
       const corners = s.corners;
@@ -199,11 +205,32 @@ export function useCornerMorph(options: Options) {
       s.raf = requestAnimationFrame(frame);
     };
 
+    const begin = () => {
+      s.startedAt = performance.now();
+      s.last = s.startedAt;
+      s.raf = requestAnimationFrame(frame);
+    };
+
     element.style.transformOrigin = '0 0';
     draw();
     cancelAnimationFrame(s.raf);
-    s.raf = requestAnimationFrame(frame);
+    let cancelled = false;
+    if (fromRest) {
+      // Opening from rest: the card is first painted on the icon (with its picture decoded), then it flies —
+      // the first heavy frame never stalls the motion.
+      const picture = element.querySelector('img');
+      const decoded = picture ? picture.decode().catch(() => undefined) : Promise.resolve();
+      const timeout = new Promise((resolve) => setTimeout(resolve, MORPH.startWaitMs));
+      void Promise.race([decoded, timeout]).then(() => {
+        requestAnimationFrame(() => {
+          if (!cancelled) begin();
+        });
+      });
+    } else {
+      begin();
+    }
     return () => {
+      cancelled = true;
       cancelAnimationFrame(s.raf);
       s.raf = 0;
     };
