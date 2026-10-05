@@ -10,29 +10,65 @@ type Props = {
 
 type Point = { readonly x: number; readonly y: number };
 
+/**
+ * A letter, the way (unit vector) the wave from the cursor pushes it, how far it is from the cursor, and where it
+ * is right now (a wave may be turned around half-way).
+ */
+type Push = {
+  readonly letter: HTMLElement;
+  readonly ux: number;
+  readonly uy: number;
+  readonly distance: number;
+  readonly transform: string;
+  readonly opacity: number;
+};
+
 const lettersOf = (layer: HTMLElement | null) => [
   ...(layer?.querySelectorAll<HTMLElement>('.flip-char') ?? []),
 ];
 
-/** Where a letter is and which way (unit vector) a push from `point` sends it. */
-function awayFrom(letter: HTMLElement, point: Point) {
-  const rect = letter.getBoundingClientRect();
-  const dx = rect.left + rect.width / 2 - point.x;
-  const dy = rect.top + rect.height / 2 - point.y;
-  const distance = Math.hypot(dx, dy);
-  return distance < 1
-    ? { ux: 0, uy: -1, distance }
-    : { ux: dx / distance, uy: dy / distance, distance };
+const REST = 'translate(0px, 0px) scale(1)';
+const shift = (ux: number, uy: number, px: number, scale: number) =>
+  `translate(${(ux * px).toFixed(2)}px, ${(uy * px).toFixed(2)}px) scale(${scale.toFixed(4)})`;
+
+/**
+ * The computed transform (`none` or a `matrix(…)` of a translate and a uniform scale) written in the same form as
+ * the targets. Every keyframe must share that form: Motion reads a bare `none` as «scale(0)», which collapsed the
+ * letters into dots.
+ */
+function current(transform: string): string {
+  const values = /matrix\(([^)]+)\)/.exec(transform)?.[1]?.split(',').map(Number);
+  if (!values || values.length !== 6 || values.some((value) => !Number.isFinite(value)))
+    return REST;
+  const [scale = 1, , , , x = 0, y = 0] = values;
+  return `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(${scale.toFixed(4)})`;
 }
 
-const restStyle = { transform: 'translate(0px, 0px) rotate(0deg) scale(1)', filter: 'blur(0px)' };
+/** Measures every letter before any animation starts: one layout for the whole wave. */
+function measure(letters: readonly HTMLElement[], point: Point): Push[] {
+  return letters.map((letter) => {
+    const rect = letter.getBoundingClientRect();
+    const style = getComputedStyle(letter);
+    const dx = rect.left + rect.width / 2 - point.x;
+    const dy = rect.top + rect.height / 2 - point.y;
+    const distance = Math.hypot(dx, dy);
+    return {
+      letter,
+      ux: distance < 1 ? 0 : dx / distance,
+      uy: distance < 1 ? -1 : dy / distance,
+      distance,
+      transform: current(style.transform),
+      opacity: Number(style.opacity),
+    };
+  });
+}
 
 /**
  * The team name that «translates» itself (an easter egg of the team card). The mouse coming onto the name sends a
- * blur wave from the cursor: every letter is pushed away from it, blurs and fades — the nearest first, the farthest
- * last — and the letters of «Современное Проявление» fly into place behind the wave with a light bounce. Leaving
- * sends the wave back from the point where the cursor left. On touch screens a tap does the same. Screen readers
- * always get the original name (it is also the dialog's accessible name).
+ * light wave from the cursor: every letter drifts a few pixels away from it and fades — the nearest first — and the
+ * letters of «Современное Проявление» settle into place behind the wave. Leaving sends the wave back from the point
+ * where the cursor left. On touch screens a tap does the same. Screen readers always get the original name (it is
+ * also the dialog's accessible name).
  */
 export function NameFlip({ lines, translation }: Props) {
   const calm = useCalmMotion();
@@ -56,57 +92,51 @@ export function NameFlip({ lines, translation }: Props) {
   const flip = (toTranslation: boolean, point: Point) => {
     if (translated.current === toTranslation) return;
     translated.current = toTranslation;
-    for (const motion of running.current) motion.stop();
-    running.current = [];
     const outgoing = lettersOf(toTranslation ? originalRef.current : translationRef.current);
     const incoming = lettersOf(toTranslation ? translationRef.current : originalRef.current);
 
     if (calm) {
+      for (const motion of running.current) motion.stop();
+      running.current = [];
       for (const letter of outgoing) letter.style.opacity = '0';
-      for (const letter of incoming) Object.assign(letter.style, restStyle, { opacity: '1' });
+      for (const letter of incoming) Object.assign(letter.style, { transform: REST, opacity: '1' });
       return;
     }
 
-    const outs = outgoing.map((letter) => ({ letter, ...awayFrom(letter, point) }));
-    const ins = incoming.map((letter) => ({ letter, ...awayFrom(letter, point) }));
+    // Where every letter is now (also mid-way through a wave that is being turned around), then the old wave stops.
+    const outs = measure(outgoing, point);
+    const ins = measure(incoming, point);
+    for (const motion of running.current) motion.stop();
+    running.current = [];
     const reach = Math.max(1, ...[...outs, ...ins].map(({ distance }) => distance));
-    // Nearer letters get a stronger push, a far one about half of it.
+    // Nearer letters drift further, the farthest about half as far.
     const strength = (distance: number) => 1 - 0.5 * (distance / reach);
     const wave = (distance: number) => distance / NAME_FLIP.waveSpeedPxS;
 
-    for (const { letter, ux, uy, distance } of outs) {
-      const push = NAME_FLIP.pushPx * strength(distance);
+    for (const { letter, ux, uy, distance, transform, opacity } of outs) {
+      const away = shift(ux, uy, NAME_FLIP.pushPx * strength(distance), NAME_FLIP.outScale);
       running.current.push(
         animate(
           letter,
-          {
-            transform: `translate(${(ux * push).toFixed(1)}px, ${(uy * push).toFixed(1)}px) rotate(${(ux * NAME_FLIP.spinDeg).toFixed(1)}deg) scale(${String(NAME_FLIP.outScale)})`,
-            filter: `blur(${String(NAME_FLIP.blurPx)}px)`,
-            opacity: 0,
-          },
+          { transform: [transform, away], opacity: [opacity, 0] },
           { duration: NAME_FLIP.outS, delay: wave(distance), ease: NAME_FLIP.outEase },
         ),
       );
     }
 
-    for (const { letter, ux, uy, distance } of ins) {
-      // A letter that is fully gone starts from where the wave would have thrown it; a half-way one turns around.
-      if (Number(getComputedStyle(letter).opacity) < 0.05) {
-        const push = NAME_FLIP.pushPx * NAME_FLIP.inFromShare * strength(distance);
-        letter.style.transform = `translate(${(ux * push).toFixed(1)}px, ${(uy * push).toFixed(1)}px) rotate(${(-ux * NAME_FLIP.spinDeg).toFixed(1)}deg) scale(${String(NAME_FLIP.inScale)})`;
-        letter.style.filter = `blur(${String(NAME_FLIP.blurPx)}px)`;
-      }
-      const delay = wave(distance) + NAME_FLIP.inLagS;
+    for (const { letter, ux, uy, distance, transform, opacity } of ins) {
+      // A letter that is fully gone starts a little behind the wave; a half-way one simply turns around.
+      const behind = -NAME_FLIP.pushPx * NAME_FLIP.inFromShare * strength(distance);
+      const from = opacity < 0.05 ? shift(ux, uy, behind, NAME_FLIP.inScale) : transform;
       running.current.push(
         animate(
           letter,
-          { transform: restStyle.transform },
-          { type: 'spring', visualDuration: NAME_FLIP.inS, bounce: NAME_FLIP.inBounce, delay },
-        ),
-        animate(
-          letter,
-          { filter: restStyle.filter, opacity: 1 },
-          { duration: NAME_FLIP.inS * 0.8, delay, ease: 'easeOut' },
+          { transform: [from, REST], opacity: [opacity, 1] },
+          {
+            duration: NAME_FLIP.inS,
+            delay: wave(distance) + NAME_FLIP.inLagS,
+            ease: NAME_FLIP.inEase,
+          },
         ),
       );
     }

@@ -25,21 +25,23 @@ describe('normalizeWheelDelta', () => {
 });
 
 describe('wheel gesture', () => {
-  it('a single mouse-wheel notch (100 px) triggers once', () => {
-    const g = createWheelGesture(options);
-    expect(g.push(100, 0, false)).toBe('down');
+  it('a single mouse-wheel notch triggers once, whatever the system «lines per notch»', () => {
+    // Chromium on Windows: 100 px with 3 lines per notch, 33 px with 1; Firefox: 1 line = 16 px.
+    for (const notch of [100, 33.33, normalizeWheelDelta(1, 1, 900)]) {
+      expect(createWheelGesture(options).push(notch, 0, false)).toBe('down');
+    }
   });
 
   it('small touchpad deltas accumulate inside the window', () => {
     const g = createWheelGesture(options);
-    expect(g.push(15, 0, false)).toBeNull();
-    expect(g.push(15, 16, false)).toBeNull();
-    expect(g.push(15, 32, false)).toBe('down');
+    expect(g.push(3, 0, false)).toBeNull();
+    expect(g.push(3, 16, false)).toBeNull();
+    expect(g.push(3, 32, false)).toBe('down');
   });
 
   it('a slow drift spread beyond the window does not trigger', () => {
     const g = createWheelGesture(options);
-    for (let t = 0; t < 2000; t += 150) expect(g.push(10, t, false)).toBeNull();
+    for (let t = 0; t < 2000; t += 250) expect(g.push(3, t, false)).toBeNull();
   });
 
   it('a touchpad fling with a long inertia tail gives exactly one transition', () => {
@@ -96,7 +98,7 @@ describe('wheel gesture', () => {
 
   it('a key or button transition consumes the current gesture', () => {
     const g = createWheelGesture(options);
-    expect(g.push(10, 0, false)).toBeNull();
+    expect(g.push(4, 0, false)).toBeNull();
     g.consume();
     expect(g.push(100, 10, false)).toBeNull();
   });
@@ -136,10 +138,10 @@ describe('scrolling inside a scene', () => {
 describe('swipe and keys', () => {
   const swipe = { minPx: GESTURE.swipeMinPx, dominance: GESTURE.swipeDominance };
 
-  it('vertical swipes beyond 50 px and 1.2×|dx|', () => {
-    expect(swipeDirection(0, -80, swipe)).toBe('down');
-    expect(swipeDirection(10, 90, swipe)).toBe('up');
-    expect(swipeDirection(0, 40, swipe)).toBeNull();
+  it('short vertical swipes: beyond 24 px and 1.2×|dx|', () => {
+    expect(swipeDirection(0, -30, swipe)).toBe('down');
+    expect(swipeDirection(10, 40, swipe)).toBe('up');
+    expect(swipeDirection(0, 20, swipe)).toBeNull();
     expect(swipeDirection(100, 110, swipe)).toBeNull();
   });
 

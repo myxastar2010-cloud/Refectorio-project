@@ -1,36 +1,29 @@
 import type { Ref } from 'react';
 import { images } from '../../lib/assets';
-import { DIALOG_SIZES } from './preload';
+import { BACKGROUND_FALLBACK, BACKGROUND_SOURCES, DIALOG_SIZES } from './preload';
 
 type DialogSurfaceProps = {
   readonly surfaceRef: Ref<HTMLDivElement>;
   readonly logoRef: Ref<HTMLPictureElement>;
   readonly backgroundRef: Ref<HTMLPictureElement>;
-  readonly radiusPx: number;
 };
 
 /**
  * The team card surface at its final size (ТЗ 6.4). useCornerMorph squeezes it onto the icon and lets it stretch
  * open; the logo on top fades into the card background during the first part of the way. The logo is stretched to
  * the card's proportions (object-fit: fill), so squeezed back onto the square icon it looks exactly like the icon.
+ * Phones get their own tall background.
  */
-export function TeamDialogSurface({
-  surfaceRef,
-  logoRef,
-  backgroundRef,
-  radiusPx,
-}: DialogSurfaceProps) {
+export function TeamDialogSurface({ surfaceRef, logoRef, backgroundRef }: DialogSurfaceProps) {
   return (
-    <div
-      ref={surfaceRef}
-      className="team-surface team-surface--dialog"
-      style={{ borderRadius: radiusPx }}
-    >
+    <div ref={surfaceRef} className="team-surface team-surface--dialog">
       <picture ref={backgroundRef} className="team-surface-bg">
-        <source type="image/avif" srcSet={images.teamBackground.avifSrcSet} sizes={DIALOG_SIZES} />
+        {BACKGROUND_SOURCES.map((source) => (
+          <source key={`${source.media ?? ''}${source.type}`} {...source} />
+        ))}
         <img
-          src={images.teamBackground.fallback}
-          srcSet={images.teamBackground.webpSrcSet}
+          src={BACKGROUND_FALLBACK.fallback}
+          srcSet={BACKGROUND_FALLBACK.webpSrcSet}
           sizes={DIALOG_SIZES}
           alt=""
           decoding="async"

@@ -5,7 +5,7 @@ const text = z.string().trim().min(1);
 const lines = z.array(text).min(1);
 
 const featureIcon = z.enum(['school', 'sparkles', 'pencil', 'shieldCheck']);
-const imageKey = z.enum(['teamLogo', 'teamBackground']);
+const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamBackground', 'teamBackgroundPhone']);
 
 const link = z.object({
   label: text,
@@ -32,7 +32,6 @@ export const siteContentSchema = z.object({
     cta: z.object({ label: text, href: z.string().startsWith('#'), toast: text }),
     featuresLabel: text,
     features: z.array(z.object({ title: text, textLines: lines, icon: featureIcon })).length(4),
-    carouselLabel: text,
   }),
   about: z.object({
     title: text,

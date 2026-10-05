@@ -10,7 +10,7 @@ import subsetFont from 'subset-font';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE = path.join(ROOT, 'node_modules/@fontsource/open-runde');
 const OUT = path.join(ROOT, 'apps/web/src/assets/fonts');
-const WEIGHTS = [400, 600, 700];
+const WEIGHTS = [400, 500, 600, 700];
 
 // Basic Latin, Latin-1, Russian Cyrillic (with Ё), dashes and quotes, ‰ ‹ ›, №, ₽, minus.
 const RANGES = [

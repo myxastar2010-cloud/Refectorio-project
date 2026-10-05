@@ -16,7 +16,8 @@ import {
 
 /** Tunables of the field (ТЗ 6.7). Pixel values are CSS px of the viewport. */
 export const FIELD = {
-  count: { desktop: 12, tablet: 9, phone: 7 },
+  /** A little more than on screen at a time: items also drift through the margins beyond the edges. */
+  count: { desktop: 14, tablet: 10, phone: 8 },
   /** Sprite edge: desktop scales with the frame (mockup ≈ 185 px at 1920), tablet/phone are fixed. */
   sizeDesktopFrame: 185,
   sizeTablet: 130,
@@ -56,6 +57,11 @@ export type FieldOptions = {
   readonly adaptiveQuality: boolean;
   /** Mockup frame → viewport: px per frame px and frame origin in the viewport. */
   readonly frame: () => { scale: number; left: number; top: number };
+  /**
+   * The part of the plane that can be on screen (in any scene) for a viewport of this size; items wrap around only
+   * once they have left all of it.
+   */
+  readonly visibleArea: (width: number, height: number) => Rect;
   readonly device: () => Device;
 };
 
@@ -114,6 +120,7 @@ export function createFoodField(options: FieldOptions) {
   let obstacles: Rect[] = [];
   let width = window.innerWidth;
   let height = window.innerHeight;
+  let area = options.visibleArea(width, height);
   let speedFactor = 1;
   let raf = 0;
   let last = 0;
@@ -151,6 +158,7 @@ export function createFoodField(options: FieldOptions) {
     random = createRandom(options.seed);
     width = window.innerWidth;
     height = window.innerHeight;
+    area = options.visibleArea(width, height);
     const device = options.device();
     const base = sizeFor(device);
 
@@ -259,8 +267,13 @@ export function createFoodField(options: FieldOptions) {
       item.x += (Math.cos(heading) * speed + item.pushX) * dt;
       item.y += (Math.sin(heading) * speed + item.pushY + item.impulseY) * dt;
       if (quality < 1) item.angle += (item.spin * speedFactor + item.spinKick) * dt;
-      const radius = (item.size / 2) * Math.SQRT2 * Math.max(1, item.bounce.value);
-      const wrapped = wrap(item, radius, width, height);
+      // The pre-blurred copy is larger than the sprite (transparent padding for the blur).
+      const radius =
+        (item.size / 2) *
+        (1 + 2 * item.sprite.blurPadRatio) *
+        Math.SQRT2 *
+        Math.max(1, item.bounce.value);
+      const wrapped = wrap(item, radius, area);
       item.x = wrapped.x;
       item.y = wrapped.y;
       item.bounce = stepSpring(item.bounce, dt, FIELD.bounce.stiffness, FIELD.bounce.damping);

@@ -1,6 +1,6 @@
 import { IconX } from '@tabler/icons-react';
-import { AnimatePresence, m, usePresence } from 'motion/react';
-import { useEffect, useRef, type KeyboardEvent, type RefObject } from 'react';
+import { AnimatePresence, m, usePresence, type MotionStyle } from 'motion/react';
+import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
 import { site } from '../../content/site.ru';
 import { useViewport } from '../../lib/useViewport';
 import { useCalmMotion } from '../../motion/hooks';
@@ -49,13 +49,11 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
   const logoRef = useRef<HTMLPictureElement>(null);
   const backgroundRef = useRef<HTMLPictureElement>(null);
   const close = useWave<HTMLButtonElement>();
+  const [revealed, setRevealed] = useState(false);
   const { teamDialog } = site;
+  // The names fill the columns top to bottom: as many rows as the longest column.
+  const memberRows = Math.max(...teamDialog.members.map((column) => column.length));
 
-  const radii = {
-    tilePx:
-      DIALOG.tileRadius * (viewport.phone ? viewport.width / DIALOG.phoneFrameWidth : viewport.s),
-    dialogPx: viewport.phone ? DIALOG.phoneDialogRadiusPx : DIALOG.dialogRadius * viewport.sd,
-  };
   useCornerMorph({
     surface: surfaceRef,
     logo: logoRef,
@@ -63,7 +61,10 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
     tile: tileRef,
     present,
     calm,
-    radii,
+    dock: viewport.phone ? DIALOG.starDockPhone : DIALOG.starDock,
+    onReveal: () => {
+      setRevealed(true);
+    },
     onLanded,
     onDone: () => {
       safeToRemove?.();
@@ -94,21 +95,25 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
     }
   };
 
-  const reveal = calm ? 0 : SPRING.expand.visualDuration * DIALOG.contentRevealAt;
+  // The text comes in once the card itself is far enough open — by its shape, not by a clock: the flight may start
+  // a little later (the picture is decoded first), and the text must never hang in the air outside the card.
   const content = (index: number) => {
-    const delay = reveal + (index * DIALOG.contentStaggerMs) / 1000;
+    const delay = (index * DIALOG.contentStaggerMs) / 1000;
+    const hidden = { opacity: 0, transform: `translate3d(0px, ${calm ? 0 : 16}px, 0px)` };
     return {
-      initial: { opacity: 0, transform: `translate3d(0px, ${calm ? 0 : 16}px, 0px)` },
-      animate: {
-        opacity: 1,
-        transform: 'translate3d(0px, 0px, 0px)',
-        transition: calm
-          ? { duration: DURATION.fade }
-          : {
-              default: { ...SPRING.dialogContent, delay },
-              opacity: { duration: 0.35, ease: EASE_OUT_SOFT, delay },
-            },
-      },
+      initial: hidden,
+      animate: revealed
+        ? {
+            opacity: 1,
+            transform: 'translate3d(0px, 0px, 0px)',
+            transition: calm
+              ? { duration: DURATION.fade }
+              : {
+                  default: { ...SPRING.dialogContent, delay },
+                  opacity: { duration: 0.35, ease: EASE_OUT_SOFT, delay },
+                },
+          }
+        : hidden,
       exit: { opacity: 0, transition: { duration: DIALOG.contentExitS } },
     };
   };
@@ -136,7 +141,6 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
           surfaceRef={surfaceRef}
           logoRef={logoRef}
           backgroundRef={backgroundRef}
-          radiusPx={radii.dialogPx}
         />
         <div className="team-dialog-content">
           <m.h2 id="team-dialog-title" className="dialog-title" {...content(0)}>
@@ -145,18 +149,17 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
           <m.p className="dialog-lead" {...content(1)}>
             <Lines lines={teamDialog.leadLines} />
           </m.p>
-          <m.ul className="dialog-members" aria-label={teamDialog.membersLabel} {...content(2)}>
-            {teamDialog.members.flatMap((column, columnIndex) =>
-              column.map((name, rowIndex) => (
-                <li
-                  key={name}
-                  className="dialog-member"
-                  style={{ gridColumn: columnIndex + 1, gridRow: rowIndex + 1 }}
-                >
-                  {name}
-                </li>
-              )),
-            )}
+          <m.ul
+            className="dialog-members"
+            aria-label={teamDialog.membersLabel}
+            style={{ '--member-rows': memberRows } as MotionStyle}
+            {...content(2)}
+          >
+            {teamDialog.members.flat().map((name) => (
+              <li key={name} className="dialog-member">
+                {name}
+              </li>
+            ))}
           </m.ul>
           <m.div className="dialog-close-slot" {...content(3)}>
             <button

@@ -12,7 +12,7 @@
 | E2E | Playwright 1.63: Chromium, Firefox, WebKit + мобильные профили | сцены, жесты (колесо с инерцией тачпада, свайпы), диалог, фокус, reduced motion, клики по еде |
 | Доступность | `@axe-core/playwright` | 0 серьёзных нарушений на обеих сценах и в диалоге (исключение по контрасту задокументировано) |
 | Производительность | Lighthouse CI (desktop ≥ 0,95 по 4 категориям; mobile performance ≥ 0,85; LCP ≤ 2 с, CLS ≤ 0,02, TBT ≤ 150 мс) | бюджеты на каждой сборке |
-| Сравнение с макетами | `scripts/compare-with-design.mjs` (pixelmatch) | геометрия ключевых элементов ±4 px на 1920×1080 |
+| Сравнение с макетами | `scripts/compare-with-design.mjs` (pixelmatch) | до 06.10 — геометрия ключевых элементов ±4 px на 1920×1080; с D-028 композиция сознательно отличается от макета (поля, размеры карточек), скрипт показывает отклонения для справки |
 
 - **pre-commit:** husky + lint-staged (ESLint + Prettier на изменённых файлах).
 - **CI (`ci.yml`):** `npm ci` → lint → typecheck → unit с покрытием → build → e2e smoke (Chromium) → Lighthouse; при ошибке —

@@ -99,6 +99,19 @@
     display: inline;
   }
 
+  /* Phones show no feature cards (D-028): the heading, the lead and the button stand in the middle of the screen. */
+  .features {
+    display: none;
+  }
+
+  .hero-title {
+    margin-top: auto;
+  }
+
+  .cta-slot {
+    margin-bottom: auto;
+  }
+
   .cta-slot {
     height: 56px;
     margin-top: 8px;
@@ -116,28 +129,9 @@
     height: 22px;
   }
 
-  /* Carousel with scroll-snap; the next card peeks in. */
-  .features {
-    display: flex;
-    gap: 12px;
-    margin: auto calc(-1 * max(16px, env(safe-area-inset-left))) 0;
-    padding: 0 max(16px, env(safe-area-inset-left));
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: max(16px, env(safe-area-inset-left));
-    scrollbar-width: none;
-    overscroll-behavior-x: contain;
-  }
-
-  .features::-webkit-scrollbar {
-    display: none;
-  }
-
   .feature-card {
-    flex: 0 0 82%;
     height: 128px;
     border-radius: 40px;
-    scroll-snap-align: start;
   }
 
   .feature-surface {
@@ -167,26 +161,6 @@
     width: 48px;
     height: 48px;
     translate: 0 -50%;
-  }
-
-  .carousel-dots {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    padding-top: 4px;
-  }
-
-  .carousel-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--color-accent);
-    opacity: 0.3;
-    transition: opacity var(--motion-micro, 220ms) var(--ease-out-expo);
-  }
-
-  .carousel-dot[data-active='true'] {
-    opacity: 1;
   }
 
   /* ── Part 2: title and cards one under another, scrolling inside ─────────────────────── */
@@ -260,7 +234,7 @@
     grid-area: tile;
     width: 96px;
     height: 96px;
-    border-radius: 23px;
+    border-radius: 31px;
   }
 
   .info-name {
@@ -367,8 +341,9 @@
     font-size: 16px;
   }
 
-  .carousel-dots {
-    display: none;
+  /* Tablets: the button no longer pushes the cards down. */
+  .cta-slot {
+    margin-bottom: 0;
   }
 
   .scene--about {
@@ -388,7 +363,7 @@
   .info-tile {
     width: 140px;
     height: 140px;
-    border-radius: 34px;
+    border-radius: 45px;
   }
 
   .info-name {
@@ -517,31 +492,94 @@
     width: 34px;
     height: 34px;
   }
+}
 
-  .carousel-dots {
+/* Phones on their side: no cards either — the text block in the middle, in one column. */
+@media (orientation: landscape) and (max-height: 35rem) and (pointer: coarse) {
+  .features {
     display: none;
+  }
+
+  .scene--hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cta-slot {
+    max-width: 420px;
   }
 }
 
-/* ── Phones: the team dialog becomes a full-screen sheet with scrolling content ─────────── */
+/* ── Phones: part 2 compact enough to fit one screen (a short swipe then works from anywhere) ── */
 
 @media (max-width: 47.99rem) {
-  .carousel-dots {
-    display: flex;
+  .scene--about {
+    justify-content: center;
+    gap: 16px;
+    padding-top: calc(20px + env(safe-area-inset-top));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
   }
 
+  .about-title {
+    font-size: 36px;
+  }
+
+  .info-surface {
+    grid-template-columns: 84px 1fr;
+    gap: 6px 16px;
+    padding: 22px 20px;
+  }
+
+  .info-label {
+    padding-bottom: 6px;
+    font-size: 20px;
+  }
+
+  .info-tile {
+    width: 84px;
+    height: 84px;
+    border-radius: 27px;
+  }
+
+  .info-name {
+    font-size: 24px;
+  }
+
+  .info-lead {
+    font-size: 14px;
+  }
+
+  .info-more,
+  .info-links {
+    margin-top: 12px;
+  }
+
+  .info-links {
+    gap: 4px 16px;
+  }
+
+  .info-link {
+    font-size: 15px;
+  }
+}
+
+/* ── Phones: the team card is a tall card of its own (958×1521), centred; the text lies on its dark lower part ─── */
+
+@media (max-width: 47.99rem) {
   .team-dialog {
-    inset: 0;
-    width: auto;
-    height: auto;
+    --pw: min(100vw - 32px, (100svh - 48px) * var(--dialog-phone-w) / var(--dialog-phone-h));
+    left: calc(50% - var(--pw) / 2);
+    top: calc(50% - var(--pw) * var(--dialog-phone-h) / var(--dialog-phone-w) / 2);
+    width: var(--pw);
+    height: calc(var(--pw) * var(--dialog-phone-h) / var(--dialog-phone-w));
+    border-radius: calc(var(--pw) * var(--radius-dialog-phone) / var(--dialog-phone-w));
   }
 
+  /* The name, the lead and the members stand on the bottom of the card, below the star. */
   .team-dialog-content {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: calc(84px + env(safe-area-inset-top)) 28px calc(32px + env(safe-area-inset-bottom));
-    overflow-y: auto;
+    justify-content: flex-end;
+    padding: 0 calc(var(--pw) * 0.085) calc(var(--pw) * 0.14);
   }
 
   .dialog-title,
@@ -552,31 +590,47 @@
   }
 
   .dialog-title {
-    font-size: 40px;
-    line-height: 1.1;
+    font-size: calc(var(--pw) * 0.094);
+    line-height: 1.08;
   }
 
   .dialog-lead {
-    font-size: 18px;
-    line-height: 1.35;
+    margin-top: calc(var(--pw) * 0.025);
+    font-size: max(14px, calc(var(--pw) * 0.044));
+    line-height: 1.3;
   }
 
+  /* Two columns as on the desktop card: three names and two. */
   .dialog-members {
-    display: block;
-    margin-top: 16px;
-    padding-left: 22px;
-    font-size: 19px;
-    line-height: 2;
+    grid-template-rows: repeat(var(--member-rows, 3), auto);
+    grid-template-columns: auto auto;
+    justify-content: start;
+    column-gap: calc(var(--pw) * 0.075);
+    margin-top: calc(var(--pw) * 0.065);
+    padding-left: 12px;
+    font-size: max(13px, calc(var(--pw) * 0.041));
+    line-height: 1.75;
+    white-space: nowrap;
   }
 
   .dialog-member::before {
-    left: -14px;
+    left: -10px;
   }
 
+  /* Inside the round top-right corner of the card. */
   .dialog-close-slot {
-    top: calc(16px + env(safe-area-inset-top));
-    right: 16px;
-    width: 48px;
-    height: 48px;
+    top: calc(var(--pw) * 0.085);
+    right: calc(var(--pw) * 0.085);
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+  }
+}
+
+/* Very narrow phones: the members in one column. */
+@media (max-width: 359.98px) {
+  .dialog-members {
+    grid-auto-flow: row;
+    grid-template-rows: none;
+    grid-template-columns: auto;
   }
 }

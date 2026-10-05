@@ -608,11 +608,32 @@
         }
       }
     },
+    "backgroundPhone": {
+      "width": 958,
+      "height": 1521,
+      "fill": "#15080b",
+      "variants": {
+        "479": {
+          "avif": "team-card-bg-phone-479.avif",
+          "webp": "team-card-bg-phone-479.webp"
+        },
+        "958": {
+          "avif": "team-card-bg-phone-958.avif",
+          "webp": "team-card-bg-phone-958.webp"
+        }
+      }
+    },
     "logo": {
+      "width": 158,
+      "height": 158,
+      "avif": "team-logo-158.avif",
+      "webp": "team-logo-158.webp"
+    },
+    "projectLogo": {
       "width": 187,
       "height": 187,
-      "avif": "team-logo-187.avif",
-      "webp": "team-logo-187.webp"
+      "avif": "project-logo-187.avif",
+      "webp": "project-logo-187.webp"
     }
   }
 }

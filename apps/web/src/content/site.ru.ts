@@ -45,7 +45,6 @@ export const site = {
         icon: 'shieldCheck',
       },
     ],
-    carouselLabel: 'Возможности, листайте вбок',
   },
   about: {
     title: 'О проекте',
@@ -63,7 +62,7 @@ export const site = {
       label: 'Проект:',
       nameLines: ['Refectorio'],
       leadLines: ['Учащиеся школы', '#2107'],
-      image: 'teamLogo',
+      image: 'projectLogo',
       imageAlt: 'Логотип проекта (временный)',
       links: [
         {

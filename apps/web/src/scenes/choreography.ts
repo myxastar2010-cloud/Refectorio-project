@@ -86,7 +86,7 @@ export function aboutTitleVariants(calm: boolean): Variants {
       opacity: 0,
       filter: blur(into.fromBlurPx),
       transition: {
-        filter: { duration: out, ease: EASE_IN_OUT },
+        filter: { duration: out, ease: EASE_OUT_SOFT },
         opacity: { duration: out, ease: EASE_IN_OUT },
       },
     },
@@ -95,15 +95,15 @@ export function aboutTitleVariants(calm: boolean): Variants {
       filter: blur(0),
       transition: {
         filter: { duration: ms(into.blurMs), ease: EASE_OUT_SOFT, delay: ms(into.delayMs) },
-        opacity: { duration: ms(into.fadeMs), ease: 'linear', delay: ms(into.delayMs) },
+        opacity: { duration: ms(into.fadeMs), ease: EASE_OUT_SOFT, delay: ms(into.delayMs) },
       },
     },
   };
 }
 
 /**
- * Part 2 cards come into focus: a strong blur resolves to sharp at their own size — they neither grow nor dim, the
- * fade is only a short start. The way back is a mirror (ТЗ 6.6): the card that came last blurs away first.
+ * Part 2 cards come into focus: a light blur resolves to sharp at their own size — they neither grow nor dim.
+ * The way back is a mirror (ТЗ 6.6): the card that came last blurs away first.
  */
 export function aboutCardVariants(index: number, count: number, calm: boolean): Variants {
   if (calm) return fade;
@@ -116,7 +116,7 @@ export function aboutCardVariants(index: number, count: number, calm: boolean): 
       opacity: 0,
       filter: blur(into.fromBlurPx),
       transition: {
-        filter: { duration: ms(out.durationMs), ease: EASE_IN_OUT, delay: exitDelay },
+        filter: { duration: ms(out.durationMs), ease: EASE_OUT_SOFT, delay: exitDelay },
         opacity: {
           duration: ms(out.fadeMs),
           ease: EASE_IN_OUT,
@@ -129,7 +129,7 @@ export function aboutCardVariants(index: number, count: number, calm: boolean): 
       filter: blur(0),
       transition: {
         filter: { duration: ms(into.blurMs), ease: EASE_OUT_SOFT, delay },
-        opacity: { duration: ms(into.fadeMs), ease: 'linear', delay },
+        opacity: { duration: ms(into.fadeMs), ease: EASE_OUT_SOFT, delay },
       },
     },
   };

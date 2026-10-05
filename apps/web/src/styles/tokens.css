@@ -55,11 +55,14 @@
   /* ── Typography roles (Figma SF Pro Rounded → Open Runde; fitted to mockup line widths in Chromium with the real
      self-hosted Open Runde — design/analysis/07_font_fit_open_runde.mjs) ───────────────────────── */
   /* size and line-height in mockup px; tracking in em (scales with the size). */
-  --type-brand-size: 45.6;
+  /* The site name: larger than in the mockup (45.6) and with the title's outline, so it has the same full, soft weight
+     as the heading under it (D-028). */
+  --type-brand-size: 53;
   --type-brand-weight: 700;
-  --type-brand-tracking: -0.017em;
+  --type-brand-stroke: 0.032em;
+  --type-brand-tracking: 0.002em;
 
-  --type-pill-label-size: 22.8; /* «О проекте» */
+  --type-pill-label-size: 24.5; /* «О проекте» (mockup 22.8, the button is larger now) */
   --type-pill-label-weight: 700;
   --type-pill-label-tracking: -0.0131em;
 
@@ -86,7 +89,7 @@
   --type-card-title-tracking: -0.0157em;
 
   --type-card-text-size: 19;
-  --type-card-text-weight: 600;
+  --type-card-text-weight: 500; /* lighter than the card title (600): it is the subtitle */
   --type-card-text-leading: 24;
   --type-card-text-tracking: -0.022em;
 
@@ -145,52 +148,53 @@
   --radius-pill: 38; /* 83-px buttons */
   --radius-feature-card: 71;
   --radius-info-card: 174;
-  --radius-tile: 45; /* team icon 187×187 */
+  --radius-tile: 61; /* icons 187×187: the corner of the new team logo (≈ 32 % of its side) */
   --radius-dialog: 217;
+  --radius-dialog-phone: 296; /* the phone card 958×1521 */
 
   /* ── Hero (scene 1), frame 1920×1080 ───────────────────────────────────────────────────── */
-  --hero-gutter: 48;
-  --hero-logo-icon-x: 23;
-  --hero-logo-icon-y: 19;
-  --hero-logo-icon-size: 97; /* Tabler 24-unit box → visible apple ≈ 73×78 */
-  --hero-brand-x: 126;
-  --hero-brand-baseline: 92;
-  --hero-about-x: 1675;
-  --hero-about-y: 19;
-  --hero-about-w: 189;
-  --hero-about-h: 83;
+  /* Desktop part 1 spans the whole window (D-028): side margins and the gaps between the cards follow its width;
+     the heights and the type follow the frame scale --s. The header row: the apple's body, the capitals of the name
+     and the button share the centre line y = 76. */
+  --hero-side: max(40px, 3.4vw);
+  --hero-cards-gap-w: max(20px, 1.8vw);
+  --hero-logo-icon-y: 15;
+  --hero-logo-icon-size: 106; /* Tabler 24-unit box → visible apple ≈ 80×85 */
+  --hero-logo-icon-inset: 0.125; /* blank space left of the apple, share of the box */
+  --hero-brand-gap: 6;
+  --hero-brand-baseline: 94.7;
+  --hero-about-y: 32;
+  --hero-about-w: 210;
+  --hero-about-h: 88;
   --hero-about-border: 2;
-  --hero-title-x: 47;
   --hero-title-baseline: 278.5;
-  --hero-lead-x: 47;
   --hero-lead-baseline: 518;
-  --hero-cta-x: 48;
   --hero-cta-y: 595;
   --hero-cta-w: 440;
   --hero-cta-h: 83;
   --hero-cta-icon-size: 28;
   --hero-cta-gap: 5;
-  --hero-cards-y: 833;
-  --hero-card-w: 440;
-  --hero-card-h: 161;
-  --hero-card-gap: 21;
+  --hero-cards-y: 816;
+  --hero-card-h: 178; /* mockup 161: a little more room around the same texts */
   --hero-cards-bottom: 86; /* space under the cards */
-  --hero-card-pad-x: 53; /* text origin of title and text (ink + side bearing) */
-  --hero-card-title-baseline: 54; /* from the card top */
-  --hero-card-text-baseline: 86;
+  --hero-card-pad-x: 44; /* text origin of title and text (ink + side bearing) */
+  --hero-card-title-leading: 36;
+  --hero-card-text-gap: 12; /* title line box → text: baselines 38 apart (mockup 32) */
   --hero-card-icon-size: 73;
-  --hero-card-icon-inset: 36; /* from the right edge */
+  --hero-card-icon-inset: 34; /* from the right edge */
 
   /* ── About (scene 2) ───────────────────────────────────────────────────────────────────── */
   --about-title-baseline: 152;
   --about-chevron-size: 58;
   --about-chevron-gap: 4; /* title box → chevron box; visible gap ≈ 16 */
   --about-chevron-dy: 3.6; /* chevron centre sits on the x-height centre (Figma 105…163) */
-  --about-cards-y: 419;
+  --about-cards-center: 662.5; /* mockup: top 419, height 487; the cards keep this centre when they grow */
   --about-card-w: 754;
   --about-card-h: 487;
-  --about-card-margin: 104;
-  --about-card-gap: 204;
+  /* Desktop: both cards with everything on them are larger than in the mockup, as far as the width allows (D-028). */
+  --about-card-grow: 1.15;
+  --about-gap-w: 6vw;
+  --about-side-min: 6vw;
   --about-label-baseline: 85; /* from the card top, centred horizontally */
   /* «Команда:» and «Ещё» are centred over the tile + name group, not over the card (Figma: 9 px right of centre) */
   --about-team-content-dx: 9;
@@ -215,8 +219,9 @@
   --dialog-h: 844;
   --dialog-pad-x: 101; /* title origin; the lead starts at 105 (no side bearing) */
   --dialog-lead-x: 105;
-  --dialog-title-baseline: 357;
-  --dialog-lead-baseline: 489;
+  /* The name and the lead sit 60 px higher than in the mockup: more air between them and the members (D-028). */
+  --dialog-title-baseline: 297;
+  --dialog-lead-baseline: 429;
   --dialog-members-x1: 362; /* name origins, columns 1 and 2 */
   --dialog-members-x2: 818;
   --dialog-bullet-offset: 27; /* bullet centre → name ink */
@@ -225,6 +230,9 @@
   --dialog-close-top: 107;
   --dialog-close-right: 112;
   --dialog-max-fraction: 0.92; /* tablets: never more than 92% of the viewport */
+  /* Phone card (its own picture, «дизайн раскрытой команды для телефона»): 958×1521, centred, 16 px from the sides. */
+  --dialog-phone-w: 958;
+  --dialog-phone-h: 1521;
 
   /* ── Food (background layer) ───────────────────────────────────────────────────────────── */
   --food-size-desktop: 185; /* sprite edge, mockup px (±10% per item) */

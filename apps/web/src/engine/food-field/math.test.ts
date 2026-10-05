@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { SCENE } from '../../motion/tokens';
 import {
   assignSprites,
+  cameraVisibleArea,
   createRandom,
   maskHit,
   repulsion,
@@ -50,11 +52,43 @@ describe('repulsion from open text', () => {
 
 describe('wrap-around', () => {
   it('teleports only fully hidden items, to a fully hidden spot on the other side', () => {
-    expect(wrap({ x: -61, y: 50 }, 60, 800, 600)).toEqual({ x: 860, y: 50 });
-    expect(wrap({ x: -59, y: 50 }, 60, 800, 600)).toEqual({ x: -59, y: 50 });
-    expect(wrap({ x: 861, y: 50 }, 60, 800, 600)).toEqual({ x: -60, y: 50 });
-    expect(wrap({ x: 100, y: 661 }, 60, 800, 600)).toEqual({ x: 100, y: -60 });
-    expect(wrap({ x: 100, y: -61 }, 60, 800, 600)).toEqual({ x: 100, y: 660 });
+    const screen = { left: 0, top: 0, right: 800, bottom: 600 };
+    expect(wrap({ x: -61, y: 50 }, 60, screen)).toEqual({ x: 860, y: 50 });
+    expect(wrap({ x: -59, y: 50 }, 60, screen)).toEqual({ x: -59, y: 50 });
+    expect(wrap({ x: 861, y: 50 }, 60, screen)).toEqual({ x: -60, y: 50 });
+    expect(wrap({ x: 100, y: 661 }, 60, screen)).toEqual({ x: 100, y: -60 });
+    expect(wrap({ x: 100, y: -61 }, 60, screen)).toEqual({ x: 100, y: 660 });
+  });
+
+  it('part 2: the edges of the area where the food wraps around are off screen under the camera', () => {
+    const { scale, originX, originY } = SCENE.food;
+    for (const [width, height] of [
+      [1536, 730],
+      [1920, 1080],
+      [390, 844],
+    ] as const) {
+      const area = cameraVisibleArea(width, height, SCENE.food);
+      const onScreen = (p: number, origin: number) => origin + (p - origin) * scale;
+      const ox = originX * width;
+      const oy = originY * height;
+      expect(onScreen(area.left, ox)).toBeLessThanOrEqual(0.001);
+      expect(onScreen(area.right, ox)).toBeGreaterThanOrEqual(width - 0.001);
+      expect(onScreen(area.top, oy)).toBeLessThanOrEqual(0.001);
+      expect(onScreen(area.bottom, oy)).toBeGreaterThanOrEqual(height - 0.001);
+      // …and part 1 (no camera) never sees them either.
+      expect(area.left).toBeLessThanOrEqual(0);
+      expect(area.top).toBeLessThanOrEqual(0);
+      expect(area.right).toBeGreaterThanOrEqual(width);
+      expect(area.bottom).toBeGreaterThanOrEqual(height);
+    }
+  });
+
+  it('wraps around a wider area than the screen (part 2 shows more of the plane)', () => {
+    const area = { left: -40, top: -100, right: 860, bottom: 600 };
+    expect(wrap({ x: -61, y: 50 }, 60, area)).toEqual({ x: -61, y: 50 });
+    expect(wrap({ x: -101, y: 50 }, 60, area)).toEqual({ x: 920, y: 50 });
+    expect(wrap({ x: 100, y: -161 }, 60, area)).toEqual({ x: 100, y: 660 });
+    expect(wrap({ x: 100, y: 661 }, 60, area)).toEqual({ x: 100, y: -160 });
   });
 });
 

@@ -149,11 +149,6 @@
   list-style: none;
 }
 
-/* Carousel indicators exist only on phones (layout-responsive.css). */
-.carousel-dots {
-  display: none;
-}
-
 .feature-surface,
 .info-surface {
   background-color: var(--color-accent);
@@ -207,6 +202,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
+  border-radius: inherit;
   background-color: var(--color-team-card);
   transform-origin: 0 0;
   will-change: transform;
@@ -306,6 +302,8 @@
   top: calc(50% - var(--dialog-h) * var(--sd) / 2);
   width: calc(var(--dialog-w) * var(--sd));
   height: calc(var(--dialog-h) * var(--sd));
+  /* Not drawn here: the card surface inherits it, and the corner morph reads it. */
+  border-radius: calc(var(--radius-dialog) * var(--sd));
   color: var(--color-on-accent);
 }
 
@@ -363,10 +361,11 @@
       var(--sd)
   );
   display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(var(--member-rows, 3), calc(var(--type-member-row) * var(--sd)));
   grid-template-columns:
     calc((var(--dialog-members-x2) - var(--dialog-members-x1)) * var(--sd))
     auto;
-  grid-auto-rows: calc(var(--type-member-row) * var(--sd));
   padding: 0;
   list-style: none;
   font-size: calc(var(--type-member-size) * var(--sd));
@@ -484,7 +483,8 @@
   white-space: nowrap;
 }
 
+/* No permanent will-change: ~40 letters would each keep a layer of their own; animations promote them only while
+   they run. */
 .flip-char {
   display: inline-block;
-  will-change: transform, filter, opacity;
 }

@@ -33,8 +33,6 @@ export const SPRING = {
   tilt: { type: 'spring', stiffness: 180, damping: 20, mass: 0.6 },
   /** The glare glides after the pointer, softer than the tilt. */
   glare: { type: 'spring', stiffness: 110, damping: 21, mass: 0.6 },
-  /** Team card expansion (shared element). */
-  expand: { type: 'spring', visualDuration: 0.55, bounce: 0.12 },
   /** Text of the opened team card rises into place with a light bounce. */
   dialogContent: { type: 'spring', visualDuration: 0.45, bounce: 0.25 },
   /** Part 1 settles back with a light overshoot. */
@@ -48,6 +46,9 @@ export const SCENE = {
     durationMs: 900,
     /** The whole layer scales about a point below the frame, exactly as in Figma (mockup №2). */
     scale: 0.8874,
+    /** …that point, in shares of the viewport (mirror of --food-about-origin-x/y in tokens.css). */
+    originX: 0.4026,
+    originY: 1.3741,
     opacity: 0.6,
     blurCrossfadeStartMs: 100,
     blurCrossfadeEndMs: 600,
@@ -58,40 +59,35 @@ export const SCENE = {
   /** Reverse path: part 1 reappears while the about cards fly towards the viewer. */
   heroIn: { delayMs: 320, durationMs: 620, staggerMs: 40 },
   /** Part 2 title comes into focus like the cards: blur only, no change of size. */
-  aboutTitleIn: { delayMs: 330, fromBlurPx: 16, blurMs: 560, fadeMs: 180 },
+  aboutTitleIn: { delayMs: 330, fromBlurPx: 8, blurMs: 460, fadeMs: 260 },
   aboutTitleOut: { durationMs: 320 },
-  /** Part 2 cards come into focus from a strong blur — no scale, no dimming: a short fade, a long sharpening. */
-  aboutCardsIn: { delayMs: 380, staggerMs: 80, fromBlurPx: 28, blurMs: 720, fadeMs: 160 },
-  /** Reverse: about cards fly towards the viewer (back to their entry scale and blur). */
-  /** …and leave by blurring away; they fade only in the last part of it. */
-  aboutCardsOut: { durationMs: 380, fadeMs: 170 },
+  /**
+   * Part 2 cards come into focus from a light blur — no scale, no dimming (D-028: calmer than the first 28 px):
+   * a soft fade and a short sharpening.
+   */
+  aboutCardsIn: { delayMs: 380, staggerMs: 60, fromBlurPx: 10, blurMs: 540, fadeMs: 280 },
+  /** Reverse: the cards blur away at once (an ease-out: the scroll gets an answer right away) and fade. */
+  aboutCardsOut: { durationMs: 340, fadeMs: 260 },
 } as const;
 
 export const DIALOG = {
-  /** Content appears after this share of the expansion. */
-  contentRevealAt: 0.6,
+  /** The text comes in once the card is this far open (by its shape, see useCornerMorph onReveal). */
+  contentRevealAt: 0.7,
   contentStaggerMs: 50,
   /** On closing the text goes first and fast: the card it lies on starts shrinking at once. */
   contentExitS: 0.12,
   /** The team logo cross-fades into the card background during the first part of the expansion. */
   logoCrossfadeEnd: 0.18,
   /**
-   * Where the team icon's picture lies in the card background, in shares of the background's width and height
-   * (measured by the core of the star: the icon is the same star seen from 4.7× further). While the card is small,
-   * the background is drawn zoomed onto this square, so its star docks exactly onto the icon's star.
+   * Where the team icon's picture lies in the card background, in shares of the background's width and height.
+   * While the card is small, the background is drawn zoomed onto this square, so its star docks onto the icon's star.
+   * Desktop: the card's star is a larger, softer one — docked by the core of the star (design/analysis/
+   * 08_star_dock.py); phones: the same picture as the icon, matched pixel by pixel.
    */
-  starDock: { x: 0.237, y: -0.2876, width: 0.6274, height: 1.0415 },
-  /** …and its top edge, which then comes into view, melts into the card colour over this share of its height. */
+  starDock: { x: 0.2326, y: -0.2866, width: 0.631, height: 1.0474 },
+  starDockPhone: { x: 0.1446, y: 0.0848, width: 0.7244, height: 0.4563 },
+  /** …and its top edge, which then may come into view, melts into the card colour over this share of its height. */
   starDockFadePct: 9,
-  /**
-   * Radii of the shared element in mockup px (mirror of --radius-tile / --radius-dialog in tokens.css, checked by
-   * tokens.test.ts): Motion animates and corrects the radius only from pixel values. Phones use a sheet radius.
-   */
-  tileRadius: 45,
-  dialogRadius: 217,
-  phoneDialogRadiusPx: 28,
-  /** Phone tiles scale with the screen width against this frame. */
-  phoneFrameWidth: 390,
 } as const;
 
 export const TILT = {
@@ -107,15 +103,19 @@ export const TILT = {
   liftScale: 0.025,
 } as const;
 
-/** Wheel/touchpad and swipe gestures (ТЗ 6.5). */
+/**
+ * Wheel/touchpad and swipe gestures (ТЗ 6.5). One wheel notch must be enough whatever the system setting: with
+ * «1 line per notch» in Windows a notch is ≈33 px in Chromium and 1 line (16 px) in Firefox.
+ */
 export const GESTURE = {
-  wheelThresholdPx: 40,
+  wheelThresholdPx: 8,
   wheelWindowMs: 200,
   /** Inertia silencer: a new transition needs this much silence in wheel events. */
   wheelQuietMs: 220,
   /** A delta this big against the current gesture starts a new one (inertia never reverses). */
   wheelReverseMinPx: 4,
-  swipeMinPx: 50,
+  /** A short swipe is enough; it switches as soon as the finger has moved this far (not on release). */
+  swipeMinPx: 24,
   swipeDominance: 1.2,
   lineHeightPx: 16,
 } as const;
@@ -151,24 +151,22 @@ export const MORPH = {
 } as const;
 
 /**
- * The team name «translates» itself under the mouse (features/team-dialog/NameFlip.tsx): a blur wave runs from the
- * cursor through the letters — each one is pushed away from it, blurs and fades (nearer letters first and harder),
- * and the letters of the other name fly into place behind the wave with a light bounce.
+ * The team name «translates» itself under the mouse (features/team-dialog/NameFlip.tsx): a light wave runs from the
+ * cursor through the letters — each one drifts a few pixels away from it and fades, the nearest first — and the
+ * letters of the other name settle into place behind the wave. Only transform and opacity: no filters on the
+ * letters (a blur animated per letter left bright rectangles on some GPUs and cost frames).
  */
 export const NAME_FLIP = {
-  /** How fast the wave runs from the cursor through the letters (≈0.3 s across the name). */
-  waveSpeedPxS: 1100,
-  pushPx: 22,
-  spinDeg: 12,
-  blurPx: 8,
-  outScale: 0.86,
-  outS: 0.32,
-  /** An impulse: a sharp start and a soft end. */
-  outEase: [0.22, 1, 0.36, 1],
-  /** Incoming letters start from this share of the push, slightly enlarged, and settle with a bounce. */
-  inFromShare: 0.8,
-  inScale: 1.14,
-  inS: 0.5,
-  inBounce: 0.32,
-  inLagS: 0.07,
+  /** How fast the wave runs from the cursor through the letters (≈0.25 s across the name). */
+  waveSpeedPxS: 1400,
+  pushPx: 7,
+  outScale: 0.97,
+  outS: 0.22,
+  outEase: [0.33, 1, 0.68, 1],
+  /** Incoming letters come from a little behind the wave (towards the cursor) and settle without a bounce. */
+  inFromShare: 0.7,
+  inScale: 1.03,
+  inS: 0.38,
+  inEase: [0.16, 1, 0.3, 1],
+  inLagS: 0.05,
 } as const;

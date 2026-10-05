@@ -11,14 +11,15 @@ import {
 test.skip(({ isMobile }) => isMobile, 'desktop interactions; phones are covered in mobile.spec.ts');
 
 test.describe('scenes', () => {
-  test('one mouse-wheel notch goes to part 2 and back', async ({ page }) => {
+  test('one mouse-wheel notch goes to part 2 and back, even a short one', async ({ page }) => {
     await page.goto('./?seed=1');
     await settled(page, 'hero');
     await page.mouse.move(960, 400);
-    await page.mouse.wheel(0, 120);
+    // 33 px: one notch in Chromium on Windows with «scroll 1 line at a time».
+    await page.mouse.wheel(0, 33);
     await settled(page, 'about');
     await expect(page).toHaveURL(/#about$/);
-    await page.mouse.wheel(0, -120);
+    await page.mouse.wheel(0, -33);
     await settled(page, 'hero');
   });
 
@@ -305,6 +306,44 @@ test.describe('quality', () => {
     });
     expect(faces).toBeGreaterThan(0);
     expect(errors).toEqual([]);
+  });
+
+  test('one font everywhere: every text is Open Runde in one of its own weights', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=1&freeze=1');
+    await settled(page, 'hero');
+    const check = () =>
+      page.evaluate(async () => {
+        await document.fonts.ready;
+        const own = new Set(
+          [...document.fonts]
+            .filter((face) => face.family.replaceAll('"', '') === 'Open Runde')
+            .map((face) => face.weight),
+        );
+        const problems: string[] = [];
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          const element = node.parentElement;
+          if (!element || !node.textContent?.trim()) continue;
+          const style = getComputedStyle(element);
+          if (style.display === 'none' || style.visibility === 'hidden') continue;
+          // WebKit writes the family without quotes.
+          const family = style.fontFamily.replaceAll('"', '');
+          if (!family.startsWith('Open Runde,') || !own.has(style.fontWeight)) {
+            problems.push(
+              `${node.textContent.trim().slice(0, 20)}: ${style.fontFamily} ${style.fontWeight}`,
+            );
+          }
+        }
+        return problems;
+      });
+    expect(await check()).toEqual([]);
+    await page.keyboard.press('ArrowDown');
+    await settled(page, 'about');
+    await page.getByRole('button', { name: /Ещё о команде/ }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    expect(await check()).toEqual([]);
   });
 
   test('accessibility: both scenes and the dialog have no serious violations', async ({ page }) => {

@@ -62,12 +62,32 @@ export function repulsion(p: Vec, rect: Rect, reach: number, strength: number): 
  * Wrap-around: an item that has completely left the viewport re-enters from the opposite side, also completely
  * hidden — nothing pops out of thin air. `radius` is the half-diagonal of the rotated sprite.
  */
-export function wrap(p: Vec, radius: number, width: number, height: number): Vec {
+/**
+ * The part of the plane that is on screen with the plane as it is (scale 1) or scaled by `scale` about the point
+ * (originX·width, originY·height) — the food camera of part 2. Shrinking the plane brings its own edges into view.
+ */
+export function cameraVisibleArea(
+  width: number,
+  height: number,
+  camera: { readonly scale: number; readonly originX: number; readonly originY: number },
+): Rect {
+  const x = camera.originX * width;
+  const y = camera.originY * height;
+  return {
+    left: Math.min(0, x * (1 - 1 / camera.scale)),
+    top: Math.min(0, y * (1 - 1 / camera.scale)),
+    right: Math.max(width, x + (width - x) / camera.scale),
+    bottom: Math.max(height, y + (height - y) / camera.scale),
+  };
+}
+
+/** An item that has fully left `area` (by `radius`) comes back from its opposite side. */
+export function wrap(p: Vec, radius: number, area: Rect): Vec {
   let { x, y } = p;
-  if (x + radius < 0) x = width + radius;
-  else if (x - radius > width) x = -radius;
-  if (y + radius < 0) y = height + radius;
-  else if (y - radius > height) y = -radius;
+  if (x + radius < area.left) x = area.right + radius;
+  else if (x - radius > area.right) x = area.left - radius;
+  if (y + radius < area.top) y = area.bottom + radius;
+  else if (y - radius > area.bottom) y = area.top - radius;
   return { x, y };
 }
 

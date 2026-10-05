@@ -6,7 +6,7 @@ import type { TestParams } from '../../lib/params';
 import { useCalmMotion } from '../../motion/hooks';
 import { DURATION, EASE_OUT_EXPO, SCENE } from '../../motion/tokens';
 import { createFoodField, type Device, type FoodField } from './engine';
-import type { Rect } from './math';
+import { cameraVisibleArea, type Rect } from './math';
 
 const RESIZE_DEBOUNCE_MS = 200;
 const BLUR_PRELOAD_MS = 2500;
@@ -37,6 +37,13 @@ function frame() {
   const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
   return { scale, left: (window.innerWidth - 1920 * scale) / 2, top: 0 };
 }
+
+/**
+ * The plane area that is on screen in either scene. Part 2 shrinks the plane towards a point below the frame, so
+ * there the plane's own edges come into view (most of all the top one): the food must wrap around beyond them.
+ */
+const visibleArea = (width: number, height: number): Rect =>
+  cameraVisibleArea(width, height, SCENE.food);
 
 function obstacles(): Rect[] {
   return [
@@ -87,6 +94,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
       designPose: params.designPose,
       adaptiveQuality: params.seed === null && !params.designPose,
       frame,
+      visibleArea,
       device,
     });
     fieldRef.current = field;

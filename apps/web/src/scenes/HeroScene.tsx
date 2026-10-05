@@ -6,9 +6,8 @@ import {
   IconSparklesFilled,
   type Icon,
 } from '@tabler/icons-react';
-import clsx from 'clsx';
 import { m, type MotionStyle } from 'motion/react';
-import { useState, type MouseEvent, type Ref } from 'react';
+import type { MouseEvent, Ref } from 'react';
 import type { FeatureIcon } from '../content/schema';
 import { site } from '../content/site.ru';
 import { useCalmMotion } from '../motion/hooks';
@@ -17,7 +16,6 @@ import { TiltGlare } from '../motion/TiltGlare';
 import { useWave } from '../motion/useWave';
 import { WaveLayer } from '../motion/WaveHover';
 import { heroVariants, type Phase } from './choreography';
-import { useViewport } from '../lib/useViewport';
 import { Lines } from '../components/Lines';
 
 const FEATURE_ICONS: Record<FeatureIcon, Icon> = {
@@ -36,12 +34,13 @@ type Props = {
   readonly onCreateMenu: (event: MouseEvent<HTMLAnchorElement>) => void;
 };
 
-/** Part 1: heading, lead, «Создать меню» and the four feature cards (ТЗ 6.2); the header is SiteHeader. */
+/**
+ * Part 1: heading, lead, «Создать меню» and the four feature cards (ТЗ 6.2; the cards are not shown on phones);
+ * the header is SiteHeader.
+ */
 export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMenu }: Props) {
   const calm = useCalmMotion();
-  const viewport = useViewport();
   const hidden = phase === 'hidden';
-  const [activeCard, setActiveCard] = useState(0);
   const { setHost: ctaRef, handlers: ctaWave, clipPath: ctaClip } = useWave<HTMLAnchorElement>();
   const variants = (index: number) => heroVariants(index, calm);
   const motionProps = (index: number) => ({
@@ -91,24 +90,13 @@ export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMen
         </TiltGlare>
       </m.div>
 
-      <ul
-        className="features focus-ring"
-        aria-label={viewport.phone ? site.hero.carouselLabel : site.hero.featuresLabel}
-        data-carousel
-        // On phones the cards scroll sideways: the list must be reachable by keyboard (arrows scroll it).
-        tabIndex={viewport.phone ? 0 : undefined}
-        onScroll={(event) => {
-          const list = event.currentTarget;
-          const card = list.firstElementChild?.getBoundingClientRect().width ?? 1;
-          setActiveCard(Math.round(list.scrollLeft / Math.max(1, card)));
-        }}
-      >
+      <ul className="features" aria-label={site.hero.featuresLabel}>
         {site.hero.features.map((feature, index) => {
           const FeatureIconComponent = FEATURE_ICONS[feature.icon];
           return (
             <m.li
               key={feature.title}
-              className={clsx('feature-card at box')}
+              className="feature-card at box"
               style={{ '--i': index } as MotionStyle}
               data-opaque
               {...motionProps(3)}
@@ -124,11 +112,6 @@ export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMen
           );
         })}
       </ul>
-      <m.div className="carousel-dots" aria-hidden {...motionProps(3)}>
-        {site.hero.features.map((feature, index) => (
-          <span key={feature.title} className="carousel-dot" data-active={index === activeCard} />
-        ))}
-      </m.div>
     </section>
   );
 }

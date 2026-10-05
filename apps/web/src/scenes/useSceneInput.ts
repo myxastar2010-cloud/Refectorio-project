@@ -11,8 +11,8 @@ import {
   type Direction,
 } from './gesture';
 
-/** Elements that need every key themselves (typing, the carousel's own arrow scrolling). */
-const OWNS_KEYS = 'input, textarea, select, [contenteditable="true"], [data-carousel]';
+/** Elements that need every key themselves (typing). */
+const OWNS_KEYS = 'input, textarea, select, [contenteditable="true"]';
 /** Space presses these; the other scene keys still switch scenes from them. */
 const CONTROL = 'button, a[href], a[role="link"], [role="button"]';
 
@@ -65,8 +65,8 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
     let nativeUntilMs = Number.NEGATIVE_INFINITY;
 
     const onWheel = (event: WheelEvent) => {
-      // Sideways scrolling (the phone carousel) is the browser's.
-      if (event.deltaY === 0) return;
+      // Sideways scrolling is the browser's (a sideways touchpad swipe has a little vertical drift too).
+      if (event.deltaY === 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       const delta = normalizeWheelDelta(event.deltaY, event.deltaMode, window.innerHeight);
       const scroller = activeScroller();
       if (
@@ -104,7 +104,6 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
     type TouchStart = {
       readonly x: number;
       readonly y: number;
-      readonly inCarousel: boolean;
       readonly room: Readonly<Record<Direction, boolean>>;
     };
     let touch: TouchStart | null = null;
@@ -114,40 +113,51 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
         touch = null;
         return;
       }
-      const target = event.target as Element | null;
       const scroller = activeScroller();
       touch = {
         x: point.clientX,
         y: point.clientY,
-        inCarousel: Boolean(target?.closest('[data-carousel]')),
         room: {
           up: scroller ? hasScrollRoom(scroller, 'up') : false,
           down: scroller ? hasScrollRoom(scroller, 'down') : false,
         },
       };
     };
-    const onTouchEnd = (event: TouchEvent) => {
+    /** The scene switches as soon as the finger has moved far enough — a short swipe, no need to let go. */
+    const trySwipe = (point: Touch | undefined) => {
       const start = touch;
-      touch = null;
-      const point = event.changedTouches[0];
-      if (!start || !point || start.inCarousel || locked()) return;
+      if (!start || !point || locked()) return;
       const direction = swipeDirection(point.clientX - start.x, point.clientY - start.y, {
         minPx: GESTURE.swipeMinPx,
         dominance: GESTURE.swipeDominance,
       });
       // A swipe that started with room to scroll was a scroll, not a scene change.
       if (!direction || start.room[direction]) return;
+      touch = null;
       navigate(direction);
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      if (event.touches.length > 1) {
+        touch = null;
+        return;
+      }
+      trySwipe(event.touches[0]);
+    };
+    const onTouchEnd = (event: TouchEvent) => {
+      trySwipe(event.changedTouches[0]);
+      touch = null;
     };
 
     window.addEventListener('wheel', onWheel, { passive: false });
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
     window.addEventListener('touchend', onTouchEnd, { passive: true });
     return () => {
       window.removeEventListener('wheel', onWheel);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
   }, [go, locked, scrollerOf]);

@@ -1,6 +1,8 @@
 /*
- * Page layout. Desktop (≥ 1280 px with a mouse): the 1920×1080 mockup frame scaled by --s, every element placed in
- * mockup px. Narrower windows get the tablet layout (layout-responsive.css): four cards in a row get too tight there.
+ * Page layout. Desktop (≥ 1280 px with a mouse): heights, sizes and type come from the 1920×1080 mockup frame scaled
+ * by --s; horizontally the page spans the whole window (D-028) — part 1 with side margins and the row of cards
+ * stretched between them, part 2 with its two cards centred. Narrower windows get the tablet layout
+ * (layout-responsive.css): four cards in a row get too tight there.
  * Texts are placed by their baseline: top of the line box = baseline − leading / 2 − (ascent − descent) / 2 · size.
  * Tablets (incl. touch tablets in landscape) and phones — layout-responsive.css.
  */
@@ -67,11 +69,15 @@
     --extra: calc(100svh - 1080 * var(--s));
     --mid: calc(var(--extra) / 2);
     --baseline-shift: calc((var(--font-ascent) - var(--font-descent)) / 2);
+    /* The page scale under its own name: inside the about cards --s is their own (larger) scale. */
+    --sp: var(--s);
+    /* About cards: grown by --about-card-grow, unless the window is too narrow for two of them side by side. */
+    --si: min(
+      var(--s) * var(--about-card-grow),
+      (100vw - 2 * var(--about-side-min) - var(--about-gap-w)) / (2 * var(--about-card-w))
+    );
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: calc(50% - 960 * var(--s));
-    width: calc(1920 * var(--s));
+    inset: 0;
   }
 
   /* Element at mockup coordinates (--x, --y) plus a vertical slack (--dy): 0 = top, mid = centre, extra = bottom. */
@@ -97,31 +103,43 @@
 
   /* ── Hero ─────────────────────────────────────────────────────────────────────────────── */
 
+  /* Part 1 hangs on the side margins: the apple, the heading, the lead, the button and the cards start at the left
+     one, «О проекте» and the last card end at the right one. */
   .brand-icon {
-    --x: var(--hero-logo-icon-x);
     --y: var(--hero-logo-icon-y);
     --w: var(--hero-logo-icon-size);
     --h: var(--hero-logo-icon-size);
+    left: calc(var(--hero-side) - var(--hero-logo-icon-inset) * var(--w) * var(--s));
   }
 
   .brand-name {
-    --x: var(--hero-brand-x);
     --baseline: var(--hero-brand-baseline);
     --size: var(--type-brand-size);
+    left: calc(
+      var(--hero-side) +
+        ((1 - var(--hero-logo-icon-inset)) * var(--hero-logo-icon-size) + var(--hero-brand-gap)) *
+        var(--s)
+    );
   }
 
   .about-pill {
-    --x: var(--hero-about-x);
     --y: var(--hero-about-y);
     --w: var(--hero-about-w);
     --h: var(--hero-about-h);
-    border-radius: calc(var(--radius-pill) * var(--s));
+    /* Ends at the right margin (a wave host is position: relative, so «right» would not do). */
+    left: calc(100% - var(--hero-side) - var(--w) * var(--s));
+    border-radius: calc(var(--h) / 2 * var(--s));
     font-size: calc(var(--type-pill-label-size) * var(--s));
     --outline-w: calc(var(--hero-about-border) * var(--s));
   }
 
+  .hero-title,
+  .hero-lead,
+  .cta-slot {
+    left: var(--hero-side);
+  }
+
   .hero-title {
-    --x: var(--hero-title-x);
     --baseline: var(--hero-title-baseline);
     --size: var(--type-hero-title-size);
     --leading: var(--type-hero-title-leading);
@@ -129,7 +147,6 @@
   }
 
   .hero-lead {
-    --x: var(--hero-lead-x);
     --baseline: var(--hero-lead-baseline);
     --size: var(--type-hero-lead-size);
     --leading: var(--type-hero-lead-leading);
@@ -138,7 +155,6 @@
   }
 
   .cta-slot {
-    --x: var(--hero-cta-x);
     --y: var(--hero-cta-y);
     --w: var(--hero-cta-w);
     --h: var(--hero-cta-h);
@@ -157,27 +173,38 @@
     height: calc(var(--hero-cta-icon-size) * var(--s));
   }
 
+  /* Four cards between the side margins. */
   .feature-card {
-    --x: calc(var(--hero-gutter) + var(--i) * (var(--hero-card-w) + var(--hero-card-gap)));
+    --card-w: calc((100% - 2 * var(--hero-side) - 3 * var(--hero-cards-gap-w)) / 4);
     --y: var(--hero-cards-y);
-    --w: var(--hero-card-w);
     --h: var(--hero-card-h);
     --dy: var(--extra);
+    left: calc(var(--hero-side) + var(--i) * (var(--card-w) + var(--hero-cards-gap-w)));
+    width: var(--card-w);
     border-radius: calc(var(--radius-feature-card) * var(--s));
   }
 
+  /* Title and text: one block centred in the card's height. */
+  .feature-surface {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: calc(var(--hero-card-text-gap) * var(--s));
+    padding-left: calc(var(--hero-card-pad-x) * var(--s));
+  }
+
+  .feature-title,
+  .feature-text {
+    position: static;
+  }
+
   .feature-title {
-    --dy: 0px;
-    --x: var(--hero-card-pad-x);
-    --baseline: var(--hero-card-title-baseline);
     --size: var(--type-card-title-size);
+    --leading: var(--hero-card-title-leading);
     --min-size: var(--type-min-title);
   }
 
   .feature-text {
-    --dy: 0px;
-    --x: var(--hero-card-pad-x);
-    --baseline: var(--hero-card-text-baseline);
     --size: var(--type-card-text-size);
     --leading: var(--type-card-text-leading);
     --min-size: var(--type-min-small);
@@ -214,12 +241,17 @@
     translate: 0 calc(var(--about-chevron-dy) * var(--s));
   }
 
+  /* The two cards side by side in the middle of the window; everything on them is drawn at their own scale --si. */
   .info-card {
-    --x: calc(var(--about-card-margin) + var(--i) * (var(--about-card-w) + var(--about-card-gap)));
-    --y: var(--about-cards-y);
+    --s: var(--si);
     --w: var(--about-card-w);
     --h: var(--about-card-h);
-    --dy: var(--mid);
+    left: calc(
+      50% + (var(--i) - 1) * var(--about-card-w) * var(--si) + (var(--i) - 0.5) * var(--about-gap-w)
+    );
+    top: calc(
+      var(--about-cards-center) * var(--sp) + var(--mid) - var(--about-card-h) / 2 * var(--si)
+    );
     border-radius: calc(var(--radius-info-card) * var(--s));
   }
 
@@ -303,6 +335,9 @@
 .brand-name {
   font-weight: var(--type-brand-weight);
   letter-spacing: var(--type-brand-tracking);
+  /* Bold plus an outline of the same colour: the full, soft weight of the heading under it. */
+  -webkit-text-stroke: var(--type-brand-stroke) currentColor;
+  paint-order: stroke fill;
 }
 
 .about-pill {
@@ -391,6 +426,17 @@
   .stage {
     --boost: 1;
     --boost-soft: calc(1 + (var(--boost) - 1) / 2);
+    --card-boost: var(--boost-soft);
+  }
+
+  /* Narrow windows (1280–1439 px): the four cards are the tightest row of the page — a little less margin around them,
+     and their texts keep the frame size so the text never runs into the icon. */
+  @media (max-width: 1439.98px) {
+    .stage {
+      --hero-side: max(32px, 2.6vw);
+      --hero-cards-gap-w: max(16px, 1.5vw);
+      --card-boost: 1;
+    }
   }
 
   @media (max-width: 1799.98px), (max-height: 1012.49px) {
@@ -462,20 +508,23 @@
     --h: calc(var(--hero-card-h) * var(--boost-soft));
   }
 
+  .feature-surface {
+    gap: calc(var(--hero-card-text-gap) * var(--card-boost) * var(--s));
+  }
+
   .feature-title {
-    --baseline: calc(var(--hero-card-title-baseline) * var(--boost-soft));
-    --size: calc(var(--type-card-title-size) * var(--boost-soft));
+    --size: calc(var(--type-card-title-size) * var(--card-boost));
+    --leading: calc(var(--hero-card-title-leading) * var(--card-boost));
   }
 
   .feature-text {
-    --baseline: calc(var(--hero-card-text-baseline) * var(--boost-soft));
-    --size: calc(var(--type-card-text-size) * var(--boost-soft));
-    --leading: calc(var(--type-card-text-leading) * var(--boost-soft));
+    --size: calc(var(--type-card-text-size) * var(--card-boost));
+    --leading: calc(var(--type-card-text-leading) * var(--card-boost));
   }
 
   .feature-icon {
-    width: calc(var(--hero-card-icon-size) * var(--boost-soft) * var(--s));
-    height: calc(var(--hero-card-icon-size) * var(--boost-soft) * var(--s));
+    width: calc(var(--hero-card-icon-size) * var(--card-boost) * var(--s));
+    height: calc(var(--hero-card-icon-size) * var(--card-boost) * var(--s));
   }
 
   /* Part 2: the title grows like the one of part 1, the texts in the cards half as much. */

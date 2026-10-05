@@ -41,7 +41,7 @@ apps/web/src/
   app/          App.tsx, провайдеры (MotionConfig, LazyMotion), сцены по hash
   scenes/       HeroScene, AboutScene, SceneController (ввод, блокировки, хореография)
   features/     team-dialog (раскрытие карточки команды)
-  components/   Button, IconButton, FeatureCard, InfoCard, LinkWithIcon, Carousel, Logo, Toast
+  components/   Lines, Toast (карточки и кнопки пока живут в сценах)
   motion/       WaveHover, TiltGlare, токены пружин и длительностей, хуки
   engine/       food-field — движок летающей еды (чистый TS) + тонкая React-обёртка
   content/      site.ru.ts — ВСЕ тексты, ссылки, имена, пути к картинкам (+ zod-схема)

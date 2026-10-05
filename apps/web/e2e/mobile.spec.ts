@@ -3,61 +3,62 @@ import { seriousViolations, settled, swipe } from './helpers';
 
 test.skip(({ isMobile }) => !isMobile, 'phone gestures');
 
-test('swipe up opens part 2, swipe down returns (only from the top of its scroll)', async ({
-  page,
-}) => {
+test('a short swipe opens part 2, another one returns', async ({ page }) => {
   await page.goto('./?seed=1');
   await settled(page, 'hero');
   const { width, height } = page.viewportSize() ?? { width: 390, height: 844 };
+  // 30 px is enough (it switches while the finger is still moving).
   await swipe(
     page,
-    { x: width / 2, y: height * 0.45 },
-    { x: width / 2, y: height * 0.2 },
+    { x: width / 2, y: height * 0.5 },
+    { x: width / 2, y: height * 0.5 - 30 },
     '.hero-title',
   );
   await settled(page, 'about');
   await swipe(
     page,
-    { x: width / 2, y: height * 0.3 },
-    { x: width / 2, y: height * 0.6 },
+    { x: width / 2, y: height * 0.4 },
+    { x: width / 2, y: height * 0.4 + 30 },
     '.about-title',
   );
   await settled(page, 'hero');
 });
 
-test('horizontal swipes inside the carousel do not switch scenes', async ({ page }) => {
+test('phones: no feature cards, and both parts fit one screen', async ({ page }) => {
   await page.goto('./?seed=1');
   await settled(page, 'hero');
-  const box = await page.locator('.features').boundingBox();
-  expect(box).not.toBeNull();
-  if (!box) return;
-  await swipe(
-    page,
-    { x: box.x + box.width * 0.8, y: box.y + 40 },
-    { x: box.x + 20, y: box.y - 60 },
-    '.feature-card',
-  );
-  await page.waitForTimeout(300);
-  await expect(page.locator('.page')).toHaveAttribute('data-scene', 'hero');
+  await expect(page.locator('.features')).toBeHidden();
+  const fits = (selector: string) =>
+    page.locator(selector).evaluate((element) => element.scrollHeight <= element.clientHeight + 1);
+  expect(await fits('.scene--hero')).toBe(true);
+  await page.getByRole('button', { name: 'О проекте', exact: true }).click();
+  await settled(page, 'about');
+  expect(await fits('.about-scroller')).toBe(true);
 });
 
-test('everything of part 1 fits on one screen, the dialog is a full-screen sheet', async ({
-  page,
-}) => {
-  await page.goto('./?seed=1');
-  const scroll = await page.evaluate(() => document.scrollingElement?.scrollHeight ?? 0);
-  expect(scroll).toBeLessThanOrEqual(page.viewportSize()?.height ?? 0);
-  const lastCard = await page.locator('.feature-card').first().boundingBox();
-  expect((lastCard?.y ?? 0) + (lastCard?.height ?? 0)).toBeLessThanOrEqual(
-    page.viewportSize()?.height ?? 0,
-  );
-  await page.getByRole('button', { name: 'О проекте', exact: true }).click();
+test('the team card is the tall phone card, centred on the screen', async ({ page }) => {
+  await page.goto('./?seed=1#about');
   await settled(page, 'about');
   await page.getByRole('button', { name: /Ещё о команде/ }).click();
   const dialog = page.locator('.team-dialog');
   await expect(dialog).toBeVisible();
   const box = await dialog.boundingBox();
-  expect(box?.width).toBe(page.viewportSize()?.width);
+  const viewport = page.viewportSize() ?? { width: 390, height: 844 };
+  expect(box).not.toBeNull();
+  if (!box) return;
+  expect(box.width).toBeCloseTo(viewport.width - 32, 0);
+  expect(box.height / box.width).toBeCloseTo(1521 / 958, 2);
+  expect(box.y).toBeGreaterThan(0);
+  expect(box.y + box.height).toBeLessThan(viewport.height);
+  // Every member is inside the card.
+  const members = await page
+    .locator('.dialog-member')
+    .evaluateAll((items) => items.map((item) => item.getBoundingClientRect().toJSON() as DOMRect));
+  for (const member of members) {
+    expect(member.left).toBeGreaterThanOrEqual(box.x);
+    expect(member.right).toBeLessThanOrEqual(box.x + box.width);
+    expect(member.bottom).toBeLessThanOrEqual(box.y + box.height);
+  }
   expect(await seriousViolations(page)).toEqual([]);
 });
 

@@ -17,6 +17,7 @@ import {
   type CornerSpring,
   type MorphStyle,
   type Quad,
+  type DockRect,
 } from './morph';
 
 type Options = {
@@ -31,8 +32,10 @@ type Options = {
   /** False once the dialog is closing. */
   readonly present: boolean;
   readonly calm: boolean;
-  /** Visual corner radii on screen, px. */
-  readonly radii: { readonly tilePx: number; readonly dialogPx: number };
+  /** Where the icon's picture lies in the card background (DIALOG.starDock / starDockPhone). */
+  readonly dock: DockRect;
+  /** Opening: the card is open far enough (DIALOG.contentRevealAt) for its text to come in. */
+  readonly onReveal: () => void;
   /** The card has landed back on the icon: the icon can be shown again. */
   readonly onLanded: () => void;
   /** Safe to unmount the dialog. */
@@ -47,6 +50,10 @@ const boxOf = (rect: DOMRect): Box => ({
 });
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+
+/** The corner radius an element has on screen, px (the CSS of the layout decides it). */
+const radiusOf = (element: Element | null) =>
+  element ? Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0 : 0;
 
 /** The layout box of an element, ignoring its own transform. */
 function layoutBox(element: HTMLElement): Box {
@@ -75,6 +82,8 @@ export function useCornerMorph(options: Options) {
     springs: CornerSpring[];
     dialog: Box | null;
     tile: Box | null;
+    radii: { tilePx: number; dialogPx: number };
+    revealed: boolean;
     startedAt: number;
     last: number;
     raf: number;
@@ -85,6 +94,8 @@ export function useCornerMorph(options: Options) {
     springs: [],
     dialog: null,
     tile: null,
+    radii: { tilePx: 0, dialogPx: 0 },
+    revealed: false,
     startedAt: 0,
     last: 0,
     raf: 0,
@@ -102,6 +113,7 @@ export function useCornerMorph(options: Options) {
 
     if (calm || !tileElement) {
       // Reduced motion (or no icon to fly from): a short cross-fade of the whole card.
+      if (present) latest.current.onReveal();
       if (logo.current) logo.current.style.opacity = '0';
       const fade = element.animate(
         present ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0 }],
@@ -122,6 +134,8 @@ export function useCornerMorph(options: Options) {
     const from = boxOf(tileElement.getBoundingClientRect());
     s.dialog = dialog;
     s.tile = from;
+    // The card inherits the dialog box's radius; the icon has its own (both set by the layout CSS).
+    s.radii = { tilePx: radiusOf(tileElement), dialogPx: radiusOf(element.parentElement) };
     const current: Quad = s.corners
       ? (s.corners.map(({ x, y }) => ({ x, y })) as unknown as Quad)
       : present
@@ -152,7 +166,11 @@ export function useCornerMorph(options: Options) {
       })) as unknown as Quad;
       element.style.transform = matrixCss(quadMatrix(local, box.width, box.height));
       const open = openness(quad, fromBox, box);
-      const { radii } = latest.current;
+      if (!s.closing && !s.revealed && open >= DIALOG.contentRevealAt) {
+        s.revealed = true;
+        latest.current.onReveal();
+      }
+      const { radii } = s;
       const radius = radii.tilePx + (radii.dialogPx - radii.tilePx) * open;
       // The card is drawn at its final size and squeezed: the radius is pre-stretched to look round on screen.
       const { width, height } = quadSize(quad);
@@ -164,7 +182,7 @@ export function useCornerMorph(options: Options) {
       const backgroundLayer = latest.current.background.current;
       if (backgroundLayer) {
         backgroundLayer.style.transform = matrix2dCss(
-          dockMatrix(open, box.width, box.height, DIALOG.starDock, DIALOG.logoCrossfadeEnd),
+          dockMatrix(open, box.width, box.height, latest.current.dock, DIALOG.logoCrossfadeEnd),
         );
         // Docked, the top edge of the picture comes into the card (the icon shows more sky than the background
         // has): it melts into the card colour instead of cutting the rays with a straight line.
@@ -196,7 +214,7 @@ export function useCornerMorph(options: Options) {
         backgroundLayer.style.setProperty('mask-image', '');
         backgroundLayer.style.setProperty('-webkit-mask-image', '');
       }
-      element.style.borderRadius = `${latest.current.radii.dialogPx}px`;
+      element.style.borderRadius = '';
       const logoLayer = latest.current.logo.current;
       if (logoLayer) logoLayer.style.opacity = '0';
     };

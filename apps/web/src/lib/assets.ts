@@ -74,34 +74,30 @@ export const foodSprites: readonly FoodSprite[] = manifest.food.items.map((item)
 });
 
 const team = manifest.team;
-const bgWidths = Object.keys(team.background.variants)
-  .map(Number)
-  .sort((a, b) => a - b);
+
+type Logo = { readonly width: number } & Variants;
+type Background = { readonly variants: Readonly<Record<string, Variants>> };
+
+function logo({ width, avif, webp }: Logo): ResponsiveImage {
+  return {
+    avifSrcSet: `${url(avif)} ${String(width)}w`,
+    webpSrcSet: `${url(webp)} ${String(width)}w`,
+    fallback: url(webp),
+  };
+}
+
+function background({ variants }: Background): ResponsiveImage {
+  const entries = Object.entries(variants).sort(([a], [b]) => Number(a) - Number(b));
+  const srcSet = (format: keyof Variants) =>
+    entries.map(([width, files]) => `${url(files[format])} ${width}w`).join(', ');
+  const largest = entries.at(-1)?.[1];
+  if (!largest) throw new Error('A team background has no variants — run "npm run assets"');
+  return { avifSrcSet: srcSet('avif'), webpSrcSet: srcSet('webp'), fallback: url(largest.webp) };
+}
 
 export const images: Readonly<Record<ImageKey, ResponsiveImage>> = {
-  teamLogo: {
-    avifSrcSet: `${url(team.logo.avif)} ${team.logo.width}w`,
-    webpSrcSet: `${url(team.logo.webp)} ${team.logo.width}w`,
-    fallback: url(team.logo.webp),
-  },
-  teamBackground: {
-    avifSrcSet: bgWidths
-      .map(
-        (w) =>
-          `${url(team.background.variants[String(w) as keyof typeof team.background.variants].avif)} ${w}w`,
-      )
-      .join(', '),
-    webpSrcSet: bgWidths
-      .map(
-        (w) =>
-          `${url(team.background.variants[String(w) as keyof typeof team.background.variants].webp)} ${w}w`,
-      )
-      .join(', '),
-    fallback: url(
-      team.background.variants[String(bgWidths.at(-1)) as keyof typeof team.background.variants]
-        .webp,
-    ),
-  },
+  teamLogo: logo(team.logo),
+  projectLogo: logo(team.projectLogo),
+  teamBackground: background(team.background),
+  teamBackgroundPhone: background(team.backgroundPhone),
 };
-
-export const TEAM_BACKGROUND_FILL = team.background.fill;

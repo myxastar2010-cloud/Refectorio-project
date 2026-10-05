@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import css from '../styles/tokens.css?raw';
-import { DIALOG } from './tokens';
+import { SCENE } from './tokens';
 
 /** A unitless custom property from tokens.css, e.g. `--radius-tile: 45;`. */
 function cssNumber(name: string): number {
@@ -11,8 +11,10 @@ function cssNumber(name: string): number {
 }
 
 describe('motion tokens mirror the CSS tokens', () => {
-  it('radii of the team card (tile and dialog)', () => {
-    expect(cssNumber('--radius-tile')).toBe(DIALOG.tileRadius);
-    expect(cssNumber('--radius-dialog')).toBe(DIALOG.dialogRadius);
+  it('the food camera of part 2 (scale origin)', () => {
+    const percent = (name: string) => Number(css.split(`${name}:`)[1]?.split('%')[0]);
+    expect(percent('--food-about-origin-x') / 100).toBeCloseTo(SCENE.food.originX, 6);
+    expect(percent('--food-about-origin-y') / 100).toBeCloseTo(SCENE.food.originY, 6);
+    expect(cssNumber('--food-about-scale')).toBe(SCENE.food.scale);
   });
 });
