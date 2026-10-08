@@ -103,6 +103,8 @@ function makeImage(src: FoodSprite['sharp'], sizePx: number, className: string):
   img.alt = '';
   img.decoding = 'async';
   img.draggable = false;
+  // Decoded ahead, so the first frame that shows it does not have to.
+  img.decode().catch(() => undefined);
   picture.append(source, img);
   wrapper.append(picture);
   return wrapper;
@@ -128,6 +130,11 @@ export function createFoodField(options: FieldOptions) {
   let quality = 0;
   let probe = { start: -1, frames: 0 };
   let blurMounted = false;
+  /**
+   * Which planes get their transforms each frame: only the visible one (both during the cross-fade between the
+   * scenes) — 14 more layers moved every frame for nothing would cost the compositor.
+   */
+  let planes = { sharp: true, blur: false };
 
   const motionless = options.reduced || options.frozen;
 
@@ -231,9 +238,10 @@ export function createFoodField(options: FieldOptions) {
 
   function render(item: Item) {
     const { x, y } = item;
-    const transform = `translate3d(${(x - item.size / 2).toFixed(2)}px, ${(y - item.size / 2).toFixed(2)}px, 0) rotate(${item.angle.toFixed(2)}deg) scale(${item.bounce.value.toFixed(4)})`;
-    item.sharp.style.transform = transform;
-    if (item.blur) {
+    if (planes.sharp) {
+      item.sharp.style.transform = `translate3d(${(x - item.size / 2).toFixed(2)}px, ${(y - item.size / 2).toFixed(2)}px, 0) rotate(${item.angle.toFixed(2)}deg) scale(${item.bounce.value.toFixed(4)})`;
+    }
+    if (item.blur && planes.blur) {
       const pad = item.size * item.sprite.blurPadRatio;
       item.blur.style.transform = `translate3d(${(x - item.size / 2 - pad).toFixed(2)}px, ${(y - item.size / 2 - pad).toFixed(2)}px, 0) rotate(${item.angle.toFixed(2)}deg) scale(${item.bounce.value.toFixed(4)})`;
     }
@@ -349,6 +357,12 @@ export function createFoodField(options: FieldOptions) {
     },
     setObstacles(rects: readonly Rect[]) {
       obstacles = [...rects];
+    },
+    /** Planes that are visible now (a plane coming back is brought up to date at once). */
+    setVisiblePlanes(sharp: boolean, blur: boolean) {
+      const appearing = (sharp && !planes.sharp) || (blur && !planes.blur);
+      planes = { sharp, blur };
+      if (appearing) items.forEach(render);
     },
     setSpeedFactor(factor: number) {
       speedFactor = factor;

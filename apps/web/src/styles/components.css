@@ -68,8 +68,19 @@
   border-radius: 9999px;
 }
 
+/*
+ * Glass (D-029): «О проекте» and «Создать меню» are see-through and frosted. Over the plain page they look exactly as
+ * before; only food passing behind them shows — softly blurred. (No filter, opacity < 1 or will-change: opacity may
+ * stay on their ancestors at rest, or the glass would only see its ancestor: see choreography.ts SHARP_END.)
+ */
+.about-pill,
+.cta {
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
 .about-pill {
-  background-color: var(--color-bg);
+  background-color: var(--color-bg-glass);
   color: var(--color-ink);
   box-shadow: inset 0 0 0 var(--outline-w, 2px) var(--color-ink-muted);
 }
@@ -115,10 +126,14 @@
 }
 /* ── Hero ────────────────────────────────────────────────────────────────────────────────── */
 
-.cta-slot,
 .feature-card,
 .info-card {
   will-change: transform, opacity;
+}
+
+/* Not opacity: it would cut the glass of «Создать меню» off from the food behind it. */
+.cta-slot {
+  will-change: transform;
 }
 
 .cta {
@@ -128,7 +143,7 @@
   align-items: center;
   justify-content: center;
   border-radius: inherit;
-  background-color: var(--color-accent);
+  background-color: var(--color-accent-glass);
   color: var(--color-on-accent);
   text-decoration: none;
 }
@@ -175,7 +190,7 @@
 }
 
 .about-title-button:hover .about-chevron,
-.about-title-button:focus-visible .about-chevron {
+.about-title-button:focus-visible:not([data-quiet-focus]) .about-chevron {
   transform: translateY(-12%);
 }
 
@@ -183,8 +198,7 @@
   overflow: hidden;
 }
 
-.info-tile img,
-.team-surface img {
+.info-tile img {
   display: block;
   width: 100%;
   height: 100%;
@@ -206,23 +220,42 @@
   background-color: var(--color-team-card);
   transform-origin: 0 0;
   will-change: transform;
+  container-type: size;
 }
 
-.team-surface-bg,
+.team-surface-picture,
 .team-surface-logo {
-  position: absolute;
-  inset: 0;
+  display: contents;
 }
 
-/* While the card is small the background is zoomed onto the icon's star (useCornerMorph). */
-.team-surface-bg {
+/*
+ * The picture covers the card like object-fit: cover with object-position 50% focus-y, but laid out whole (the morph
+ * zooms it from the icon's square, which lies outside a landscape card's band). Phones see all of it; landscape
+ * cards a band at their width with the star near the top. Mirror of DIALOG.picture / pictureFraming().
+ */
+.team-surface-picture img {
+  --picture-w: max(100cqw, 100cqh * var(--team-picture-w) / var(--team-picture-h));
+  --picture-h: calc(var(--picture-w) * var(--team-picture-h) / var(--team-picture-w));
+  position: absolute;
+  left: calc((100cqw - var(--picture-w)) / 2);
+  top: calc((100cqh - var(--picture-h)) * var(--team-picture-focus-y));
+  width: var(--picture-w);
+  max-width: none;
+  height: var(--picture-h);
   transform-origin: 0 0;
   will-change: transform;
 }
 
-/* Stretched to the card's proportions: squeezed back onto the square icon it is exactly the icon. */
+/* The icon's logo over its square of the picture while the card is small; useCornerMorph sizes and moves it. */
 .team-surface-logo img {
-  object-fit: fill;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transform-origin: 0 0;
+  will-change: transform, opacity;
 }
 
 .info-links {
@@ -281,6 +314,16 @@
   position: absolute;
   inset: 0;
   background-color: var(--color-scrim);
+}
+
+/*
+ * GPU rehearsal (lib/warmGpu.ts): for a dozen frames after loading, the hidden part 2 is drawn almost transparent
+ * (invisible on the page) through the blurs of its entrance, so the first real scroll finds their GPU programs ready.
+ */
+.page[data-gpu-warm] .scene--about .info-card,
+.page[data-gpu-warm] .scene--about .about-title {
+  opacity: 0.004 !important;
+  filter: blur(var(--warm-blur)) !important;
 }
 
 /* The stage is always its own layer above the food. Without the z-index the blur under the open team card

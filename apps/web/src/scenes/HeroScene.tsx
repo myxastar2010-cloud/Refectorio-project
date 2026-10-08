@@ -41,7 +41,12 @@ type Props = {
 export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMenu }: Props) {
   const calm = useCalmMotion();
   const hidden = phase === 'hidden';
-  const { setHost: ctaRef, handlers: ctaWave, clipPath: ctaClip } = useWave<HTMLAnchorElement>();
+  const {
+    setHost: ctaRef,
+    handlers: ctaWave,
+    clipPath: ctaClip,
+    act: afterCtaWave,
+  } = useWave<HTMLAnchorElement>();
   const variants = (index: number) => heroVariants(index, calm);
   const motionProps = (index: number) => ({
     variants: variants(index),
@@ -75,7 +80,9 @@ export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMen
             ref={ctaRef}
             href={site.hero.cta.href}
             className="cta wave-host focus-ring"
-            onClick={onCreateMenu}
+            onClick={(event) => {
+              afterCtaWave(event, onCreateMenu);
+            }}
             {...ctaWave}
           >
             <span className="wave-content">

@@ -21,7 +21,7 @@ type Props = {
 export function SiteHeader({ phase, instant, scrolled, onAbout }: Props) {
   const calm = useCalmMotion();
   const hidden = phase === 'hidden';
-  const { setHost, handlers, clipPath } = useWave<HTMLButtonElement>();
+  const { setHost, handlers, clipPath, act } = useWave<HTMLButtonElement>();
 
   return (
     <m.header
@@ -43,7 +43,9 @@ export function SiteHeader({ phase, instant, scrolled, onAbout }: Props) {
         ref={setHost}
         type="button"
         className="about-pill at box wave-host focus-ring"
-        onClick={onAbout}
+        onClick={(event) => {
+          act(event, onAbout);
+        }}
         {...handlers}
       >
         <span className="wave-content">{site.hero.aboutButton}</span>

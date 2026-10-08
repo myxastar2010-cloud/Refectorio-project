@@ -48,6 +48,10 @@ export async function countSceneChanges(page: Page) {
  * team's decision. Only those elements are excluded — every other rule and element is checked.
  */
 export async function seriousViolations(page: Page) {
+  // Colours are judged on the settled page: a card still fading in (slow engines) would read as low contrast.
+  await page.waitForFunction(() =>
+    document.getAnimations().every((animation) => animation.playState !== 'running'),
+  );
   const { violations } = await new AxeBuilder({ page })
     .exclude('.feature-text')
     .exclude('.info-lead')

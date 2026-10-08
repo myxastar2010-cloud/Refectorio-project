@@ -5,6 +5,9 @@ import { site } from '../content/site.ru';
 import { FoodFieldLayer } from '../engine/food-field/FoodFieldLayer';
 import { TeamDialog } from '../features/team-dialog/TeamDialog';
 import { readTestParams } from '../lib/params';
+import { whenIdle } from '../lib/idle';
+import { focusQuietly, trackInputModality } from '../lib/quietFocus';
+import { rehearseBlurs } from '../lib/warmGpu';
 import { useCalmMotion } from '../motion/hooks';
 import { DURATION, SCENE } from '../motion/tokens';
 import { AboutScene } from '../scenes/AboutScene';
@@ -14,6 +17,8 @@ import { useSceneInput } from '../scenes/useSceneInput';
 import { useScene, type Scene } from './useScene';
 
 const TOAST_MS = 3200;
+/** The GPU rehearsal runs once the page is idle, at the latest after this. */
+const WARM_UP_MS = 1200;
 const params = readTestParams(window.location.search);
 
 export function App() {
@@ -72,8 +77,8 @@ function Page() {
   useEffect(() => {
     if (previousScene.current === scene) return;
     previousScene.current = scene;
-    if (scene === 'about') aboutTitleRef.current?.focus({ preventScroll: true });
-    else document.querySelector<HTMLButtonElement>('.about-pill')?.focus({ preventScroll: true });
+    if (scene === 'about') focusQuietly(aboutTitleRef.current);
+    else focusQuietly(document.querySelector<HTMLButtonElement>('.about-pill'));
   }, [scene]);
 
   // Stable: a new function on every render would re-create the input listeners and reset the wheel gesture.
@@ -82,6 +87,16 @@ function Page() {
     [],
   );
   useSceneInput({ scene, go: goScene, locked, scrollerOf });
+  useEffect(() => {
+    trackInputModality();
+  }, []);
+  // GPU programs of the transition prepared before the first scroll (lib/warmGpu.ts); no blurs with reduced motion.
+  useEffect(() => {
+    if (calm) return;
+    return whenIdle(() => {
+      if (pageRef.current) rehearseBlurs(pageRef.current);
+    }, WARM_UP_MS);
+  }, [calm]);
   // Effects run in order, so the input listeners above are attached by now; e2e tests wait for this mark.
   useEffect(() => {
     pageRef.current?.setAttribute('data-ready', '');
@@ -112,7 +127,7 @@ function Page() {
   // while the card's shape still settles back into the tile.
   const wasTeamOpen = useRef(teamOpen);
   useEffect(() => {
-    if (wasTeamOpen.current && !teamOpen) moreRef.current?.focus({ preventScroll: true });
+    if (wasTeamOpen.current && !teamOpen) focusQuietly(moreRef.current);
     wasTeamOpen.current = teamOpen;
   }, [teamOpen]);
 

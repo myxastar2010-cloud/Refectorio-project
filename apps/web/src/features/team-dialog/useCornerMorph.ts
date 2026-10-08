@@ -3,37 +3,39 @@ import { DIALOG, DURATION, MORPH } from '../../motion/tokens';
 import {
   atRest,
   boxCorners,
-  dockAmount,
   cornerSprings,
-  dockMatrix,
-  matrix2dCss,
+  invert3,
+  mat3FromMatrix3d,
+  matrix3dFromMat3,
   matrixCss,
+  multiply3,
   openness,
+  pictureFraming,
+  pictureMapping,
   quadMatrix,
   quadSize,
+  similarity3,
   stepCorner,
+  translate3,
   type Box,
   type Corner,
   type CornerSpring,
   type MorphStyle,
   type Quad,
-  type DockRect,
 } from './morph';
 
 type Options = {
   /** The card surface at its final (dialog) size. */
   readonly surface: RefObject<HTMLElement | null>;
-  /** The logo layer inside it: visible while the card is small. */
+  /** The card picture inside it (laid out by CSS as in the open card). */
+  readonly picture: RefObject<HTMLImageElement | null>;
+  /** The icon's logo on top of the picture: visible while the card is small. */
   readonly logo: RefObject<HTMLElement | null>;
-  /** The background layer: zoomed onto the icon's star while the card is small. */
-  readonly background: RefObject<HTMLElement | null>;
   /** The team icon in part 2 — where the card comes from and returns to. */
   readonly tile: RefObject<HTMLElement | null>;
   /** False once the dialog is closing. */
   readonly present: boolean;
   readonly calm: boolean;
-  /** Where the icon's picture lies in the card background (DIALOG.starDock / starDockPhone). */
-  readonly dock: DockRect;
   /** Opening: the card is open far enough (DIALOG.contentRevealAt) for its text to come in. */
   readonly onReveal: () => void;
   /** The card has landed back on the icon: the icon can be shown again. */
@@ -66,9 +68,10 @@ function layoutBox(element: HTMLElement): Box {
 
 /**
  * Opens and closes the team card by the corner morph (see morph.ts): one requestAnimationFrame loop while it moves,
- * transform and radius written straight to the element. Interruptible: a new direction starts from the current
- * corners and their velocities. Critically damped springs: the card is drawn to its place like by a magnet —
- * no bounce.
+ * transforms and radius written straight to the elements. Interruptible: a new direction starts from the current
+ * corners and their velocities. Critically damped springs: the card is drawn to its place like by a magnet — no
+ * bounce. The picture inside never stretches with the card: it gets the inverse of the card's transform and then a
+ * plain zoom — from «the icon's square of the picture on the icon» to «the picture as in the open card».
  */
 export function useCornerMorph(options: Options) {
   const latest = useRef(options);
@@ -136,6 +139,23 @@ export function useCornerMorph(options: Options) {
     s.tile = from;
     // The card inherits the dialog box's radius; the icon has its own (both set by the layout CSS).
     s.radii = { tilePx: radiusOf(tileElement), dialogPx: radiusOf(element.parentElement) };
+    // Where the CSS lays the picture out in the card, and the icon's square of it (box coordinates).
+    const { frame: pictureFrame, icon } = pictureFraming(
+      dialog.width,
+      dialog.height,
+      DIALOG.picture,
+    );
+    const tileInBox: Box = {
+      left: from.left - dialog.left,
+      top: from.top - dialog.top,
+      width: from.width,
+      height: from.height,
+    };
+    const logoLayer = logo.current;
+    if (logoLayer) {
+      logoLayer.style.width = `${icon.width.toFixed(2)}px`;
+      logoLayer.style.height = `${icon.height.toFixed(2)}px`;
+    }
     const current: Quad = s.corners
       ? (s.corners.map(({ x, y }) => ({ x, y })) as unknown as Quad)
       : present
@@ -164,7 +184,8 @@ export function useCornerMorph(options: Options) {
         x: x - box.left,
         y: y - box.top,
       })) as unknown as Quad;
-      element.style.transform = matrixCss(quadMatrix(local, box.width, box.height));
+      const card = quadMatrix(local, box.width, box.height);
+      element.style.transform = matrixCss(card);
       const open = openness(quad, fromBox, box);
       if (!s.closing && !s.revealed && open >= DIALOG.contentRevealAt) {
         s.revealed = true;
@@ -177,22 +198,37 @@ export function useCornerMorph(options: Options) {
       const rx = radius / Math.max(0.01, width / box.width);
       const ry = radius / Math.max(0.01, height / box.height);
       element.style.borderRadius = `${rx.toFixed(2)}px / ${ry.toFixed(2)}px`;
-      const logoLayer = latest.current.logo.current;
-      if (logoLayer) logoLayer.style.opacity = String(1 - clamp01(open / DIALOG.logoCrossfadeEnd));
-      const backgroundLayer = latest.current.background.current;
-      if (backgroundLayer) {
-        backgroundLayer.style.transform = matrix2dCss(
-          dockMatrix(open, box.width, box.height, latest.current.dock, DIALOG.logoCrossfadeEnd),
+
+      // Undo the card's squeeze, then zoom the picture as a whole: never distorted on screen.
+      const zoom = pictureMapping({
+        quad: local,
+        box,
+        tile: tileInBox,
+        frame: pictureFrame,
+        icon,
+        open,
+        dockedBelow: DIALOG.dockedBelow,
+      });
+      const inside = multiply3(invert3(mat3FromMatrix3d(card)), similarity3(zoom));
+      const picture = latest.current.picture.current;
+      if (picture) {
+        // The picture is laid out at frame.left/top: its own transform works around that corner.
+        picture.style.transform = matrixCss(
+          matrix3dFromMat3(
+            multiply3(
+              multiply3(translate3(-pictureFrame.left, -pictureFrame.top), inside),
+              translate3(pictureFrame.left, pictureFrame.top),
+            ),
+          ),
         );
-        // Docked, the top edge of the picture comes into the card (the icon shows more sky than the background
-        // has): it melts into the card colour instead of cutting the rays with a straight line.
-        const dock = dockAmount(open, DIALOG.logoCrossfadeEnd);
-        const mask =
-          dock > 0.001
-            ? `linear-gradient(to bottom, rgb(0 0 0 / ${(1 - dock).toFixed(3)}) 0%, #000 ${String(DIALOG.starDockFadePct)}%)`
-            : '';
-        backgroundLayer.style.setProperty('mask-image', mask);
-        backgroundLayer.style.setProperty('-webkit-mask-image', mask);
+      }
+      const logoNow = latest.current.logo.current;
+      if (logoNow) {
+        // The logo is that same square of the picture: laid out at 0, 0 and carried onto it.
+        logoNow.style.transform = matrixCss(
+          matrix3dFromMat3(multiply3(inside, translate3(icon.left, icon.top))),
+        );
+        logoNow.style.opacity = String(1 - clamp01(open / DIALOG.logoCrossfadeEnd));
       }
     };
 
@@ -208,15 +244,11 @@ export function useCornerMorph(options: Options) {
       }
       s.corners = null;
       element.style.transform = '';
-      const backgroundLayer = latest.current.background.current;
-      if (backgroundLayer) {
-        backgroundLayer.style.transform = '';
-        backgroundLayer.style.setProperty('mask-image', '');
-        backgroundLayer.style.setProperty('-webkit-mask-image', '');
-      }
       element.style.borderRadius = '';
-      const logoLayer = latest.current.logo.current;
-      if (logoLayer) logoLayer.style.opacity = '0';
+      const picture = latest.current.picture.current;
+      if (picture) picture.style.transform = '';
+      const logoNow = latest.current.logo.current;
+      if (logoNow) logoNow.style.opacity = '0';
     };
 
     const frame = (now: number) => {
@@ -262,8 +294,8 @@ export function useCornerMorph(options: Options) {
     if (fromRest) {
       // Opening from rest: the card is first painted on the icon (with its picture decoded), then it flies —
       // the first heavy frame never stalls the motion.
-      const picture = element.querySelector('img');
-      const decoded = picture ? picture.decode().catch(() => undefined) : Promise.resolve();
+      const image = latest.current.picture.current;
+      const decoded = image ? image.decode().catch(() => undefined) : Promise.resolve();
       const timeout = new Promise((resolve) => setTimeout(resolve, MORPH.startWaitMs));
       void Promise.race([decoded, timeout]).then(() => {
         requestAnimationFrame(() => {

@@ -98,6 +98,5 @@ function background({ variants }: Background): ResponsiveImage {
 export const images: Readonly<Record<ImageKey, ResponsiveImage>> = {
   teamLogo: logo(team.logo),
   projectLogo: logo(team.projectLogo),
-  teamBackground: background(team.background),
-  teamBackgroundPhone: background(team.backgroundPhone),
+  teamCard: background(team.card),
 };

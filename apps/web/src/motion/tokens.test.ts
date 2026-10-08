@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import css from '../styles/tokens.css?raw';
-import { SCENE } from './tokens';
+import { DIALOG, SCENE } from './tokens';
 
 /** A unitless custom property from tokens.css, e.g. `--radius-tile: 45;`. */
 function cssNumber(name: string): number {
@@ -11,6 +11,12 @@ function cssNumber(name: string): number {
 }
 
 describe('motion tokens mirror the CSS tokens', () => {
+  it('the team card picture and its band in landscape cards', () => {
+    expect(cssNumber('--team-picture-w')).toBe(DIALOG.picture.width);
+    expect(cssNumber('--team-picture-h')).toBe(DIALOG.picture.height);
+    expect(cssNumber('--team-picture-focus-y')).toBe(DIALOG.picture.focusY);
+  });
+
   it('the food camera of part 2 (scale origin)', () => {
     const percent = (name: string) => Number(css.split(`${name}:`)[1]?.split('%')[0]);
     expect(percent('--food-about-origin-x') / 100).toBeCloseTo(SCENE.food.originX, 6);

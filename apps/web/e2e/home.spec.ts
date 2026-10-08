@@ -144,13 +144,23 @@ test.describe('small window: part 2 scrolls inside', () => {
     await settled(page, 'about');
     const scroller = page.locator('.about-scroller');
     const top = () => scroller.evaluate((element) => element.scrollTop);
+    // The scroll is smooth: wait until it has come to rest (by state, whatever the engine's speed).
+    const scrollSettled = () =>
+      expect
+        .poll(async () => {
+          const before = await top();
+          await page.waitForTimeout(80);
+          return before === (await top());
+        })
+        .toBe(true);
     await page.keyboard.press('ArrowDown');
     await expect.poll(top).toBeGreaterThan(0);
+    await scrollSettled();
     await expect(scene(page)).toHaveAttribute('data-scene', 'about');
     // Back up to the top step by step, then one more press goes to part 1.
     for (let i = 0; i < 10 && (await top()) > 0; i += 1) {
       await page.keyboard.press('ArrowUp');
-      await page.waitForTimeout(150);
+      await scrollSettled();
     }
     expect(await top()).toBe(0);
     await expect(scene(page)).toHaveAttribute('data-scene', 'about');
@@ -355,9 +365,6 @@ test.describe('quality', () => {
     expect(await seriousViolations(page)).toEqual([]);
     await page.getByRole('button', { name: /Ещё о команде/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
-    await page.waitForFunction(() =>
-      document.getAnimations().every((a) => a.playState !== 'running'),
-    );
     expect(await seriousViolations(page)).toEqual([]);
   });
 });

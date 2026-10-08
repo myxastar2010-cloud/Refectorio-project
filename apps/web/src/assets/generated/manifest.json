@@ -593,33 +593,18 @@
     ]
   },
   "team": {
-    "background": {
-      "width": 1401,
-      "height": 844,
-      "fill": "#08050a",
-      "variants": {
-        "701": {
-          "avif": "team-card-bg-701.avif",
-          "webp": "team-card-bg-701.webp"
-        },
-        "1401": {
-          "avif": "team-card-bg-1401.avif",
-          "webp": "team-card-bg-1401.webp"
-        }
-      }
-    },
-    "backgroundPhone": {
+    "card": {
       "width": 958,
       "height": 1521,
       "fill": "#15080b",
       "variants": {
         "479": {
-          "avif": "team-card-bg-phone-479.avif",
-          "webp": "team-card-bg-phone-479.webp"
+          "avif": "team-card-479.avif",
+          "webp": "team-card-479.webp"
         },
         "958": {
-          "avif": "team-card-bg-phone-958.avif",
-          "webp": "team-card-bg-phone-958.webp"
+          "avif": "team-card-958.avif",
+          "webp": "team-card-958.webp"
         }
       }
     },

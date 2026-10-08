@@ -1,6 +1,7 @@
 import type { Variants } from 'motion/react';
 import {
   DURATION,
+  EASE_FOCUS_IN,
   EASE_IN_OUT,
   EASE_OUT_EXPO,
   EASE_OUT_SOFT,
@@ -21,18 +22,27 @@ const scaleTo = (value: number) => `scale(${value})`;
 /** Upward drift plus scale; the same functions on both ends keep the interpolation a straight one. */
 const liftTo = (upPx: number, scale: number) => `translate3d(0px, ${-upPx}px, 0px) scale(${scale})`;
 
-/** Leaving: scale on the expo curve, opacity and blur over the whole duration (see EASE_OUT_SOFT). */
+/**
+ * Leaving: scale on the expo curve, opacity over the whole duration; the blur grows at once (EASE_OUT_SOFT): a small
+ * blur is the GPU's most expensive one, so it is passed quickly (see EASE_FOCUS_IN).
+ */
 const leaving = (duration: number, delay = 0) => ({
   default: { duration, ease: EASE_OUT_EXPO, delay },
   opacity: { duration, ease: EASE_IN_OUT, delay },
-  filter: { duration, ease: EASE_IN_OUT, delay },
-});
-
-/** Opacity and blur of appearing content; the scale keeps its own curve or spring. */
-const appearing = (duration: number, delay: number) => ({
-  opacity: { duration, ease: EASE_OUT_SOFT, delay },
   filter: { duration, ease: EASE_OUT_SOFT, delay },
 });
+
+/** Opacity and blur of appearing content: it fades in blurred and sharpens at the end; the scale has its own curve. */
+const appearing = (duration: number, delay: number) => ({
+  opacity: { duration, ease: EASE_OUT_SOFT, delay },
+  filter: { duration, ease: EASE_FOCUS_IN, delay },
+});
+
+/**
+ * Once sharp, the filter is removed altogether: a leftover `blur(0px)` still makes the browser draw the element
+ * through an extra GPU pass on every frame (and would hide the food from the glass buttons, see components.css).
+ */
+const SHARP_END = { filter: 'none' } as const;
 
 /** Reduced motion: every element just cross-fades in 200 ms. */
 const fade: Variants = {
@@ -41,6 +51,7 @@ const fade: Variants = {
     transform: scaleTo(1),
     filter: blur(0),
     transition: { duration: DURATION.fade },
+    transitionEnd: SHARP_END,
   },
   hidden: {
     opacity: 0,
@@ -72,6 +83,7 @@ export function heroVariants(index: number, calm: boolean): Variants {
         default: { ...SPRING.heroIn, delay },
         ...appearing(ms(back.durationMs), delay),
       },
+      transitionEnd: SHARP_END,
     },
   };
 }
@@ -94,9 +106,10 @@ export function aboutTitleVariants(calm: boolean): Variants {
       opacity: 1,
       filter: blur(0),
       transition: {
-        filter: { duration: ms(into.blurMs), ease: EASE_OUT_SOFT, delay: ms(into.delayMs) },
+        filter: { duration: ms(into.blurMs), ease: EASE_FOCUS_IN, delay: ms(into.delayMs) },
         opacity: { duration: ms(into.fadeMs), ease: EASE_OUT_SOFT, delay: ms(into.delayMs) },
       },
+      transitionEnd: SHARP_END,
     },
   };
 }
@@ -128,9 +141,10 @@ export function aboutCardVariants(index: number, count: number, calm: boolean): 
       opacity: 1,
       filter: blur(0),
       transition: {
-        filter: { duration: ms(into.blurMs), ease: EASE_OUT_SOFT, delay },
+        filter: { duration: ms(into.blurMs), ease: EASE_FOCUS_IN, delay },
         opacity: { duration: ms(into.fadeMs), ease: EASE_OUT_SOFT, delay },
       },
+      transitionEnd: SHARP_END,
     },
   };
 }

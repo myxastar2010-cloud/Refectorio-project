@@ -5,7 +5,7 @@ const text = z.string().trim().min(1);
 const lines = z.array(text).min(1);
 
 const featureIcon = z.enum(['school', 'sparkles', 'pencil', 'shieldCheck']);
-const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamBackground', 'teamBackgroundPhone']);
+const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamCard']);
 
 const link = z.object({
   label: text,

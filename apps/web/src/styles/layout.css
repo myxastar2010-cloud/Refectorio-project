@@ -50,6 +50,11 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+/* Focus moved by the page after a mouse, touchpad or touch input (lib/quietFocus.ts): no keyboard ring. */
+[data-quiet-focus]:focus-visible {
+  outline: none;
+}
+
 .line {
   display: block;
 }
@@ -102,6 +107,13 @@
   }
 
   /* ── Hero ─────────────────────────────────────────────────────────────────────────────── */
+
+  /* The header box covers only its row: it is blurred in the scene change, and a full-screen box would make the GPU
+     blur a whole screen of nothing. */
+  .site-header {
+    bottom: auto;
+    height: calc(var(--hero-header-h) * var(--s));
+  }
 
   /* Part 1 hangs on the side margins: the apple, the heading, the lead, the button and the cards start at the left
      one, «О проекте» and the last card end at the right one. */

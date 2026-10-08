@@ -2,7 +2,7 @@ import { IconX } from '@tabler/icons-react';
 import { AnimatePresence, m, usePresence, type MotionStyle } from 'motion/react';
 import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
 import { site } from '../../content/site.ru';
-import { useViewport } from '../../lib/useViewport';
+import { focusQuietly } from '../../lib/quietFocus';
 import { useCalmMotion } from '../../motion/hooks';
 import { DIALOG, DURATION, EASE_OUT_SOFT, SPRING } from '../../motion/tokens';
 import { useWave } from '../../motion/useWave';
@@ -42,12 +42,11 @@ type BodyProps = Omit<Props, 'open'>;
 function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
   const [present, safeToRemove] = usePresence();
   const calm = useCalmMotion();
-  const viewport = useViewport();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
-  const logoRef = useRef<HTMLPictureElement>(null);
-  const backgroundRef = useRef<HTMLPictureElement>(null);
+  const pictureRef = useRef<HTMLImageElement>(null);
+  const logoRef = useRef<HTMLImageElement>(null);
   const close = useWave<HTMLButtonElement>();
   const [revealed, setRevealed] = useState(false);
   const { teamDialog } = site;
@@ -56,12 +55,11 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
 
   useCornerMorph({
     surface: surfaceRef,
+    picture: pictureRef,
     logo: logoRef,
-    background: backgroundRef,
     tile: tileRef,
     present,
     calm,
-    dock: viewport.phone ? DIALOG.starDockPhone : DIALOG.starDock,
     onReveal: () => {
       setRevealed(true);
     },
@@ -72,7 +70,7 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
   });
 
   useEffect(() => {
-    closeRef.current?.focus({ preventScroll: true });
+    focusQuietly(closeRef.current);
   }, []);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -137,11 +135,7 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
         aria-labelledby="team-dialog-title"
         onKeyDown={onKeyDown}
       >
-        <TeamDialogSurface
-          surfaceRef={surfaceRef}
-          logoRef={logoRef}
-          backgroundRef={backgroundRef}
-        />
+        <TeamDialogSurface surfaceRef={surfaceRef} pictureRef={pictureRef} logoRef={logoRef} />
         <div className="team-dialog-content">
           <m.h2 id="team-dialog-title" className="dialog-title" {...content(0)}>
             <NameFlip lines={teamDialog.nameLines} translation={teamDialog.nameTranslationLines} />
@@ -170,7 +164,9 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
               type="button"
               className="dialog-close wave-host focus-ring-inverse"
               aria-label={teamDialog.close}
-              onClick={onClose}
+              onClick={(event) => {
+                close.act(event, onClose);
+              }}
               {...close.handlers}
             >
               <IconX aria-hidden className="dialog-close-icon" stroke={2} />

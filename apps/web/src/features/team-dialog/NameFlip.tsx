@@ -76,6 +76,8 @@ export function NameFlip({ lines, translation }: Props) {
   const translationRef = useRef<HTMLSpanElement>(null);
   const translated = useRef(false);
   const running = useRef<AnimationPlaybackControls[]>([]);
+  // Leaving is confirmed a moment later: a cursor brushing past the edge does not send two waves.
+  const leaveTimer = useRef(0);
 
   // The translation waits invisible in the same place (set before the first paint).
   useLayoutEffect(() => {
@@ -84,6 +86,7 @@ export function NameFlip({ lines, translation }: Props) {
 
   useEffect(
     () => () => {
+      window.clearTimeout(leaveTimer.current);
       for (const motion of running.current) motion.stop();
     },
     [],
@@ -103,11 +106,16 @@ export function NameFlip({ lines, translation }: Props) {
       return;
     }
 
-    // Where every letter is now (also mid-way through a wave that is being turned around), then the old wave stops.
+    // Where every letter is now (also mid-way through a wave that is being turned around), then the old wave stops
+    // and every letter holds that state — during its delay, too, until the new wave reaches it.
     const outs = measure(outgoing, point);
     const ins = measure(incoming, point);
     for (const motion of running.current) motion.stop();
     running.current = [];
+    for (const { letter, transform, opacity } of [...outs, ...ins]) {
+      letter.style.transform = transform;
+      letter.style.opacity = String(opacity);
+    }
     const reach = Math.max(1, ...[...outs, ...ins].map(({ distance }) => distance));
     // Nearer letters drift further, the farthest about half as far.
     const strength = (distance: number) => 1 - 0.5 * (distance / reach);
@@ -166,10 +174,17 @@ export function NameFlip({ lines, translation }: Props) {
         aria-hidden
         className="name-flip"
         onPointerEnter={(event) => {
-          if (byMouse(event)) flip(true, at(event));
+          if (!byMouse(event)) return;
+          window.clearTimeout(leaveTimer.current);
+          flip(true, at(event));
         }}
         onPointerLeave={(event) => {
-          if (byMouse(event)) flip(false, at(event));
+          if (!byMouse(event)) return;
+          const point = at(event);
+          window.clearTimeout(leaveTimer.current);
+          leaveTimer.current = window.setTimeout(() => {
+            flip(false, point);
+          }, NAME_FLIP.leaveDelayMs);
         }}
         onPointerUp={(event) => {
           if (!byMouse(event)) flip(!translated.current, at(event));

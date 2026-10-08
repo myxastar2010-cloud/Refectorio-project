@@ -3,7 +3,7 @@ import { m, type MotionStyle } from 'motion/react';
 import { useEffect, useRef, type Ref } from 'react';
 import { site } from '../content/site.ru';
 import { TeamTile } from '../features/team-dialog/TeamTile';
-import { preloadTeamBackground } from '../features/team-dialog/preload';
+import { preloadTeamPicture } from '../features/team-dialog/preload';
 import { useCalmMotion } from '../motion/hooks';
 import { TILT } from '../motion/tokens';
 import { TiltGlare, type TiltHandle } from '../motion/TiltGlare';
@@ -55,9 +55,9 @@ export function AboutScene({
     onOpenTeam();
   };
 
-  // The card background is not on the first screen: fetch it once part 2 is shown, before the first opening.
+  // The card picture is not on the first screen: fetch it once part 2 is shown, before the first opening.
   useEffect(() => {
-    if (!hidden) preloadTeamBackground();
+    if (!hidden) preloadTeamPicture();
   }, [hidden]);
 
   return (
@@ -120,7 +120,9 @@ export function AboutScene({
             aria-label={team.moreLabel}
             aria-haspopup="dialog"
             aria-expanded={teamOpen}
-            onClick={openTeam}
+            onClick={(event) => {
+              more.act(event, openTeam);
+            }}
             {...more.handlers}
           >
             <span className="wave-content">{team.more}</span>

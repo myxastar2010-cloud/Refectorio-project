@@ -7,9 +7,13 @@ import { useCalmMotion } from '../../motion/hooks';
 import { DURATION, EASE_OUT_EXPO, SCENE } from '../../motion/tokens';
 import { createFoodField, type Device, type FoodField } from './engine';
 import { cameraVisibleArea, type Rect } from './math';
+import { whenIdle } from '../../lib/idle';
 
 const RESIZE_DEBOUNCE_MS = 200;
-const BLUR_PRELOAD_MS = 2500;
+/** The pre-blurred copies are fetched and decoded once the page is idle (at the latest after this). */
+const BLUR_PRELOAD_MS = 1500;
+/** After the cross-fade between the sharp and the blurred food only one plane is moved. */
+const PLANE_SETTLE_MS = SCENE.food.blurCrossfadeEndMs + 150;
 const NOT_FOOD = '[data-opaque], button, a, input, textarea, select, [role="dialog"]';
 
 type Props = {
@@ -80,6 +84,19 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     if (about) field.ensureBlur();
   }, [scene, teamOpen, about]);
 
+  // Both planes move during the cross-fade, then only the one that is seen.
+  useEffect(() => {
+    const field = fieldRef.current;
+    if (!field) return;
+    field.setVisiblePlanes(true, about);
+    const settle = window.setTimeout(() => {
+      field.setVisiblePlanes(!about, about);
+    }, PLANE_SETTLE_MS);
+    return () => {
+      window.clearTimeout(settle);
+    };
+  }, [about]);
+
   useEffect(() => {
     const sharpPlane = sharpRef.current;
     const blurPlane = blurRef.current;
@@ -101,6 +118,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     field.setObstacles(obstacles());
     field.start();
     if (sceneRef.current === 'about') field.ensureBlur();
+    field.setVisiblePlanes(sceneRef.current !== 'about', sceneRef.current === 'about');
     if (params.seed !== null || params.freeze || params.designPose) {
       window.__refectorioFood = {
         snapshot: () => field.snapshot(),
@@ -120,7 +138,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     void document.fonts.ready.then(() => {
       field.setObstacles(sceneRef.current === 'hero' ? obstacles() : []);
     });
-    const preload = window.setTimeout(() => {
+    const cancelPreload = whenIdle(() => {
       field.ensureBlur();
     }, BLUR_PRELOAD_MS);
 
@@ -137,7 +155,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('pointerdown', onPointerDown);
       window.clearTimeout(resizeTimer);
-      window.clearTimeout(preload);
+      cancelPreload();
       field.stop();
       fieldRef.current = null;
       delete window.__refectorioFood;

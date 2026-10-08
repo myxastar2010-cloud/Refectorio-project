@@ -12,20 +12,41 @@ export const EASE_IN_OUT = [0.65, 0, 0.35, 1] as const;
  * (it also lingers long enough to cross-fade with the next scene instead of leaving an empty screen).
  */
 export const EASE_OUT_SOFT = [0.33, 1, 0.68, 1] as const;
+/**
+ * Blur of content coming into focus: it holds the blur and sharpens at the end. A small blur (≈0.5–4 px) is the most
+ * expensive one for the GPU — it is computed at full resolution, a larger one on a smaller copy — so blurs pass
+ * through that range quickly: coming in with this curve, going away with EASE_OUT_SOFT (D-029, GPU traces on an
+ * integrated Intel GPU: ≈4× less GPU time per transition).
+ */
+export const EASE_FOCUS_IN = [0.55, 0, 0.8, 0.25] as const;
 
 export const DURATION = {
   /** Hover/press feedback of small controls. */
   micro: 0.22,
   /** WaveHover: the circle grows to the far corner / shrinks to the exit point. */
   wave: 0.42,
-  /** Tap wave on touch screens. */
-  waveTap: 0.32,
+  /** Tap wave on touch screens: it fills the button, then the button acts (WAVE). */
+  waveTap: 0.34,
   /** Reduced motion: every transition becomes a cross-fade of this length. */
   fade: 0.2,
   scrim: 0.35,
   /** The scrim leaves with the closing card (1.5× faster than opening). */
   scrimOut: 0.26,
   toast: 0.3,
+} as const;
+
+/** The wave on touch screens (motion/useWave.ts): a tap fills the button completely before its action runs. */
+export const WAVE = {
+  /** Even, visible growth all the way (the expo curve would look finished long before it is). */
+  tapEase: [0.3, 0, 0.2, 1],
+  /** A click this soon after a touch on the same button is that tap. */
+  tapClickWindowMs: 1000,
+  /** The filled button stays filled this long after its action. */
+  tapHoldMs: 140,
+  /** Safety margin over the fill duration before the action runs anyway. */
+  tapGraceMs: 80,
+  /** A touch that ends without a click (a scroll, a long press): the wave goes after this. */
+  tapNoClickMs: 500,
 } as const;
 
 export const SPRING = {
@@ -55,17 +76,17 @@ export const SCENE = {
     /** The about scene may slow the food down. */
     speedFactor: 0.7,
   },
-  heroOut: { durationMs: 450, staggerMs: 40, blurPx: 12, scale: 0.96, liftPx: 28 },
+  heroOut: { durationMs: 450, staggerMs: 40, blurPx: 8, scale: 0.96, liftPx: 28 },
   /** Reverse path: part 1 reappears while the about cards fly towards the viewer. */
   heroIn: { delayMs: 320, durationMs: 620, staggerMs: 40 },
   /** Part 2 title comes into focus like the cards: blur only, no change of size. */
-  aboutTitleIn: { delayMs: 330, fromBlurPx: 8, blurMs: 460, fadeMs: 260 },
+  aboutTitleIn: { delayMs: 330, fromBlurPx: 6, blurMs: 440, fadeMs: 260 },
   aboutTitleOut: { durationMs: 320 },
   /**
    * Part 2 cards come into focus from a light blur — no scale, no dimming (D-028: calmer than the first 28 px):
-   * a soft fade and a short sharpening.
+   * a soft fade, then they sharpen (EASE_FOCUS_IN).
    */
-  aboutCardsIn: { delayMs: 380, staggerMs: 60, fromBlurPx: 10, blurMs: 540, fadeMs: 280 },
+  aboutCardsIn: { delayMs: 380, staggerMs: 60, fromBlurPx: 8, blurMs: 480, fadeMs: 280 },
   /** Reverse: the cards blur away at once (an ease-out: the scroll gets an answer right away) and fade. */
   aboutCardsOut: { durationMs: 340, fadeMs: 260 },
 } as const;
@@ -76,18 +97,22 @@ export const DIALOG = {
   contentStaggerMs: 50,
   /** On closing the text goes first and fast: the card it lies on starts shrinking at once. */
   contentExitS: 0.12,
-  /** The team logo cross-fades into the card background during the first part of the expansion. */
-  logoCrossfadeEnd: 0.18,
+  /** The icon's logo on top of the card fades out over this first share of the way (it is the same picture). */
+  logoCrossfadeEnd: 0.16,
+  /** Up to this openness the picture stays docked on the icon, then it glides to its open-card place. */
+  dockedBelow: 0.08,
   /**
-   * Where the team icon's picture lies in the card background, in shares of the background's width and height.
-   * While the card is small, the background is drawn zoomed onto this square, so its star docks onto the icon's star.
-   * Desktop: the card's star is a larger, softer one — docked by the core of the star (design/analysis/
-   * 08_star_dock.py); phones: the same picture as the icon, matched pixel by pixel.
+   * The card picture — «дизайн раскрытой команды для телефона» (958×1521), the same star as the team icon: the icon is
+   * its square at (138.5, 129) of side 694 (matched pixel by pixel, design/analysis/08_star_dock.py). Phones show the
+   * whole picture; landscape cards (desktop, tablets) show a band of it at the card's width with the star near the
+   * top, as in the desktop mockup (object-position y = focusY). Mirror of .team-surface-picture in components.css.
    */
-  starDock: { x: 0.2326, y: -0.2866, width: 0.631, height: 1.0474 },
-  starDockPhone: { x: 0.1446, y: 0.0848, width: 0.7244, height: 0.4563 },
-  /** …and its top edge, which then may come into view, melts into the card colour over this share of its height. */
-  starDockFadePct: 9,
+  picture: {
+    width: 958,
+    height: 1521,
+    focusY: 0.3543,
+    icon: { x: 138.5, y: 129, size: 694 },
+  },
 } as const;
 
 export const TILT = {
@@ -169,4 +194,6 @@ export const NAME_FLIP = {
   inS: 0.38,
   inEase: [0.16, 1, 0.3, 1],
   inLagS: 0.05,
+  /** The way back starts only if the cursor stays away this long (no flicker at the edge). */
+  leaveDelayMs: 90,
 } as const;

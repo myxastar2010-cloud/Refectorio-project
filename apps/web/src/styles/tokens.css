@@ -15,6 +15,10 @@
   --color-ink-muted: #5a5451;
   --color-on-accent: #ffffff;
   --color-scrim: rgb(0 0 0 / 0.52);
+  /* Glass buttons (D-029): over the plain page they are exactly --color-bg and --color-accent; food flying behind
+     them shows through, blurred. #E63946 = 80 % of rgb(224 9 26) over #FEF9F7. */
+  --color-bg-glass: rgb(254 249 247 / 0.55);
+  --color-accent-glass: rgb(224 9 26 / 0.8);
   --color-team-card: #08050a;
 
   --font-*: initial;
@@ -46,6 +50,8 @@
   --z-toast: 60;
 
   /* ── Focus and touch ───────────────────────────────────────────────────────────────────── */
+  --glass-blur: blur(14px) saturate(1.5);
+
   --focus-ring-width: 3px;
   --focus-ring-offset: 3px;
   --focus-ring-color: var(--color-ink);
@@ -158,6 +164,7 @@
      and the button share the centre line y = 76. */
   --hero-side: max(40px, 3.4vw);
   --hero-cards-gap-w: max(20px, 1.8vw);
+  --hero-header-h: 136; /* the header's own box: its row with some air (the logo and the button end at 121–120) */
   --hero-logo-icon-y: 15;
   --hero-logo-icon-size: 106; /* Tabler 24-unit box → visible apple ≈ 80×85 */
   --hero-logo-icon-inset: 0.125; /* blank space left of the apple, share of the box */
@@ -174,9 +181,9 @@
   --hero-cta-h: 83;
   --hero-cta-icon-size: 28;
   --hero-cta-gap: 5;
-  --hero-cards-y: 816;
+  --hero-cards-y: 844;
   --hero-card-h: 178; /* mockup 161: a little more room around the same texts */
-  --hero-cards-bottom: 86; /* space under the cards */
+  --hero-cards-bottom: 58; /* space under the cards (mockup 86: the row sits a little lower, D-029) */
   --hero-card-pad-x: 44; /* text origin of title and text (ink + side bearing) */
   --hero-card-title-leading: 36;
   --hero-card-text-gap: 12; /* title line box → text: baselines 38 apart (mockup 32) */
@@ -219,20 +226,23 @@
   --dialog-h: 844;
   --dialog-pad-x: 101; /* title origin; the lead starts at 105 (no side bearing) */
   --dialog-lead-x: 105;
-  /* The name and the lead sit 60 px higher than in the mockup: more air between them and the members (D-028). */
-  --dialog-title-baseline: 297;
-  --dialog-lead-baseline: 429;
+  /* The name and the lead sit 95 px higher than in the mockup, the members 42 px: more air under them (D-028, D-029). */
+  --dialog-title-baseline: 262;
+  --dialog-lead-baseline: 394;
   --dialog-members-x1: 362; /* name origins, columns 1 and 2 */
   --dialog-members-x2: 818;
   --dialog-bullet-offset: 27; /* bullet centre → name ink */
-  --dialog-members-baseline: 582;
+  --dialog-members-baseline: 540;
   --dialog-close-size: 51;
   --dialog-close-top: 107;
   --dialog-close-right: 112;
   --dialog-max-fraction: 0.92; /* tablets: never more than 92% of the viewport */
-  /* Phone card (its own picture, «дизайн раскрытой команды для телефона»): 958×1521, centred, 16 px from the sides. */
-  --dialog-phone-w: 958;
-  --dialog-phone-h: 1521;
+  /* The card picture («дизайн раскрытой команды для телефона», 958×1521, the same star as the team icon): phones show
+     it whole, landscape cards a band at their width (object-position y, mirror of DIALOG.picture). */
+  --team-picture-w: 958;
+  --team-picture-h: 1521;
+  --team-picture-focus-y: 0.3543;
+  /* Phone card: the picture's proportions, centred, 16 px from the sides (layout-responsive.css). */
 
   /* ── Food (background layer) ───────────────────────────────────────────────────────────── */
   --food-size-desktop: 185; /* sprite edge, mockup px (±10% per item) */

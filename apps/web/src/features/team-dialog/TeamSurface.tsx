@@ -1,37 +1,40 @@
 import type { Ref } from 'react';
 import { images } from '../../lib/assets';
-import { BACKGROUND_FALLBACK, BACKGROUND_SOURCES, DIALOG_SIZES } from './preload';
+import { CARD_PICTURE_SIZES } from './preload';
 
 type DialogSurfaceProps = {
   readonly surfaceRef: Ref<HTMLDivElement>;
-  readonly logoRef: Ref<HTMLPictureElement>;
-  readonly backgroundRef: Ref<HTMLPictureElement>;
+  readonly pictureRef: Ref<HTMLImageElement>;
+  readonly logoRef: Ref<HTMLImageElement>;
 };
 
 /**
  * The team card surface at its final size (ТЗ 6.4). useCornerMorph squeezes it onto the icon and lets it stretch
- * open; the logo on top fades into the card background during the first part of the way. The logo is stretched to
- * the card's proportions (object-fit: fill), so squeezed back onto the square icon it looks exactly like the icon.
- * Phones get their own tall background.
+ * open. The picture is the same star as the team icon (the icon is a square of it), so at the icon the card shows
+ * exactly the icon; the icon's own logo lies on top for the first frames and fades out.
  */
-export function TeamDialogSurface({ surfaceRef, logoRef, backgroundRef }: DialogSurfaceProps) {
+export function TeamDialogSurface({ surfaceRef, pictureRef, logoRef }: DialogSurfaceProps) {
   return (
-    <div ref={surfaceRef} className="team-surface team-surface--dialog">
-      <picture ref={backgroundRef} className="team-surface-bg">
-        {BACKGROUND_SOURCES.map((source) => (
-          <source key={`${source.media ?? ''}${source.type}`} {...source} />
-        ))}
+    <div ref={surfaceRef} className="team-surface">
+      <picture className="team-surface-picture">
+        <source type="image/avif" srcSet={images.teamCard.avifSrcSet} sizes={CARD_PICTURE_SIZES} />
         <img
-          src={BACKGROUND_FALLBACK.fallback}
-          srcSet={BACKGROUND_FALLBACK.webpSrcSet}
-          sizes={DIALOG_SIZES}
+          ref={pictureRef}
+          src={images.teamCard.fallback}
+          srcSet={images.teamCard.webpSrcSet}
+          sizes={CARD_PICTURE_SIZES}
           alt=""
           decoding="async"
         />
       </picture>
-      <picture ref={logoRef} className="team-surface-logo">
+      <picture className="team-surface-logo">
         <source type="image/avif" srcSet={images.teamLogo.avifSrcSet} />
-        <img src={images.teamLogo.fallback} srcSet={images.teamLogo.webpSrcSet} alt="" />
+        <img
+          ref={logoRef}
+          src={images.teamLogo.fallback}
+          srcSet={images.teamLogo.webpSrcSet}
+          alt=""
+        />
       </picture>
     </div>
   );

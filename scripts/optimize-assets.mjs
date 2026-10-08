@@ -4,7 +4,7 @@
 //
 //   food   → square sprites, AVIF + WebP at 1× and 2×; pre-blurred copies for the "about" scene
 //            (with transparent padding so the blur is not clipped); 32×32 alpha masks for hit tests
-//   team   → card backgrounds (desktop and phone) without transparent corners, team and project logos (AVIF + WebP)
+//   team   → the team card picture without transparent corners, team and project logos (AVIF + WebP)
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -216,11 +216,8 @@ async function buildLogo(file, baseName) {
 
 async function buildTeam() {
   return {
-    background: await buildBackground(path.join(SRC, 'team/team-card-bg.png'), 'team-card-bg'),
-    backgroundPhone: await buildBackground(
-      path.join(SRC, 'team/team-card-bg-phone.png'),
-      'team-card-bg-phone',
-    ),
+    // One picture for every screen: phones show it whole, landscape cards a band of it (DIALOG.picture).
+    card: await buildBackground(path.join(SRC, 'team/team-card.png'), 'team-card'),
     logo: await buildLogo(path.join(SRC, 'team/team-logo.png'), 'team-logo'),
     projectLogo: await buildLogo(path.join(SRC, 'team/project-logo.png'), 'project-logo'),
   };

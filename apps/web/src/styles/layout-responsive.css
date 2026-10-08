@@ -511,7 +511,19 @@
 
 /* ── Phones: part 2 compact enough to fit one screen (a short swipe then works from anywhere) ── */
 
+/* Phones upright: the heading, the lead and the button a little above the middle (D-029). */
+@media (max-width: 47.99rem) and (orientation: portrait) {
+  .scene--hero {
+    padding-bottom: calc(14svh + env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 47.99rem) {
+  /* As round as the desktop cards (there the radius is ≈ 36 % of the height). */
+  .info-card {
+    border-radius: 80px;
+  }
+
   .scene--about {
     justify-content: center;
     gap: 16px;
@@ -526,7 +538,7 @@
   .info-surface {
     grid-template-columns: 84px 1fr;
     gap: 6px 16px;
-    padding: 22px 20px;
+    padding: 24px 26px;
   }
 
   .info-label {
@@ -566,12 +578,12 @@
 
 @media (max-width: 47.99rem) {
   .team-dialog {
-    --pw: min(100vw - 32px, (100svh - 48px) * var(--dialog-phone-w) / var(--dialog-phone-h));
+    --pw: min(100vw - 32px, (100svh - 48px) * var(--team-picture-w) / var(--team-picture-h));
     left: calc(50% - var(--pw) / 2);
-    top: calc(50% - var(--pw) * var(--dialog-phone-h) / var(--dialog-phone-w) / 2);
+    top: calc(50% - var(--pw) * var(--team-picture-h) / var(--team-picture-w) / 2);
     width: var(--pw);
-    height: calc(var(--pw) * var(--dialog-phone-h) / var(--dialog-phone-w));
-    border-radius: calc(var(--pw) * var(--radius-dialog-phone) / var(--dialog-phone-w));
+    height: calc(var(--pw) * var(--team-picture-h) / var(--team-picture-w));
+    border-radius: calc(var(--pw) * var(--radius-dialog-phone) / var(--team-picture-w));
   }
 
   /* The name, the lead and the members stand on the bottom of the card, below the star. */
@@ -579,7 +591,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 0 calc(var(--pw) * 0.085) calc(var(--pw) * 0.14);
+    padding: 0 calc(var(--pw) * 0.085) calc(var(--pw) * 0.2);
   }
 
   .dialog-title,
