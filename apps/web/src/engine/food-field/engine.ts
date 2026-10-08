@@ -3,12 +3,15 @@ import { DESIGN_POSE } from './designPose';
 import {
   assignSprites,
   createRandom,
+  FRESH_PROBE,
   maskHit,
+  probeFrame,
   repulsion,
   scatter,
   stepSpring,
   toLocal,
   wrap,
+  type FpsProbe,
   type Random,
   type Rect,
   type Spring,
@@ -16,8 +19,11 @@ import {
 
 /** Tunables of the field (ТЗ 6.7). Pixel values are CSS px of the viewport. */
 export const FIELD = {
-  /** A little more than on screen at a time: items also drift through the margins beyond the edges. */
-  count: { desktop: 14, tablet: 10, phone: 8 },
+  /**
+   * Part 2 (camera pulled back) shows a wider area than the screen, part 1 only the screen: on average ≈11 items on
+   * screen in either part on a 1536×730 laptop, ≈5.4 and ≈6 on a phone (D-030 measurements).
+   */
+  count: { desktop: 13, tablet: 10, phone: 8 },
   /** Sprite edge: desktop scales with the frame (mockup ≈ 185 px at 1920), tablet/phone are fixed. */
   sizeDesktopFrame: 185,
   sizeTablet: 130,
@@ -36,8 +42,17 @@ export const FIELD = {
   impulseDecayS: 0.5,
   spinKickDegS: 40,
   maxStepS: 0.05,
+  /**
+   * Adaptive quality: a slow device loses part of the food for good, so only a steady slowness counts — never the
+   * first seconds of the page (fonts, pictures and the GPU are still busy) nor a scene change or the team card.
+   */
   fpsProbeMs: 2000,
   minFps: 50,
+  fpsWarmupMs: 4000,
+  /** After a scene change or the team card opening/closing the probe waits this long. */
+  fpsPauseMs: 2000,
+  /** Probe windows in a row below minFps before the quality goes down a level. */
+  fpsSlowWindows: 2,
 } as const;
 
 export type Device = 'desktop' | 'tablet' | 'phone';
@@ -58,8 +73,9 @@ export type FieldOptions = {
   /** Mockup frame → viewport: px per frame px and frame origin in the viewport. */
   readonly frame: () => { scale: number; left: number; top: number };
   /**
-   * The part of the plane that can be on screen (in any scene) for a viewport of this size; items wrap around only
-   * once they have left all of it.
+   * The part of the plane that is on screen in part 2 (its camera shows more of the plane than the screen). While
+   * part 2 is shown, items wrap around only once they have left all of it; in part 1 — once they have left the
+   * screen, as always (setWideWrap).
    */
   readonly visibleArea: (width: number, height: number) => Rect;
   readonly device: () => Device;
@@ -122,13 +138,16 @@ export function createFoodField(options: FieldOptions) {
   let obstacles: Rect[] = [];
   let width = window.innerWidth;
   let height = window.innerHeight;
-  let area = options.visibleArea(width, height);
+  let wideWrap = false;
+  let area = wrapArea();
   let speedFactor = 1;
   let raf = 0;
   let last = 0;
   let time = 0;
   let quality = 0;
-  let probe = { start: -1, frames: 0 };
+  let probe: FpsProbe = FRESH_PROBE;
+  /** The FPS probe counts only from this moment on (performance.now()). */
+  let calmFrom = 0;
   let blurMounted = false;
   /**
    * Which planes get their transforms each frame: only the visible one (both during the cross-fade between the
@@ -137,6 +156,12 @@ export function createFoodField(options: FieldOptions) {
   let planes = { sharp: true, blur: false };
 
   const motionless = options.reduced || options.frozen;
+
+  function wrapArea(): Rect {
+    return wideWrap
+      ? options.visibleArea(width, height)
+      : { left: 0, top: 0, right: width, bottom: height };
+  }
 
   function sizeFor(device: Device): number {
     if (device === 'phone') return FIELD.sizePhone;
@@ -165,7 +190,7 @@ export function createFoodField(options: FieldOptions) {
     random = createRandom(options.seed);
     width = window.innerWidth;
     height = window.innerHeight;
-    area = options.visibleArea(width, height);
+    area = wrapArea();
     const device = options.device();
     const base = sizeFor(device);
 
@@ -275,10 +300,11 @@ export function createFoodField(options: FieldOptions) {
       item.x += (Math.cos(heading) * speed + item.pushX) * dt;
       item.y += (Math.sin(heading) * speed + item.pushY + item.impulseY) * dt;
       if (quality < 1) item.angle += (item.spin * speedFactor + item.spinKick) * dt;
-      // The pre-blurred copy is larger than the sprite (transparent padding for the blur).
+      // Part 2 shows the pre-blurred copy, larger than the sprite (transparent padding for the blur): it must be off
+      // screen too. Part 1 shows only the sprite — a wider margin there would just keep food off screen longer.
       const radius =
         (item.size / 2) *
-        (1 + 2 * item.sprite.blurPadRatio) *
+        (wideWrap ? 1 + 2 * item.sprite.blurPadRatio : 1) *
         Math.SQRT2 *
         Math.max(1, item.bounce.value);
       const wrapped = wrap(item, radius, area);
@@ -289,21 +315,26 @@ export function createFoodField(options: FieldOptions) {
     }
   }
 
+  const probeLimits = {
+    windowMs: FIELD.fpsProbeMs,
+    minFps: FIELD.minFps,
+    slowWindows: FIELD.fpsSlowWindows,
+  };
+
   function measureFps(now: number) {
     if (quality >= 2 || motionless || !options.adaptiveQuality) return;
-    if (probe.start < 0) {
-      probe = { start: now, frames: 0 };
-      return;
-    }
-    probe.frames += 1;
-    const elapsed = now - probe.start;
-    if (elapsed < FIELD.fpsProbeMs) return;
-    const fps = (probe.frames * 1000) / elapsed;
-    probe = { start: now, frames: 0 };
-    if (fps < FIELD.minFps) {
+    const result = probeFrame(probe, now, calmFrom, probeLimits);
+    probe = result.probe;
+    if (result.lower) {
       quality += 1;
       applyQuality();
     }
+  }
+
+  /** A busy moment ahead (or just started): the probe skips it and starts over. */
+  function pauseProbe(ms: number) {
+    calmFrom = Math.max(calmFrom, performance.now() + ms);
+    probe = FRESH_PROBE;
   }
 
   /** Quality levels: 0 full; 1 fewer items (−30 %), no rotation; 2 half of the items. */
@@ -331,7 +362,7 @@ export function createFoodField(options: FieldOptions) {
       raf = 0;
     } else if (!raf) {
       last = performance.now();
-      probe = { start: -1, frames: 0 };
+      pauseProbe(FIELD.fpsPauseMs);
       raf = requestAnimationFrame(frame);
     }
   };
@@ -341,6 +372,7 @@ export function createFoodField(options: FieldOptions) {
       build();
       if (motionless) return;
       last = performance.now();
+      pauseProbe(FIELD.fpsWarmupMs);
       raf = requestAnimationFrame(frame);
       document.addEventListener('visibilitychange', onVisibility);
     },
@@ -358,6 +390,11 @@ export function createFoodField(options: FieldOptions) {
     setObstacles(rects: readonly Rect[]) {
       obstacles = [...rects];
     },
+    /** Part 2 (camera pulled back): items wrap around beyond its wider view; part 1 — beyond the screen. */
+    setWideWrap(wide: boolean) {
+      wideWrap = wide;
+      area = wrapArea();
+    },
     /** Planes that are visible now (a plane coming back is brought up to date at once). */
     setVisiblePlanes(sharp: boolean, blur: boolean) {
       const appearing = (sharp && !planes.sharp) || (blur && !planes.blur);
@@ -366,6 +403,10 @@ export function createFoodField(options: FieldOptions) {
     },
     setSpeedFactor(factor: number) {
       speedFactor = factor;
+    },
+    /** A scene change or the team card has just started: not a moment to judge the device by. */
+    pauseProbe() {
+      pauseProbe(FIELD.fpsPauseMs);
     },
     /** Pre-blurred copies are created lazily — only before the first visit to part 2. */
     ensureBlur() {

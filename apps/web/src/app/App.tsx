@@ -5,9 +5,7 @@ import { site } from '../content/site.ru';
 import { FoodFieldLayer } from '../engine/food-field/FoodFieldLayer';
 import { TeamDialog } from '../features/team-dialog/TeamDialog';
 import { readTestParams } from '../lib/params';
-import { whenIdle } from '../lib/idle';
 import { focusQuietly, trackInputModality } from '../lib/quietFocus';
-import { rehearseBlurs } from '../lib/warmGpu';
 import { useCalmMotion } from '../motion/hooks';
 import { DURATION, SCENE } from '../motion/tokens';
 import { AboutScene } from '../scenes/AboutScene';
@@ -17,8 +15,6 @@ import { useSceneInput } from '../scenes/useSceneInput';
 import { useScene, type Scene } from './useScene';
 
 const TOAST_MS = 3200;
-/** The GPU rehearsal runs once the page is idle, at the latest after this. */
-const WARM_UP_MS = 1200;
 const params = readTestParams(window.location.search);
 
 export function App() {
@@ -90,13 +86,6 @@ function Page() {
   useEffect(() => {
     trackInputModality();
   }, []);
-  // GPU programs of the transition prepared before the first scroll (lib/warmGpu.ts); no blurs with reduced motion.
-  useEffect(() => {
-    if (calm) return;
-    return whenIdle(() => {
-      if (pageRef.current) rehearseBlurs(pageRef.current);
-    }, WARM_UP_MS);
-  }, [calm]);
   // Effects run in order, so the input listeners above are attached by now; e2e tests wait for this mark.
   useEffect(() => {
     pageRef.current?.setAttribute('data-ready', '');

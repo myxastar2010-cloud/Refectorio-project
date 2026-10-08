@@ -4,7 +4,7 @@ import type { Scene } from '../../app/useScene';
 import { foodSprites } from '../../lib/assets';
 import type { TestParams } from '../../lib/params';
 import { useCalmMotion } from '../../motion/hooks';
-import { DURATION, EASE_OUT_EXPO, SCENE } from '../../motion/tokens';
+import { EASE_OUT_EXPO, SCENE } from '../../motion/tokens';
 import { createFoodField, type Device, type FoodField } from './engine';
 import { cameraVisibleArea, type Rect } from './math';
 import { whenIdle } from '../../lib/idle';
@@ -43,8 +43,8 @@ function frame() {
 }
 
 /**
- * The plane area that is on screen in either scene. Part 2 shrinks the plane towards a point below the frame, so
- * there the plane's own edges come into view (most of all the top one): the food must wrap around beyond them.
+ * The plane area that is on screen in part 2. It shrinks the plane towards a point below the frame, so there the
+ * plane's own edges come into view (most of all the top one): the food must wrap around beyond them (setWideWrap).
  */
 const visibleArea = (width: number, height: number): Rect =>
   cameraVisibleArea(width, height, SCENE.food);
@@ -79,21 +79,30 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     teamOpenRef.current = teamOpen;
     const field = fieldRef.current;
     if (!field) return;
+    field.pauseProbe();
     field.setSpeedFactor(about ? SCENE.food.speedFactor : 1);
     field.setObstacles(about ? [] : obstacles());
     if (about) field.ensureBlur();
   }, [scene, teamOpen, about]);
 
-  // Both planes move during the cross-fade, then only the one that is seen.
+  // Both planes move during the cross-fade, then only the one that is seen. The wider wrap of part 2 starts at once
+  // and ends only when the camera is back (then the margins are off screen again).
   useEffect(() => {
     const field = fieldRef.current;
     if (!field) return;
     field.setVisiblePlanes(true, about);
+    if (about) field.setWideWrap(true);
     const settle = window.setTimeout(() => {
       field.setVisiblePlanes(!about, about);
     }, PLANE_SETTLE_MS);
+    const narrow = about
+      ? 0
+      : window.setTimeout(() => {
+          field.setWideWrap(false);
+        }, SCENE.food.durationMs);
     return () => {
       window.clearTimeout(settle);
+      window.clearTimeout(narrow);
     };
   }, [about]);
 
@@ -119,6 +128,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     field.start();
     if (sceneRef.current === 'about') field.ensureBlur();
     field.setVisiblePlanes(sceneRef.current !== 'about', sceneRef.current === 'about');
+    field.setWideWrap(sceneRef.current === 'about');
     if (params.seed !== null || params.freeze || params.designPose) {
       window.__refectorioFood = {
         snapshot: () => field.snapshot(),
@@ -163,38 +173,20 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
   }, [calm, params]);
 
   const food = SCENE.food;
-  const ease = EASE_OUT_EXPO;
-  const camera = calm ? { duration: 0 } : { duration: food.durationMs / 1000, ease };
-  const blurFade = calm
-    ? { duration: DURATION.fade }
-    : {
-        duration: (food.blurCrossfadeEndMs - food.blurCrossfadeStartMs) / 1000,
-        delay: food.blurCrossfadeStartMs / 1000,
-        ease,
-      };
+  const camera = calm ? { duration: 0 } : { duration: food.durationMs / 1000, ease: EASE_OUT_EXPO };
 
+  // The sharp and the pre-blurred food cross-fade item by item (CSS transitions in components.css): a whole plane
+  // fading would make the GPU draw two full-screen layers on every frame of the scene change.
   return (
-    <div className="food-layer" aria-hidden>
+    <div className="food-layer" aria-hidden data-scene={scene}>
       <m.div
         className="food-camera"
         initial={false}
         animate={{ transform: `scale(${about ? food.scale : 1})` }}
         transition={camera}
       >
-        <m.div
-          ref={sharpRef}
-          className="food-plane"
-          initial={false}
-          animate={{ opacity: about ? 0 : 1 }}
-          transition={about ? blurFade : { ...blurFade, delay: 0 }}
-        />
-        <m.div
-          ref={blurRef}
-          className="food-plane"
-          initial={false}
-          animate={{ opacity: about ? food.opacity : 0 }}
-          transition={about ? blurFade : { ...blurFade, delay: 0 }}
-        />
+        <div ref={sharpRef} className="food-plane" />
+        <div ref={blurRef} className="food-plane" />
       </m.div>
     </div>
   );

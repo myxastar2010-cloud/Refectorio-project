@@ -124,6 +124,34 @@ export function stepSpring(spring: Spring, dt: number, stiffness: number, dampin
   return { value: spring.value + velocity * dt, velocity };
 }
 
+/** FPS probe of the adaptive quality: the current window and how many windows in a row were slow. */
+export type FpsProbe = {
+  readonly start: number;
+  readonly frames: number;
+  readonly slowWindows: number;
+};
+export const FRESH_PROBE: FpsProbe = { start: -1, frames: 0, slowWindows: 0 };
+
+/**
+ * One frame for the probe. Frames before `calmFrom` are not counted (the window starts over). A window of `windowMs`
+ * below `minFps` is slow; `slowWindows` slow windows in a row mean a slow device (`lower`, and the count starts over).
+ */
+export function probeFrame(
+  probe: FpsProbe,
+  now: number,
+  calmFrom: number,
+  limits: { readonly windowMs: number; readonly minFps: number; readonly slowWindows: number },
+): { readonly probe: FpsProbe; readonly lower: boolean } {
+  if (probe.start < 0 || now < calmFrom)
+    return { probe: { ...probe, start: now, frames: 0 }, lower: false };
+  const frames = probe.frames + 1;
+  const elapsed = now - probe.start;
+  if (elapsed < limits.windowMs) return { probe: { ...probe, frames }, lower: false };
+  const slowWindows = (frames * 1000) / elapsed < limits.minFps ? probe.slowWindows + 1 : 0;
+  const lower = slowWindows >= limits.slowWindows;
+  return { probe: { start: now, frames: 0, slowWindows: lower ? 0 : slowWindows }, lower };
+}
+
 /**
  * Poisson-disc-like placement (dart throwing with a shrinking radius): points at least `minDistance` apart,
  * outside the `avoid` rects, covering the area evenly. Deterministic for a given random source.

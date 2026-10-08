@@ -237,6 +237,9 @@
   --dialog-close-top: 107;
   --dialog-close-right: 112;
   --dialog-max-fraction: 0.92; /* tablets: never more than 92% of the viewport */
+  /* The page under the open card blurs once the card is well on its way (its first frames come first). */
+  --team-open-blur: 4px;
+  --team-open-blur-delay: 0.22s;
   /* The card picture («дизайн раскрытой команды для телефона», 958×1521, the same star as the team icon): phones show
      it whole, landscape cards a band at their width (object-position y, mirror of DIALOG.picture). */
   --team-picture-w: 958;
@@ -250,6 +253,9 @@
   --food-about-origin-x: 40.26%;
   --food-about-origin-y: 137.41%;
   --food-about-opacity: 0.6; /* fitted on mockup №2 (σ ≈ 7 px, opacity 0.6) */
+  /* Sharp ↔ pre-blurred cross-fade of the food (mirror of SCENE.food.blurCrossfade*). */
+  --food-fade-ms: 500ms;
+  --food-fade-delay-ms: 100ms;
 }
 
 @media (min-width: 80rem) and (hover: hover) {

@@ -1,7 +1,6 @@
-import type { Variants } from 'motion/react';
+import type { TargetAndTransition, Variants } from 'motion/react';
 import {
   DURATION,
-  EASE_FOCUS_IN,
   EASE_IN_OUT,
   EASE_OUT_EXPO,
   EASE_OUT_SOFT,
@@ -22,25 +21,22 @@ const scaleTo = (value: number) => `scale(${value})`;
 /** Upward drift plus scale; the same functions on both ends keep the interpolation a straight one. */
 const liftTo = (upPx: number, scale: number) => `translate3d(0px, ${-upPx}px, 0px) scale(${scale})`;
 
-/**
- * Leaving: scale on the expo curve, opacity over the whole duration; the blur grows at once (EASE_OUT_SOFT): a small
- * blur is the GPU's most expensive one, so it is passed quickly (see EASE_FOCUS_IN).
- */
+/** Leaving: scale on the expo curve, opacity and blur over the whole duration (see EASE_OUT_SOFT). */
 const leaving = (duration: number, delay = 0) => ({
   default: { duration, ease: EASE_OUT_EXPO, delay },
   opacity: { duration, ease: EASE_IN_OUT, delay },
+  filter: { duration, ease: EASE_IN_OUT, delay },
+});
+
+/** Opacity and blur of appearing content; the scale keeps its own curve or spring. */
+const appearing = (duration: number, delay: number) => ({
+  opacity: { duration, ease: EASE_OUT_SOFT, delay },
   filter: { duration, ease: EASE_OUT_SOFT, delay },
 });
 
-/** Opacity and blur of appearing content: it fades in blurred and sharpens at the end; the scale has its own curve. */
-const appearing = (duration: number, delay: number) => ({
-  opacity: { duration, ease: EASE_OUT_SOFT, delay },
-  filter: { duration, ease: EASE_FOCUS_IN, delay },
-});
-
 /**
- * Once sharp, the filter is removed altogether: a leftover `blur(0px)` still makes the browser draw the element
- * through an extra GPU pass on every frame (and would hide the food from the glass buttons, see components.css).
+ * Once sharp, the filter is removed altogether: a leftover `blur(0px)` makes the browser draw the element through an
+ * extra GPU pass on every frame. Invisible: the blur has already reached 0.
  */
 const SHARP_END = { filter: 'none' } as const;
 
@@ -88,6 +84,29 @@ export function heroVariants(index: number, calm: boolean): Variants {
   };
 }
 
+/** The two states of a block's variants, each split into the given properties (the transition goes along). */
+function split(variants: Variants, keys: readonly string[], withEnd: boolean): Variants {
+  const part = (state: 'hidden' | 'shown') => {
+    const target = variants[state] as TargetAndTransition;
+    const picked: Record<string, unknown> = { transition: target.transition };
+    for (const key of keys) picked[key] = (target as Record<string, unknown>)[key];
+    if (withEnd && state === 'shown' && 'filter' in picked) picked.transitionEnd = SHARP_END;
+    return picked as TargetAndTransition;
+  };
+  return { hidden: part('hidden'), shown: part('shown') };
+}
+
+/**
+ * Blocks that hold a glass button (the header, the slot of «Создать меню») only move: a filter or an opacity below 1
+ * on an ancestor would cut the glass off from the food behind it — it would turn see-through for the length of the
+ * transition. Their logo and buttons fade and blur themselves (heroFadeVariants), on the same timing.
+ */
+export const heroLiftVariants = (index: number, calm: boolean): Variants =>
+  split(heroVariants(index, calm), ['transform'], false);
+
+export const heroFadeVariants = (index: number, calm: boolean): Variants =>
+  split(heroVariants(index, calm), ['opacity', 'filter'], true);
+
 /** Part 2 title: comes into focus from a blur, at its own size. */
 export function aboutTitleVariants(calm: boolean): Variants {
   if (calm) return fade;
@@ -106,7 +125,7 @@ export function aboutTitleVariants(calm: boolean): Variants {
       opacity: 1,
       filter: blur(0),
       transition: {
-        filter: { duration: ms(into.blurMs), ease: EASE_FOCUS_IN, delay: ms(into.delayMs) },
+        filter: { duration: ms(into.blurMs), ease: EASE_OUT_SOFT, delay: ms(into.delayMs) },
         opacity: { duration: ms(into.fadeMs), ease: EASE_OUT_SOFT, delay: ms(into.delayMs) },
       },
       transitionEnd: SHARP_END,
@@ -141,7 +160,7 @@ export function aboutCardVariants(index: number, count: number, calm: boolean): 
       opacity: 1,
       filter: blur(0),
       transition: {
-        filter: { duration: ms(into.blurMs), ease: EASE_FOCUS_IN, delay },
+        filter: { duration: ms(into.blurMs), ease: EASE_OUT_SOFT, delay },
         opacity: { duration: ms(into.fadeMs), ease: EASE_OUT_SOFT, delay },
       },
       transitionEnd: SHARP_END,

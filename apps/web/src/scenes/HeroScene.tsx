@@ -15,7 +15,7 @@ import { TILT } from '../motion/tokens';
 import { TiltGlare } from '../motion/TiltGlare';
 import { useWave } from '../motion/useWave';
 import { WaveLayer } from '../motion/WaveHover';
-import { heroVariants, type Phase } from './choreography';
+import { heroFadeVariants, heroLiftVariants, heroVariants, type Phase } from './choreography';
 import { Lines } from '../components/Lines';
 
 const FEATURE_ICONS: Record<FeatureIcon, Icon> = {
@@ -74,11 +74,19 @@ export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMen
         <Lines lines={site.hero.leadLines} />
       </m.p>
 
-      <m.div className="cta-slot at box" data-opaque {...motionProps(2)}>
+      {/* The slot only moves; the glass button fades and blurs itself (see choreography.ts heroLiftVariants). */}
+      <m.div
+        className="cta-slot at box"
+        data-opaque
+        variants={heroLiftVariants(2, calm)}
+        animate={phase}
+        {...(instant ? { initial: false as const } : {})}
+      >
         <TiltGlare maxDeg={TILT.ctaMaxDeg} className="cta-tilt">
-          <a
+          <m.a
             ref={ctaRef}
             href={site.hero.cta.href}
+            variants={heroFadeVariants(2, calm)}
             className="cta wave-host focus-ring"
             onClick={(event) => {
               afterCtaWave(event, onCreateMenu);
@@ -93,7 +101,7 @@ export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMen
               <span>{site.hero.cta.label}</span>
               <IconCirclePlusFilled aria-hidden className="cta-icon" />
             </WaveLayer>
-          </a>
+          </m.a>
         </TiltGlare>
       </m.div>
 

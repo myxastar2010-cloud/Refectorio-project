@@ -579,10 +579,8 @@
 @media (max-width: 47.99rem) {
   .team-dialog {
     --pw: min(100vw - 32px, (100svh - 48px) * var(--team-picture-w) / var(--team-picture-h));
-    left: calc(50% - var(--pw) / 2);
-    top: calc(50% - var(--pw) * var(--team-picture-h) / var(--team-picture-w) / 2);
-    width: var(--pw);
-    height: calc(var(--pw) * var(--team-picture-h) / var(--team-picture-w));
+    --dialog-box-w: var(--pw);
+    --dialog-box-h: calc(var(--pw) * var(--team-picture-h) / var(--team-picture-w));
     border-radius: calc(var(--pw) * var(--radius-dialog-phone) / var(--team-picture-w));
   }
 

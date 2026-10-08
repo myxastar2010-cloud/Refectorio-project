@@ -4,7 +4,9 @@ import {
   assignSprites,
   cameraVisibleArea,
   createRandom,
+  FRESH_PROBE,
   maskHit,
+  probeFrame,
   repulsion,
   scatter,
   stepSpring,
@@ -130,6 +132,41 @@ describe('bounce spring', () => {
     expect(trough).toBeLessThan(1);
     expect(trough).toBeGreaterThan(0.9);
     expect(Math.abs(spring.value - 1)).toBeLessThan(0.02);
+  });
+});
+
+describe('adaptive quality probe', () => {
+  const limits = { windowMs: 2000, minFps: 50, slowWindows: 2 };
+  /** Feeds frames at `fps` from `from` for `ms`; true if the probe asked to lower the quality. */
+  const run = (probe: typeof FRESH_PROBE, from: number, ms: number, fps: number, calmFrom = 0) => {
+    let state = probe;
+    let lowered = false;
+    for (let now = from; now <= from + ms; now += 1000 / fps) {
+      const result = probeFrame(state, now, calmFrom, limits);
+      state = result.probe;
+      lowered ||= result.lower;
+    }
+    return { state, lowered };
+  };
+
+  it('one slow window (a busy moment) does not lower the quality, a steady slowness does', () => {
+    const busy = run(FRESH_PROBE, 0, 2100, 30);
+    expect(busy.lowered).toBe(false);
+    expect(run(busy.state, 2100, 2100, 140).lowered).toBe(false);
+    expect(run(FRESH_PROBE, 0, 4300, 30).lowered).toBe(true);
+  });
+
+  it('a fast window in between starts the count over', () => {
+    const first = run(FRESH_PROBE, 0, 2100, 30);
+    const fast = run(first.state, 2100, 2100, 140);
+    expect(fast.state.slowWindows).toBe(0);
+    expect(run(fast.state, 4200, 2100, 30).lowered).toBe(false);
+  });
+
+  it('counts nothing before the calm moment (the page warming up)', () => {
+    const warmup = run(FRESH_PROBE, 0, 4000, 20, 4000);
+    expect(warmup.lowered).toBe(false);
+    expect(warmup.state.slowWindows).toBe(0);
   });
 });
 

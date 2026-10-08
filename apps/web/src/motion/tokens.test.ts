@@ -17,6 +17,14 @@ describe('motion tokens mirror the CSS tokens', () => {
     expect(cssNumber('--team-picture-focus-y')).toBe(DIALOG.picture.focusY);
   });
 
+  it('the cross-fade of the sharp and the blurred food', () => {
+    const ms = (name: string) => Number(css.split(`${name}:`)[1]?.split('ms')[0]);
+    const { blurCrossfadeStartMs, blurCrossfadeEndMs } = SCENE.food;
+    expect(ms('--food-fade-ms')).toBe(blurCrossfadeEndMs - blurCrossfadeStartMs);
+    expect(ms('--food-fade-delay-ms')).toBe(blurCrossfadeStartMs);
+    expect(cssNumber('--food-about-opacity')).toBe(SCENE.food.opacity);
+  });
+
   it('the food camera of part 2 (scale origin)', () => {
     const percent = (name: string) => Number(css.split(`${name}:`)[1]?.split('%')[0]);
     expect(percent('--food-about-origin-x') / 100).toBeCloseTo(SCENE.food.originX, 6);

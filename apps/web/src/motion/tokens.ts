@@ -12,13 +12,6 @@ export const EASE_IN_OUT = [0.65, 0, 0.35, 1] as const;
  * (it also lingers long enough to cross-fade with the next scene instead of leaving an empty screen).
  */
 export const EASE_OUT_SOFT = [0.33, 1, 0.68, 1] as const;
-/**
- * Blur of content coming into focus: it holds the blur and sharpens at the end. A small blur (≈0.5–4 px) is the most
- * expensive one for the GPU — it is computed at full resolution, a larger one on a smaller copy — so blurs pass
- * through that range quickly: coming in with this curve, going away with EASE_OUT_SOFT (D-029, GPU traces on an
- * integrated Intel GPU: ≈4× less GPU time per transition).
- */
-export const EASE_FOCUS_IN = [0.55, 0, 0.8, 0.25] as const;
 
 export const DURATION = {
   /** Hover/press feedback of small controls. */
@@ -76,17 +69,17 @@ export const SCENE = {
     /** The about scene may slow the food down. */
     speedFactor: 0.7,
   },
-  heroOut: { durationMs: 450, staggerMs: 40, blurPx: 8, scale: 0.96, liftPx: 28 },
+  heroOut: { durationMs: 450, staggerMs: 40, blurPx: 12, scale: 0.96, liftPx: 28 },
   /** Reverse path: part 1 reappears while the about cards fly towards the viewer. */
   heroIn: { delayMs: 320, durationMs: 620, staggerMs: 40 },
   /** Part 2 title comes into focus like the cards: blur only, no change of size. */
-  aboutTitleIn: { delayMs: 330, fromBlurPx: 6, blurMs: 440, fadeMs: 260 },
+  aboutTitleIn: { delayMs: 330, fromBlurPx: 8, blurMs: 460, fadeMs: 260 },
   aboutTitleOut: { durationMs: 320 },
   /**
    * Part 2 cards come into focus from a light blur — no scale, no dimming (D-028: calmer than the first 28 px):
-   * a soft fade, then they sharpen (EASE_FOCUS_IN).
+   * a soft fade and a short sharpening.
    */
-  aboutCardsIn: { delayMs: 380, staggerMs: 60, fromBlurPx: 8, blurMs: 480, fadeMs: 280 },
+  aboutCardsIn: { delayMs: 380, staggerMs: 60, fromBlurPx: 10, blurMs: 540, fadeMs: 280 },
   /** Reverse: the cards blur away at once (an ease-out: the scroll gets an answer right away) and fade. */
   aboutCardsOut: { durationMs: 340, fadeMs: 260 },
 } as const;

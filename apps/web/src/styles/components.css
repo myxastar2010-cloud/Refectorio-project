@@ -220,7 +220,6 @@
   background-color: var(--color-team-card);
   transform-origin: 0 0;
   will-change: transform;
-  container-type: size;
 }
 
 .team-surface-picture,
@@ -234,11 +233,14 @@
  * cards a band at their width with the star near the top. Mirror of DIALOG.picture / pictureFraming().
  */
 .team-surface-picture img {
-  --picture-w: max(100cqw, 100cqh * var(--team-picture-w) / var(--team-picture-h));
+  --picture-w: max(
+    var(--dialog-box-w),
+    var(--dialog-box-h) * var(--team-picture-w) / var(--team-picture-h)
+  );
   --picture-h: calc(var(--picture-w) * var(--team-picture-h) / var(--team-picture-w));
   position: absolute;
-  left: calc((100cqw - var(--picture-w)) / 2);
-  top: calc((100cqh - var(--picture-h)) * var(--team-picture-focus-y));
+  left: calc((var(--dialog-box-w) - var(--picture-w)) / 2);
+  top: calc((var(--dialog-box-h) - var(--picture-h)) * var(--team-picture-focus-y));
   width: var(--picture-w);
   max-width: none;
   height: var(--picture-h);
@@ -316,35 +318,36 @@
   background-color: var(--color-scrim);
 }
 
-/*
- * GPU rehearsal (lib/warmGpu.ts): for a dozen frames after loading, the hidden part 2 is drawn almost transparent
- * (invisible on the page) through the blurs of its entrance, so the first real scroll finds their GPU programs ready.
- */
-.page[data-gpu-warm] .scene--about .info-card,
-.page[data-gpu-warm] .scene--about .about-title {
-  opacity: 0.004 !important;
-  filter: blur(var(--warm-blur)) !important;
-}
-
-/* The stage is always its own layer above the food. Without the z-index the blur under the open team card
-   (a filter creates a stacking context) re-stacked it below the food — the food jumped over the cards and back. */
+/* The stage is always its own layer above the food: a filter or an opacity on it (a stacking context) would
+   otherwise re-stack it below the food — the food would jump over the cards and back. */
 .page .stage {
   z-index: var(--z-scene);
+}
+
+/*
+ * Under the open card the page behind it blurs (it starts once the card is well on its way). Only what is seen there —
+ * the cards and the title — not the whole stage: a growing blur of the whole screen cost the GPU 2.5× more per frame
+ * (26 ms against 7 ms at most on Intel Iris Xe, D-030 traces); the look is the same.
+ */
+.info-surface,
+.about-title-button {
   transition: filter var(--motion-scrim, 350ms) var(--ease-out-expo);
 }
 
-/* The blur starts once the card is well on its way: its first frames must not compete with re-drawing the stage. */
-.page[data-team-open] .stage {
-  filter: blur(4px);
-  transition-delay: 0.22s;
+.page[data-team-open] .info-surface,
+.page[data-team-open] .about-title-button {
+  filter: blur(var(--team-open-blur));
+  transition-delay: var(--team-open-blur-delay);
 }
 
 .team-dialog {
+  --dialog-box-w: calc(var(--dialog-w) * var(--sd));
+  --dialog-box-h: calc(var(--dialog-h) * var(--sd));
   position: absolute;
-  left: calc(50% - var(--dialog-w) * var(--sd) / 2);
-  top: calc(50% - var(--dialog-h) * var(--sd) / 2);
-  width: calc(var(--dialog-w) * var(--sd));
-  height: calc(var(--dialog-h) * var(--sd));
+  left: calc(50% - var(--dialog-box-w) / 2);
+  top: calc(50% - var(--dialog-box-h) / 2);
+  width: var(--dialog-box-w);
+  height: var(--dialog-box-h);
   /* Not drawn here: the card surface inherits it, and the corner morph reads it. */
   border-radius: calc(var(--radius-dialog) * var(--sd));
   color: var(--color-on-accent);
@@ -492,6 +495,21 @@
   top: 0;
   left: 0;
   will-change: transform;
+  /* Sharp and pre-blurred copies cross-fade item by item (SCENE.food: 500 ms after 100 ms into part 2, at once back). */
+  transition: opacity var(--food-fade-ms) var(--ease-out-expo);
+}
+
+.food-item--blur {
+  opacity: 0;
+}
+
+.food-layer[data-scene='about'] .food-item {
+  opacity: 0;
+  transition-delay: var(--food-fade-delay-ms);
+}
+
+.food-layer[data-scene='about'] .food-item--blur {
+  opacity: var(--food-about-opacity);
 }
 
 .food-item picture,
@@ -506,6 +524,12 @@
   .scene--hero,
   .about-scroller {
     scroll-behavior: auto;
+  }
+
+  .food-item,
+  .food-layer[data-scene='about'] .food-item {
+    transition-duration: var(--motion-fade, 200ms);
+    transition-delay: 0s;
   }
 }
 
@@ -526,8 +550,9 @@
   white-space: nowrap;
 }
 
-/* No permanent will-change: ~40 letters would each keep a layer of their own; animations promote them only while
-   they run. */
+/* Every letter keeps its own layer for good: a layer that appeared only while it moved would vanish at the end of
+   the wave, and the browser would re-draw the text in place — a visible little jump a moment after the wave. */
 .flip-char {
   display: inline-block;
+  will-change: transform, opacity;
 }
