@@ -32,7 +32,14 @@
     "icons": "node scripts/make-icons.mjs",
     "og-image": "node scripts/make-og-image.mjs",
     "compare-design": "node scripts/compare-with-design.mjs",
-    "fonts": "node scripts/subset-fonts.mjs"
+    "fonts": "node scripts/subset-fonts.mjs",
+    "quiz-icons": "node scripts/quiz-icons.mjs",
+    "photos:check": "node scripts/photos/check-keys.mjs",
+    "photos:curate": "node scripts/photos/curate.mjs",
+    "photos:sheets": "node scripts/photos/review-sheets.mjs",
+    "photos:finalize": "node scripts/photos/finalize.mjs",
+    "photos:materialize": "node scripts/photos/materialize.mjs",
+    "sim": "npm run sim -w @refectorio/taste-core --"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

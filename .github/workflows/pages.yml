@@ -29,6 +29,12 @@ jobs:
       - id: pages
         uses: actions/configure-pages@v6
       - run: npm ci
+      # Self-hosted dish photos (scripts/photos/materialize.mjs) are downloaded once per manifest version.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/dish-photos
+          key: dish-photos-${{ hashFiles('packages/taste-core/data/photo-manifest.json') }}
+          restore-keys: dish-photos-
       - name: Build with the Pages base path
         run: npm run build -w @refectorio/web
         env:

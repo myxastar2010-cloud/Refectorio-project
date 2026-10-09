@@ -50,7 +50,8 @@ const META_CSP =
     "default-src 'self'",
     "script-src 'self'",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data:",
+    // Dish photos from Unsplash are hotlinked (API guidelines); nothing else leaves the site.
+    "img-src 'self' data: https://images.unsplash.com",
     "font-src 'self'",
     "connect-src 'self'",
     "manifest-src 'self'",
