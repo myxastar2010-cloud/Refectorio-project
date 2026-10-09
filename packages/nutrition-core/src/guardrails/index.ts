@@ -16,43 +16,55 @@ export const GUARDRAIL_STATUSES = [
 ] as const;
 export type GuardrailStatus = (typeof GUARDRAIL_STATUSES)[number];
 
-export type ReasonCode =
-  | 'AGE_UNDER_1'
-  | 'CHILD_NEEDS_ADULT'
-  | 'CHILD_FAMILY_MODE'
-  | 'TODDLER_NO_INDIVIDUAL_ENERGY'
-  | 'TEEN_NO_ENERGY_GOALS'
-  | 'PREGNANCY'
-  | 'LACTATION'
-  | 'DIABETES_INSULIN'
-  | 'DIABETES_TYPE2'
-  | 'KIDNEY_DISEASE'
-  | 'PKU'
-  | 'WARFARIN'
-  | 'MAOI'
-  | 'ED_SCREEN_POSITIVE'
-  | 'ED_HISTORY'
-  | 'BMI_UNDERWEIGHT'
-  | 'OLDER_ADULT_CAUTION'
-  | 'HYPERTENSION'
-  | 'HYPOTHYROIDISM'
-  | 'INSULIN_RESISTANCE';
+/** Machine-readable reasons (runtime list: the quiz contract validates stored decisions against it). */
+export const REASON_CODES = [
+  'AGE_UNDER_1',
+  'CHILD_NEEDS_ADULT',
+  'CHILD_FAMILY_MODE',
+  'TODDLER_NO_INDIVIDUAL_ENERGY',
+  'TEEN_NO_ENERGY_GOALS',
+  'PREGNANCY',
+  'LACTATION',
+  'DIABETES_INSULIN',
+  'DIABETES_TYPE2',
+  'KIDNEY_DISEASE',
+  'PKU',
+  'WARFARIN',
+  'MAOI',
+  'ED_SCREEN_POSITIVE',
+  'ED_HISTORY',
+  'BMI_UNDERWEIGHT',
+  'OLDER_ADULT_CAUTION',
+  'HYPERTENSION',
+  'HYPOTHYROIDISM',
+  'INSULIN_RESISTANCE',
+] as const;
+export type ReasonCode = (typeof REASON_CODES)[number];
 
-export type Specialist =
-  | 'pediatrician'
-  | 'obstetrician'
-  | 'endocrinologist'
-  | 'nephrologist'
-  | 'geneticist'
-  | 'mentalHealth'
-  | 'gp';
+export const SPECIALISTS = [
+  'pediatrician',
+  'obstetrician',
+  'endocrinologist',
+  'nephrologist',
+  'geneticist',
+  'mentalHealth',
+  'gp',
+] as const;
+export type Specialist = (typeof SPECIALISTS)[number];
 
-export type Regime = 'intermittentFasting' | 'keto' | 'vlcd';
+export const REGIMES = ['intermittentFasting', 'keto', 'vlcd'] as const;
+export type Regime = (typeof REGIMES)[number];
 /**
  * Rules for the stage-3 dish filter. `limitSodium` and `limitAddedSugar` are soft preferences (salt < 5 g/day,
  * fewer free sugars and refined starches — research/stage-2-mappings.md §3), not exclusions.
  */
-export type DishRule = 'stableVitaminK' | 'excludeHighTyramine' | 'limitSodium' | 'limitAddedSugar';
+export const DISH_RULES = [
+  'stableVitaminK',
+  'excludeHighTyramine',
+  'limitSodium',
+  'limitAddedSugar',
+] as const;
+export type DishRule = (typeof DISH_RULES)[number];
 
 export type GuardrailDecision = {
   readonly status: GuardrailStatus;

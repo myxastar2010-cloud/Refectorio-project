@@ -1,17 +1,23 @@
 /** Domain types of the questionnaire and calculations (research/algorithm-spec.md §2). */
 
-export type Sex = 'male' | 'female' | 'unspecified';
+export const SEXES = ['male', 'female', 'unspecified'] as const;
+export type Sex = (typeof SEXES)[number];
 
 /** Physical activity groups (КФА) of МР 2.3.1.0253-21; children map them to NASEM categories. */
-export type ActivityGroup = 'kfa1' | 'kfa2' | 'kfa3' | 'kfa4';
+export const ACTIVITY_GROUPS = ['kfa1', 'kfa2', 'kfa3', 'kfa4'] as const;
+export type ActivityGroup = (typeof ACTIVITY_GROUPS)[number];
 
-export type Goal = 'maintain' | 'lose' | 'gain' | 'habits';
+export const GOALS = ['maintain', 'lose', 'gain', 'habits'] as const;
+export type Goal = (typeof GOALS)[number];
 
-export type Pregnancy = 'none' | 'trimester1' | 'trimester2' | 'trimester3';
+export const PREGNANCY_STATES = ['none', 'trimester1', 'trimester2', 'trimester3'] as const;
+export type Pregnancy = (typeof PREGNANCY_STATES)[number];
 
-export type Lactation = 'none' | 'months0to6' | 'months7to12';
+export const LACTATION_STATES = ['none', 'months0to6', 'months7to12'] as const;
+export type Lactation = (typeof LACTATION_STATES)[number];
 
-export type Mode = 'self' | 'family';
+export const MODES = ['self', 'family'] as const;
+export type Mode = (typeof MODES)[number];
 
 /** Health answers as fixed flags, never free text (R13); the quiz chips map onto them (research/stage-2-mappings.md). */
 export const HEALTH_FLAGS = [
@@ -48,19 +54,22 @@ export const ALLERGEN_CODES = [
 ] as const;
 export type AllergenCode = (typeof ALLERGEN_CODES)[number];
 
-export type AllergenLevel = 'intolerance' | 'allergy' | 'severeAllergy';
+export const ALLERGEN_LEVELS = ['intolerance', 'allergy', 'severeAllergy'] as const;
+export type AllergenLevel = (typeof ALLERGEN_LEVELS)[number];
 
-export type Diet =
-  | 'omnivore'
+export const DIETS = [
+  'omnivore',
   /** Plants, fish, seafood, eggs and dairy; no meat or poultry (R06, stage-2-mappings §1). */
-  | 'pescatarian'
-  | 'vegetarianLactoOvo'
-  | 'vegetarianLacto'
-  | 'vegetarianOvo'
-  | 'vegan'
-  | 'lentLay'
-  | 'halal'
-  | 'kosher';
+  'pescatarian',
+  'vegetarianLactoOvo',
+  'vegetarianLacto',
+  'vegetarianOvo',
+  'vegan',
+  'lentLay',
+  'halal',
+  'kosher',
+] as const;
+export type Diet = (typeof DIETS)[number];
 
 export type Budget = 'economy' | 'medium' | 'unlimited';
 

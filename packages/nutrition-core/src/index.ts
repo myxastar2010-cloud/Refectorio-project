@@ -61,7 +61,11 @@ export {
 export {
   AGE_LIMITS,
   BMI_UNDERWEIGHT_BELOW,
+  DISH_RULES,
   GUARDRAIL_STATUSES,
+  REASON_CODES,
+  REGIMES,
+  SPECIALISTS,
   evaluateGuardrails,
   type DishRule,
   type GuardrailDecision,
