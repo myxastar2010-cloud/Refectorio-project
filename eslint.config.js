@@ -14,6 +14,7 @@ export default defineConfig([
     '**/playwright-report/',
     '**/test-results/',
     '.lighthouseci/',
+    '**/.cache/',
   ]),
   {
     files: ['**/*.{ts,tsx}'],
