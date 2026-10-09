@@ -102,10 +102,9 @@ function Page() {
   }, [toast]);
 
   const onCreateMenu = (event: MouseEvent<HTMLAnchorElement>) => {
-    // Stage 2 will open the quiz here; until then the link only shows a friendly note.
+    // The quiz scene is wired in the next step of stage 2; until then the link only marks the address.
     event.preventDefault();
     window.history.replaceState(window.history.state, '', site.hero.cta.href);
-    setToast(site.hero.cta.toast);
   };
 
   const setMoreRef = useCallback((node: HTMLButtonElement | null) => {

@@ -21,7 +21,7 @@ export const site = {
     aboutButton: 'О проекте',
     titleLines: ['Питаться', 'полезно и', 'вкусно сейчас'],
     leadLines: ['Создавайте меню, выбирайте то, что', 'любите, ставьте цели, в пару кликов'],
-    cta: { label: 'Создать меню', href: '#quiz', toast: 'Скоро: интерактивный тест' },
+    cta: { label: 'Создать меню', href: '#quiz' },
     featuresLabel: 'Возможности Refectorio',
     features: [
       {
@@ -77,6 +77,13 @@ export const site = {
         },
       ],
     },
+  },
+  quizShell: {
+    exit: 'Выйти',
+    exitLabel: 'Выйти из теста',
+    loading: 'Загружаем тест…',
+    loadError: 'Не получилось загрузить тест. Проверьте интернет и попробуйте ещё раз.',
+    retry: 'Повторить',
   },
   teamDialog: {
     nameLines: ['Modern', 'Manifesto'],

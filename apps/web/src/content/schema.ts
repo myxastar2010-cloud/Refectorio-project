@@ -29,7 +29,7 @@ export const siteContentSchema = z.object({
     aboutButton: text,
     titleLines: lines,
     leadLines: lines,
-    cta: z.object({ label: text, href: z.string().startsWith('#'), toast: text }),
+    cta: z.object({ label: text, href: z.string().startsWith('#') }),
     featuresLabel: text,
     features: z.array(z.object({ title: text, textLines: lines, icon: featureIcon })).length(4),
   }),
@@ -54,6 +54,8 @@ export const siteContentSchema = z.object({
       links: z.array(link).length(2),
     }),
   }),
+  /** The landing's part of the quiz: the header pill turns into «Выйти ×» while the quiz chunk loads. */
+  quizShell: z.object({ exit: text, exitLabel: text, loading: text, loadError: text, retry: text }),
   teamDialog: z.object({
     nameLines: lines,
     nameTranslationLines: lines,
