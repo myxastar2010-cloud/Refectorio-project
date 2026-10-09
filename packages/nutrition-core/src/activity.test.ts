@@ -2,36 +2,36 @@ import { describe, expect, it } from 'vitest';
 import { activityFromLifestyle } from './activity';
 import { EXERCISE_FREQUENCIES, LIFESTYLES, type ExerciseFrequency, type Lifestyle } from './types';
 
-const estimate = (exercise: ExerciseFrequency, lifestyle: Lifestyle, strengthTraining = false) =>
-  activityFromLifestyle({ exercise, lifestyle, strengthTraining });
+const adult = (exercise: ExerciseFrequency, lifestyle: Lifestyle, strengthTraining = false) =>
+  activityFromLifestyle({ exercise, lifestyle, strengthTraining, ageYears: 30 });
 
-describe('activityFromLifestyle', () => {
-  // Worked examples (research/stage-2-mappings.md §5).
-  it('office worker without sport → PAL 1.40, group I', () => {
-    expect(estimate('none', 'mostlySitting')).toEqual({ pal: 1.4, group: 'kfa1' });
+describe('activityFromLifestyle: adults', () => {
+  // Worked examples, research/stage-2-mappings.md §5.5.
+  it('office, no sport → PAL 1.40, group I', () => {
+    expect(adult('none', 'mostlySitting')).toEqual({ pal: 1.4, group: 'kfa1' });
   });
 
-  it('office worker with sport 3–4 times a week → PAL 1.50, group II', () => {
-    expect(estimate('3to4', 'mostlySitting', true)).toEqual({ pal: 1.5, group: 'kfa2' });
+  it('student: mostly sitting + 3–4 sessions → PAL 1.50, group II (on the threshold)', () => {
+    expect(adult('3to4', 'mostlySitting', true)).toEqual({ pal: 1.5, group: 'kfa2' });
   });
 
-  it('on the move all day plus sport 5–6 times → PAL 1.90, group III', () => {
-    expect(estimate('5to6', 'movingAllDay')).toEqual({ pal: 1.9, group: 'kfa3' });
+  it('shop assistant: mostly standing + 1–2 sessions → PAL 1.64, group II', () => {
+    expect(adult('1to2', 'mostlyStanding')).toEqual({ pal: 1.64, group: 'kfa2' });
   });
 
-  it('physical labour plus daily sport → PAL 2.10, group IV', () => {
-    expect(estimate('daily', 'physicalLabour', true)).toEqual({ pal: 2.1, group: 'kfa4' });
+  it('physical work + daily sport → PAL 2.20, group IV', () => {
+    expect(adult('daily', 'physicalLabour', true)).toEqual({ pal: 2.2, group: 'kfa4' });
   });
 
-  it('strength training does not change the PAL estimate', () => {
-    expect(estimate('1to2', 'mostlyStanding', true)).toEqual(estimate('1to2', 'mostlyStanding'));
+  it('strength training does not change the estimate', () => {
+    expect(adult('1to2', 'mostlyStanding', true)).toEqual(adult('1to2', 'mostlyStanding'));
   });
 
-  it('is monotonic in both answers and stays inside the FAO/WHO range 1.4–2.4', () => {
+  it('is monotonic in both answers and stays inside the FAO/WHO range 1.40–2.40', () => {
     for (const lifestyle of LIFESTYLES) {
       let previous = 0;
       for (const exercise of EXERCISE_FREQUENCIES) {
-        const { pal } = estimate(exercise, lifestyle);
+        const { pal } = adult(exercise, lifestyle);
         expect(pal).toBeGreaterThan(previous);
         expect(pal).toBeGreaterThanOrEqual(1.4);
         expect(pal).toBeLessThanOrEqual(2.4);
@@ -41,18 +41,40 @@ describe('activityFromLifestyle', () => {
     for (const exercise of EXERCISE_FREQUENCIES) {
       let previous = 0;
       for (const lifestyle of LIFESTYLES) {
-        const { pal } = estimate(exercise, lifestyle);
+        const { pal } = adult(exercise, lifestyle);
         expect(pal).toBeGreaterThan(previous);
         previous = pal;
       }
     }
   });
 
-  it('maps PAL onto the groups at the midpoints 1.5 / 1.75 / 2.05', () => {
-    expect(estimate('1to2', 'mostlySitting').group).toBe('kfa1'); // 1.45
-    expect(estimate('3to4', 'mostlyStanding').group).toBe('kfa2'); // 1.70
-    expect(estimate('none', 'movingAllDay').group).toBe('kfa3'); // 1.75
-    expect(estimate('3to4', 'physicalLabour').group).toBe('kfa3'); // 2.00
-    expect(estimate('5to6', 'physicalLabour').group).toBe('kfa4'); // 2.05
+  it('maps onto the groups at the midpoints 1.50 / 1.75 / 2.05 exactly (integer hundredths)', () => {
+    expect(adult('1to2', 'mostlySitting').group).toBe('kfa1'); // 1.44
+    expect(adult('none', 'sometimesStanding').group).toBe('kfa2'); // 1.50
+    expect(adult('1to2', 'movingAllDay').group).toBe('kfa2'); // 1.74
+    expect(adult('5to6', 'mostlyStanding').group).toBe('kfa3'); // 1.75
+    expect(adult('5to6', 'sometimesStanding').group).toBe('kfa2'); // 1.65
+    expect(adult('daily', 'sometimesStanding').group).toBe('kfa2'); // 1.70
+    expect(adult('3to4', 'movingAllDay').group).toBe('kfa3'); // 1.80
+    expect(adult('1to2', 'physicalLabour').group).toBe('kfa3'); // 2.04
+    expect(adult('5to6', 'movingAllDay').group).toBe('kfa3'); // 1.85
+    expect(adult('daily', 'physicalLabour').group).toBe('kfa4'); // 2.20
+  });
+});
+
+describe('activityFromLifestyle: minors', () => {
+  it('counts only sports sessions and reports the group PAL', () => {
+    const minor = (exercise: ExerciseFrequency) =>
+      activityFromLifestyle({
+        exercise,
+        lifestyle: 'physicalLabour',
+        strengthTraining: false,
+        ageYears: 15,
+      });
+    expect(minor('none')).toEqual({ pal: 1.4, group: 'kfa1' });
+    expect(minor('1to2')).toEqual({ pal: 1.6, group: 'kfa2' });
+    expect(minor('3to4').group).toBe('kfa3');
+    expect(minor('5to6').group).toBe('kfa3');
+    expect(minor('daily')).toEqual({ pal: 2.2, group: 'kfa4' });
   });
 });

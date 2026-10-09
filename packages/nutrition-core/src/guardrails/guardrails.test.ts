@@ -163,6 +163,7 @@ describe('guardrails: body', () => {
     expect(d.reasons).toEqual(['BMI_UNDERWEIGHT']);
     expect(d.allowedGoals).toEqual(['maintain', 'gain', 'habits']);
     expect(d.energyDeficitAllowed).toBe(false);
+    expect(d.forbiddenRegimes).toEqual(['intermittentFasting', 'keto', 'vlcd']);
   });
 
   it('older adults: caution for low or high BMI and for weight loss', () => {

@@ -277,6 +277,8 @@ function bodyEffects(q: Questionnaire): Effect[] {
       refer: ['gp'],
       goals: ['maintain', 'gain', 'habits'],
       noDeficit: true,
+      // No restrictive regimes either (Watanabe 2020; research/stage-2-mappings.md §2.3).
+      forbid: NO_DIETS,
     });
   }
   const older = q.ageYears >= AGE_LIMITS.olderAdultFromYears;
