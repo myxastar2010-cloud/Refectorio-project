@@ -36,6 +36,12 @@ export default defineConfig({
       thresholds: {
         'packages/nutrition-core/src/**': { lines: 95, statements: 95, functions: 95 },
         'packages/nutrition-core/src/guardrails/**': { lines: 100, branches: 100, functions: 100 },
+        // Stage 2: the quiz mappings are new safety-relevant code (ТЗ §10: 100 % branches).
+        'packages/nutrition-core/src/{activity,weight,input}.ts': {
+          lines: 100,
+          branches: 100,
+          functions: 100,
+        },
       },
     },
   },

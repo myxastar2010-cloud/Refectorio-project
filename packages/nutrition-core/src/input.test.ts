@@ -104,6 +104,49 @@ describe('validateQuestionnaire', () => {
       'dislikesOther:TOO_LONG',
     ]);
   });
+
+  it('limits the quiz «+» items and the notes', () => {
+    const many = Array.from({ length: 11 }, (_, i) => `условие ${i}`);
+    expect(codes({ ...valid, healthOther: many })).toEqual(['healthOther:TOO_MANY_ITEMS']);
+    expect(codes({ ...valid, allergensOther: ['к'.repeat(41)] })).toEqual([
+      'allergensOther:TOO_LONG',
+    ]);
+    expect(codes({ ...valid, allergensOther: ['к'.repeat(40)] })).toEqual([]);
+    expect(codes({ ...valid, notes: 'я'.repeat(301) })).toEqual(['notes:TOO_LONG']);
+    expect(codes({ ...valid, notes: `  ${'я'.repeat(300)}  ` })).toEqual([]);
+  });
+
+  it('keeps free text verbatim but trimmed, deduplicated and separate from the flags', () => {
+    const result = validateQuestionnaire({
+      ...valid,
+      healthOther: ['  Анемия ', 'анемия', '', 'Мигрень'],
+      allergensOther: ['киви'],
+      notes: '  обычно я завтракаю фруктами ',
+      macroProfile: 'highProtein',
+      strengthTraining: true,
+      diet: 'pescatarian',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.healthOther).toEqual(['Анемия', 'Мигрень']);
+    expect(result.value.allergensOther).toEqual(['киви']);
+    expect(result.value.health).toEqual([]);
+    expect(result.value.notes).toBe('обычно я завтракаю фруктами');
+    expect(result.value.macroProfile).toBe('highProtein');
+    expect(result.value.strengthTraining).toBe(true);
+    expect(result.value.diet).toBe('pescatarian');
+  });
+
+  it('fills the stage-2 defaults and drops empty notes', () => {
+    const result = validateQuestionnaire({ ...valid, notes: '   ' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.macroProfile).toBe('recommended');
+    expect(result.value.strengthTraining).toBe(false);
+    expect(result.value.healthOther).toEqual([]);
+    expect(result.value.allergensOther).toEqual([]);
+    expect('notes' in result.value).toBe(false);
+  });
 });
 
 describe('allergen codes', () => {

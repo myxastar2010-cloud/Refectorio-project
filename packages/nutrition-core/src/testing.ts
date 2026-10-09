@@ -19,6 +19,10 @@ export function makeQuestionnaire(overrides: Partial<Questionnaire> = {}): Quest
     mealsPerDay: 4,
     budget: 'unlimited',
     dislikes: [],
+    macroProfile: 'recommended',
+    strengthTraining: false,
+    healthOther: [],
+    allergensOther: [],
     ...overrides,
   };
 }

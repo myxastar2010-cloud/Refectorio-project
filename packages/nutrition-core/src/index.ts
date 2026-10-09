@@ -6,6 +6,7 @@ export { err, ok, type Result } from './result';
 export * from './types';
 export {
   INPUT_LIMITS,
+  cleanItems,
   validateQuestionnaire,
   type InputError,
   type InputErrorCode,
@@ -59,6 +60,7 @@ export {
 } from './status';
 export {
   AGE_LIMITS,
+  BMI_UNDERWEIGHT_BELOW,
   GUARDRAIL_STATUSES,
   evaluateGuardrails,
   type DishRule,
@@ -68,3 +70,17 @@ export {
   type Regime,
   type Specialist,
 } from './guardrails';
+export {
+  ACTIVITY_MAPPING,
+  activityFromLifestyle,
+  type ActivityAnswers,
+  type ActivityEstimate,
+} from './activity';
+export {
+  WEIGHT_RULES,
+  recommendedWeightRangeKg,
+  targetWeightBoundsKg,
+  targetWeightStartKg,
+  type TargetWeightInput,
+  type WeightRangeKg,
+} from './weight';

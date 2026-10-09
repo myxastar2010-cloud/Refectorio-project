@@ -33,7 +33,10 @@ export type ReasonCode =
   | 'ED_SCREEN_POSITIVE'
   | 'ED_HISTORY'
   | 'BMI_UNDERWEIGHT'
-  | 'OLDER_ADULT_CAUTION';
+  | 'OLDER_ADULT_CAUTION'
+  | 'HYPERTENSION'
+  | 'HYPOTHYROIDISM'
+  | 'INSULIN_RESISTANCE';
 
 export type Specialist =
   | 'pediatrician'
@@ -45,7 +48,11 @@ export type Specialist =
   | 'gp';
 
 export type Regime = 'intermittentFasting' | 'keto' | 'vlcd';
-export type DishRule = 'stableVitaminK' | 'excludeHighTyramine';
+/**
+ * Rules for the stage-3 dish filter. `limitSodium` and `limitAddedSugar` are soft preferences (salt < 5 g/day,
+ * fewer free sugars and refined starches — research/stage-2-mappings.md §3), not exclusions.
+ */
+export type DishRule = 'stableVitaminK' | 'excludeHighTyramine' | 'limitSodium' | 'limitAddedSugar';
 
 export type GuardrailDecision = {
   readonly status: GuardrailStatus;
@@ -214,6 +221,20 @@ function healthEffects(q: Questionnaire): Effect[] {
       reason: 'MAOI',
       refer: ['gp'],
       dishRules: ['excludeHighTyramine'],
+    });
+  }
+  // Common conditions that need no restriction of goals: the menu only follows food advice for them (stage 3).
+  if (has('hypertension')) {
+    effects.push({ status: 'allowed', reason: 'HYPERTENSION', dishRules: ['limitSodium'] });
+  }
+  if (has('hypothyroidism')) {
+    effects.push({ status: 'allowed', reason: 'HYPOTHYROIDISM' });
+  }
+  if (has('insulinResistance')) {
+    effects.push({
+      status: 'allowed',
+      reason: 'INSULIN_RESISTANCE',
+      dishRules: ['limitAddedSugar'],
     });
   }
   const edCommon = {

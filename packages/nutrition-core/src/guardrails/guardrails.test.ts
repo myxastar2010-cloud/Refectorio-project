@@ -125,6 +125,26 @@ describe('guardrails: health', () => {
     expect(screen.reasons).toEqual(['ED_SCREEN_POSITIVE']);
   });
 
+  it('hypertension, hypothyroidism and insulin resistance restrict nothing but carry food rules', () => {
+    const d = evaluateGuardrails(
+      q({ health: ['hypertension', 'hypothyroidism', 'insulinResistance'], goal: 'lose' }),
+    );
+    expect(d.status).toBe('allowed');
+    expect(d.reasons).toEqual(['HYPERTENSION', 'HYPOTHYROIDISM', 'INSULIN_RESISTANCE']);
+    expect(d.dishRules).toEqual(['limitSodium', 'limitAddedSugar']);
+    expect(d.allowedGoals).toEqual(['maintain', 'lose', 'gain', 'habits']);
+    expect(d.energyDeficitAllowed).toBe(true);
+    expect(d.forbiddenRegimes).toEqual([]);
+    expect(d.referToDoctor).toEqual([]);
+  });
+
+  it('a common condition never softens a stricter one', () => {
+    const d = evaluateGuardrails(q({ health: ['hypertension', 'diabetesType2'] }));
+    expect(d.status).toBe('limited');
+    expect(d.forbiddenRegimes).toContain('keto');
+    expect(d.dishRules).toEqual(['limitSodium']);
+  });
+
   it('merges: strictest status wins, referrals and restrictions accumulate', () => {
     const d = evaluateGuardrails(
       q({ health: ['warfarin', 'kidneyDisease'], edScreenPositive: true }),
