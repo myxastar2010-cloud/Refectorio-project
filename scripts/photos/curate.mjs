@@ -43,8 +43,36 @@ const { catalog, queries } = await loadCatalog();
 const state = await readJson(CANDIDATES_FILE, { version: 1, dishes: {} });
 const pacer = createPacer();
 const search = { pexels: searchPexels, unsplash: searchUnsplash };
-/** Unsplash demo: 50 requests an hour — keep a few for download tracking. */
-const UNSPLASH_RESERVE = 5;
+/**
+ * Unsplash demo: 50 requests an hour. A couple are kept in reserve; when the hour's quota runs out the script sleeps
+ * until the next hour (progress is saved after every dish, so it can also be stopped and restarted).
+ */
+const UNSPLASH_RESERVE = 2;
+/** Enough good candidates for one dish: further queries are skipped (requests are the scarce resource). */
+const ENOUGH = 4;
+const remaining = { pexels: Infinity, unsplash: Infinity };
+
+async function searchPolitely(provider, query) {
+  for (;;) {
+    if (remaining[provider] <= (provider === 'unsplash' ? UNSPLASH_RESERVE : 0)) {
+      const waitMs = untilNextHourMs();
+      console.log(
+        `${provider}: лимит запросов — пауза ${Math.ceil(waitMs / 60_000)} мин (прогресс сохранён)`,
+      );
+      await writeJson(CANDIDATES_FILE, state);
+      await sleep(waitMs);
+      remaining[provider] = Infinity;
+    }
+    const result = await search[provider](keys[provider], query, pacer);
+    if (result.limit.remaining !== null) remaining[provider] = result.limit.remaining;
+    if (!result.throttled) return result;
+    // Throttled although the counter looked fine (a rolling window): wait ten minutes and try again.
+    remaining[provider] = 0;
+    console.log(`${provider}: сервис просит подождать — пауза 10 мин`);
+    await sleep(10 * 60_000);
+    remaining[provider] = Infinity;
+  }
+}
 
 async function saveThumb(dishId, candidate) {
   const dir = path.join(CACHE_DIR, 'thumbs', dishId);
@@ -77,23 +105,9 @@ for (const dish of catalog.dishes) {
       continue;
     }
     for (const query of dishQueries) {
-      let result = await search[provider](keys[provider], query, pacer);
-      if (
-        result.throttled ||
-        (provider === 'unsplash' && (result.limit.remaining ?? 99) <= UNSPLASH_RESERVE)
-      ) {
-        const waitMs =
-          provider === 'pexels' && result.limit.resetAt
-            ? Math.max(60_000, result.limit.resetAt - Date.now())
-            : untilNextHourMs();
-        console.log(
-          `${provider}: лимит запросов — пауза ${Math.ceil(waitMs / 60_000)} мин (прогресс сохранён)`,
-        );
-        await writeJson(CANDIDATES_FILE, state);
-        await sleep(waitMs);
-        if (result.throttled) result = await search[provider](keys[provider], query, pacer);
-      }
+      const result = await searchPolitely(provider, query);
       found.push(...result.photos);
+      if (rankCandidates(found, dishQueries).length >= ENOUGH) break;
     }
     searched.add(provider);
   }
@@ -101,6 +115,9 @@ for (const dish of catalog.dishes) {
   const withThumbs = [];
   for (const candidate of ranked)
     if (await saveThumb(dish.id, candidate)) withThumbs.push(candidate);
+  if (ranked.length > 0 && withThumbs.length === 0) {
+    console.log(`${dish.id}: миниатюры не скачались (CDN недоступен? нужен VPN)`);
+  }
   state.dishes[dish.id] = {
     candidates: withThumbs,
     searched: [...searched],
