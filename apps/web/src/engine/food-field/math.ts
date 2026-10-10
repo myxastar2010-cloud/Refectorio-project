@@ -220,3 +220,57 @@ export function assignSprites(
   });
   return result;
 }
+
+/** The finale's attractor (ТЗ §12.2): food spirals into the core and dissolves there. */
+export type Attractor = { readonly x: number; readonly y: number; readonly radiusPx: number };
+
+export const ATTRACT = {
+  /** Inward speed far away / near the core (px/s): slow, the food is blurred background. */
+  inwardPxS: [70, 28] as const,
+  /** Tangential speed at the reference distance; a vortex turns faster closer in. */
+  swirlPxS: 46,
+  referenceRadii: 4,
+  maxSwirlBoost: 2.4,
+  /** The food fades out between these multiples of the core radius and respawns at the edge. */
+  dissolveFrom: 1.9,
+  dissolveTo: 1.05,
+  /** Seconds to fade a respawned item in, and to blend the attraction in or out. */
+  fadeInS: 1.4,
+  blendS: 2,
+} as const;
+
+/** Spiral velocity towards the attractor (px/s): inward plus a vortex swirl (counter-clockwise on screen). */
+export function attractVelocity(p: Vec, attractor: Attractor): Vec {
+  const dx = attractor.x - p.x;
+  const dy = attractor.y - p.y;
+  const distance = Math.hypot(dx, dy);
+  if (distance < 1e-6) return { x: 0, y: 0 };
+  const ux = dx / distance;
+  const uy = dy / distance;
+  const reference = attractor.radiusPx * ATTRACT.referenceRadii;
+  const near = Math.min(1, distance / reference);
+  const inward = ATTRACT.inwardPxS[1] + (ATTRACT.inwardPxS[0] - ATTRACT.inwardPxS[1]) * near;
+  const swirl = ATTRACT.swirlPxS * Math.min(ATTRACT.maxSwirlBoost, reference / distance);
+  return { x: ux * inward - uy * swirl, y: uy * inward + ux * swirl };
+}
+
+/** Opacity of an item at `distance` from the core (1 outside the dissolve ring, 0 at the core's edge). */
+export function dissolveOpacity(distance: number, radiusPx: number): number {
+  const from = radiusPx * ATTRACT.dissolveFrom;
+  const to = radiusPx * ATTRACT.dissolveTo;
+  if (distance >= from) return 1;
+  if (distance <= to) return 0;
+  const t = (distance - to) / (from - to);
+  return t * t * (3 - 2 * t);
+}
+
+/** A respawn point just outside the area, on a random edge (weighted by the edge's length). */
+export function edgePoint(random: Random, area: Rect, margin: number): Vec {
+  const width = area.right - area.left;
+  const height = area.bottom - area.top;
+  const along = random.range(0, 2 * (width + height));
+  if (along < width) return { x: area.left + along, y: area.top - margin };
+  if (along < 2 * width) return { x: area.left + along - width, y: area.bottom + margin };
+  if (along < 2 * width + height) return { x: area.left - margin, y: area.top + along - 2 * width };
+  return { x: area.right + margin, y: area.top + along - 2 * width - height };
+}

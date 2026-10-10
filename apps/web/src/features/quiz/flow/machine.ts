@@ -2,6 +2,7 @@ import {
   decisiveCount,
   DECISIVE_ANSWERS_REQUIRED,
   type SafetyAdjustment,
+  type TasteDecision,
 } from '@refectorio/contracts';
 import { AGE_LIMITS, targetWeightBoundsKg, type ReasonCode } from '@refectorio/nutrition-core';
 import type { NoticeId } from '../../../content/quizSchema';
@@ -16,12 +17,22 @@ import { emptyAnswers, type Answers, type QuizState, type Screen, type StepId } 
  */
 export type QuizAction =
   | { readonly type: 'patch'; readonly patch: Partial<Answers> }
+  /** Forget answers that no longer fit (a target weight after the current weight changed). */
+  | { readonly type: 'clear'; readonly keys: readonly ClearableKey[] }
   /** A row of «Цель» was committed: the goal rules run at once (the target row may disappear). */
   | { readonly type: 'rowCommitted' }
   | { readonly type: 'next' }
   | { readonly type: 'dismissNotice' }
   | { readonly type: 'back' }
+  /** One answer of the dish game (an entry in the browser history of its own). */
+  | { readonly type: 'tasteAnswer'; readonly decision: TasteDecision }
+  | { readonly type: 'tasteUndo' }
+  | { readonly type: 'tasteExhausted' }
+  /** The browser went back this many entries (useQuizHistory). */
+  | { readonly type: 'rewind'; readonly steps: number }
   | { readonly type: 'restart'; readonly seed: number; readonly now: string };
+
+export type ClearableKey = 'targetWeightKg' | 'insulin' | 'trimester' | 'lactationPeriod';
 
 export function initialQuizState(seed: number, now: string): QuizState {
   return {
@@ -145,6 +156,11 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
     case 'patch':
       return { ...state, answers: { ...state.answers, ...action.patch } };
+    case 'clear': {
+      const answers: Record<string, unknown> = { ...state.answers };
+      for (const key of action.keys) Reflect.deleteProperty(answers, key);
+      return { ...state, answers: answers as Answers };
+    }
     case 'rowCommitted':
       return state.screen === 'finale' || state.screen === 'adjustments'
         ? state
@@ -172,9 +188,62 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
         advanceAfterNotices: false,
       };
     }
+    case 'tasteAnswer':
+      return {
+        ...state,
+        answers: {
+          ...state.answers,
+          tasteDecisions: [...state.answers.tasteDecisions, action.decision],
+        },
+      };
+    case 'tasteUndo':
+      return {
+        ...state,
+        answers: {
+          ...state.answers,
+          tasteDecisions: state.answers.tasteDecisions.slice(0, -1),
+          tasteExhausted: false,
+        },
+      };
+    case 'tasteExhausted':
+      return { ...state, answers: { ...state.answers, tasteExhausted: true } };
+    case 'rewind':
+      return rewind(state, action.steps);
     case 'restart':
       return initialQuizState(action.seed, action.now);
   }
+}
+
+/**
+ * The game's last answer moves the quiz on by itself, so the answer and the step forward share one history entry:
+ * Back from «О вас» returns to the game with that card again (ТЗ §7.4). Leaving through «Дальше» of an exhausted
+ * catalog is a click of its own and keeps its own entry.
+ */
+const leftGameWithAnswer = (state: Pick<QuizState, 'answers' | 'history'>) =>
+  state.history.length > 0 &&
+  !state.answers.tasteExhausted &&
+  state.answers.tasteDecisions.length > 0;
+
+/**
+ * Entries this quiz owns in the browser history: one per dish answer and one per step forward; Back walks them back
+ * (features/quiz/useQuizHistory).
+ */
+export const historyDepth = (state: Pick<QuizState, 'answers' | 'history'>) =>
+  state.answers.tasteDecisions.length + state.history.length - (leftGameWithAnswer(state) ? 1 : 0);
+
+/** Undoes `steps` entries: screens first, then dish answers (on the game screen). */
+export function rewind(state: QuizState, steps: number): QuizState {
+  let next = state;
+  for (let i = 0; i < steps; i += 1) {
+    if (next.history.length > 0) {
+      const merged = next.history.length === 1 && leftGameWithAnswer(next);
+      next = quizReducer(next, { type: 'back' });
+      if (merged) next = quizReducer(next, { type: 'tasteUndo' });
+    } else if (next.answers.tasteDecisions.length > 0) {
+      next = quizReducer(next, { type: 'tasteUndo' });
+    } else break;
+  }
+  return next;
 }
 
 /**

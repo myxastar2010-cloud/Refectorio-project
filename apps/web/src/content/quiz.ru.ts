@@ -18,6 +18,7 @@ export const quiz = {
     close: 'Закрыть',
     understood: 'Понятно',
     remove: 'Убрать «{item}»',
+    added: 'Добавлено: {item}',
     progressLabel: 'Прогресс теста',
     progressValue: 'Вопрос {n} из {total}',
     resumeToast: 'Продолжаем с вопроса {n}',
@@ -43,6 +44,8 @@ export const quiz = {
     },
     credit: 'Фото: {author} · {provider}',
     creditLabel: 'Фото: {author}, {provider}. Откроется в новой вкладке',
+    providerLabel: '{provider}. Откроется в новой вкладке',
+    providers: { unsplash: 'Unsplash', pexels: 'Pexels' },
     skipHint: 'Можно пропускать незнакомые блюда — покажем те, что точно знаете.',
     exhausted: 'Блюда закончились — этого хватит, чтобы начать.',
     exhaustedContinue: 'Дальше',
@@ -293,6 +296,8 @@ export const quiz = {
     deleteNo: 'Отмена',
     deleted: 'Ответы удалены',
     credits: 'Авторы фотографий',
+    creditsUrl:
+      'https://github.com/myxastar2010-cloud/Refectorio-project/blob/main/docs/photo-credits.md',
   },
   finale: {
     captions: [

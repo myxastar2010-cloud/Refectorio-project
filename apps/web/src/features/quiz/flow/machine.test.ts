@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  historyDepth,
   initialQuizState,
   nextScreen,
   progressOf,
   quizReducer,
   reconcile,
+  rewind,
   type QuizAction,
 } from './machine';
 import { firstIncompleteStep, nextStepId, questionNumber, STEPS } from './steps';
@@ -252,5 +254,54 @@ describe('progress', () => {
     expect(progressOf({ screen: 'notes', answers: base.answers })).toBeCloseTo(10 / 11, 10);
     expect(progressOf({ screen: 'adjustments', answers: base.answers })).toBeLessThan(1);
     expect(progressOf({ screen: 'finale', answers: base.answers })).toBe(1);
+  });
+});
+
+describe('history entries', () => {
+  const answered = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({ dishId: `d_dish_${i}`, answer: 'like' as const }));
+  const aboutYou = patch({ sex: 'female', ageYears: 30, heightCm: 165 });
+
+  it('one entry per dish answer and per step; the last answer and the step forward share one', () => {
+    const base = initialQuizState(1, NOW);
+    const playing = { ...base, answers: { ...base.answers, tasteDecisions: answered(4) } };
+    expect(historyDepth(playing)).toBe(4);
+    const left = run(adultAt('taste', { tasteDecisions: answered(10) }), next);
+    expect(left.screen).toBe('body');
+    expect(historyDepth(left)).toBe(10);
+    const further = run(left, aboutYou, next);
+    expect(further.screen).toBe('goal');
+    expect(historyDepth(further)).toBe(11);
+  });
+
+  it('Back from «О вас» returns to the game with its last card again', () => {
+    const left = run(adultAt('taste', { tasteDecisions: answered(10) }), next);
+    const back = rewind(left, 1);
+    expect(back.screen).toBe('taste');
+    expect(back.answers.tasteDecisions).toHaveLength(9);
+    expect(historyDepth(back)).toBe(9);
+  });
+
+  it('leaving an exhausted catalog is an entry of its own', () => {
+    const base = initialQuizState(1, NOW);
+    const exhausted = run(
+      { ...base, answers: { ...base.answers, tasteDecisions: answered(3) } },
+      { type: 'tasteExhausted' },
+      next,
+    );
+    expect(exhausted.screen).toBe('body');
+    expect(historyDepth(exhausted)).toBe(4);
+    const back = rewind(exhausted, 1);
+    expect(back.screen).toBe('taste');
+    expect(back.answers.tasteDecisions).toHaveLength(3);
+  });
+
+  it('rewinds several entries: screens first, then answers; never below the start', () => {
+    const left = run(adultAt('taste', { tasteDecisions: answered(10) }), next);
+    const further = run(left, aboutYou, next);
+    const back = rewind(further, 3);
+    expect(back.screen).toBe('taste');
+    expect(back.answers.tasteDecisions).toHaveLength(8);
+    expect(rewind(back, 50).answers.tasteDecisions).toHaveLength(0);
   });
 });
