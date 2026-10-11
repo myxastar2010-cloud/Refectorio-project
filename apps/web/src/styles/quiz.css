@@ -112,6 +112,21 @@
   color: var(--color-ink);
 }
 
+/* Portrait tablets: the window is narrow and tall. A larger unit fills it better, and «Вернуться» with the bar get a
+   row of their own under the logo and «Выйти» (on one row they ran into «Refectorio»). */
+@media (min-width: 48rem) and (orientation: portrait) {
+  .quiz {
+    --q: max(0.62px, min(100vw / 1000, 100svh / 1000));
+    --q-tablet-row: 56px;
+    --q-header-h: calc(126 * var(--q) + var(--q-tablet-row));
+    --q-progress-y: calc(var(--quiz-progress-y) * var(--q) + var(--q-tablet-row));
+    --q-top: calc(var(--quiz-icon-y) * var(--q) + var(--q-tablet-row));
+    --q-game-title-y: calc(var(--quiz-game-title-y) * var(--q) + var(--q-tablet-row));
+    /* The longest health chip stays on one line at 768–1000 px. */
+    --q-chip-compact: calc(var(--type-quiz-chip-size) * 0.66 * var(--q));
+  }
+}
+
 /* The desktop frame: the mockup scaled by --s, without the landing's laptop --boost — every step of the mockups fills
    one 1080 px screen, and boosted it would no longer fit a laptop window (1536×730). Small texts keep their own
    minimum sizes below. */
