@@ -224,7 +224,8 @@ export const QUIZ = {
   /** «+» → add panel and row → picker panel (transform-only shape morph). */
   panelSpring: { stiffness: 420, damping: 38, mass: 0.9 },
   panelContentAt: 0.6,
-  toastMs: 6000,
+  /** «Продолжаем с вопроса n»: long enough to read and reach «Начать заново»; paused under the pointer or focus. */
+  toastMs: 12000,
   /** Notice cards and sheets. */
   sheet: { durationMs: 340, risePx: 24 },
 } as const;
@@ -235,6 +236,8 @@ export const TINDER = {
   commitShare: 0.3,
   commitDownShare: 0.22,
   flingPxS: 650,
+  /** …but a fling commits only after this share of the width (a twitch of the finger is not an answer). */
+  flingMinShare: 0.12,
   maxRotateDeg: 12,
   /** The matching button swells as the card moves towards it. */
   buttonSwell: 0.18,

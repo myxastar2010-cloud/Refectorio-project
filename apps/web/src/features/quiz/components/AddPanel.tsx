@@ -41,6 +41,8 @@ export function AddPanel({
   const inputRef = useRef<HTMLInputElement>(null);
   const titleId = useId();
   const [text, setText] = useState('');
+  // From «Готово» or × on, the panel is only a shape flying home: no longer reachable or announced.
+  const [leaving, setLeaving] = useState(false);
   const closing = useRef(false);
   const intoChip = useRef(false);
 
@@ -59,6 +61,7 @@ export function AddPanel({
   const finish = async (submit: boolean) => {
     if (closing.current) return;
     closing.current = true;
+    setLeaving(true);
     const value = text.trim();
     const target = submit && value ? onSubmit(value) : null;
     intoChip.current = target !== null;
@@ -84,6 +87,8 @@ export function AddPanel({
       className="quiz-add"
       role="group"
       aria-labelledby={titleId}
+      inert={leaving}
+      aria-hidden={leaving || undefined}
       onKeyDown={onKeyDown}
       initial={calm ? { opacity: 0 } : false}
       animate={{ opacity: 1, transition: { duration: DURATION.fade } }}

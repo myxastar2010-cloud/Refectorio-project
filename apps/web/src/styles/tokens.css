@@ -313,9 +313,11 @@
   --quiz-pill-gap-short: 27;
   --quiz-pill-h-desc: 123; /* option with a one-line description */
   --quiz-pill-gap-desc: 16;
-  --quiz-pill-pad-x: 50;
+  /* The label starts 110 px from the pill's left edge, as in the mockup (44 + icon 56 + 10): the longest labels
+     («Набор мышечной массы», «Физическая нагрузка») stay on one line in Open Runde, ≈ 3 % wider than the mockup font. */
+  --quiz-pill-pad-x: 44;
   --quiz-option-icon: 56;
-  --quiz-option-icon-gap: 14;
+  --quiz-option-icon-gap: 10;
   --quiz-yesno-h: 117;
   --quiz-yesno-gap: 44;
   --quiz-radio: 46;

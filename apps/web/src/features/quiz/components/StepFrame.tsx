@@ -6,6 +6,7 @@ import type { IconKey } from '../flow/steps';
 import { useQuiz } from '../quizContext';
 import { quizIcon } from '../quizIcons';
 import { PrivacyLabel } from './PrivacyLabel';
+import { useLayoutFollow } from './useLayoutFollow';
 import { blockVariants, StepMotionContext, type PresenceInfo } from './stepMotion';
 
 type BlockProps = {
@@ -45,6 +46,18 @@ function QuestionIcon({ icon }: { readonly icon: IconKey }) {
           decoding="async"
         />
       </picture>
+    </m.div>
+  );
+}
+
+/** The privacy label glides to its new place when «Далее» rises in above it. */
+function Following({ children }: { readonly children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { calm } = useQuiz();
+  const y = useLayoutFollow(ref, calm);
+  return (
+    <m.div ref={ref} style={{ y }}>
+      {children}
     </m.div>
   );
 }
@@ -104,7 +117,9 @@ export function StepFrame({
       ) : null}
       {privacy ? (
         <Block order={3} className="quiz-privacy">
-          <PrivacyLabel />
+          <Following>
+            <PrivacyLabel />
+          </Following>
         </Block>
       ) : null}
     </div>

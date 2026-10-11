@@ -17,6 +17,7 @@ export const quiz = {
     addOther: 'Добавить другое',
     close: 'Закрыть',
     understood: 'Понятно',
+    noticeTitle: 'Обратите внимание',
     remove: 'Убрать «{item}»',
     added: 'Добавлено: {item}',
     progressLabel: 'Прогресс теста',

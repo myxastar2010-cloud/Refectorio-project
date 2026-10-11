@@ -585,3 +585,16 @@
   width: 1em;
   height: 1em;
 }
+
+/* «Загружаем тест…» while the quiz chunk is on its way (app/QuizBoundary.tsx). */
+.quiz-loading {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-scene);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  pointer-events: none;
+}

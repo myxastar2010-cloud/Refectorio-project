@@ -62,6 +62,10 @@ describe('wheel picker maths', () => {
     expect(drum(-1, 64).y).toBeCloseTo(-near.y, 9);
     expect(drum(6, 64).visible).toBe(false);
     expect(drum(6, 64).opacity).toBe(0);
+    // Seven values at rest: the third neighbour is shown and readable, the fourth is gone.
+    expect(drum(3, 64).opacity).toBeGreaterThan(0.45);
+    expect(drum(4, 64).opacity).toBe(0);
+    expect(drum(3.75, 64).opacity).toBeGreaterThan(0);
   });
 
   it('one mouse notch is one value; touchpad deltas add up', () => {

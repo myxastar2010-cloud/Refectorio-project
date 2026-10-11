@@ -77,6 +77,7 @@ export const quizContentSchema = z.object({
     addOther: text,
     close: text,
     understood: text,
+    noticeTitle: text,
     remove: template('item'),
     added: template('item'),
     progressLabel: text,

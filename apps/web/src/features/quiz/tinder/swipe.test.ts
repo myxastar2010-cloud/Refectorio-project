@@ -18,10 +18,15 @@ describe('dish card swipes', () => {
 
   it('a fling commits a short drag in its own direction only', () => {
     const fast = TINDER.flingPxS + 1;
-    expect(decideSwipe({ x: 30, y: 0 }, { vx: fast, vy: 0 }, card)).toBe('like');
-    expect(decideSwipe({ x: 30, y: 0 }, { vx: -fast, vy: 0 }, card)).toBeNull();
-    expect(decideSwipe({ x: 4, y: 40 }, { vx: 0, vy: fast }, card)).toBe('skip');
+    const flick = card.width * TINDER.flingMinShare + 1;
+    expect(decideSwipe({ x: flick, y: 0 }, { vx: fast, vy: 0 }, card)).toBe('like');
+    expect(decideSwipe({ x: flick, y: 0 }, { vx: -fast, vy: 0 }, card)).toBeNull();
+    expect(
+      decideSwipe({ x: 4, y: card.height * TINDER.flingMinShare + 1 }, { vx: 0, vy: fast }, card),
+    ).toBe('skip');
     expect(decideSwipe({ x: 0, y: -60 }, { vx: 0, vy: -fast }, card)).toBeNull();
+    // A twitch of the finger, however fast, is not an answer.
+    expect(decideSwipe({ x: 20, y: 0 }, { vx: 5 * fast, vy: 0 }, card)).toBeNull();
   });
 
   it('upward drags are resisted, rotation is bounded', () => {

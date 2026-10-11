@@ -1,6 +1,7 @@
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation } from 'motion/react';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import { Toast } from '../components/Toast';
+import { site } from '../content/site.ru';
 import { FoodFieldLayer } from '../engine/food-field/FoodFieldLayer';
 import { TeamDialog } from '../features/team-dialog/TeamDialog';
 import { whenIdle } from '../lib/idle';
@@ -12,6 +13,7 @@ import { AboutScene } from '../scenes/AboutScene';
 import { HeroScene } from '../scenes/HeroScene';
 import { SiteHeader } from '../scenes/SiteHeader';
 import { useSceneInput } from '../scenes/useSceneInput';
+import { QuizBoundary, QuizLoading } from './QuizBoundary';
 import { useScene, type Scene } from './useScene';
 
 const TOAST_MS = 3200;
@@ -21,7 +23,8 @@ const params = readTestParams(window.location.search);
 const noop = (): void => undefined;
 
 const loadQuiz = () => import('../features/quiz/QuizScene');
-const QuizScene = lazy(() => loadQuiz().then((module) => ({ default: module.QuizScene })));
+/** A fresh lazy component: after a failed load the next «Создать меню» must try again, not rethrow. */
+const lazyQuiz = () => lazy(() => loadQuiz().then((module) => ({ default: module.QuizScene })));
 let quizRequested = false;
 /** Hover, focus or touch on «Создать меню»: start loading the quiz before the click. */
 const prefetchQuiz = () => {
@@ -50,6 +53,7 @@ function Page() {
   const [teamOut, setTeamOut] = useState(false);
   const teamTileRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [QuizScene, setQuizScene] = useState(lazyQuiz);
   // Exposed as data-busy: e2e tests wait for the end of a transition by state, not by timeouts.
   const [busy, setBusy] = useState(false);
   const lockedUntil = useRef(0);
@@ -91,6 +95,13 @@ function Page() {
     leaveQuiz();
   }, [calm, leaveQuiz, lockFor]);
 
+  const quizFailed = useCallback(() => {
+    quizRequested = false;
+    setQuizScene(() => lazyQuiz());
+    exitQuiz();
+    setToast(site.quizShell.loadError);
+  }, [exitQuiz]);
+
   // Entering part 2 moves focus to its title (ТЗ 6.5); leaving it returns focus to «О проекте». The quiz moves focus
   // to its own step title.
   const previousScene = useRef(scene);
@@ -101,7 +112,8 @@ function Page() {
     if (scene === 'about') focusQuietly(aboutTitleRef.current);
     else if (scene === 'hero' && from === 'quiz') {
       focusQuietly(document.querySelector<HTMLAnchorElement>('.cta'));
-    } else if (scene === 'hero') focusQuietly(document.querySelector<HTMLButtonElement>('.about-pill'));
+    } else if (scene === 'hero')
+      focusQuietly(document.querySelector<HTMLButtonElement>('.about-pill'));
   }, [scene]);
 
   // Stable: a new function on every render would re-create the input listeners and reset the wheel gesture.
@@ -213,9 +225,11 @@ function Page() {
         </main>
         <AnimatePresence>
           {inQuiz && (
-            <Suspense key="quiz" fallback={null}>
-              <QuizScene instant={instant} onExit={exitQuiz} params={params} />
-            </Suspense>
+            <QuizBoundary key="quiz" onError={quizFailed}>
+              <Suspense fallback={<QuizLoading />}>
+                <QuizScene instant={instant} onExit={exitQuiz} params={params} />
+              </Suspense>
+            </QuizBoundary>
           )}
         </AnimatePresence>
       </div>

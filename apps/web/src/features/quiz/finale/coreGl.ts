@@ -30,21 +30,21 @@ float smin(float a, float b, float k) {
 
 vec3 blob(float i, float t) {
   float a = t * (0.32 + 0.09 * i) + i * 1.5708 + 0.5 * sin(t * 0.23 + i * 1.7);
-  float orbit = 0.24 + 0.07 * sin(t * 0.41 + i * 2.3);
+  float orbit = 0.27 + 0.17 * sin(t * 0.41 + i * 2.3);
   float tilt = 0.45 + 0.3 * sin(i * 1.9 + 0.6);
   vec3 c = vec3(cos(a) * orbit, sin(a) * orbit * tilt, sin(a) * orbit * sqrt(1.0 - tilt * tilt));
-  float r = 0.14 + 0.03 * sin(t * 0.83 + i * 1.31);
+  float r = 0.12 + 0.03 * sin(t * 0.83 + i * 1.31);
   float near = 1.0 + 0.9 * c.z;
   return vec3(c.xy * near, r * near);
 }
 
 float field(vec2 p, float t, float intro) {
   float swell = exp(-uPulse * 3.2) * 0.035 * intro;
-  float d = length(p) - mix(uDot, 0.25 + 0.012 * sin(t * 1.3), intro) - swell;
+  float d = length(p) - mix(uDot, 0.22 + 0.015 * sin(t * 1.3), intro) - swell;
   for (int i = 0; i < 4; i++) {
     vec3 b = blob(float(i), t);
     float r = mix(uDot, b.z, intro);
-    d = smin(d, length(p - b.xy * intro) - r, 0.001 + 0.15 * intro);
+    d = smin(d, length(p - b.xy * intro) - r, 0.001 + 0.12 * intro);
   }
   return d;
 }

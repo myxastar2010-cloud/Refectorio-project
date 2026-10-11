@@ -1,3 +1,4 @@
+import './zodConfig';
 import '../../styles/quiz.css';
 
 import type { TasteDecision } from '@refectorio/contracts';

@@ -30,9 +30,13 @@ function NoticeCard({ id }: { readonly id: NoticeId }) {
       className="quiz-notice"
       role="alertdialog"
       aria-modal="true"
+      aria-labelledby={`quiz-notice-title-${id}`}
       aria-describedby={`quiz-notice-${id}`}
       {...sheetMotion(calm)}
     >
+      <h2 className="visually-hidden" id={`quiz-notice-title-${id}`}>
+        {quiz.common.noticeTitle}
+      </h2>
       <p className="quiz-notice-text" id={`quiz-notice-${id}`}>
         {quiz.notices[id]}
       </p>

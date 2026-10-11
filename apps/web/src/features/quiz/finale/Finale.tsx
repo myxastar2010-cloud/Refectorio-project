@@ -1,6 +1,14 @@
 import type { QuizAnswersV1 } from '@refectorio/contracts';
 import { AnimatePresence, m } from 'motion/react';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 import { quiz } from '../../../content/quiz.ru';
 import { setFoodAttractor } from '../../../engine/food-field/attractorChannel';
 import { focusQuietly } from '../../../lib/quietFocus';
@@ -151,7 +159,7 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
   }, []);
 
   return (
-    <div className="quiz-finale">
+    <div className="quiz-finale" style={{ '--core-size': `${size}px` } as CSSProperties}>
       <h2 ref={titleRef} id="quiz-step-title" className="visually-hidden" tabIndex={-1}>
         {quiz.finale.generatingLabel}
       </h2>

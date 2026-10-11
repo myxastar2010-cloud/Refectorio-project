@@ -91,14 +91,6 @@ test.describe('scenes', () => {
     await page.keyboard.press('ArrowUp');
     await settled(page, 'hero');
   });
-
-  test('«Создать меню» shows a friendly note instead of a dialog', async ({ page }) => {
-    await page.goto('./?seed=1');
-    await page.getByRole('link', { name: 'Создать меню' }).click();
-    await expect(page.getByRole('status')).toHaveText('Скоро: интерактивный тест');
-    await expect(page).toHaveURL(/#quiz$/);
-    await expect(scene(page)).toHaveAttribute('data-scene', 'hero');
-  });
 });
 
 test.describe('small window: part 2 scrolls inside', () => {

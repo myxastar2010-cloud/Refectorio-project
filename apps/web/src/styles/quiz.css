@@ -112,10 +112,12 @@
   color: var(--color-ink);
 }
 
-/* The desktop frame (as the landing): the mockup scaled by --s and the laptop --boost. */
+/* The desktop frame: the mockup scaled by --s, without the landing's laptop --boost — every step of the mockups fills
+   one 1080 px screen, and boosted it would no longer fit a laptop window (1536×730). Small texts keep their own
+   minimum sizes below. */
 @media (min-width: 80rem) and (hover: hover) {
   .quiz {
-    --q: calc(var(--s) * var(--boost, 1));
+    --q: var(--s);
     --q-gutter: calc(var(--hero-side));
   }
 }
@@ -294,15 +296,17 @@
   pointer-events: none;
 }
 
+/* Sized by the button, not by its content span (a percentage of the span would collapse). */
 .quiz-back-icon {
-  width: 46%;
-  height: 46%;
+  width: calc(var(--q-back) * 0.42);
+  height: calc(var(--q-back) * 0.42);
 }
 
 @media (max-width: 47.99rem) {
+  /* Between «Вернуться» and the compact «Выйти ×» pill of the landing header (≈ 116 px wide on phones). */
   .quiz-progress-slot {
     left: calc(var(--q-gutter) + var(--q-back) + var(--q-back-gap));
-    right: calc(var(--q-gutter) + 104px);
+    right: calc(var(--q-gutter) + 116px + var(--q-back-gap));
     width: auto;
     margin-left: 0;
   }
@@ -384,7 +388,8 @@
 }
 
 .quiz-title {
-  max-width: min(100%, calc(1400 * var(--q)));
+  /* The longest one-line title of the mockups is 1410 px wide. */
+  max-width: min(100%, calc(1640 * var(--q)));
   margin-top: var(--q-title-gap);
   font-size: var(--q-title);
   line-height: var(--q-title-leading);
@@ -455,8 +460,9 @@
   height: var(--q-done-h);
   padding: 0 calc(36 * var(--q));
   border-radius: 9999px;
-  font-size: var(--q-button);
-  font-weight: 600;
+  /* White on #E63946 is 4.17:1: the label is large text (≥ 18.67 px bold → 3:1, WCAG 1.4.3), never small. */
+  font-size: max(19px, var(--q-button));
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -485,10 +491,19 @@
   opacity: 0.5;
 }
 
+/* No reserved space: «Далее» rises in and the privacy label glides down (StepFrame), as close to the mockups as can be
+   while the answer is not complete. */
 .quiz-continue {
   display: flex;
   justify-content: center;
-  min-height: var(--q-done-h);
+}
+
+.quiz-continue:empty {
+  display: none;
+}
+
+.quiz-footer:has(> .quiz-continue:empty) {
+  margin-top: 0;
 }
 
 .quiz-continue-button {
@@ -709,9 +724,9 @@
   white-space: nowrap;
 }
 
-/* «Выбрать ›» in the accent (bold, ≥ 19 px: large text, 3:1). */
+/* «Выбрать ›»: the mockup's red, one step deeper — at row-value size #E63946 is 4.0:1, #C42532 is 5.4:1 (WCAG 1.4.3). */
 .quiz-row-value.is-empty {
-  color: var(--color-accent);
+  color: var(--color-accent-deep);
   font-weight: 700;
 }
 
@@ -1159,6 +1174,17 @@
   min-width: var(--q-done-w);
 }
 
+@media (max-width: 47.99rem) {
+  .quiz-add-content {
+    gap: 20px;
+    padding: 22px 18px 24px;
+  }
+
+  .quiz-add-head {
+    padding: 0 calc(var(--q-close) + 4px);
+  }
+}
+
 /* Inline questions under the chips: insulin, trimester, the baby's age. */
 .quiz-followup {
   display: flex;
@@ -1601,8 +1627,8 @@
 }
 
 .quiz-game-button svg {
-  width: 46%;
-  height: 46%;
+  width: calc(var(--q-game-button) * 0.46);
+  height: calc(var(--q-game-button) * 0.46);
 }
 
 .quiz-game-button--dislike {
@@ -1813,11 +1839,12 @@
   pointer-events: none;
 }
 
+/* The core's canvas keeps room for its satellites and ripple: the captions sit up into that empty lower band. */
 .quiz-finale-captions {
   display: flex;
   justify-content: center;
   min-height: calc(var(--quiz-caption-h) + 8px);
-  margin-top: max(12px, calc(28 * var(--q)));
+  margin-top: calc(var(--core-size, 360px) * -0.14);
 }
 
 .quiz-caption {

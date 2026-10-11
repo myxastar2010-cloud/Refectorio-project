@@ -49,15 +49,19 @@ export function rubberBand(offset: number, count: number): number {
  */
 export function drum(distance: number, itemPx: number) {
   const angle = (distance * WHEEL.itemDeg * Math.PI) / 180;
-  const visible = Math.abs(angle) < Math.PI / 2;
   const radius = itemPx / ((WHEEL.itemDeg * Math.PI) / 180);
   const cos = Math.cos(angle);
+  // WHEEL.visible values at rest (ТЗ §8.3: 5–7); the next ones fade out over half an item while the drum turns. At
+  // rest the outermost shown value stays readable (≥ 3:1 for this large bold text).
+  const edge = WHEEL.visible / 2;
+  const inView = Math.min(1, Math.max(0, edge + 0.5 - Math.abs(distance)));
+  const visible = inView > 0 && Math.abs(angle) < Math.PI / 2;
   return {
     visible,
     y: radius * Math.sin(angle),
     scaleY: Math.max(0, cos),
     scale: 0.82 + 0.18 * Math.max(0, cos),
-    opacity: visible ? 0.2 + 0.8 * Math.max(0, cos) ** 2 : 0,
+    opacity: visible ? (0.2 + 0.8 * Math.max(0, cos) ** 2) * inView : 0,
   };
 }
 

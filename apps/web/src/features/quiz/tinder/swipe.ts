@@ -32,7 +32,9 @@ export function decideSwipe(
 ): TasteAnswer | null {
   const horizontal = Math.abs(offset.x) >= Math.abs(offset.y) * 0.8;
   const flungX =
-    Math.abs(velocity.vx) > TINDER.flingPxS && Math.sign(velocity.vx) === Math.sign(offset.x);
+    Math.abs(velocity.vx) > TINDER.flingPxS &&
+    Math.sign(velocity.vx) === Math.sign(offset.x) &&
+    Math.abs(offset.x) > card.width * TINDER.flingMinShare;
   if (
     horizontal &&
     (Math.abs(offset.x) > card.width * TINDER.commitShare || flungX) &&
@@ -40,7 +42,10 @@ export function decideSwipe(
   ) {
     return offset.x > 0 ? 'like' : 'dislike';
   }
-  const flungDown = velocity.vy > TINDER.flingPxS && Math.abs(velocity.vx) < velocity.vy;
+  const flungDown =
+    velocity.vy > TINDER.flingPxS &&
+    Math.abs(velocity.vx) < velocity.vy &&
+    offset.y > card.height * TINDER.flingMinShare;
   if (
     !horizontal &&
     offset.y > 0 &&

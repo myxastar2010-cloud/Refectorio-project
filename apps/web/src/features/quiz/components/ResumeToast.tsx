@@ -1,5 +1,5 @@
 import { AnimatePresence, m } from 'motion/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { quiz } from '../../../content/quiz.ru';
 import { useCalmMotion } from '../../../motion/hooks';
 import { DURATION, EASE_OUT_EXPO, QUIZ } from '../../../motion/tokens';
@@ -15,13 +15,15 @@ type Props = {
 /** A resumed draft: «Продолжаем с вопроса n» with «Начать заново» (ТЗ §7.4); goes away by itself. */
 export function ResumeToast({ show, number, onRestart, onDone }: Props) {
   const calm = useCalmMotion();
+  // WCAG 2.2.1: the time runs only while the toast is not being read or used.
+  const [held, setHeld] = useState(false);
   useEffect(() => {
-    if (!show) return undefined;
+    if (!show || held) return undefined;
     const timer = window.setTimeout(onDone, QUIZ.toastMs);
     return () => {
       window.clearTimeout(timer);
     };
-  }, [show, onDone]);
+  }, [show, held, onDone]);
   return (
     <div className="quiz-toast-region" role="status" aria-live="polite">
       <AnimatePresence>
@@ -29,6 +31,18 @@ export function ResumeToast({ show, number, onRestart, onDone }: Props) {
           <m.div
             key="resume"
             className="quiz-toast"
+            onPointerEnter={() => {
+              setHeld(true);
+            }}
+            onPointerLeave={() => {
+              setHeld(false);
+            }}
+            onFocus={() => {
+              setHeld(true);
+            }}
+            onBlur={() => {
+              setHeld(false);
+            }}
             initial={{ opacity: 0, transform: calm ? 'none' : 'translateY(16px)' }}
             animate={{
               opacity: 1,
