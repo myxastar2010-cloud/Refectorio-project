@@ -38,6 +38,7 @@
     "photos:curate": "node scripts/photos/curate.mjs",
     "photos:sheets": "node scripts/photos/review-sheets.mjs",
     "photos:finalize": "node scripts/photos/finalize.mjs",
+    "photos:runtime": "node scripts/photos/runtime.mjs",
     "photos:materialize": "node scripts/photos/materialize.mjs",
     "sim": "npm run sim -w @refectorio/taste-core --"
   },

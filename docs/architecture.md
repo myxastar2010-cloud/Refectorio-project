@@ -1,6 +1,6 @@
 # Архитектура Refectorio
 
-Решения — в `docs/adr/` (0001–0007). Черновики этапов 2–3: модель данных — `docs/drafts/data-model.md`,
+Решения — в `docs/adr/` (0001–0010). Черновики этапов 2–3: модель данных — `docs/drafts/data-model.md`,
 контракт API — `docs/drafts/openapi.yaml`.
 
 ## 1. Контекст системы
@@ -90,3 +90,73 @@ sequenceDiagram
     W-->>U: интерактивное меню
   end
 ```
+
+## 4. Тест «Создать меню» (этап 2)
+
+Тест открывается по «Создать меню» (адрес `#quiz`) поверх главной: главная становится `inert`, летающая еда
+размывается и замедляется. Весь код теста — ленивые чанки, главная от него не тяжелеет.
+
+```mermaid
+flowchart TB
+  app[App.tsx<br/>сцены hero / about / quiz] -- "наведение, фокус, простой" --> load[loadQuiz.ts]
+  load --> scene[QuizScene<br/>чанк теста ≤ 90 КБ gz]
+  load --> photos[(photo-runtime.json<br/>свой чанк ≤ 25 КБ gz)]
+  scene --> flow[flow/<br/>steps · machine · safety · persistence]
+  scene --> stage[components/StepStage<br/>переходы шагов]
+  stage --> steps[steps/<br/>варианты · Да/Нет · строки + колесо · чипы + «+» · текст]
+  stage --> game[tinder/<br/>игра «Выберите блюдо»]
+  stage -. "простой на последних шагах" .-> finale[finale/<br/>свой чанк: ядро, подписи, волна]
+  finale -.-> gl[coreGl · revealGl<br/>WebGL2, свои чанки]
+  game --> taste[packages/taste-core<br/>каталог · модель · отбор]
+  flow --> core[packages/nutrition-core<br/>guardrails · вес · активность]
+  flow --> contracts[packages/contracts<br/>QuizAnswersV1 · TasteProfileV1]
+  flow --> ls[(localStorage<br/>черновик и результат)]
+```
+
+- **Поток — данные.** `flow/steps.ts` перечисляет шаги (id, вид, `showIf(ответы)`, проверка), `flow/machine.ts` —
+  чистый редьюсер (ответ, «Назад», отмена карточки, переход), `flow/safety.ts` сверяет ответы с guardrails
+  (`nutrition-core`) и решает, какие уведомления показать и что поменять (например, цель «похудение» при диабете
+  2 типа → «поддержка»). Всё это — чистые функции с юнит-тестами.
+- **История браузера.** Каждый ответ в игре и каждый шаг — отдельная запись, поэтому системная кнопка «Назад»
+  работает как «Вернуться» (D-039). Глубина считается из состояния (`historyDepth`), откат на n шагов — `rewind`.
+- **Хранение.** Черновик — `localStorage['refectorio.quiz.v1']` (версия, проверка zod при чтении, срок 30 дней,
+  испорченный — тихо забывается), результат — `refectorio.quiz.result.v1`. На сервер ничего не уходит (ADR 0003).
+- **60 fps — вне React.** Перетаскивание карточки, физика колеса, морфы панелей и WebGL живут в refs и motion values;
+  в состоянии React — только ответы и экран.
+- **Безопасность ввода.** Свободный текст (нелюбимые продукты, «Что нам следует знать?», свои пункты чипов) хранится
+  отдельно от словарных значений и ограничен по длине (`INPUT_LIMITS`); на этапе 3 он считается непроверенными
+  данными (R11).
+
+## 5. taste-core: как игра узнаёт вкус за 10 ответов
+
+```mermaid
+flowchart LR
+  catalog[(catalog.json<br/>186 блюд, признаки)] --> features[features.ts<br/>разреженные векторы]
+  features --> model[model.ts<br/>пробит-модель, гауссов априор,<br/>ADF-обновление]
+  model --> selection[selection.ts<br/>BALD × P(ответ) + правила]
+  selection --> engine[engine.ts<br/>сессия: replay, peek, undo,<br/>скрытые блюда]
+  engine --> profile[profile.ts<br/>TasteProfileV1: вероятности, подсказки]
+  sim[sim/<br/>5000 синтетических игроков] -. "проверка" .-> selection
+```
+
+- Сессия детерминирована: seed + решения → те же карточки, поэтому черновик восстанавливается повтором ответов.
+- Блюда без подобранного фото игра не показывает (`hidden`), но их вероятность «понравится» всё равно считается.
+- Подробности и альтернативы — ADR 0008; итоги симуляции — `refectorio-workspace/reports/stage-2/taste-sim/` (D-035).
+
+## 6. Фото блюд
+
+```mermaid
+flowchart LR
+  curate[curate.mjs<br/>поиск Unsplash · фильтр · топ-6] --> sheets[review-sheets.mjs<br/>листы 6 × 6]
+  sheets --> picks[(picks.json<br/>визуальный выбор)]
+  overrides[(photo-overrides.json<br/>закрепления команды)] --> finalize
+  picks --> finalize[finalize.mjs<br/>download_location · blurhash · кадр]
+  finalize --> manifest[(photo-manifest.json<br/>метаданные, в git)]
+  finalize --> runtime[(photo-runtime.json<br/>копия для сайта)]
+  finalize --> credits[docs/photo-credits.md]
+  runtime --> card[Карточка блюда<br/>хотлинк images.unsplash.com]
+```
+
+- Ключи читают только скрипты (переменная окружения или `.secrets/` вне git); сайт к API не обращается.
+- Цепочка на карточке: фото → (запасное фото) → заглушка из blurhash с названием блюда; после двух неудач подряд
+  игра перестаёт ждать сервис. Файлов фото в git нет — правила сервисов в `docs/photo-licensing.md`, ADR 0009.

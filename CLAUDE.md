@@ -15,6 +15,8 @@
   SF Pro Rounded не встраивать — запрещено лицензией Apple.
 - Иконки — Tabler (`@tabler/icons-react`, MIT). Схемы данных — zod 4.
 - `packages/nutrition-core`: чистый TypeScript без зависимостей от UI и ИИ.
+- `packages/taste-core`: каталог блюд (`data/catalog.json`), байесовская модель вкуса и отбор карточек игры, симуляция `sim/`.
+- `packages/contracts`: zod-схемы, общие для сайта и будущего API (`QuizAnswersV1`, `TasteProfileV1`, `toQuestionnaireInput`).
 - Тесты: Vitest 5, Playwright 1.63 (Chromium, Firefox, WebKit), `@axe-core/playwright`, Lighthouse CI.
 - Хостинг: Render Static Site (основной, base `/`) и GitHub Pages (зеркало, base — имя репозитория: `/Refectorio-project/`).
 
@@ -31,6 +33,10 @@
 | `npm run format` | Prettier |
 | `npm run assets` | пересобрать картинки из `assets-src/` в `apps/web/src/assets/generated/` |
 | `npm run lhci` | Lighthouse CI с бюджетами |
+| `npm run quiz-icons` | пересобрать иконки теста из PNG команды |
+| `npm run sim -- --users 5000 --out <папка>` | симуляция игры «Выберите блюдо» (taste-core) |
+| `npm run photos:curate` → `photos:sheets` → `photos:finalize` | подбор фото блюд (нужен ключ Unsplash в `UNSPLASH_ACCESS_KEY` или `.secrets/`), см. `docs/photo-licensing.md` |
+| `npm run photos:runtime` | пересобрать облегчённую копию манифеста фото для сайта |
 
 Перед коммитом husky запускает lint-staged (ESLint + Prettier на изменённых файлах).
 
@@ -40,14 +46,16 @@
 apps/web/src/
   app/          App.tsx, провайдеры (MotionConfig, LazyMotion), сцены по hash
   scenes/       HeroScene, AboutScene, SceneController (ввод, блокировки, хореография)
-  features/     team-dialog (раскрытие карточки команды)
+  features/     team-dialog (раскрытие карточки команды), quiz (тест: flow/ steps/ components/ tinder/ finale/)
   components/   Lines, Toast (карточки и кнопки пока живут в сценах)
   motion/       WaveHover, TiltGlare, токены пружин и длительностей, хуки
   engine/       food-field — движок летающей еды (чистый TS) + тонкая React-обёртка
-  content/      site.ru.ts — ВСЕ тексты, ссылки, имена, пути к картинкам (+ zod-схема)
+  content/      site.ru.ts — тексты главной; quiz.ru.ts — тексты теста (обе с zod-схемами)
   styles/       tokens.css (дизайн-токены + @theme), globals.css
   assets/generated/  результат `npm run assets` (коммитится)
 packages/nutrition-core/  расчёты норм и правила безопасности (guardrails) + тесты
+packages/taste-core/      каталог блюд, модель вкуса, отбор карточек, манифест фото (data/), симуляция (sim/)
+packages/contracts/       zod-схемы ответов теста и профиля вкуса
 assets-src/     исходные картинки (копии из «Ресурсов»), из них скрипт делает generated
 docs/           публичная документация: наука, ADR, дизайн-система
 scripts/        служебные Node-скрипты (кросс-платформенные)
@@ -60,7 +68,7 @@ scripts/        служебные Node-скрипты (кросс-платфо�
   хуки — `useSomething`, файлы компонентов — `PascalCase.tsx`, остальные — `camelCase.ts`.
 - Единицы измерения — в именах или типах: `weightKg`, `heightCm`, `energyKcal`, `durationMs`.
 - Ошибки ввода в `nutrition-core` — через явный результат (`{ ok: true, value } | { ok: false, error }`), не исключения.
-- Тексты интерфейса — только в `apps/web/src/content/site.ru.ts`. В компонентах текста нет.
+- Тексты интерфейса — только в `apps/web/src/content/site.ru.ts` (главная) и `quiz.ru.ts` (тест). В компонентах текста нет.
 - Цвета, размеры, радиусы, z-слои, тайминги — только из токенов (`styles/tokens.css`, `motion/tokens.ts`). Никаких «магических чисел».
 - Компоненты маленькие и чистые; состояние анимаций 60 fps (еда, наклон) — не в React state, а в refs и прямой записи `style.transform`.
 - Комментарии — только там, где неочевидно «почему».
