@@ -7,8 +7,22 @@ describe('dish photos', () => {
       sources: [],
       blurhash: null,
       avgColor: null,
-      alt: null,
     });
+  });
+
+  it('a curated dish gets an Unsplash hotlink cropped around its focal point, in three widths', () => {
+    const photos = photosFor('d_oatmeal');
+    const [first] = photos.sources;
+    expect(first?.provider).toBe('unsplash');
+    const url = new URL(first?.src ?? '');
+    expect(url.hostname).toBe('images.unsplash.com');
+    // The view-tracking parameter of the API guidelines stays on every size.
+    expect(url.searchParams.has('ixid')).toBe(true);
+    expect(url.searchParams.get('fit')).toBe('crop');
+    expect(url.searchParams.get('crop')).toBe('focalpoint');
+    expect(first?.srcSet.split(', ')).toHaveLength(3);
+    expect(first?.providerUrl).toContain('utm_source=refectorio');
+    expect(photos.blurhash).toMatch(/^.{6,}$/);
   });
 
   it('the tint under the white dish name reaches 4.5:1 on light photos and keeps its minimum on dark ones', () => {

@@ -1,5 +1,5 @@
 import { AnimatePresence, m, useIsPresent } from 'motion/react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import { whenIdle } from '../../../lib/idle';
 import { QUIZ } from '../../../motion/tokens';
 import { historyDepth } from '../flow/machine';
@@ -13,9 +13,15 @@ import { OptionsStep } from '../steps/OptionsStep';
 import { RowsStep } from '../steps/RowsStep';
 import { TextStep } from '../steps/TextStep';
 import { YesNoStep } from '../steps/YesNoStep';
-import { Finale } from '../finale/Finale';
 import { TasteStep } from '../tinder/TasteStep';
 import { StepMotionContext, type PresenceInfo, type StepMotion } from './stepMotion';
+
+/**
+ * The finale (core, captions, reveal) is a chunk of its own, like its WebGL core: both are fetched on idle during the
+ * last steps (ТЗ §12.2), so the quiz chunk stays within its budget and the finale opens without waiting.
+ */
+const loadFinale = () => import('../finale/Finale');
+const Finale = lazy(() => loadFinale().then((module) => ({ default: module.Finale })));
 
 const iconOf = (screen: Screen): IconKey | null =>
   screen === 'finale' || screen === 'adjustments' ? null : stepDef(screen).icon;
@@ -67,7 +73,11 @@ function ScreenBody({ screen }: { readonly screen: Screen }): ReactNode {
     case 'adjustments':
       return <AdjustmentsScreen />;
     case 'finale':
-      return <Finale />;
+      return (
+        <Suspense fallback={null}>
+          <Finale />
+        </Suspense>
+      );
   }
 }
 
@@ -145,11 +155,11 @@ export function StepStage({ instant }: { readonly instant: boolean }) {
     setTrack({ screen, depth, icon, motion });
   }
 
-  // The finale's WebGL core is a chunk of its own: fetched on idle during the last steps (ТЗ §12.2).
   const nearTheEnd = screen === 'lifestyle' || screen === 'notes' || screen === 'adjustments';
   useEffect(() => {
     if (!nearTheEnd) return undefined;
     return whenIdle(() => {
+      void loadFinale();
       void import('../finale/coreGl');
     }, 2000);
   }, [nearTheEnd]);

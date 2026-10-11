@@ -101,6 +101,21 @@ describe('taste session', () => {
     expect(session.complete()).toBe(false);
   });
 
+  it('hidden dishes are never offered, yet still get a predicted score', () => {
+    const hidden = new Set(prepared.dishes.filter((_, i) => i % 4 === 0).map((d) => d.id));
+    const session = createTasteSession(prepared, 6, [], { hidden });
+    while (session.current()) {
+      const card = session.current();
+      expect(hidden.has(card?.id ?? '')).toBe(false);
+      for (const answer of ['like', 'dislike', 'skip'] as const)
+        expect(hidden.has(session.peek(answer)?.id ?? '')).toBe(false);
+      session.answer('skip');
+    }
+    expect(session.exhausted()).toBe(true);
+    const scored = new Set(session.profile().predictions.map((p) => p.dishId));
+    for (const dishId of hidden) expect(scored.has(dishId)).toBe(true);
+  });
+
   it('builds a valid TasteProfileV1 with a prediction for every dish', () => {
     const profile = play(4, (i) => (i % 2 ? 'like' : 'dislike')).profile();
     expect(tasteProfileV1Schema.safeParse(profile).success).toBe(true);

@@ -11,6 +11,7 @@ export {
   prepareCatalog,
   type PreparedCatalog,
   type TasteSession,
+  type TasteSessionOptions,
   type TasteState,
 } from './engine';
 export { buildFeatureSpace, encode, type FeatureSpace, type SparseVector } from './features';
@@ -33,5 +34,7 @@ export {
   photoManifestSchema,
   photoSchema,
   type DishPhoto,
+  type DishPhotoRuntime,
   type PhotoManifest,
+  type PhotoRuntimeManifest,
 } from './photos';

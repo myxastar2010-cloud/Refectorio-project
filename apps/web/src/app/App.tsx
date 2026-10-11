@@ -3,6 +3,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEve
 import { Toast } from '../components/Toast';
 import { site } from '../content/site.ru';
 import { FoodFieldLayer } from '../engine/food-field/FoodFieldLayer';
+import { loadQuiz } from '../features/quiz/loadQuiz';
 import { TeamDialog } from '../features/team-dialog/TeamDialog';
 import { whenIdle } from '../lib/idle';
 import { readTestParams } from '../lib/params';
@@ -22,7 +23,6 @@ const QUIZ_PREFETCH_AFTER_MS = 5000;
 const params = readTestParams(window.location.search);
 const noop = (): void => undefined;
 
-const loadQuiz = () => import('../features/quiz/QuizScene');
 /** A fresh lazy component: after a failed load the next «Создать меню» must try again, not rethrow. */
 const lazyQuiz = () => lazy(() => loadQuiz().then((module) => ({ default: module.QuizScene })));
 let quizRequested = false;

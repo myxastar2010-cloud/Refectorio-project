@@ -1,14 +1,16 @@
-import type { DishPhoto, PhotoManifest } from '@refectorio/taste-core';
-import manifestJson from '@refectorio/taste-core/data/photo-manifest.json';
+import type { DishPhotoRuntime, PhotoRuntimeManifest } from '@refectorio/taste-core';
+import runtimeJson from '@refectorio/taste-core/data/photo-runtime.json';
 import { decode } from 'blurhash';
 
 /**
  * The runtime photo chain of a dish card (ТЗ §9.6): primary (an Unsplash hotlink, or a self-hosted Pexels file when
  * one was materialized) → the curated Unsplash fallback → a generated placeholder (blurhash or average colour + the
  * dish name). A source that fails or is late (TINDER.photoTimeoutMs) moves down the chain: never a broken image.
- * The manifest is validated by the taste-core tests; here it is only typed.
+ * The data is the site's copy of the manifest (taste-core/data/photo-runtime.json, checked against the validated
+ * manifest by the scripts' tests): a chunk of its own (ТЗ: ≤ 25 KB gz) — loadQuiz also imports it, which keeps it out
+ * of the quiz chunk and fetches both in parallel.
  */
-const manifest = manifestJson as unknown as PhotoManifest;
+const manifest = runtimeJson as unknown as PhotoRuntimeManifest;
 
 /** Card widths of the image set (srcset 480w/720w/960w, same as scripts/photos/crop.mjs). */
 export const PHOTO_WIDTHS = [480, 720, 960] as const;
@@ -19,7 +21,7 @@ export const PHOTO_SIZES = '(max-width: 47.99rem) 88vw, 24vw';
 
 export type PhotoSource = {
   readonly key: string;
-  readonly provider: DishPhoto['provider'];
+  readonly provider: DishPhotoRuntime['provider'];
   readonly src: string;
   readonly srcSet: string;
   /** A self-hosted AVIF set (`<source type="image/avif">`). */
@@ -35,7 +37,6 @@ export type DishPhotos = {
   /** For the placeholder and the soft gradient under the dish name. */
   readonly blurhash: string | null;
   readonly avgColor: string | null;
-  readonly alt: string | null;
 };
 
 const UNSPLASH_HOME = 'https://unsplash.com/?utm_source=refectorio&utm_medium=referral';
@@ -63,7 +64,7 @@ export function loadLocalPhotoIndex(): void {
     });
 }
 
-function unsplashSource(photo: DishPhoto): PhotoSource {
+function unsplashSource(photo: DishPhotoRuntime): PhotoSource {
   const sized = (width: number) => {
     const url = new URL(photo.src);
     url.searchParams.set('w', String(width));
@@ -87,7 +88,7 @@ function unsplashSource(photo: DishPhoto): PhotoSource {
   };
 }
 
-function localSource(dishId: string, photo: DishPhoto): PhotoSource | null {
+function localSource(dishId: string, photo: DishPhotoRuntime): PhotoSource | null {
   const hash = localIndex?.files[dishId];
   if (!hash) return null;
   const file = (width: number, ext: 'avif' | 'webp') =>
@@ -104,10 +105,13 @@ function localSource(dishId: string, photo: DishPhoto): PhotoSource | null {
   };
 }
 
+/** A curated photo exists (the game offers only these dishes). */
+export const hasPhoto = (dishId: string): boolean => dishId in manifest.photos;
+
 /** The chain of a dish (empty: placeholder only). */
 export function photosFor(dishId: string): DishPhotos {
   const set = manifest.photos[dishId];
-  if (!set) return { sources: [], blurhash: null, avgColor: null, alt: null };
+  if (!set) return { sources: [], blurhash: null, avgColor: null };
   const sources: PhotoSource[] = [];
   for (const photo of [set.primary, set.fallback]) {
     if (!photo) continue;
@@ -119,7 +123,6 @@ export function photosFor(dishId: string): DishPhotos {
     sources,
     blurhash: set.primary.blurhash,
     avgColor: set.primary.avgColor,
-    alt: set.primary.altRu,
   };
 }
 

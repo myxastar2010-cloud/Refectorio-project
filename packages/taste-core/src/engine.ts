@@ -134,15 +134,29 @@ export type TasteSession = {
   readonly prepared: PreparedCatalog;
 };
 
+export type TasteSessionOptions = {
+  /** Dishes never offered as cards (the site hides dishes without a photo); they still get a predicted score. */
+  readonly hidden?: ReadonlySet<string>;
+};
+
 /**
- * A game session. Deterministic: the seed and the decisions define everything, so a saved draft is restored by
- * replaying its decisions (`createTasteSession(prepared, seed, saved)`).
+ * A game session. Deterministic: the seed, the hidden dishes and the decisions define everything, so a saved draft
+ * is restored by replaying its decisions (`createTasteSession(prepared, seed, saved)`).
  */
 export function createTasteSession(
   prepared: PreparedCatalog,
   seed: number,
   saved: readonly TasteDecision[] = [],
+  options: TasteSessionOptions = {},
 ): TasteSession {
+  const exclude = options.hidden
+    ? new Set(
+        [...options.hidden].flatMap((dishId) => {
+          const index = prepared.indexOf.get(dishId);
+          return index === undefined ? [] : [index];
+        }),
+      )
+    : undefined;
   let state = initialState(prepared);
   const replay = (decisions: readonly TasteDecision[]) => {
     let next = initialState(prepared);
@@ -160,7 +174,7 @@ export function createTasteSession(
   const currentIndex = () => {
     if (cached?.state !== state) {
       const done = decisiveCount(state.decisions) >= DECISIVE_ANSWERS_REQUIRED;
-      cached = { state, index: done ? null : nextCard(prepared, state, seed) };
+      cached = { state, index: done ? null : nextCard(prepared, state, seed, 'ours', exclude) };
     }
     return cached.index;
   };
@@ -175,7 +189,7 @@ export function createTasteSession(
       if (index === null) return null;
       const after = applyAnswer(prepared, state, index, answer);
       if (decisiveCount(after.decisions) >= DECISIVE_ANSWERS_REQUIRED) return null;
-      return dishAt(nextCard(prepared, after, seed));
+      return dishAt(nextCard(prepared, after, seed, 'ours', exclude));
     },
     answer: (answer) => {
       const index = currentIndex();

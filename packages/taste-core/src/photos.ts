@@ -66,3 +66,18 @@ export const photoManifestSchema = z.object({
 
 export type DishPhoto = z.infer<typeof photoSchema>;
 export type PhotoManifest = z.infer<typeof photoManifestSchema>;
+
+/**
+ * The site's copy of the manifest (data/photo-runtime.json, written by scripts/photos/runtime.mjs and checked against
+ * the manifest by its test): only the fields the quiz's photo chain reads.
+ */
+export type DishPhotoRuntime = Pick<
+  DishPhoto,
+  'provider' | 'id' | 'src' | 'author' | 'authorUrl' | 'focal' | 'avgColor' | 'blurhash'
+>;
+export type PhotoRuntimeManifest = {
+  readonly version: 1;
+  readonly photos: Readonly<
+    Record<string, { readonly primary: DishPhotoRuntime; readonly fallback?: DishPhotoRuntime }>
+  >;
+};

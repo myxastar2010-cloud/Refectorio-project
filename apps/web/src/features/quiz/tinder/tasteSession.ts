@@ -7,6 +7,7 @@ import {
   type TasteSession,
 } from '@refectorio/taste-core';
 import catalogJson from '@refectorio/taste-core/data/catalog.json';
+import { hasPhoto } from './photos';
 
 /**
  * The dish catalog, prepared once per page (features, prior, near-duplicates). The JSON is validated against the
@@ -18,9 +19,23 @@ export function preparedCatalog(): PreparedCatalog {
   return prepared;
 }
 
+/**
+ * Dishes without a curated photo are not offered as cards (a generated placeholder is a poor first impression); the
+ * profile still predicts them. When images.unsplash.com is unreachable, the curated ones show their blurhash.
+ */
+let hidden: ReadonlySet<string> | null = null;
+function hiddenDishes(): ReadonlySet<string> {
+  hidden ??= new Set(
+    preparedCatalog()
+      .dishes.filter((d) => !hasPhoto(d.id))
+      .map((d) => d.id),
+  );
+  return hidden;
+}
+
 /** A game session restored from the saved decisions (deterministic replay). */
 export const sessionFor = (seed: number, decisions: readonly TasteDecision[]): TasteSession =>
-  createTasteSession(preparedCatalog(), seed, decisions);
+  createTasteSession(preparedCatalog(), seed, decisions, { hidden: hiddenDishes() });
 
 export function tasteProfileOf(seed: number, decisions: readonly TasteDecision[]): TasteProfileV1 {
   return sessionFor(seed, decisions).profile();

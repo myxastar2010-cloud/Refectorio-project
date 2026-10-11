@@ -10,6 +10,8 @@ export const PROJECT_ROOT = path.resolve(APP_ROOT, '..');
 export const DATA_DIR = path.join(APP_ROOT, 'packages', 'taste-core', 'data');
 export const CACHE_DIR = path.join(APP_ROOT, '.cache', 'photos');
 export const MANIFEST_FILE = path.join(DATA_DIR, 'photo-manifest.json');
+/** The site's copy of the manifest: only the fields the browser reads (runtime.mjs). */
+export const RUNTIME_MANIFEST_FILE = path.join(DATA_DIR, 'photo-runtime.json');
 export const OVERRIDES_FILE = path.join(DATA_DIR, 'photo-overrides.json');
 export const CANDIDATES_FILE = path.join(CACHE_DIR, 'candidates.json');
 export const PICKS_FILE = path.join(CACHE_DIR, 'picks.json');
@@ -169,13 +171,31 @@ export async function searchUnsplash(key, query, pacer) {
   return { photos: (body.results ?? []).map(fromUnsplash), limit, throttled: false };
 }
 
-/** Unsplash requires this call once a photo is chosen for use (API guidelines, «Triggering a download»). */
+/**
+ * Unsplash requires this call once a photo is chosen for use (API guidelines, «Triggering a download»). It counts
+ * against the demo quota (50 an hour): when the quota runs out, wait for the next hour instead of losing the call.
+ */
 export async function trackUnsplashDownload(key, downloadLocation, pacer) {
-  await pacer.wait();
-  const response = await fetchWithTimeout(downloadLocation, {
-    headers: { Authorization: `Client-ID ${key}`, 'Accept-Version': 'v1' },
-  });
-  return response.ok;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await pacer.wait();
+    const response = await fetchWithTimeout(downloadLocation, {
+      headers: { Authorization: `Client-ID ${key}`, 'Accept-Version': 'v1' },
+    });
+    const { remaining } = rateLimit(response);
+    if (response.ok) {
+      if (remaining !== null && remaining <= 1) {
+        console.log(
+          `unsplash: лимит запросов — пауза ${Math.ceil(untilNextHourMs() / 60_000)} мин`,
+        );
+        await sleep(untilNextHourMs());
+      }
+      return true;
+    }
+    if (response.status !== 403 && response.status !== 429) return false;
+    console.log(`unsplash: лимит запросов — пауза ${Math.ceil(untilNextHourMs() / 60_000)} мин`);
+    await sleep(untilNextHourMs());
+  }
+  return false;
 }
 
 /** Image URLs at a given width (no API cost: CDN requests are not counted by either provider). */

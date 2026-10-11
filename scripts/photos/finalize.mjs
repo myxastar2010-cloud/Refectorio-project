@@ -1,9 +1,10 @@
 // Turns the visual choice into the committed manifest (ТЗ §9.8 steps 3–4):
 //   .cache/photos/picks.json  { "<dishId>": { "provider": "pexels", "id": "123", "fallback"?: { "provider": "unsplash", "id": "abc" } } }
 //   packages/taste-core/data/photo-overrides.json (the team pins photos the same way; it wins over picks)
-// → packages/taste-core/data/photo-manifest.json (metadata only — photo files never go into git: Pexels licence) and
-//   docs/photo-credits.md. Fires Unsplash's download_location once per chosen photo.
-//   node scripts/photos/finalize.mjs
+// → packages/taste-core/data/photo-manifest.json (metadata only — photo files never go into git: Pexels licence), the
+//   site's copy photo-runtime.json (runtime.mjs) and docs/photo-credits.md. Fires Unsplash's download_location once per chosen photo.
+//   node scripts/photos/finalize.mjs [--skip-tracking]
+// --skip-tracking writes the manifest at once (no API calls); a later run without it fires the pending downloads.
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { encode } from 'blurhash';
@@ -24,7 +25,9 @@ import {
   UTM,
   writeJson,
 } from './lib.mjs';
+import { writeRuntimeManifest } from './runtime.mjs';
 
+const skipTracking = process.argv.includes('--skip-tracking');
 const { catalog } = await loadCatalog();
 const candidates = await readJson(CANDIDATES_FILE, { dishes: {} });
 const picks = { ...(await readJson(PICKS_FILE, {})), ...(await readJson(OVERRIDES_FILE, {})) };
@@ -132,7 +135,8 @@ async function entry(dish, choice, today) {
     photo.provider === 'unsplash' &&
     !downloadTrackedAt &&
     photo.downloadLocation &&
-    unsplashKey
+    unsplashKey &&
+    !skipTracking
   ) {
     if (await trackUnsplashDownload(unsplashKey, photo.downloadLocation, pacer))
       downloadTrackedAt = today;
@@ -177,8 +181,21 @@ await writeJson(MANIFEST_FILE, {
   updatedAt: today,
   photos,
 });
+await writeRuntimeManifest();
 
 // Public credits page (both providers require crediting the photographer).
+const used = new Set(
+  Object.values(photos).flatMap((set) =>
+    [set.primary, set.fallback].filter(Boolean).map((p) => p.provider),
+  ),
+);
+const servicesText = () => {
+  const links = [
+    used.has('pexels') ? '[Pexels](https://www.pexels.com)' : null,
+    used.has('unsplash') ? `[Unsplash](https://unsplash.com/?${UTM})` : null,
+  ].filter(Boolean);
+  return links.length > 1 ? `с сервисов ${links.join(' и ')}` : `с сервиса ${links[0] ?? '—'}`;
+};
 const rows = catalog.dishes.flatMap((dish) => {
   const set = photos[dish.id];
   if (!set) return [];
@@ -194,8 +211,8 @@ await writeFile(
   [
     '# Фото блюд — авторы',
     '',
-    'Фотографии в игре «Выберите блюдо» — с сервисов [Pexels](https://www.pexels.com) и',
-    `[Unsplash](https://unsplash.com/?${UTM}). Спасибо фотографам! Правила использования — [photo-licensing.md](photo-licensing.md).`,
+    `Фотографии в игре «Выберите блюдо» — ${servicesText()}. Спасибо фотографам!`,
+    'Правила использования — [photo-licensing.md](photo-licensing.md).',
     'Файл создаётся скриптом `scripts/photos/finalize.mjs`.',
     '',
     `Всего фото: ${rows.length} (обновлено ${today}).`,

@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./data/catalog.json": "./data/catalog.json",
-    "./data/photo-manifest.json": "./data/photo-manifest.json"
+    "./data/photo-manifest.json": "./data/photo-manifest.json",
+    "./data/photo-runtime.json": "./data/photo-runtime.json"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",

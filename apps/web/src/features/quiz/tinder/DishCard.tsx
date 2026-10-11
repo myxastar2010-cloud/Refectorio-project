@@ -333,7 +333,7 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
             src={source.src}
             srcSet={source.srcSet}
             sizes={PHOTO_SIZES}
-            alt={photos.alt ?? dish.altRu}
+            alt={dish.altRu}
             decoding="async"
             fetchPriority={interactive ? 'high' : 'auto'}
             draggable={false}
