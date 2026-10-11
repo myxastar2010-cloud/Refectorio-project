@@ -208,6 +208,23 @@
   }
 }
 
+/* Landscape phones and very low windows: the steps scroll as usual, only their icon and title get smaller; the game
+   keeps its card and its buttons on one screen — the card on the left, the buttons on the right. */
+@media (orientation: landscape) and (max-height: 31.25rem) {
+  .quiz {
+    --q-icon: 48px;
+    --q-title: 24px;
+    --q-title-leading: 1.18em;
+    /* Right under «Вернуться», which sits centred on the progress bar. */
+    --q-game-title-y: calc(
+      var(--q-progress-y) + var(--q-progress-h) / 2 + var(--q-back) / 2 + 10px
+    );
+    /* Under the one-line title, with a little air at the bottom. */
+    --q-card-h: calc(100svh - var(--q-game-title-y) - 66px - env(safe-area-inset-bottom));
+    --q-card-w: calc(var(--q-card-h) * var(--quiz-card-w) / var(--quiz-card-h));
+  }
+}
+
 /* ── Header: «Вернуться» and the progress bar (ТЗ §7.2–7.3) ─────────────────────────────── */
 
 .quiz-header {
@@ -1003,6 +1020,24 @@
   color: var(--color-ink-muted);
 }
 
+/* Landscape phones: the sheet fits the low screen — smaller rows, and the drum shows as many as there is room for. */
+@media (orientation: landscape) and (max-height: 31.25rem) {
+  .quiz {
+    --q-wheel-row: 32px;
+    --q-wheel-font: 20px;
+  }
+
+  .quiz-picker--sheet {
+    gap: 8px;
+    padding-top: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .quiz-wheel {
+    height: min(calc(var(--q-wheel-row) * 6.6), calc(100svh - 168px));
+  }
+}
+
 /* ── Chips with «+» (ТЗ §8.5) ─────────────────────────────────────────────────────────────── */
 
 .quiz-chips-area {
@@ -1686,6 +1721,47 @@
   line-height: 1.35;
   font-weight: 500;
   color: var(--color-ink-muted);
+}
+
+@media (orientation: landscape) and (max-height: 31.25rem) {
+  .quiz-frame--taste .quiz-answers {
+    display: grid;
+    grid-template-columns: var(--q-card-w) auto;
+    grid-template-rows: 1fr auto auto auto 1fr;
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+    column-gap: 32px;
+    margin-top: 12px;
+  }
+
+  .quiz-frame--taste .quiz-card-stage {
+    grid-row: 1 / -1;
+    grid-column: 1;
+    margin-top: 0;
+  }
+
+  .quiz-frame--taste .quiz-privacy--top {
+    grid-row: 2;
+    grid-column: 2;
+    margin-top: 0;
+  }
+
+  .quiz-frame--taste .quiz-game-controls {
+    grid-row: 3;
+    grid-column: 2;
+  }
+
+  .quiz-frame--taste .quiz-game-credit {
+    grid-row: 4;
+    grid-column: 2;
+  }
+
+  .quiz-frame--taste .quiz-game-hint {
+    grid-row: 5;
+    grid-column: 2;
+    align-self: start;
+  }
 }
 
 .quiz-game-moment {
