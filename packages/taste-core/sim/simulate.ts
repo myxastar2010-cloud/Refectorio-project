@@ -53,8 +53,11 @@ export function simulateUser(
   user: SyntheticUser,
   strategy: Strategy,
   seed: number,
+  hidden: ReadonlySet<number> = new Set(),
 ): UserResult {
   const test = testSet(prepared, user.id, seed);
+  // Never offered: the held-out test set and the dishes the site hides (no photo).
+  const exclude = hidden.size > 0 ? new Set([...test, ...hidden]) : test;
   const testIndices = [...test].sort((a, b) => a - b);
   const truthLabels = testIndices.map((i) => (user.utility[i] ?? 0) > 0);
   const truthChance = testIndices.map((i) => likeChance(user, i));
@@ -104,7 +107,7 @@ export function simulateUser(
     nextK += 1;
   }
   for (let card = 0; card < MAX_CARDS && decisive < maxK; card += 1) {
-    const index = nextCard(prepared, state, sessionSeed, strategy, test);
+    const index = nextCard(prepared, state, sessionSeed, strategy, exclude);
     if (index === null) break;
     const dish = prepared.dishes[index];
     if (!dish) break;

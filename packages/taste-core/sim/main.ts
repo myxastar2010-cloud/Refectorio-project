@@ -3,6 +3,7 @@ import { cpus } from 'node:os';
 import path from 'node:path';
 import { isMainThread, parentPort, Worker, workerData } from 'node:worker_threads';
 import catalogJson from '../data/catalog.json';
+import photoRuntimeJson from '../data/photo-runtime.json';
 import { catalogSchema } from '../src/catalog';
 import { prepareCatalog } from '../src/engine';
 import { DEFAULT_PRIOR, type PriorConfig } from '../src/model';
@@ -33,6 +34,8 @@ type Job = {
   readonly prior: PriorConfig;
   readonly strategies: readonly Strategy[];
   readonly noise: NoiseLevel;
+  /** Dishes never offered (--hide-photoless: the site's game hides dishes without a photo). */
+  readonly hidden: readonly string[];
 };
 
 /** Experiments: --prior '{"sdScale":1.5,"groupScale":0,"meanScale":1}' scales the default prior. */
@@ -62,12 +65,18 @@ function priorFrom(spec: string | undefined): PriorConfig {
 function runJob(job: Job): UserResult[] {
   const prepared = prepareCatalog(catalogSchema.parse(catalogJson), job.prior);
   const population = createPopulation(prepared.dishes, job.users, job.seed, job.noise);
+  const hidden = new Set(
+    job.hidden.flatMap((dishId) => {
+      const index = prepared.indexOf.get(dishId);
+      return index === undefined ? [] : [index];
+    }),
+  );
   const results: UserResult[] = [];
   for (let id = job.from; id < job.to; id += 1) {
     const user = population[id];
     if (!user) continue;
     for (const strategy of job.strategies) {
-      results.push(simulateUser(prepared, user, strategy, job.seed));
+      results.push(simulateUser(prepared, user, strategy, job.seed, hidden));
     }
   }
   return results;
@@ -87,6 +96,13 @@ async function main() {
     process.argv.includes('--strategies') ? argument('strategies', '').split(',') : STRATEGIES
   ) as Strategy[];
   const threads = Math.max(1, Math.min(cpus().length - 2, 16));
+  const withPhoto = new Set(Object.keys(photoRuntimeJson.photos));
+  const hidden = process.argv.includes('--hide-photoless')
+    ? catalogSchema
+        .parse(catalogJson)
+        .dishes.map((dish) => dish.id)
+        .filter((dishId) => !withPhoto.has(dishId))
+    : [];
   const started = performance.now();
   const chunk = Math.ceil(users / threads);
   const jobs: Job[] = Array.from({ length: threads }, (_, i) => ({
@@ -97,6 +113,7 @@ async function main() {
     prior,
     strategies,
     noise: argument('noise', 'base') as NoiseLevel,
+    hidden,
   })).filter((job) => job.from < job.to);
   const parts = await Promise.all(
     jobs.map(
@@ -201,6 +218,12 @@ async function main() {
     `# Симуляция «10 ответов достаточно» — ${users} игроков, seed ${seed}`,
     '',
     `Время: ${((performance.now() - started) / 1000).toFixed(1)} с, потоков: ${threads}.`,
+    ...(hidden.length > 0
+      ? [
+          '',
+          `Скрыто блюд без фото (как в игре на сайте): ${hidden.length} — их не показывают, но метрики считаются и на них.`,
+        ]
+      : []),
     '',
     '## Приёмка (ТЗ §9.5)',
     '',
