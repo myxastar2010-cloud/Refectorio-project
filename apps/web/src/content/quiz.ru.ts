@@ -18,6 +18,7 @@ export const quiz = {
     close: 'Закрыть',
     understood: 'Понятно',
     confirmContinue: 'Понимаю, продолжить',
+    choiceAdvances: 'Выбор сразу откроет следующий вопрос.',
     chooseOther: 'Выбрать другое',
     noticeTitle: 'Обратите внимание',
     remove: 'Убрать «{item}»',

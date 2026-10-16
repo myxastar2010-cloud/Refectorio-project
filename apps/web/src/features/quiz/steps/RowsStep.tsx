@@ -376,13 +376,29 @@ export function RowsStep({ step }: { readonly step: Step }) {
           setOpen(null);
         }}
       >
-        <div className="quiz-sex" role="radiogroup" aria-labelledby="quiz-sex-title">
+        <div
+          className="quiz-sex"
+          role="radiogroup"
+          aria-labelledby="quiz-sex-title"
+          onKeyDown={(event) => {
+            // One tab stop; the arrows move between the two answers (a radio group), Space or Enter chooses.
+            const keys = ['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft'];
+            if (!keys.includes(event.key)) return;
+            const radios = [...event.currentTarget.querySelectorAll<HTMLElement>('[role="radio"]')];
+            const at = radios.indexOf(document.activeElement as HTMLElement);
+            if (at < 0) return;
+            event.preventDefault();
+            const step = event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1;
+            radios[(at + step + radios.length) % radios.length]?.focus();
+          }}
+        >
           {(['male', 'female'] as const).map((sex, index) => (
             <button
               key={sex}
               type="button"
               role="radio"
               aria-checked={a.sex === sex}
+              tabIndex={(a.sex ? a.sex === sex : index === 0) ? 0 : -1}
               data-autofocus={(a.sex ? a.sex === sex : index === 0) || undefined}
               className={clsx('quiz-sex-option focus-ring', a.sex === sex && 'is-selected')}
               onClick={() => {

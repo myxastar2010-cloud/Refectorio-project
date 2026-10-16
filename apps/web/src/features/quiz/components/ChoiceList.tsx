@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import { useIsPresent } from 'motion/react';
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import { quiz } from '../../../content/quiz.ru';
 import type { QuizIconName } from '../quizIcons';
 import { useQuiz } from '../quizContext';
 import { bounceThen, digitIndex } from './choice';
@@ -43,6 +44,7 @@ export function ChoiceList<T extends string>({
   const present = useIsPresent();
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const chosen = useRef(false);
+  const hintId = useId();
   // Back during the bounce: the step is leaving, its pending «next» must not move the quiz forward again.
   const presentRef = useRef(present);
   useEffect(() => {
@@ -109,35 +111,42 @@ export function ChoiceList<T extends string>({
   };
 
   return (
-    <div
-      role="radiogroup"
-      aria-labelledby={labelledBy}
-      className={clsx('quiz-choices', `quiz-choices--${variant}`, className)}
-    >
-      {items.map((item, index) => (
-        <OptionPill
-          key={item.value}
-          label={item.label}
-          {...(item.description ? { description: item.description } : {})}
-          {...(item.icon ? { icon: item.icon } : {})}
-          {...(item.tag ? { tag: item.tag } : {})}
-          radio={variant === 'yesno'}
-          selected={item.value === selected}
-          disabled={item.disabled ?? false}
-          variant={variant}
-          tabIndex={index === focusIndex ? 0 : -1}
-          buttonRef={(node) => {
-            buttons.current[index] = node;
-          }}
-          onChoose={(element) => {
-            setFocusIndex(index);
-            choose(index, element);
-          }}
-          onKeyDown={(event) => {
-            move(event, index);
-          }}
-        />
-      ))}
-    </div>
+    <>
+      {/* Choosing moves on at once: said beforehand (WCAG 3.2.2). */}
+      <p id={hintId} className="visually-hidden">
+        {quiz.common.choiceAdvances}
+      </p>
+      <div
+        role="radiogroup"
+        aria-labelledby={labelledBy}
+        aria-describedby={hintId}
+        className={clsx('quiz-choices', `quiz-choices--${variant}`, className)}
+      >
+        {items.map((item, index) => (
+          <OptionPill
+            key={item.value}
+            label={item.label}
+            {...(item.description ? { description: item.description } : {})}
+            {...(item.icon ? { icon: item.icon } : {})}
+            {...(item.tag ? { tag: item.tag } : {})}
+            radio={variant === 'yesno'}
+            selected={item.value === selected}
+            disabled={item.disabled ?? false}
+            variant={variant}
+            tabIndex={index === focusIndex ? 0 : -1}
+            buttonRef={(node) => {
+              buttons.current[index] = node;
+            }}
+            onChoose={(element) => {
+              setFocusIndex(index);
+              choose(index, element);
+            }}
+            onKeyDown={(event) => {
+              move(event, index);
+            }}
+          />
+        ))}
+      </div>
+    </>
   );
 }

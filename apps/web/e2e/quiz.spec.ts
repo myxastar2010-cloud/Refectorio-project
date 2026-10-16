@@ -106,6 +106,24 @@ test.describe('entering and leaving', () => {
     await onScreen(page, 'taste');
   });
 
+  test('«Выйти» from a quiz opened directly keeps the answers; keys answer only inside the step', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=11#quiz');
+    await inQuiz(page);
+    await playDishes(page, ['d', 'a', 's']);
+    // With «Выйти» in focus a letter is not an answer (WCAG 2.1.4).
+    const exit = page.getByRole('button', { name: 'Выйти из теста' });
+    await exit.focus();
+    await page.keyboard.press('KeyD');
+    await page.waitForTimeout(400);
+    expect((await draft(page))?.answers.tasteDecisions.length).toBe(3);
+    await exit.click();
+    await settled(page, 'hero');
+    // Leaving rewinds the browser history, never the answers.
+    expect((await draft(page))?.answers.tasteDecisions.length).toBe(3);
+  });
+
   test('opening #quiz again from inside the quiz keeps it open', async ({ page }) => {
     await openQuiz(page);
     await page.evaluate(() => {
@@ -256,7 +274,10 @@ test.describe('the whole path', () => {
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
     await page.clock.runFor(45_000);
-    await expect(page.getByText(/мы дорабатываем генерацию/)).toBeVisible();
+    // Once on screen and once in the status region (it is announced): the visible line.
+    await expect(
+      page.locator('.quiz-finale-after').getByText(/мы дорабатываем генерацию/),
+    ).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Как мы используем ваши данные?' }),
     ).toBeVisible();

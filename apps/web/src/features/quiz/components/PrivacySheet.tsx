@@ -1,6 +1,6 @@
 import { IconX } from '@tabler/icons-react';
 import { AnimatePresence, m } from 'motion/react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { quiz } from '../../../content/quiz.ru';
 import { useCalmMotion } from '../../../motion/hooks';
 import { DURATION } from '../../../motion/tokens';
@@ -20,6 +20,17 @@ type Props = {
 function SheetContent({ onClose, onDeleted }: Pick<Props, 'onClose' | 'onDeleted'>) {
   const [confirming, setConfirming] = useState(false);
   const [deleted, setDeleted] = useState(false);
+  // The button that was pressed disappears: the focus goes to the next sensible place, never to the page (WCAG 2.4.3).
+  const deleteRef = useRef<HTMLButtonElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const doneRef = useRef<HTMLParagraphElement>(null);
+  const asked = useRef(false);
+  useEffect(() => {
+    if (deleted) doneRef.current?.focus();
+    else if (confirming) cancelRef.current?.focus();
+    else if (asked.current) deleteRef.current?.focus();
+    asked.current = confirming || asked.current;
+  }, [confirming, deleted]);
   return (
     <>
       <div className="quiz-sheet-head">
@@ -47,7 +58,9 @@ function SheetContent({ onClose, onDeleted }: Pick<Props, 'onClose' | 'onDeleted
       </p>
       <div className="quiz-sheet-actions" aria-live="polite">
         {deleted ? (
-          <p className="quiz-sheet-done">{quiz.privacy.deleted}</p>
+          <p ref={doneRef} className="quiz-sheet-done" tabIndex={-1}>
+            {quiz.privacy.deleted}
+          </p>
         ) : confirming ? (
           <>
             <p className="quiz-sheet-confirm">{quiz.privacy.deleteConfirm}</p>
@@ -63,6 +76,7 @@ function SheetContent({ onClose, onDeleted }: Pick<Props, 'onClose' | 'onDeleted
             </PillButton>
             <PillButton
               tone="outline"
+              buttonRef={cancelRef}
               onClick={() => {
                 setConfirming(false);
               }}
@@ -73,6 +87,7 @@ function SheetContent({ onClose, onDeleted }: Pick<Props, 'onClose' | 'onDeleted
         ) : (
           <PillButton
             tone="outline"
+            buttonRef={deleteRef}
             onClick={() => {
               setConfirming(true);
             }}

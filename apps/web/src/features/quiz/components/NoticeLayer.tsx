@@ -18,13 +18,24 @@ function NoticeCard({ id }: { readonly id: NoticeId }) {
   const { dispatch, exit, calm, state } = useQuiz();
   const cardRef = useRef<HTMLDivElement>(null);
   const okRef = useRef<HTMLButtonElement>(null);
+  const otherRef = useRef<HTMLButtonElement>(null);
+  const confirm = CONFIRM_NOTICES.has(id);
   // Leaving, the card stops being a dialog at once: the step behind (maybe already the next one) is usable and can
   // take focus while the card fades.
   const present = useIsPresent();
   const dismiss = () => {
     if (present) dispatch({ type: 'dismissNotice' });
   };
-  useModal({ open: present, containerRef: cardRef, onClose: dismiss, initialFocusRef: okRef });
+  const decline = () => {
+    if (present) dispatch({ type: 'declineNotice' });
+  };
+  // A confirmation starts on the safe answer, and Esc means «no» (ARIA APG, alertdialog).
+  useModal({
+    open: present,
+    containerRef: cardRef,
+    onClose: confirm ? decline : dismiss,
+    initialFocusRef: confirm ? otherRef : okRef,
+  });
   const minor = (state.answers.ageYears ?? 30) < 18;
   return (
     <m.div
@@ -55,15 +66,10 @@ function NoticeCard({ id }: { readonly id: NoticeId }) {
       ) : null}
       <div className="quiz-notice-actions">
         <PillButton tone="accent" onClick={dismiss} buttonRef={okRef}>
-          {CONFIRM_NOTICES.has(id) ? quiz.common.confirmContinue : quiz.common.understood}
+          {confirm ? quiz.common.confirmContinue : quiz.common.understood}
         </PillButton>
-        {CONFIRM_NOTICES.has(id) ? (
-          <PillButton
-            tone="outline"
-            onClick={() => {
-              if (present) dispatch({ type: 'declineNotice' });
-            }}
-          >
+        {confirm ? (
+          <PillButton tone="outline" onClick={decline} buttonRef={otherRef}>
             {quiz.common.chooseOther}
           </PillButton>
         ) : null}

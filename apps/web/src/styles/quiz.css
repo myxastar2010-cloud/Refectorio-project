@@ -225,7 +225,7 @@
 
 /* Landscape phones and very low windows: the steps scroll as usual, only their icon and title get smaller; the game
    keeps its card and its buttons on one screen — the card on the left, the buttons on the right. */
-@media (orientation: landscape) and (max-height: 31.25rem) {
+@media (orientation: landscape) and (max-height: 31.25rem) and (min-width: 37.5rem) {
   .quiz {
     --q-icon: 48px;
     --q-title: 24px;
@@ -385,6 +385,8 @@
   inset: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  /* A focused element scrolled into view stays below the header (WCAG 2.4.11). */
+  scroll-padding-top: calc(var(--q-header-h) + 8px);
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
@@ -482,9 +484,10 @@
   }
 }
 
-/* The accent wave with white text (the landing's accent layer keeps ink text). */
+/* The accent wave with white text (the landing's accent layer keeps ink text): the deeper red, because the label is
+   small text — white on #C42532 is 5.7:1, on #E63946 only 4.2:1 (WCAG 1.4.3, D-040). */
 .wave-layer--accent-fill {
-  background-color: var(--color-accent);
+  background-color: var(--color-accent-deep);
   color: var(--color-on-accent);
 }
 
@@ -1048,7 +1051,7 @@
 }
 
 /* Landscape phones: the sheet fits the low screen — smaller rows, and the drum shows as many as there is room for. */
-@media (orientation: landscape) and (max-height: 31.25rem) {
+@media (orientation: landscape) and (max-height: 31.25rem) and (min-width: 37.5rem) {
   .quiz {
     --q-wheel-row: 32px;
     --q-wheel-font: 20px;
@@ -1764,7 +1767,7 @@
   color: var(--color-ink-muted);
 }
 
-@media (orientation: landscape) and (max-height: 31.25rem) {
+@media (orientation: landscape) and (max-height: 31.25rem) and (min-width: 37.5rem) {
   .quiz-frame--taste .quiz-answers {
     display: grid;
     grid-template-columns: var(--q-card-w) auto;
@@ -1922,6 +1925,15 @@
       var(--color-coral) 100%
     );
   animation: quiz-core-pulse var(--finale-core-pulse-s) var(--ease-in-out) infinite alternate;
+}
+
+/* The honest line is up: everything that moved in the finale stands still (WCAG 2.2.2). */
+.quiz-core-css.is-paused {
+  animation-play-state: paused;
+}
+
+.quiz-finale[data-paused] .quiz-shimmer {
+  display: none;
 }
 
 .quiz-core-css.is-calm {
@@ -2323,14 +2335,6 @@
 
   .quiz-frame--text .quiz-footer {
     margin-top: calc(19 * var(--q));
-  }
-}
-
-/* The desktop frame: labels never wrap (the mockups' pills are one line). */
-@media (min-width: 80rem) and (hover: hover) {
-  .quiz-option-label,
-  .quiz-row-label {
-    white-space: nowrap;
   }
 }
 

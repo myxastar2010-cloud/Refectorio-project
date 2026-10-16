@@ -79,6 +79,7 @@ export const quizContentSchema = z.object({
     close: text,
     understood: text,
     confirmContinue: text,
+    choiceAdvances: text,
     chooseOther: text,
     noticeTitle: text,
     remove: template('item'),

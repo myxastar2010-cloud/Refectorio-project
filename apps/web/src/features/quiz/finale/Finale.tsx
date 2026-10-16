@@ -125,6 +125,8 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
         ? 0
         : window.setTimeout(() => {
             setHonest(true);
+            // The line and its two buttons appear: screen readers hear the line too (WCAG 4.1.3).
+            announce(quiz.finale.honest);
           }, FINALE.honestAfterMs),
     ];
     if (params.revealDemo) {
@@ -137,7 +139,7 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
     return () => {
       for (const timer of timers) window.clearTimeout(timer);
     };
-  }, [params.demo, params.revealDemo, center]);
+  }, [params.demo, params.revealDemo, center, announce]);
 
   // The food spirals into the core while it is shown (ТЗ §12.2).
   useLayoutEffect(() => {
@@ -160,12 +162,23 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
   }, []);
 
   return (
-    <div className="quiz-finale" style={{ '--core-size': `${size}px` } as CSSProperties}>
+    <div
+      className="quiz-finale"
+      data-paused={honest || undefined}
+      style={{ '--core-size': `${size}px` } as CSSProperties}
+    >
       <h2 ref={titleRef} id="quiz-step-title" className="visually-hidden" tabIndex={-1}>
         {quiz.finale.generatingLabel}
       </h2>
       <div ref={coreBoxRef} className="quiz-finale-core" data-shown={grown || undefined}>
-        <Core grown={grown} pulse={captionIndex + 1} dotPx={dotPx} sizePx={size} calm={calm} />
+        <Core
+          grown={grown}
+          pulse={captionIndex + 1}
+          dotPx={dotPx}
+          sizePx={size}
+          calm={calm}
+          paused={honest}
+        />
       </div>
       <div className="quiz-finale-captions">
         {captionIndex >= 0 ? (

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { quiz } from '../../../content/quiz.ru';
 import { whenIdle } from '../../../lib/idle';
 import { DURATION, EASE_OUT_SOFT, TINDER } from '../../../motion/tokens';
+import { focusInStep } from '../components/choice';
 import { PillButton } from '../components/PillButton';
 import { PrivacyLabel } from '../components/PrivacyLabel';
 import { StepFrame } from '../components/StepFrame';
@@ -195,7 +196,7 @@ export function TasteStep() {
         )
       )
         return;
-      if (document.querySelector('[aria-modal="true"]')) return;
+      if (document.querySelector('[aria-modal="true"]') || !focusInStep()) return;
       const answer = answerOfKey(event);
       if (!answer) return;
       event.preventDefault();

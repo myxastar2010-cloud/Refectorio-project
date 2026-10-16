@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { QUIZ_HASH, type HistoryState } from '../../app/useScene';
+import { leavingQuiz, QUIZ_HASH, type HistoryState } from '../../app/useScene';
 import { QUIZ } from '../../motion/tokens';
 
 type Options = {
@@ -78,6 +78,7 @@ export function useQuizHistory({ depth, onRewind, onLeave }: Options) {
 
   useEffect(() => {
     const onPop = (event: PopStateEvent) => {
+      if (leavingQuiz()) return;
       if (undoingForwardRef.current) {
         undoingForwardRef.current = false;
         return;

@@ -26,9 +26,21 @@ export async function bounceThen(element: HTMLElement, calm: boolean, then: () =
   await back;
 }
 
+/**
+ * Single-key shortcuts act only while the focus is in the current step (or nowhere): with «Выйти», «Вернуться» or the
+ * landing in focus a letter or a digit must not answer (WCAG 2.1.4).
+ */
+export function focusInStep(): boolean {
+  const active = document.activeElement;
+  return (
+    !active || active === document.body || active.closest('.quiz-screen:not([inert])') !== null
+  );
+}
+
 /** Digits 1–9 choose the n-th answer of a single-choice step (never inside a text field). */
 export function digitIndex(event: KeyboardEvent): number | null {
   if (event.altKey || event.ctrlKey || event.metaKey) return null;
+  if (!focusInStep()) return null;
   const target = event.target as Element | null;
   if (target?.closest('input, textarea, select, [contenteditable="true"]')) return null;
   return /^[1-9]$/.test(event.key) ? Number(event.key) - 1 : null;

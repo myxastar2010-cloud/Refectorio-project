@@ -14,13 +14,15 @@ type Props = {
   readonly dotPx: number;
   readonly sizePx: number;
   readonly calm: boolean;
+  /** The honest line is up: the core stops moving (WCAG 2.2.2). */
+  readonly paused: boolean;
 };
 
 /**
  * The core (ТЗ §12.2): the WebGL2 metaball (lazy chunk coreGl) or, without WebGL2, with saveData or reduced motion,
  * the CSS fallback — the same accent drop as a gradient with a soft opacity pulse. Both start as the bar's red dot.
  */
-export function Core({ grown, pulse, dotPx, sizePx, calm }: Props) {
+export function Core({ grown, pulse, dotPx, sizePx, calm, paused }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderer = useRef<CoreRenderer | null>(null);
   const [wanted] = useState(() => glWanted(calm));
@@ -77,11 +79,15 @@ export function Core({ grown, pulse, dotPx, sizePx, calm }: Props) {
     if (pulse > 0) renderer.current?.pulse();
   }, [pulse]);
 
+  useEffect(() => {
+    renderer.current?.setPaused(paused);
+  }, [paused, mode]);
+
   return (
     <div className="quiz-core" style={{ width: sizePx, height: sizePx }} aria-hidden>
       {mode === 'css' ? (
         <m.div
-          className={clsx('quiz-core-css', calm && 'is-calm')}
+          className={clsx('quiz-core-css', calm && 'is-calm', paused && 'is-paused')}
           style={{ scale: cssScale }}
           initial={calm ? { opacity: 0 } : false}
           animate={{ opacity: 1, transition: { duration: DURATION.fade } }}

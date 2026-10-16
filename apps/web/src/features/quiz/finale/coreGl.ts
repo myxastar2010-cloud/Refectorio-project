@@ -130,6 +130,8 @@ export type CoreRenderer = {
   readonly setIntro: (value: number) => void;
   /** The dot's radius in shares of the canvas half-size (it must match the bar's height). */
   readonly setDot: (radius: number) => void;
+  /** Stops on the current frame (the honest line is up: WCAG 2.2.2) or moves on again. */
+  readonly setPaused: (paused: boolean) => void;
   readonly dispose: () => void;
 };
 
@@ -179,10 +181,12 @@ export function createCoreRenderer(
     }
   };
 
+  let paused = false;
   const draw = (now: number) => {
     raf = 0;
     if (disposed || !visible || document.hidden) return;
-    raf = requestAnimationFrame(draw);
+    // Paused: this frame is drawn (a resize still redraws it) and no next one is asked for.
+    if (!paused) raf = requestAnimationFrame(draw);
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -230,6 +234,10 @@ export function createCoreRenderer(
     },
     setDot(radius: number) {
       dot = radius;
+    },
+    setPaused(value: boolean) {
+      paused = value;
+      if (!value) wake();
     },
     dispose() {
       disposed = true;

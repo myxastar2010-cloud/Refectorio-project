@@ -23,6 +23,13 @@ export type HistoryState = {
  * Scene state synced with the address: part 2 lives at #about, the quiz at #quiz; the browser Back button works,
  * a direct visit opens the scene without the long transition (`instant`).
  */
+/**
+ * True from «Выйти» until the browser has rewound the quiz's entries: the quiz's own history listener must not take
+ * that rewind for «Назад» and undo the answers (a quiz opened directly lands on its own first entry).
+ */
+let leavingQuizNow = false;
+export const leavingQuiz = () => leavingQuizNow;
+
 export function useScene() {
   const [scene, setScene] = useState<Scene>(() => sceneFromHash(window.location.hash));
   // True until the first change: the initial scene appears without choreography.
@@ -86,6 +93,7 @@ export function useScene() {
     setScene('hero');
     const finish = () => {
       leavingRef.current = false;
+      leavingQuizNow = false;
       if (!fromLanding) {
         window.history.replaceState(
           { scene: 'hero' } satisfies HistoryState,
@@ -100,6 +108,7 @@ export function useScene() {
       return;
     }
     leavingRef.current = true;
+    leavingQuizNow = true;
     window.addEventListener('popstate', finish, { once: true });
     window.history.go(-steps);
   }, []);

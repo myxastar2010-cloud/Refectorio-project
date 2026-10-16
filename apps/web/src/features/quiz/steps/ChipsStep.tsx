@@ -178,6 +178,20 @@ export function ChipsStep({ step }: { readonly step: Step }) {
   };
 
   const active = health ? activeHealthChips(a) : [];
+  // A required question appears under the chips: screen readers hear it (WCAG 4.1.3; «Готово» waits for it).
+  const followUps = [
+    active.includes('diabetes') ? quiz.health.insulinQuestion : null,
+    active.includes('pregnancy') ? quiz.health.trimesterQuestion : null,
+    active.includes('lactation') ? quiz.health.lactationQuestion : null,
+  ].filter((label): label is string => label !== null);
+  const followUpKey = followUps.join('|');
+  const shownFollowUps = useRef<readonly string[]>(followUps);
+  useEffect(() => {
+    const now = followUpKey ? followUpKey.split('|') : [];
+    const added = now.filter((label) => !shownFollowUps.current.includes(label));
+    shownFollowUps.current = now;
+    if (added.length > 0) announce(added.join('. '));
+  }, [followUpKey, announce]);
   const minor = a.ageYears !== undefined && a.ageYears < AGE_LIMITS.minorUnderYears;
   const teen = minor && (a.ageYears ?? 0) >= AGE_LIMITS.childUnderYears;
   const severeShown =

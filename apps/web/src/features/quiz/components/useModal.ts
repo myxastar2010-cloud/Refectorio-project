@@ -84,6 +84,8 @@ export function useModal({ open, containerRef, onClose, returnFocusTo, initialFo
       });
       // Not into a step that is leaving (inert): the new step moves focus to its own title.
       if (opener?.isConnected && !opener.closest('[inert]')) focusQuietly(opener);
+      // The opener is gone (the answers were deleted and the quiz started over): the current step's title.
+      else if (!opener?.isConnected) focusQuietly(document.getElementById('quiz-step-title'));
     };
   }, [open, containerRef, returnFocusTo, initialFocusRef]);
 }
