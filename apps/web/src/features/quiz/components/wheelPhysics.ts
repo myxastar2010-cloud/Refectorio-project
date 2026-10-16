@@ -1,4 +1,4 @@
-import { WHEEL } from '../../../motion/tokens';
+import { TINDER, WHEEL } from '../../../motion/tokens';
 
 /**
  * Pure maths of the wheel picker (ТЗ §8.3), unit-tested: positions are in «items» (0 = the first value),
@@ -31,7 +31,7 @@ export function releaseVelocity(
 ): number {
   const last = samples.at(-1);
   if (!last) return 0;
-  const first = samples.find((s) => last.t - s.t <= 100) ?? last;
+  const first = samples.find((s) => last.t - s.t <= TINDER.velocityWindowMs) ?? last;
   const dt = (last.t - first.t) / 1000;
   return dt > 0 ? (last.offset - first.offset) / dt : 0;
 }

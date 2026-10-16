@@ -147,10 +147,10 @@ export function TasteStep() {
   const blocked = state.notices.length > 0;
 
   const commit = useCallback(
-    (answer: TasteAnswer, velocity = { vx: 0, vy: 0 }) => {
-      if (!current || !present || complete || blocked) return;
+    (answer: TasteAnswer, velocity = { vx: 0, vy: 0 }): boolean => {
+      if (!current || !present || complete || blocked) return false;
       const now = performance.now();
-      if (now - lastAnswerAt.current < TINDER.answerGapMs) return;
+      if (now - lastAnswerAt.current < TINDER.answerGapMs) return false;
       lastAnswerAt.current = now;
       setFling(velocity);
       tasteAnswer({ dishId: current.id, answer });
@@ -163,6 +163,7 @@ export function TasteStep() {
       announce(after ? `${said}. ${fill(quiz.taste.live.card, { dish: after.nameRu })}` : said);
       for (const value of [like, dislike, skip])
         void animate(value, 0, { duration: DURATION.micro });
+      return true;
     },
     [
       current,
@@ -221,7 +222,7 @@ export function TasteStep() {
         const upcoming = session.peek(answer);
         if (upcoming) preloadPhoto(upcoming.id);
       }
-    }, 300);
+    }, TINDER.lookaheadIdleMs);
   }, [session, current]);
 
   // The tenth decisive answer: «Запомнили…» (when the posterior is confident), then the quiz moves on by itself.
@@ -245,7 +246,7 @@ export function TasteStep() {
     const flyMs = calm ? 0 : TINDER.flyDurationMs;
     const show = window.setTimeout(() => {
       setMoment(text);
-    }, flyMs * 0.6);
+    }, flyMs * TINDER.momentAtShare);
     const leave = window.setTimeout(
       () => {
         nextRef.current();

@@ -176,6 +176,8 @@ export async function searchUnsplash(key, query, pacer) {
  * against the demo quota (50 an hour): when the quota runs out, wait for the next hour instead of losing the call.
  */
 export async function trackUnsplashDownload(key, downloadLocation, pacer) {
+  // The key goes to the Unsplash API only, whatever a cached candidate says.
+  if (new URL(downloadLocation).host !== 'api.unsplash.com') return false;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     await pacer.wait();
     const response = await fetchWithTimeout(downloadLocation, {

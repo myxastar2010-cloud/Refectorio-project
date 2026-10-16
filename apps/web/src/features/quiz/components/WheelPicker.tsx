@@ -81,6 +81,8 @@ export function WheelPicker({
   const [typed, setTyped] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // The typed field is open (a blur after Enter or Esc must not commit or cancel a second time).
+  const typingOpen = useRef(false);
   const [shownValue, setShownValue] = useState(value);
   // An outside change of the value (a typed number, a reset) is shown at once (React's «adjust state while rendering»).
   const [lastValue, setLastValue] = useState(value);
@@ -262,25 +264,40 @@ export function WheelPicker({
       event.preventDefault();
       setTyped(key);
       setMessage(null);
+      typingOpen.current = true;
       setTyping(true);
     }
   };
 
   useEffect(() => {
-    if (typing) inputRef.current?.select();
+    const input = inputRef.current;
+    if (!typing || !input) return;
+    // The caret after the first digit: the next digits add to it (selecting it would replace it: «70» → «0»).
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
   }, [typing]);
 
-  const finishTyping = (commit: boolean) => {
+  /** `refocus` false: the field lost focus on its own (iOS «Done», a click on «Готово») — focus stays there. */
+  const finishTyping = (commit: boolean, refocus = true) => {
+    const focusWheel = () => {
+      if (refocus) rootRef.current?.focus();
+    };
     if (!commit) {
+      typingOpen.current = false;
       setTyping(false);
-      rootRef.current?.focus();
+      focusWheel();
       return;
     }
     const parsed = parseTyped(typed, range, decimals);
     if (!parsed) {
       setMessage(quiz.goalSetup.typedInvalid);
+      if (!refocus) {
+        typingOpen.current = false;
+        setTyping(false);
+      }
       return;
     }
+    typingOpen.current = false;
     setTyping(false);
     setMessage(
       parsed.clamped
@@ -296,7 +313,7 @@ export function WheelPicker({
     offset.set(indexOf(range, parsed.value));
     setShownValue(parsed.value);
     onChange(parsed.value);
-    rootRef.current?.focus();
+    focusWheel();
   };
 
   const valueText = `${formatNumber(shownValue)} ${unit(shownValue)}`;
@@ -356,7 +373,10 @@ export function WheelPicker({
               }
             }}
             onBlur={() => {
-              setTyping(false);
+              // Leaving the field keeps what was typed; an empty field leaves the wheel as it was.
+              if (!typingOpen.current) return;
+              if (typed.trim() === '') finishTyping(false, false);
+              else finishTyping(true, false);
             }}
           />
         ) : null}

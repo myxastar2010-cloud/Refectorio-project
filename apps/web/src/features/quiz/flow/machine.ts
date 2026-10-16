@@ -48,14 +48,42 @@ export function initialQuizState(seed: number, now: string): QuizState {
 }
 
 /** Why a weight goal is not available — the notice that explains it (most specific first). */
-function goalNotice(reasons: readonly ReasonCode[]): NoticeId {
+function goalNotice(reasons: readonly ReasonCode[]): NoticeId | null {
   if (reasons.includes('PREGNANCY') || reasons.includes('LACTATION')) return 'pregnancyLactation';
   if (reasons.includes('ED_HISTORY') || reasons.includes('ED_SCREEN_POSITIVE'))
     return 'eatingDisorder';
   if (reasons.includes('DIABETES_TYPE2')) return 'diabetesGoal';
   if (reasons.includes('BMI_UNDERWEIGHT')) return 'underweightLose';
   if (reasons.includes('TEEN_NO_ENERGY_GOALS')) return 'teenGoals';
-  return 'childFamily';
+  if (reasons.includes('TODDLER_NO_INDIVIDUAL_ENERGY')) return 'toddler';
+  if (reasons.includes('CHILD_FAMILY_MODE') || reasons.includes('CHILD_NEEDS_ADULT'))
+    return 'childFamily';
+  return null;
+}
+
+/** The target weight still lies inside the bounds of the current goal, weight, height and age (ТЗ §8.4). */
+function targetFits(a: Answers): boolean {
+  if (a.goal !== 'lose' && a.goal !== 'gain') return false;
+  if (a.weightKg === undefined || a.heightCm === undefined || a.ageYears === undefined)
+    return false;
+  const bounds = targetWeightBoundsKg({
+    goal: a.goal,
+    currentKg: a.weightKg,
+    heightCm: a.heightCm,
+    ageYears: a.ageYears,
+  });
+  return (
+    bounds !== null &&
+    a.targetWeightKg !== undefined &&
+    a.targetWeightKg >= bounds.minKg &&
+    a.targetWeightKg <= bounds.maxKg
+  );
+}
+
+function withoutTarget(a: Answers): Answers {
+  const answers: Record<string, unknown> = { ...a };
+  Reflect.deleteProperty(answers, 'targetWeightKg');
+  return answers as Answers;
 }
 
 type Reconciled = {
@@ -69,13 +97,23 @@ export function reconcile(state: QuizState, step: StepId): Reconciled {
   let answers = state.answers;
   const adjustments = new Set(state.adjustments);
   const notices: NoticeId[] = [];
-  const queue = (id: NoticeId) => {
-    if (!state.seenNotices.includes(id) && !notices.includes(id)) notices.push(id);
+  // Each notice once: not after it was read, not while it waits in the queue.
+  const queue = (id: NoticeId | null) => {
+    if (id === null) return;
+    if (state.seenNotices.includes(id) || state.notices.includes(id) || notices.includes(id))
+      return;
+    notices.push(id);
   };
   const { decision } = safetyOf(answers);
   const weightGoal = answers.goal === 'lose' || answers.goal === 'gain';
 
-  if (weightGoal && answers.goal && !decision.allowedGoals.includes(answers.goal)) {
+  // «Refused» (insulin, kidney disease, PKU) replaces the generation with the doctor screen and has a notice of its own.
+  if (
+    weightGoal &&
+    answers.goal &&
+    decision.status !== 'refused' &&
+    !decision.allowedGoals.includes(answers.goal)
+  ) {
     answers = { ...answers, goal: 'maintain' };
     adjustments.add('goalToMaintain');
     queue(goalNotice(decision.reasons));
@@ -97,6 +135,10 @@ export function reconcile(state: QuizState, step: StepId): Reconciled {
     adjustments.add('goalToMaintain');
     queue('noValidTarget');
   }
+
+  // A target left over from another goal, a corrected height or age: the target row asks again.
+  if (answers.targetWeightKg !== undefined && !targetFits(answers))
+    answers = withoutTarget(answers);
 
   if (answers.macroProfile === 'keto' && !ketoAllowed(decision)) {
     answers = { ...answers, macroProfile: 'recommended' };
@@ -127,7 +169,6 @@ function withReconciled(state: QuizState, step: StepId): QuizState {
     answers: result.answers,
     adjustments: result.adjustments,
     notices: [...state.notices, ...result.notices],
-    seenNotices: [...state.seenNotices, ...result.notices],
   };
 }
 
@@ -154,8 +195,19 @@ function advance(state: QuizState): QuizState {
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
-    case 'patch':
-      return { ...state, answers: { ...state.answers, ...action.patch } };
+    case 'patch': {
+      // A new own choice of the goal or the diet type drops the record of the earlier safe switch; reconcile adds it
+      // again if the switch is still needed.
+      const dropped = new Set<SafetyAdjustment>();
+      if (action.patch.goal !== undefined) dropped.add('goalToMaintain');
+      if (action.patch.macroProfile !== undefined) dropped.add('ketoToRecommended');
+      return {
+        ...state,
+        answers: { ...state.answers, ...action.patch },
+        adjustments:
+          dropped.size > 0 ? state.adjustments.filter((a) => !dropped.has(a)) : state.adjustments,
+      };
+    }
     case 'clear': {
       const answers: Record<string, unknown> = { ...state.answers };
       for (const key of action.keys) Reflect.deleteProperty(answers, key);
@@ -173,8 +225,12 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       return advance(checked);
     }
     case 'dismissNotice': {
-      const notices = state.notices.slice(1);
-      const next = { ...state, notices };
+      const [read, ...notices] = state.notices;
+      const next = {
+        ...state,
+        notices,
+        seenNotices: read === undefined ? state.seenNotices : [...state.seenNotices, read],
+      };
       return notices.length === 0 && state.advanceAfterNotices ? advance(next) : next;
     }
     case 'back': {

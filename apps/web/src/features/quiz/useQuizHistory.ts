@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { QUIZ_HASH, type HistoryState } from '../../app/useScene';
+import { QUIZ } from '../../motion/tokens';
 
 type Options = {
   /** Entries the quiz state owns now (machine.historyDepth). */
@@ -31,6 +32,8 @@ export function useQuizHistory({ depth, onRewind, onLeave }: Options) {
   const fromLandingRef = useRef(false);
   /** A depth change we caused ourselves (rewind, restart): the effect below must not push entries for it. */
   const quietRef = useRef(false);
+  /** We undid a browser Forward ourselves: its popstate is not a step. */
+  const undoingForwardRef = useRef(false);
   const onRewindRef = useRef(onRewind);
   const onLeaveRef = useRef(onLeave);
   useEffect(() => {
@@ -75,6 +78,10 @@ export function useQuizHistory({ depth, onRewind, onLeave }: Options) {
 
   useEffect(() => {
     const onPop = (event: PopStateEvent) => {
+      if (undoingForwardRef.current) {
+        undoingForwardRef.current = false;
+        return;
+      }
       const state = event.state as HistoryState;
       // The address #quiz opened again from inside the quiz (a link, Enter in the address bar): the browser adds an
       // entry without state. It is this very place of the quiz, not a way out.
@@ -96,9 +103,15 @@ export function useQuizHistory({ depth, onRewind, onLeave }: Options) {
       }
       const target = state.quiz ?? 0;
       const steps = browserDepthRef.current - target;
+      if (steps < 0) {
+        // Forward through the browser (after Back): an undone answer cannot be redone, so the browser returns to
+        // where the quiz is — otherwise it would stay ahead and the next Back would do nothing.
+        undoingForwardRef.current = true;
+        window.history.go(steps);
+        return;
+      }
       browserDepthRef.current = target;
-      // Forward through the browser (after Back): the quiz state stays where it is.
-      if (steps <= 0 || depthRef.current === 0) return;
+      if (steps === 0 || depthRef.current === 0) return;
       quietRef.current = true;
       onRewindRef.current(Math.min(steps, depthRef.current));
     };
@@ -142,7 +155,16 @@ export function useQuizHistory({ depth, onRewind, onLeave }: Options) {
     if (steps > 0) {
       // The popstate of this jump must not rewind: the state is reset as a whole once we arrive.
       depthRef.current = 0;
-      window.addEventListener('popstate', reset, { once: true });
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        window.removeEventListener('popstate', finish);
+        window.clearTimeout(fallback);
+        reset();
+      };
+      window.addEventListener('popstate', finish);
+      const fallback = window.setTimeout(finish, QUIZ.historyFallbackMs);
       window.history.go(-steps);
       return;
     }

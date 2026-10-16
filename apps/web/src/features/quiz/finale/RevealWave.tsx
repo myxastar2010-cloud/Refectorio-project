@@ -1,4 +1,4 @@
-import { animate, m } from 'motion/react';
+import { animate, m, type AnimationPlaybackControls } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { quiz } from '../../../content/quiz.ru';
@@ -29,6 +29,7 @@ export function RevealWave({ origin, calm }: { readonly origin: Point; readonly 
     if (!content || calm) return undefined;
     let renderer: RevealRenderer | null = null;
     let cancelled = false;
+    let wave: AnimationPlaybackControls | null = null;
     // A function, not the flag itself: TypeScript would keep its narrowing across the awaits.
     const stopped = () => cancelled;
     const width = window.innerWidth;
@@ -62,7 +63,13 @@ export function RevealWave({ origin, calm }: { readonly origin: Point; readonly 
         if (stopped()) return;
         renderer = createRevealRenderer(canvas);
       }
-      await animate(0, 1, { duration: FINALE.revealMs / 1000, ease: EASE_IN_OUT, onUpdate: paint });
+      const controls = animate(0, 1, {
+        duration: FINALE.revealMs / 1000,
+        ease: EASE_IN_OUT,
+        onUpdate: paint,
+      });
+      wave = controls;
+      await controls;
       if (stopped()) return;
       content.style.clipPath = 'none';
       content.style.transform = 'none';
@@ -74,7 +81,9 @@ export function RevealWave({ origin, calm }: { readonly origin: Point; readonly 
     void run();
     return () => {
       cancelled = true;
+      wave?.stop();
       renderer?.dispose();
+      renderer = null;
     };
   }, [origin, calm, gl]);
 

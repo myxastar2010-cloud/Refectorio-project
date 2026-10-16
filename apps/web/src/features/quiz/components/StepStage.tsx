@@ -161,7 +161,7 @@ export function StepStage({ instant }: { readonly instant: boolean }) {
     return whenIdle(() => {
       void loadFinale();
       void import('../finale/coreGl');
-    }, 2000);
+    }, QUIZ.finalePrefetchIdleMs);
   }, [nearTheEnd]);
 
   // The next step's icons are decoded while this one is shown.

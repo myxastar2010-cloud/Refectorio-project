@@ -18,8 +18,6 @@ import { QuizBoundary, QuizLoading } from './QuizBoundary';
 import { useScene, type Scene } from './useScene';
 
 const TOAST_MS = 3200;
-/** The quiz chunk is fetched on idle once the landing has settled — never during its first animations. */
-const QUIZ_PREFETCH_AFTER_MS = 5000;
 const params = readTestParams(window.location.search);
 const noop = (): void => undefined;
 
@@ -138,8 +136,8 @@ function Page() {
     }
     let cancel = noop;
     const timer = window.setTimeout(() => {
-      cancel = whenIdle(prefetchQuiz, QUIZ_PREFETCH_AFTER_MS);
-    }, QUIZ_PREFETCH_AFTER_MS);
+      cancel = whenIdle(prefetchQuiz, QUIZ.prefetchAfterMs);
+    }, QUIZ.prefetchAfterMs);
     return () => {
       window.clearTimeout(timer);
       cancel();

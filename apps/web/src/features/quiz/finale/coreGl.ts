@@ -151,7 +151,7 @@ export function createCoreRenderer(
   if (!gl) return null;
   const program = link(gl, FULLSCREEN_VERTEX, FRAGMENT);
   if (!program) return null;
-  const vao = fullscreenTriangle(gl, program);
+  const { vao, buffer } = fullscreenTriangle(gl, program);
   const uniform = (name: string) => gl.getUniformLocation(program, name);
   const u = {
     time: uniform('uTime'),
@@ -240,6 +240,7 @@ export function createCoreRenderer(
       canvas.removeEventListener('webglcontextlost', onLost);
       gl.deleteProgram(program);
       gl.deleteVertexArray(vao);
+      gl.deleteBuffer(buffer);
     },
   };
 }

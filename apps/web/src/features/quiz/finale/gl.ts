@@ -24,8 +24,12 @@ export function link(
 ): WebGLProgram | null {
   const vs = compile(gl, gl.VERTEX_SHADER, vertex);
   const fs = compile(gl, gl.FRAGMENT_SHADER, fragment);
+  if (!vs || !fs) {
+    if (vs) gl.deleteShader(vs);
+    if (fs) gl.deleteShader(fs);
+    return null;
+  }
   const program = gl.createProgram();
-  if (!vs || !fs) return null;
   gl.attachShader(program, vs);
   gl.attachShader(program, fs);
   gl.linkProgram(program);
@@ -51,7 +55,7 @@ void main() {
 export function fullscreenTriangle(
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
-): WebGLVertexArrayObject {
+): { readonly vao: WebGLVertexArrayObject; readonly buffer: WebGLBuffer } {
   const vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
   const buffer = gl.createBuffer();
@@ -60,7 +64,7 @@ export function fullscreenTriangle(
   const location = gl.getAttribLocation(program, 'aPos');
   gl.enableVertexAttribArray(location);
   gl.vertexAttribPointer(location, 2, gl.FLOAT, false, 0, 0);
-  return vao;
+  return { vao, buffer };
 }
 
 /** WebGL2 is worth trying: it exists, the person has not asked for less motion or less data. */

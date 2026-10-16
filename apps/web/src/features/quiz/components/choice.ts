@@ -14,7 +14,7 @@ export async function bounceThen(element: HTMLElement, calm: boolean, then: () =
   await animate(
     element,
     { transform: ['scale(1)', `scale(${QUIZ.choice.bounceScale})`] },
-    { duration: 0.08, ease: 'easeOut' },
+    { duration: QUIZ.choice.pressMs / 1000, ease: 'easeOut' },
   );
   const back = animate(
     element,

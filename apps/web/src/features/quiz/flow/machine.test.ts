@@ -204,6 +204,60 @@ describe('machine', () => {
     expect(state.notices).toEqual(['eatingDisorder']);
   });
 
+  it('kidney disease after a weight-loss goal: only the doctor notice, never the child one', () => {
+    const state = run(
+      adultAt('healthConditions', {
+        goal: 'lose',
+        weightKg: 80,
+        targetWeightKg: 70,
+        health: 'yes',
+        healthChips: ['kidneyDisease'],
+      }),
+      next,
+    );
+    expect(state.notices).toEqual(['refused']);
+    expect(state.notices).not.toContain('childFamily');
+  });
+
+  it('a notice left by Back (not read) comes again; a read one never does', () => {
+    const atChips = adultAt('healthConditions', {
+      goal: 'maintain',
+      health: 'yes',
+      healthChips: ['eatingDisorder'],
+    });
+    const shown = run({ ...atChips, history: ['health'] }, next);
+    expect(shown.notices).toEqual(['eatingDisorder']);
+    const leftUnread = run(shown, { type: 'back' }, next);
+    expect(leftUnread.screen).toBe('healthConditions');
+    const again = run(leftUnread, next);
+    expect(again.notices).toEqual(['eatingDisorder']);
+    const read = run(again, { type: 'dismissNotice' }, { type: 'back' }, next, next);
+    expect(read.notices).toEqual([]);
+  });
+
+  it('a target weight left from the other goal is cleared, so the target row asks again', () => {
+    const lose = adultAt('goal', { goal: 'lose', weightKg: 80, targetWeightKg: 70 });
+    const gain = run(lose, patch({ goal: 'gain' }), next);
+    expect(gain.answers.targetWeightKg).toBeUndefined();
+    expect(gain.screen).toBe('goalSetup');
+    // A corrected height moves the lower bound above the old target (BMI 18.5 at 187 cm ≈ 65 kg).
+    const tall = run(
+      adultAt('body', { goal: 'lose', weightKg: 80, targetWeightKg: 60 }),
+      patch({ heightCm: 187 }),
+      next,
+    );
+    expect(tall.answers.targetWeightKg).toBeUndefined();
+    const kept = run(lose, next);
+    expect(kept.answers.targetWeightKg).toBe(70);
+  });
+
+  it('choosing the goal again drops the record of the earlier safe switch', () => {
+    const switched = run(adultAt('goalSetup', { goal: 'lose', weightKg: 49 }), next);
+    expect(switched.adjustments).toEqual(['goalToMaintain']);
+    const fixed = run(switched, patch({ weightKg: 70, goal: 'lose' }));
+    expect(fixed.adjustments).toEqual([]);
+  });
+
   it('a teenager whose age changed after a weight goal: goal → maintain with the teen notice', () => {
     const state = run(adultAt('goalSetup', { ageYears: 16, goal: 'lose', weightKg: 60 }), next);
     expect(state.answers.goal).toBe('maintain');

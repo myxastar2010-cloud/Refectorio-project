@@ -43,6 +43,11 @@ export function ChoiceList<T extends string>({
   const present = useIsPresent();
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const chosen = useRef(false);
+  // Back during the bounce: the step is leaving, its pending «next» must not move the quiz forward again.
+  const presentRef = useRef(present);
+  useEffect(() => {
+    presentRef.current = present;
+  }, [present]);
   const selectedIndex = items.findIndex((item) => item.value === selected);
   const [focusIndex, setFocusIndex] = useState(() =>
     selectedIndex >= 0
@@ -59,8 +64,11 @@ export function ChoiceList<T extends string>({
     chosen.current = true;
     onChoose(item.value);
     const target = element ?? buttons.current[index];
-    if (target) void bounceThen(target, calm, onDone);
-    else onDone();
+    const done = () => {
+      if (presentRef.current) onDone();
+    };
+    if (target) void bounceThen(target, calm, done);
+    else done();
   };
 
   // Digits pick an answer while this step is the current one and nothing covers it.

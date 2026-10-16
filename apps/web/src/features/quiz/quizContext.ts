@@ -48,6 +48,8 @@ export type QuizApi = {
   readonly tasteAnswer: (decision: TasteDecision) => void;
   readonly openPrivacy: (opener: HTMLElement | null) => void;
   readonly exit: () => void;
+  /** A fresh quiz from the first card (the finale's «Пройти тест заново», the resume toast, deleted answers). */
+  readonly restart: () => void;
   /** Screen readers: a polite announcement (the dish game, the finale). */
   readonly announce: (text: string) => void;
 };

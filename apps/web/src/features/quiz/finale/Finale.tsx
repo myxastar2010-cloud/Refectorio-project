@@ -14,6 +14,7 @@ import { setFoodAttractor } from '../../../engine/food-field/attractorChannel';
 import { focusQuietly } from '../../../lib/quietFocus';
 import { DURATION, EASE_OUT_SOFT, FINALE } from '../../../motion/tokens';
 import { PillButton } from '../components/PillButton';
+import { PrivacyLabel } from '../components/PrivacyLabel';
 import { StepFrame } from '../components/StepFrame';
 import { saveResult } from '../flow/persistence';
 import { buildResult } from '../flow/result';
@@ -51,7 +52,7 @@ function coreSize(): number {
  * ≈ 40 s an honest line says so (hidden by `?demo`).
  */
 function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
-  const { safety, calm, params, announce, detachBar } = useQuiz();
+  const { safety, calm, params, announce, detachBar, restart } = useQuiz();
   const captions = useMemo(
     () => captionsFor(safety.decision.deemphasizeNumbers),
     [safety.decision.deemphasizeNumbers],
@@ -172,17 +173,26 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
         ) : null}
       </div>
       <AnimatePresence>
-        {honest ? (
-          <m.p
-            className="quiz-finale-honest"
+        {honest || !result ? (
+          <m.div
+            className="quiz-finale-after"
             initial={{ opacity: 0 }}
             animate={{
               opacity: 1,
               transition: { duration: DURATION.fade * 3, ease: EASE_OUT_SOFT },
             }}
           >
-            {quiz.finale.honest}
-          </m.p>
+            <p className="quiz-finale-honest">
+              {result ? quiz.finale.honest : quiz.finale.notSaved}
+            </p>
+            {/* The generation never ends in stage 2: a way to start over and to the privacy sheet (delete answers). */}
+            <div className="quiz-finale-actions">
+              <PrivacyLabel />
+              <button type="button" className="quiz-finale-again focus-ring" onClick={restart}>
+                {quiz.finale.again}
+              </button>
+            </div>
+          </m.div>
         ) : null}
       </AnimatePresence>
       {params.debugAnswers ? <DebugAnswers result={result} /> : null}
@@ -208,7 +218,7 @@ function RefusedScreen({ result }: { readonly result: QuizAnswersV1 | null }) {
     <StepFrame
       icon={null}
       title={quiz.finale.refused.title}
-      privacy={false}
+      privacy
       className="quiz-frame--refused"
       footer={
         <div className="quiz-refused-actions">

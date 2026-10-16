@@ -75,7 +75,7 @@ export function createRevealRenderer(canvas: HTMLCanvasElement): RevealRenderer 
   if (!gl) return null;
   const program = link(gl, FULLSCREEN_VERTEX, FRAGMENT);
   if (!program) return null;
-  const vao = fullscreenTriangle(gl, program);
+  const { vao, buffer } = fullscreenTriangle(gl, program);
   const uniform = (name: string) => gl.getUniformLocation(program, name);
   const u = {
     res: uniform('uRes'),
@@ -111,6 +111,7 @@ export function createRevealRenderer(canvas: HTMLCanvasElement): RevealRenderer 
     dispose() {
       gl.deleteProgram(program);
       gl.deleteVertexArray(vao);
+      gl.deleteBuffer(buffer);
     },
   };
 }

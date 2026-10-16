@@ -83,7 +83,8 @@ type Props = {
   readonly interactive: boolean;
   readonly calm: boolean;
   /** A swipe decided an answer (with the release velocity). */
-  readonly onSwipe: (answer: TasteAnswer, velocity: { vx: number; vy: number }) => void;
+  /** `false`: the answer was not taken (too soon after the previous one) — the card springs back. */
+  readonly onSwipe: (answer: TasteAnswer, velocity: { vx: number; vy: number }) => boolean;
   /** The card moved: shares of the commit distances towards each answer (the buttons swell). */
   readonly onMove: (towards: { like: number; dislike: number; skip: number }) => void;
   /** The photo source shown now (null: the placeholder) — for the credit line. */
@@ -261,10 +262,7 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
             width: card.offsetWidth,
             height: card.offsetHeight,
           });
-    if (answer) {
-      onSwipe(answer, velocity);
-      return;
-    }
+    if (answer && onSwipe(answer, velocity)) return;
     void animate(x, 0, { ...TINDER.springBack, velocity: velocity.vx });
     void animate(y, 0, { ...TINDER.springBack, velocity: velocity.vy });
     void animate(rotate, 0, TINDER.springBack);

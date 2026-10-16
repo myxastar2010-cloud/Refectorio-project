@@ -250,6 +250,8 @@ export const quizContentSchema = z.object({
     captions: z.array(z.object({ text, icon: z.string().min(1) })).min(6),
     captionsCalm: z.object({ replace: text, with: text }),
     honest: text,
+    notSaved: text,
+    again: text,
     generatingLabel: text,
     refused: z.object({
       title: text,

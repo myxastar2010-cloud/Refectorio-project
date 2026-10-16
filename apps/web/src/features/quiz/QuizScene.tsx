@@ -89,6 +89,17 @@ export function QuizScene({ instant, onExit, params }: Props) {
     });
   }, []);
 
+  const restart = useCallback(() => {
+    setShowResume(false);
+    history.restart(() => {
+      dispatch({
+        type: 'restart',
+        seed: quizParams.seed ?? randomSeed(),
+        now: new Date().toISOString(),
+      });
+    });
+  }, [history]);
+
   const api = useMemo<QuizApi>(
     () => ({
       state,
@@ -114,21 +125,11 @@ export function QuizScene({ instant, onExit, params }: Props) {
         setPrivacyOpener(opener);
       },
       exit: onExit,
+      restart,
       announce,
     }),
-    [state, safety, calm, history.back, history.backBy, onExit, announce],
+    [state, safety, calm, history.back, history.backBy, onExit, restart, announce],
   );
-
-  const restart = useCallback(() => {
-    setShowResume(false);
-    history.restart(() => {
-      dispatch({
-        type: 'restart',
-        seed: quizParams.seed ?? randomSeed(),
-        now: new Date().toISOString(),
-      });
-    });
-  }, [history]);
 
   const screen = state.screen;
   const progress = progressOf(state);

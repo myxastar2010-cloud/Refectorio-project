@@ -74,7 +74,7 @@
   --q-panel-h: calc(var(--quiz-panel-h) * var(--q));
   --q-panel-radius: calc(var(--quiz-panel-radius) * var(--q));
   --q-panel-title: calc(var(--type-quiz-panel-title-size) * var(--q));
-  --q-close: max(40px, calc(var(--quiz-panel-close) * var(--q)));
+  --q-close: max(44px, calc(var(--quiz-panel-close) * var(--q)));
   --q-input-w: calc(var(--quiz-input-w) * var(--q));
   --q-input-h: max(48px, calc(var(--quiz-input-h) * var(--q)));
   --q-input: max(16px, calc(var(--type-quiz-input-size) * var(--q)));
@@ -194,7 +194,7 @@
     --q-panel-h: auto;
     --q-panel-radius: 36px;
     --q-panel-title: 20px;
-    --q-close: 40px;
+    --q-close: 44px;
     --q-input-w: 100%;
     --q-input-h: 48px;
     --q-input: 16px;
@@ -360,7 +360,7 @@
   height: calc(var(--q-header-h) + 8px);
   background-color: color-mix(in srgb, var(--color-bg) 88%, transparent);
   opacity: 0;
-  transition: opacity 200ms var(--ease-out-soft);
+  transition: opacity var(--quiz-fade-ms) var(--ease-out-soft);
   pointer-events: none;
 }
 
@@ -473,7 +473,8 @@
   font-size: var(--q-privacy);
   font-weight: 500;
   color: var(--color-ink-muted);
-  min-height: 32px;
+  /* A text button, but a full touch target (CLAUDE.md: ≥ 44 px). */
+  min-height: 44px;
 }
 
 /* The accent wave with white text (the landing's accent layer keeps ink text). */
@@ -1129,11 +1130,20 @@
   align-items: center;
   justify-content: center;
   flex: none;
+  position: relative;
   width: max(32px, 1.6em);
   height: max(32px, 1.6em);
   border-radius: 50%;
   color: var(--color-on-accent);
   background-color: rgb(255 255 255 / 0.14);
+}
+
+/* The circle stays small; the finger gets the full 44 px (CLAUDE.md). */
+.quiz-chip-remove::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
 }
 
 .quiz-chip-remove svg {
@@ -1531,7 +1541,7 @@
 }
 
 .quiz-toast-action {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 16px;
   border-radius: 9999px;
   background-color: var(--color-on-accent);
@@ -1613,7 +1623,7 @@
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 220ms var(--ease-out-soft);
+  transition: opacity var(--quiz-photo-fade-ms) var(--ease-out-soft);
   pointer-events: none;
 }
 
@@ -1895,11 +1905,11 @@
       var(--color-accent) 55%,
       var(--color-coral) 100%
     );
-  animation: quiz-core-pulse 2.6s var(--ease-in-out) infinite alternate;
+  animation: quiz-core-pulse var(--finale-core-pulse-s) var(--ease-in-out) infinite alternate;
 }
 
 .quiz-core-css.is-calm {
-  animation: quiz-core-breathe 3.2s var(--ease-in-out) infinite alternate;
+  animation: quiz-core-breathe var(--finale-core-breathe-s) var(--ease-in-out) infinite alternate;
 }
 
 @keyframes quiz-core-pulse {
@@ -2037,7 +2047,7 @@
   overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 35%, #000 65%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 35%, #000 65%, transparent);
-  animation: quiz-shimmer-band 2.2s linear infinite;
+  animation: quiz-shimmer-band var(--finale-shimmer-loop-s) linear infinite;
   will-change: transform;
 }
 
@@ -2047,7 +2057,7 @@
   left: 0;
   white-space: nowrap;
   color: var(--color-ink);
-  animation: quiz-shimmer-text 2.2s linear infinite;
+  animation: quiz-shimmer-text var(--finale-shimmer-loop-s) linear infinite;
   will-change: transform;
 }
 
@@ -2070,9 +2080,41 @@
   }
 }
 
+.quiz-finale-after {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 18px;
+  text-align: center;
+}
+
+.quiz-finale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  margin-top: 10px;
+}
+
+/* A quiet text button, the privacy label's sibling (no wave: it starts over at once). */
+.quiz-finale-again {
+  min-height: 44px;
+  padding: 0 calc(18 * var(--q));
+  border-radius: 9999px;
+  font-size: var(--q-privacy);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.quiz-finale-again:hover {
+  color: var(--color-accent-deep);
+}
+
 .quiz-finale-honest {
   max-width: min(100%, 520px);
-  margin-top: 18px;
   font-size: 15px;
   line-height: 1.45;
   font-weight: 500;

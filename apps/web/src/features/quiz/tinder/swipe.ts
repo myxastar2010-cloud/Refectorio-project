@@ -8,7 +8,10 @@ import { TINDER } from '../../../motion/tokens';
 export type Sample = { readonly t: number; readonly x: number; readonly y: number };
 
 /** Velocity (px/s) from the samples of the last ~100 ms. */
-export function velocityOf(samples: readonly Sample[], windowMs = 100): { vx: number; vy: number } {
+export function velocityOf(
+  samples: readonly Sample[],
+  windowMs = TINDER.velocityWindowMs,
+): { vx: number; vy: number } {
   const last = samples.at(-1);
   if (!last) return { vx: 0, vy: 0 };
   let first = last;

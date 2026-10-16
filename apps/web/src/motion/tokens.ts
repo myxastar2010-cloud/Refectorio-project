@@ -212,7 +212,7 @@ export const QUIZ = {
   stepOut: { durationMs: 320, blurPx: 12, scale: 0.98 },
   stepIn: { delayMs: 170, durationMs: 500, blurPx: 10, risePx: 12, staggerMs: 50 },
   /** Single choice: the wave completes, a small bounce, then the step changes (≤ ≈ 450 ms). */
-  choice: { bounceScale: 0.96, settleMs: 140 },
+  choice: { bounceScale: 0.96, pressMs: 80, settleMs: 140 },
   choiceSpring: { type: 'spring', visualDuration: 0.22, bounce: 0.3 },
   /** A chip toggles with a micro-bounce from this scale. */
   chipPressScale: 0.94,
@@ -226,6 +226,12 @@ export const QUIZ = {
   panelContentAt: 0.6,
   /** «Продолжаем с вопроса n»: long enough to read and reach «Начать заново»; paused under the pointer or focus. */
   toastMs: 12000,
+  /** The quiz chunk is fetched on idle once the landing has settled — never during its first animations. */
+  prefetchAfterMs: 5000,
+  /** The finale's chunks are fetched on idle during the last steps. */
+  finalePrefetchIdleMs: 2000,
+  /** history.go() that never arrives (the browser trimmed old entries): reset without waiting for it. */
+  historyFallbackMs: 600,
   /** Notice cards and sheets. */
   sheet: { durationMs: 340, risePx: 24 },
 } as const;
@@ -251,6 +257,12 @@ export const TINDER = {
   rise: { type: 'spring', visualDuration: 0.42, bounce: 0.14 },
   /** A second answer sooner than this after the previous one is a double tap, not a decision. */
   answerGapMs: 160,
+  /** Pointer velocity is measured over the last samples of this window (cards and the wheel). */
+  velocityWindowMs: 100,
+  /** The next cards' photos are fetched on idle, at most this late. */
+  lookaheadIdleMs: 300,
+  /** «Запомнили…» appears when the flying card is this far gone. */
+  momentAtShare: 0.6,
   /** The gentle hint after this many skips in a row (ТЗ §9.1). */
   skipHintAfter: 5,
   /** «Запомнили: …» moment after the last answer. */

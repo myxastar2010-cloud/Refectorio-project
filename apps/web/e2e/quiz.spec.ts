@@ -237,6 +237,51 @@ test.describe('the whole path', () => {
     await expect(page.getByText('Ответы (проверенный JSON)')).toBeVisible();
     await expect(page.locator('.quiz-finale-debug pre')).toContainText('"version": 1');
   });
+
+  test('the endless finale offers a fresh start and the privacy sheet after the honest line', async ({
+    page,
+  }) => {
+    test.slow();
+    await openQuiz(page);
+    await throughGoal(page);
+    await choose(page, /Сбалансированное питание/, 'macroProfile');
+    await choose(page, /Рекомендуется/, 'health');
+    await choose(page, 'Нет', 'allergy');
+    await choose(page, 'Нет', 'dislikes');
+    await choose(page, 'Нет', 'activity');
+    await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
+    await choose(page, 'В основном сидя', 'notes');
+    // The honest line comes after 40 s: the page clock runs them in a moment.
+    await page.clock.install();
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await onScreen(page, 'finale');
+    await page.clock.runFor(45_000);
+    await expect(page.getByText(/мы дорабатываем генерацию/)).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Как мы используем ваши данные?' }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Пройти тест заново' }).click();
+    await page.clock.runFor(5_000);
+    await onScreen(page, 'taste', 'Выберите блюдо');
+    await expect.poll(async () => (await draft(page))?.answers.tasteDecisions.length ?? 0).toBe(0);
+  });
+});
+
+test.describe('the wheel', () => {
+  test('typed digits add up, and «Готово» keeps the typed value without Enter', async ({
+    page,
+  }) => {
+    await openQuiz(page);
+    await playDishes(page, TEN_DECISIVE);
+    await onScreen(page, 'body', 'О вас');
+    await page.getByRole('button', { name: /^Возраст/ }).click();
+    await expect(page.getByRole('spinbutton')).toBeFocused();
+    await page.keyboard.type('35');
+    await expect(page.locator('.quiz-wheel-input')).toHaveValue('35');
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^Возраст/ })).toContainText('35');
+  });
 });
 
 test.describe('safety', () => {
