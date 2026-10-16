@@ -35,6 +35,7 @@ export const REASON_CODES = [
   'ED_HISTORY',
   'BMI_UNDERWEIGHT',
   'OLDER_ADULT_CAUTION',
+  'OLDER_ADULT_REGIMES',
   'HYPERTENSION',
   'HYPOTHYROIDISM',
   'INSULIN_RESISTANCE',
@@ -284,6 +285,11 @@ function bodyEffects(q: Questionnaire): Effect[] {
   const older = q.ageYears >= AGE_LIMITS.olderAdultFromYears;
   if (older && (bmi < BMI_UNDERWEIGHT_BELOW || bmi >= BMI_OBESITY_FROM || q.goal === 'lose')) {
     effects.push({ status: 'requiresDoctor', reason: 'OLDER_ADULT_CAUTION', refer: ['gp'] });
+  }
+  if (older) {
+    // Keto and very-low-calorie diets after 65 only with support and monitoring (Watanabe 2020; research/
+    // stage-2-mappings.md §2.3–2.4): not offered at all.
+    effects.push({ status: 'allowed', reason: 'OLDER_ADULT_REGIMES', forbid: ['keto', 'vlcd'] });
   }
   return effects;
 }

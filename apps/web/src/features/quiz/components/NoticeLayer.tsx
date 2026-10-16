@@ -11,6 +11,8 @@ import { useModal } from './useModal';
 
 /** Notices that may end the personal path: they also offer the way home. */
 const HOME_NOTICES = new Set<NoticeId>(['refused', 'insulinUnknown']);
+/** Notices that ask to confirm an answer: «Понимаю, продолжить» or «Выбрать другое». */
+const CONFIRM_NOTICES = new Set<NoticeId>(['ketoConfirm']);
 
 function NoticeCard({ id }: { readonly id: NoticeId }) {
   const { dispatch, exit, calm, state } = useQuiz();
@@ -44,16 +46,27 @@ function NoticeCard({ id }: { readonly id: NoticeId }) {
         <div className="quiz-helplines">
           <p>{quiz.helplines.title}</p>
           <ul>
-            <li>{quiz.helplines.minors}</li>
-            {minor ? null : <li>{quiz.helplines.adults}</li>}
+            {/* The children's line serves children, teenagers and their parents; adults get the adult one. */}
+            <li>{minor ? quiz.helplines.minors : quiz.helplines.adults}</li>
+            <li>{quiz.helplines.emergency}</li>
           </ul>
           <p className="quiz-helplines-checked">{quiz.helplines.checked}</p>
         </div>
       ) : null}
       <div className="quiz-notice-actions">
         <PillButton tone="accent" onClick={dismiss} buttonRef={okRef}>
-          {quiz.common.understood}
+          {CONFIRM_NOTICES.has(id) ? quiz.common.confirmContinue : quiz.common.understood}
         </PillButton>
+        {CONFIRM_NOTICES.has(id) ? (
+          <PillButton
+            tone="outline"
+            onClick={() => {
+              if (present) dispatch({ type: 'declineNotice' });
+            }}
+          >
+            {quiz.common.chooseOther}
+          </PillButton>
+        ) : null}
         {HOME_NOTICES.has(id) ? (
           <PillButton tone="outline" onClick={exit}>
             {site.quizShell.exit}

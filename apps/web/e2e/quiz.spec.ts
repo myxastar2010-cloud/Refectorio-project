@@ -328,7 +328,7 @@ test.describe('safety', () => {
     await choose(page, /Сбалансированное питание/, 'macroProfile');
     await choose(page, /Рекомендуется/, 'health');
     await choose(page, 'Да', 'healthConditions');
-    await page.getByRole('button', { name: 'Диабет' }).click();
+    await page.getByRole('button', { name: 'Диабет', exact: true }).click();
     await page.getByRole('radio', { name: 'Да' }).click();
     await page.getByRole('button', { name: 'Готово' }).click();
     const notice = page.getByRole('alertdialog');
@@ -353,9 +353,20 @@ test.describe('safety', () => {
     await openQuiz(page);
     await throughGoal(page, 'Сжигание жира');
     await choose(page, /Сбалансированное питание/, 'macroProfile');
-    await choose(page, 'Кето', 'health');
+    // Keto asks for a confirmation first; «Выбрать другое» takes it back, «Понимаю, продолжить» goes on.
+    await page.getByRole('radio', { name: 'Кето' }).click();
+    const confirm = page.getByRole('alertdialog');
+    await expect(confirm).toContainText('водно-солевой баланс');
+    await confirm.getByRole('button', { name: 'Выбрать другое' }).click();
+    await expect(page.getByRole('radio', { name: 'Кето' })).not.toBeChecked();
+    await page.getByRole('radio', { name: 'Кето' }).click();
+    await page
+      .getByRole('alertdialog')
+      .getByRole('button', { name: 'Понимаю, продолжить' })
+      .click();
+    await onScreen(page, 'health');
     await choose(page, 'Да', 'healthConditions');
-    await page.getByRole('button', { name: 'Диабет' }).click();
+    await page.getByRole('button', { name: 'Диабет', exact: true }).click();
     await page.getByRole('radio', { name: 'Нет' }).click();
     await page.getByRole('button', { name: 'Готово' }).click();
     for (const text of [

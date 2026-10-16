@@ -23,6 +23,8 @@ export type QuizAction =
   | { readonly type: 'rowCommitted' }
   | { readonly type: 'next' }
   | { readonly type: 'dismissNotice' }
+  /** «Выбрать другое» of a confirmation notice: the answer it asked about is taken back, the step stays. */
+  | { readonly type: 'declineNotice' }
   | { readonly type: 'back' }
   /** One answer of the dish game (an entry in the browser history of its own). */
   | { readonly type: 'tasteAnswer'; readonly decision: TasteDecision }
@@ -146,6 +148,11 @@ export function reconcile(state: QuizState, step: StepId): Reconciled {
     queue(decision.reasons.includes('DIABETES_TYPE2') ? 'diabetesKeto' : 'ketoUnavailable');
   }
 
+  // Keto is allowed here, but it is not for everyone: a confirmation first (research/stage-2-mappings.md §7.11).
+  if (step === 'macroProfile' && answers.macroProfile === 'keto' && ketoAllowed(decision)) {
+    queue('ketoConfirm');
+  }
+
   if (step === 'goalSetup' || step === 'goal') {
     if (decision.reasons.includes('OLDER_ADULT_CAUTION')) queue('olderAdult');
   }
@@ -232,6 +239,12 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
         seenNotices: read === undefined ? state.seenNotices : [...state.seenNotices, read],
       };
       return notices.length === 0 && state.advanceAfterNotices ? advance(next) : next;
+    }
+    case 'declineNotice': {
+      const [declined, ...notices] = state.notices;
+      const answers: Record<string, unknown> = { ...state.answers };
+      if (declined === 'ketoConfirm') Reflect.deleteProperty(answers, 'macroProfile');
+      return { ...state, answers: answers as Answers, notices, advanceAfterNotices: false };
     }
     case 'back': {
       const previous = state.history.at(-1);

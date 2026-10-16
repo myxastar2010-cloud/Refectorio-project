@@ -76,7 +76,7 @@ export function buildResult(
       exercise: a.exercise,
       strengthTraining,
       lifestyle: a.lifestyle,
-      pal: activity.pal,
+      ...(activity.pal !== undefined ? { pal: activity.pal } : {}),
       group: activity.group,
     },
     ...(notes ? { notes } : {}),

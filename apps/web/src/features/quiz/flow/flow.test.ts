@@ -88,7 +88,8 @@ describe('allergen synonyms (whole words, never substrings)', () => {
     ['пшеница', ['gluten']],
     ['лактоза', ['lactose']],
     ['земляной орех', ['peanut']],
-    ['кокосовое молоко', ['treeNut']],
+    ['миндальное молоко', ['treeNut']],
+    ['крабовые палочки', ['fish', 'egg', 'crustacean']],
     ['сыр', ['milk']],
     ['яйца', ['egg']],
     ['Е220', ['sulphites']],
@@ -105,6 +106,7 @@ describe('allergen synonyms (whole words, never substrings)', () => {
     'икра',
     'орехи',
     'молочная кислота',
+    'кокосовое молоко',
     'киви',
     'карпаччо',
   ])('%s → nothing', (text) => {

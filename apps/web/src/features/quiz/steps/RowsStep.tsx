@@ -167,6 +167,8 @@ export function RowsStep({ step }: { readonly step: Step }) {
     a.heightCm !== undefined && a.ageYears !== undefined && adult && !deemphasize
       ? recommendedWeightRangeKg(a.heightCm, a.ageYears)
       : null;
+  // After 65 the range is a guide from studies (Winter 2014), not the WHO «norm»: its own wording.
+  const older = (a.ageYears ?? 0) >= AGE_LIMITS.olderAdultFromYears;
 
   const range = (row: RowId): WheelRange => {
     switch (row) {
@@ -249,7 +251,9 @@ export function RowsStep({ step }: { readonly step: Step }) {
     if (a.goal === 'lose') {
       setLimitNote(
         edge === 'min'
-          ? fill(quiz.goalSetup.limitLose, { min: targetBounds.minKg })
+          ? fill(older ? quiz.goalSetup.limitLoseOlder : quiz.goalSetup.limitLose, {
+              min: targetBounds.minKg,
+            })
           : quiz.goalSetup.limitDirectionLose,
       );
     } else if (a.goal === 'gain') {
@@ -272,7 +276,10 @@ export function RowsStep({ step }: { readonly step: Step }) {
         : quiz.goalSetup.title;
   const panelHint =
     open === 'target' && recommended
-      ? fill(quiz.goalSetup.recommended, { min: recommended.minKg, max: recommended.maxKg })
+      ? fill(older ? quiz.goalSetup.recommendedOlder : quiz.goalSetup.recommended, {
+          min: recommended.minKg,
+          max: recommended.maxKg,
+        })
       : null;
 
   return (
@@ -314,7 +321,10 @@ export function RowsStep({ step }: { readonly step: Step }) {
       ) : null}
       {step === 'goalSetup' && recommended && !maintain && !open ? (
         <p className="quiz-note">
-          {fill(quiz.goalSetup.recommended, { min: recommended.minKg, max: recommended.maxKg })}
+          {fill(older ? quiz.goalSetup.recommendedOlder : quiz.goalSetup.recommended, {
+            min: recommended.minKg,
+            max: recommended.maxKg,
+          })}
         </p>
       ) : null}
       {implausible ? (

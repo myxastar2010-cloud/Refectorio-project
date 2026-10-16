@@ -31,7 +31,7 @@ describe('activityFromLifestyle: adults', () => {
     for (const lifestyle of LIFESTYLES) {
       let previous = 0;
       for (const exercise of EXERCISE_FREQUENCIES) {
-        const { pal } = adult(exercise, lifestyle);
+        const pal = adult(exercise, lifestyle).pal ?? 0;
         expect(pal).toBeGreaterThan(previous);
         expect(pal).toBeGreaterThanOrEqual(1.4);
         expect(pal).toBeLessThanOrEqual(2.4);
@@ -41,7 +41,7 @@ describe('activityFromLifestyle: adults', () => {
     for (const exercise of EXERCISE_FREQUENCIES) {
       let previous = 0;
       for (const lifestyle of LIFESTYLES) {
-        const { pal } = adult(exercise, lifestyle);
+        const pal = adult(exercise, lifestyle).pal ?? 0;
         expect(pal).toBeGreaterThan(previous);
         previous = pal;
       }
@@ -63,7 +63,7 @@ describe('activityFromLifestyle: adults', () => {
 });
 
 describe('activityFromLifestyle: minors', () => {
-  it('counts only sports sessions and reports the group PAL', () => {
+  it('counts only sports sessions; no adult PAL, the group only', () => {
     const minor = (exercise: ExerciseFrequency) =>
       activityFromLifestyle({
         exercise,
@@ -71,10 +71,11 @@ describe('activityFromLifestyle: minors', () => {
         strengthTraining: false,
         ageYears: 15,
       });
-    expect(minor('none')).toEqual({ pal: 1.4, group: 'kfa1' });
-    expect(minor('1to2')).toEqual({ pal: 1.6, group: 'kfa2' });
+    expect(minor('none')).toEqual({ group: 'kfa1' });
+    expect(minor('1to2')).toEqual({ group: 'kfa2' });
     expect(minor('3to4').group).toBe('kfa3');
-    expect(minor('5to6').group).toBe('kfa3');
-    expect(minor('daily')).toEqual({ pal: 2.2, group: 'kfa4' });
+    // «5–6» takes the higher group: underfeeding a growing teenager is worse than a slight overestimate.
+    expect(minor('5to6').group).toBe('kfa4');
+    expect(minor('daily')).toEqual({ group: 'kfa4' });
   });
 });

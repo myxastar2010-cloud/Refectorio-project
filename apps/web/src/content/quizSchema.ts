@@ -25,6 +25,7 @@ export const NOTICE_IDS = [
   'severeTraces',
   'teenHealth',
   'diabetesGoal',
+  'ketoConfirm',
 ] as const;
 export type NoticeId = (typeof NOTICE_IDS)[number];
 
@@ -77,6 +78,8 @@ export const quizContentSchema = z.object({
     addOther: text,
     close: text,
     understood: text,
+    confirmContinue: text,
+    chooseOther: text,
     noticeTitle: text,
     remove: template('item'),
     added: template('item'),
@@ -152,7 +155,9 @@ export const quizContentSchema = z.object({
     currentTitle: text,
     targetTitle: text,
     recommended: template('min', 'max'),
+    recommendedOlder: template('min', 'max'),
     limitLose: template('min'),
+    limitLoseOlder: template('min'),
     limitGain: template('max'),
     limitDirectionLose: text,
     limitDirectionGain: text,
@@ -229,7 +234,7 @@ export const quizContentSchema = z.object({
   notices: z.object(
     Object.fromEntries(NOTICE_IDS.map((id) => [id, text])) as Record<NoticeId, typeof text>,
   ),
-  helplines: z.object({ title: text, minors: text, adults: text, checked: text }),
+  helplines: z.object({ title: text, minors: text, adults: text, emergency: text, checked: text }),
   adjustments: z.object({
     title: text,
     goalToMaintain: text,

@@ -170,15 +170,24 @@ describe('guardrails: body', () => {
     expect(evaluateGuardrails(q({ ageYears: 70, weightKg: 45 })).reasons).toEqual([
       'BMI_UNDERWEIGHT',
       'OLDER_ADULT_CAUTION',
+      'OLDER_ADULT_REGIMES',
     ]);
     // 85 kg / 1.65² = 31.2
     expect(evaluateGuardrails(q({ ageYears: 70, weightKg: 85 })).reasons).toEqual([
       'OLDER_ADULT_CAUTION',
+      'OLDER_ADULT_REGIMES',
     ]);
     const losing = evaluateGuardrails(q({ ageYears: 70, goal: 'lose' }));
     expect(losing.status).toBe('requiresDoctor');
     expect(losing.allowedGoals).toContain('lose');
     expect(evaluateGuardrails(q({ ageYears: 70 })).status).toBe('allowed');
+  });
+
+  it('older adults: no keto and no very-low-calorie diet (Watanabe 2020)', () => {
+    const d = evaluateGuardrails(q({ ageYears: 70 }));
+    expect(d.forbiddenRegimes).toEqual(['keto', 'vlcd']);
+    expect(d.reasons).toEqual(['OLDER_ADULT_REGIMES']);
+    expect(evaluateGuardrails(q({ ageYears: 64 })).forbiddenRegimes).toEqual([]);
   });
 
   it('does not apply adult BMI rules to minors', () => {

@@ -48,6 +48,10 @@ export function ChoiceList<T extends string>({
   useEffect(() => {
     presentRef.current = present;
   }, [present]);
+  // The answer was taken back (a declined confirmation): the step can be answered again.
+  useEffect(() => {
+    if (selected === undefined) chosen.current = false;
+  }, [selected]);
   const selectedIndex = items.findIndex((item) => item.value === selected);
   const [focusIndex, setFocusIndex] = useState(() =>
     selectedIndex >= 0

@@ -258,6 +258,30 @@ describe('machine', () => {
     expect(fixed.adjustments).toEqual([]);
   });
 
+  it('keto asks for a confirmation; «Выбрать другое» takes it back and stays, a confirmed one never asks again', () => {
+    const atDiet = adultAt('macroProfile', {
+      goal: 'maintain',
+      weightKg: 60,
+      macroProfile: 'keto',
+    });
+    const asked = run(atDiet, next);
+    expect(asked.notices).toEqual(['ketoConfirm']);
+    const declined = run(asked, { type: 'declineNotice' });
+    expect(declined.screen).toBe('macroProfile');
+    expect(declined.answers.macroProfile).toBeUndefined();
+    expect(declined.notices).toEqual([]);
+    const confirmed = run(declined, patch({ macroProfile: 'keto' }), next, {
+      type: 'dismissNotice',
+    });
+    expect(confirmed.screen).toBe('health');
+    expect(confirmed.answers.macroProfile).toBe('keto');
+    expect(run({ ...confirmed, screen: 'macroProfile' }, next).notices).toEqual([]);
+    // After 65 keto is not offered at all: chosen anyway, it becomes «Рекомендуется».
+    const older = run(adultAt('macroProfile', { ageYears: 70, macroProfile: 'keto' }), next);
+    expect(older.answers.macroProfile).toBe('recommended');
+    expect(older.notices).toEqual(['ketoUnavailable']);
+  });
+
   it('a teenager whose age changed after a weight goal: goal → maintain with the teen notice', () => {
     const state = run(adultAt('goalSetup', { ageYears: 16, goal: 'lose', weightKg: 60 }), next);
     expect(state.answers.goal).toBe('maintain');

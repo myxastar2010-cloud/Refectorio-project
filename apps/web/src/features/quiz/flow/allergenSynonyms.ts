@@ -14,15 +14,20 @@ const rule = (chip: AllergenChipId, ...patterns: readonly string[]): Rule[] =>
 
 const L = '\\p{L}*';
 
-/** Phrases first: «земляной орех» is peanut, «кокосовое молоко» is not milk. */
-const PHRASES: readonly { readonly chip: AllergenChipId | null; readonly phrase: RegExp }[] = [
-  { chip: 'peanut', phrase: /(^|\s)земляно\p{L}*\s+орех\p{L}*/u },
-  { chip: 'sulphites', phrase: /(^|\s)диоксид\p{L}*\s+серы/u },
-  { chip: null, phrase: /(^|\s)молочн\p{L}*\s+кислот\p{L}*/u },
-  { chip: 'treeNut', phrase: /(^|\s)(кокосов|миндальн)\p{L}*\s+молок\p{L}*/u },
-  { chip: 'gluten', phrase: /(^|\s)овсян\p{L}*\s+молок\p{L}*/u },
-  { chip: 'soy', phrase: /(^|\s)соев\p{L}*\s+молок\p{L}*/u },
-  { chip: null, phrase: /(^|\s)рисов\p{L}*\s+молок\p{L}*/u },
+/**
+ * Phrases first: «земляной орех» is peanut; «кокосовое молоко» is neither milk nor a tree nut (coconut is not in the
+ * EU list of tree nuts, Regulation 1169/2011 Annex II); crab sticks are surimi — fish with egg white, sometimes crab.
+ */
+const PHRASES: readonly { readonly chips: readonly AllergenChipId[]; readonly phrase: RegExp }[] = [
+  { chips: ['peanut'], phrase: /(^|\s)земляно\p{L}*\s+орех\p{L}*/u },
+  { chips: ['sulphites'], phrase: /(^|\s)диоксид\p{L}*\s+серы/u },
+  { chips: [], phrase: /(^|\s)молочн\p{L}*\s+кислот\p{L}*/u },
+  { chips: [], phrase: /(^|\s)кокосов\p{L}*\s+молок\p{L}*/u },
+  { chips: ['treeNut'], phrase: /(^|\s)миндальн\p{L}*\s+молок\p{L}*/u },
+  { chips: ['fish', 'egg', 'crustacean'], phrase: /(^|\s)крабов\p{L}*\s+палоч\p{L}*/u },
+  { chips: ['gluten'], phrase: /(^|\s)овсян\p{L}*\s+молок\p{L}*/u },
+  { chips: ['soy'], phrase: /(^|\s)соев\p{L}*\s+молок\p{L}*/u },
+  { chips: [], phrase: /(^|\s)рисов\p{L}*\s+молок\p{L}*/u },
 ];
 
 const TOKENS: readonly Rule[] = [
@@ -141,9 +146,9 @@ const normalize = (text: string) => text.toLocaleLowerCase('ru').replaceAll('ё'
 export function matchAllergenChips(text: string): AllergenChipId[] {
   let rest = ` ${normalize(text)} `;
   const found = new Set<AllergenChipId>();
-  for (const { chip, phrase } of PHRASES) {
+  for (const { chips, phrase } of PHRASES) {
     if (phrase.test(rest)) {
-      if (chip) found.add(chip);
+      for (const chip of chips) found.add(chip);
       rest = rest.replace(phrase, ' ');
     }
   }

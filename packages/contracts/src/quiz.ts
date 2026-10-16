@@ -107,8 +107,8 @@ export const quizAnswersV1Schema = z
       exercise: z.enum(EXERCISE_FREQUENCIES),
       strengthTraining: z.boolean(),
       lifestyle: z.enum(LIFESTYLES),
-      /** Derived by nutrition-core activityFromLifestyle(). */
-      pal: z.number().min(1).max(2.5),
+      /** Derived by nutrition-core activityFromLifestyle(); adults only (minors: the group only). */
+      pal: z.number().min(1).max(2.5).optional(),
       group: z.enum(ACTIVITY_GROUPS),
     }),
     notes: z.string().max(INPUT_LIMITS.notesMaxLength).optional(),

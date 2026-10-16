@@ -40,12 +40,16 @@ export const ACTIVITY_MAPPING = {
     { group: 'kfa3', below: 205 },
   ],
   topGroup: 'kfa4',
-  /** Under 18: sports sessions → group (NASEM categories, algorithm-spec.md §4.3). */
+  /**
+   * Under 18: sports sessions → group (NASEM categories, algorithm-spec.md §4.3). «5–6» straddles «3–5» and «6 or
+   * more» of the research: the higher group, because underfeeding a growing teenager is worse than a slight
+   * overestimate (fact-check of stage 2, A10).
+   */
   minorGroups: {
     none: 'kfa1',
     '1to2': 'kfa2',
     '3to4': 'kfa3',
-    '5to6': 'kfa3',
+    '5to6': 'kfa4',
     daily: 'kfa4',
   },
 } as const satisfies {
@@ -69,18 +73,18 @@ export type ActivityAnswers = {
 };
 
 export type ActivityEstimate = {
-  /** Adults: the continuous estimate (stage 3 may use it instead of the group). Minors: the group's PAL. */
-  readonly pal: number;
+  /**
+   * Adults only: the continuous estimate (stage 3 may use it instead of the group). Minors have none: NASEM's PAL
+   * ranges differ by age, so only the group is meaningful.
+   */
+  readonly pal?: number;
   readonly group: ActivityGroup;
 };
-
-const GROUP_PAL100: Record<ActivityGroup, number> = { kfa1: 140, kfa2: 160, kfa3: 190, kfa4: 220 };
 
 export function activityFromLifestyle(answers: ActivityAnswers): ActivityEstimate {
   const m = ACTIVITY_MAPPING;
   if (answers.ageYears < AGE_LIMITS.minorUnderYears) {
-    const group = m.minorGroups[answers.exercise];
-    return { pal: GROUP_PAL100[group] / 100, group };
+    return { group: m.minorGroups[answers.exercise] };
   }
   const pal100 = Math.min(
     m.maxPal100,
