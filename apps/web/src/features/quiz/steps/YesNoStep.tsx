@@ -32,7 +32,7 @@ const answerOf = (step: Step, value: YesNo): Partial<Answers> => {
 export function YesNoStep({ step }: { readonly step: Step }) {
   const { state, patch, next } = useQuiz();
   return (
-    <StepFrame icon={stepDef(step).icon} title={TITLES[step]}>
+    <StepFrame icon={stepDef(step).icon} title={TITLES[step]} className="quiz-frame--yesno">
       <ChoiceList<YesNo>
         items={[
           { value: 'yes', label: quiz.yesNo.yes },

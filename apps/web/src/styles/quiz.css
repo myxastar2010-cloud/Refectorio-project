@@ -96,7 +96,7 @@
 
   /* The card is a picture, not text: it keeps to the window's height (the title, label, buttons, credit and margins
      around it take ≈ 510 mockup px) rather than pushing the buttons off screen. */
-  --q-card-h: min(calc(var(--quiz-card-h) * var(--q)), calc(100svh - 510 * var(--q)));
+  --q-card-h: min(calc(var(--quiz-card-h) * var(--q)), calc(100svh - 497 * var(--q)));
   --q-card-w: calc(var(--q-card-h) * var(--quiz-card-w) / var(--quiz-card-h));
   --q-card-radius: calc(var(--q-card-w) * var(--quiz-card-radius) / var(--quiz-card-w));
   --q-dish: max(18px, calc(var(--type-quiz-dish-size) * var(--q)));
@@ -235,7 +235,7 @@
       var(--q-progress-y) + var(--q-progress-h) / 2 + var(--q-back) / 2 + 10px
     );
     /* Under the one-line title, with a little air at the bottom. */
-    --q-card-h: calc(100svh - var(--q-game-title-y) - 66px - env(safe-area-inset-bottom));
+    --q-card-h: calc(100svh - var(--q-game-title-y) - 70px - env(safe-area-inset-bottom));
     --q-card-w: calc(var(--q-card-h) * var(--quiz-card-w) / var(--quiz-card-h));
   }
 }
@@ -471,10 +471,15 @@
   padding: calc(6 * var(--q)) calc(18 * var(--q));
   border-radius: 9999px;
   font-size: var(--q-privacy);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-ink-muted);
-  /* A text button, but a full touch target (CLAUDE.md: ≥ 44 px). */
-  min-height: 44px;
+}
+
+/* A text button, but a full touch target for fingers (CLAUDE.md: ≥ 44 px); with a mouse it keeps the mockup's size. */
+@media (pointer: coarse) {
+  .quiz-privacy-label {
+    min-height: 44px;
+  }
 }
 
 /* The accent wave with white text (the landing's accent layer keeps ink text). */
@@ -676,6 +681,12 @@
   width: var(--q-radio);
   height: var(--q-radio);
   border-radius: 50%;
+  /* The mockup's muted ring; chosen (white on black) and under the wave it follows the text. */
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+}
+
+.quiz-option.is-selected .quiz-radio,
+.quiz-option .wave-layer .quiz-radio {
   box-shadow: inset 0 0 0 var(--q-outline) currentColor;
 }
 
@@ -1117,6 +1128,8 @@
 
 .quiz-chips.is-compact .quiz-chip--add {
   width: calc(var(--q-add-w) * 0.85);
+  /* The compact chips' padding must not reach the «+» oval. */
+  padding: 0;
 }
 
 .quiz-chip--custom {
@@ -1166,6 +1179,8 @@
 /* The «+» panel (design «подвопрос 26»): grows out of the oval; the chips cross-fade under it. */
 .quiz-add {
   position: relative;
+  /* Scrolled into view (the phone keyboard), it stays below the header band. */
+  scroll-margin-top: var(--q-header-h);
   width: var(--q-panel-w);
   max-width: 100%;
   min-height: var(--q-panel-h);
@@ -1553,6 +1568,7 @@
 
 .quiz-frame--taste {
   padding-top: var(--q-game-title-y);
+  padding-bottom: calc(16 * var(--q));
 }
 
 .quiz-frame--taste .quiz-title {
@@ -1573,7 +1589,7 @@
   place-items: center;
   width: var(--q-card-w);
   height: var(--q-card-h);
-  margin-top: calc(18 * var(--q));
+  margin-top: calc(31 * var(--q));
 }
 
 .quiz-card {
@@ -2195,6 +2211,128 @@
 }
 
 /* ── Reduced motion: no shimmer bands moving, no pulses ─────────────────────────────────── */
+
+/* ── Mockup geometry per step (design review, 16.10): tablets and desktops; phones keep their own sizes ── */
+
+@media (min-width: 48rem) {
+  /* The mockups' own line breaks of the titles (TitleText, «|» in quiz.ru.ts). */
+  .quiz-title-line {
+    display: block;
+  }
+
+  .quiz-frame--goal .quiz-answers,
+  .quiz-frame--rows .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap) * var(--q));
+  }
+  .quiz-frame--yesno .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-yesno) * var(--q));
+  }
+  .quiz-frame--chips .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-chips) * var(--q));
+  }
+  .quiz-frame--text .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-text) * var(--q));
+  }
+  .quiz-frame--food-style .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-food-style) * var(--q));
+  }
+  .quiz-frame--macro .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-macro) * var(--q));
+  }
+  .quiz-frame--activity .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-activity) * var(--q));
+  }
+  .quiz-frame--lifestyle .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-lifestyle) * var(--q));
+  }
+
+  /* Question icons of different heights, as in the mockups; the box bottom stays on the same line. */
+  .quiz-icon {
+    --icon-box: 140;
+    height: calc(var(--q-icon) * var(--icon-box) / 140);
+    margin-top: calc(var(--q-icon) * (140 - var(--icon-box)) / 140);
+  }
+  .quiz-icon[data-icon='q-body'] {
+    --icon-box: 153;
+  }
+  .quiz-icon[data-icon='q-goal'] {
+    --icon-box: 133;
+  }
+  .quiz-icon[data-icon='q-food-style'] {
+    --icon-box: 106;
+  }
+  .quiz-icon[data-icon='q-health'] {
+    --icon-box: 102;
+  }
+  .quiz-icon[data-icon='q-allergy'] {
+    --icon-box: 109;
+  }
+  .quiz-icon[data-icon='q-activity'] {
+    --icon-box: 137;
+  }
+  .quiz-icon[data-icon='q-strength'] {
+    --icon-box: 119;
+  }
+  .quiz-icon[data-icon='q-lifestyle'] {
+    --icon-box: 156;
+  }
+  .quiz-icon[data-icon='q-notes'] {
+    --icon-box: 119;
+  }
+
+  /* Food preferences and diet type: a larger icon and the text column 140 mockup px from the pill's edge. */
+  .quiz-option--wide,
+  .quiz-option--widest {
+    --q-option-icon: calc(62 * var(--q));
+    --q-option-icon-gap: calc(21 * var(--q));
+    padding-block: calc(20 * var(--q));
+    padding-left: calc(57 * var(--q));
+    /* The descriptions keep the mockup's one or two lines (Open Runde is a little wider than SF Pro). */
+    padding-right: calc(28 * var(--q));
+  }
+  .quiz-choices--wide {
+    gap: calc(28 * var(--q));
+  }
+  .quiz-choices--widest {
+    gap: calc(13 * var(--q));
+  }
+  .quiz-frame--lifestyle .quiz-choices--short {
+    gap: calc(31 * var(--q));
+  }
+  .quiz-choices--short .quiz-option-icon {
+    width: calc(48 * var(--q));
+    height: calc(48 * var(--q));
+  }
+  .quiz-option--short:not(:has(.quiz-option-icon)) {
+    padding-left: calc(52 * var(--q));
+  }
+  .quiz-option--yesno {
+    padding-left: calc(35 * var(--q));
+  }
+
+  /* «Настройте свою цель»: the rows are as wide as the goal's options. */
+  .quiz-rows--wide .quiz-row {
+    width: var(--q-pill-w-options);
+  }
+
+  /* The «+» panel: the mockup's spacing. */
+  .quiz-add-content {
+    gap: calc(66 * var(--q));
+    padding: calc(40 * var(--q)) calc(94 * var(--q));
+  }
+
+  .quiz-frame--text .quiz-footer {
+    margin-top: calc(19 * var(--q));
+  }
+}
+
+/* The desktop frame: labels never wrap (the mockups' pills are one line). */
+@media (min-width: 80rem) and (hover: hover) {
+  .quiz-option-label,
+  .quiz-row-label {
+    white-space: nowrap;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .quiz-progress-shimmer,

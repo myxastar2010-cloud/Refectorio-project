@@ -35,7 +35,12 @@ function QuestionIcon({ icon }: { readonly icon: IconKey }) {
   const still = motion.iconStill || leavingToSameIcon;
   const source = quizIcon(icon);
   return (
-    <m.div className="quiz-icon" variants={blockVariants(calm, motion, 0, still)} aria-hidden>
+    <m.div
+      className="quiz-icon"
+      data-icon={icon}
+      variants={blockVariants(calm, motion, 0, still)}
+      aria-hidden
+    >
       <picture>
         <source type="image/avif" srcSet={source.avif} />
         <img
@@ -48,6 +53,21 @@ function QuestionIcon({ icon }: { readonly icon: IconKey }) {
       </picture>
     </m.div>
   );
+}
+
+/**
+ * A title with the mockups' own line breaks («|» in quiz.ru.ts): each part is a line from 768 px; phones wrap the
+ * words freely. Screen readers read the plain sentence.
+ */
+function TitleText({ text }: { readonly text: string }) {
+  const parts = text.split('|');
+  if (parts.length === 1) return text;
+  return parts.map((part, index) => (
+    <span key={index} className="quiz-title-line">
+      {index > 0 ? ' ' : null}
+      {part}
+    </span>
+  ));
 }
 
 /** The privacy label glides to its new place when «Далее» rises in above it. */
@@ -105,7 +125,7 @@ export function StepFrame({
         tabIndex={-1}
         variants={blockVariants(calm, motion, 1)}
       >
-        {title}
+        <TitleText text={title} />
       </m.h2>
       <Block order={2} className="quiz-answers">
         {children}

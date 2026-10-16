@@ -280,25 +280,33 @@
   --quiz-icon-y: 128; /* top of the question icon box */
   --quiz-icon-box: 140;
   --quiz-title-gap: 4; /* icon box → title line box (title cap top ≈ 285) */
-  --quiz-content-gap: 72; /* title's last line box → answers (body 417, goal 417) */
-  --quiz-content-gap-dense: 36; /* long lists (food preferences, diet type, activity, lifestyle) */
-  --quiz-privacy-gap: 27;
-  --quiz-step-bottom: 48; /* space under the privacy label when a step scrolls */
+  --quiz-content-gap: 60; /* title's last line box → answers (body 417, goal 417) */
+  --quiz-content-gap-dense: 36; /* long lists (phones and the fallback) */
+  /* Per kind of step, measured on the mockups (design review 16.10): the answers start where they do there. */
+  --quiz-content-gap-yesno: 47;
+  --quiz-content-gap-chips: 42;
+  --quiz-content-gap-text: 28;
+  --quiz-content-gap-food-style: 31;
+  --quiz-content-gap-macro: 28;
+  --quiz-content-gap-activity: 20;
+  --quiz-content-gap-lifestyle: 44;
+  --quiz-privacy-gap: 18;
+  --quiz-step-bottom: 12; /* space under the privacy label when a step scrolls */
 
-  --type-quiz-title-size: 72.25; /* the landing H1 role: Bold + outline */
+  --type-quiz-title-size: 69.5; /* Bold + outline like the landing H1, a little smaller (the mockups' titles) */
   --type-quiz-title-leading: 84.5;
   --type-quiz-title-tracking: 0.016em;
-  --type-quiz-option-size: 40;
+  --type-quiz-option-size: 39.3;
   --type-quiz-option-weight: 600;
   --type-quiz-option-tracking: -0.012em;
   --type-quiz-desc-size: 24;
   --type-quiz-desc-leading: 29;
   --type-quiz-value-size: 24;
-  --type-quiz-yesno-size: 56;
+  --type-quiz-yesno-size: 48;
   --type-quiz-chip-size: 40;
-  --type-quiz-privacy-size: 20;
-  --type-quiz-panel-title-size: 42;
-  --type-quiz-input-size: 24;
+  --type-quiz-privacy-size: 22;
+  --type-quiz-panel-title-size: 36;
+  --type-quiz-input-size: 23;
   --type-quiz-button-size: 24;
   --type-quiz-dish-size: 32;
 
@@ -316,8 +324,8 @@
   /* The label starts 110 px from the pill's left edge, as in the mockup (44 + icon 56 + 10): the longest labels
      («Набор мышечной массы», «Физическая нагрузка») stay on one line in Open Runde, ≈ 3 % wider than the mockup font. */
   --quiz-pill-pad-x: 44;
-  --quiz-option-icon: 56;
-  --quiz-option-icon-gap: 10;
+  --quiz-option-icon: 46;
+  --quiz-option-icon-gap: 20;
   --quiz-yesno-h: 117;
   --quiz-yesno-gap: 44;
   --quiz-radio: 46;
@@ -352,7 +360,7 @@
   --quiz-card-radius: 112;
   --quiz-card-shade: 0.36; /* top third: blurred photo + a light tint for white text ≥ 4.5:1 */
   --quiz-card-name-y: 52;
-  --quiz-game-title-y: 152; /* the game has no icon: the title starts high */
+  --quiz-game-title-y: 140; /* the game has no icon: the title starts high */
   --quiz-game-button: 83;
   --quiz-game-skip-w: 211;
   --quiz-game-gap: 36;

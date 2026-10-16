@@ -152,8 +152,8 @@ export const quiz = {
   },
   yesNo: { yes: 'Да', no: 'Нет' },
   health: {
-    title: 'Есть ли у вас проблемы со здоровьем?',
-    conditionsTitle: 'Какое состояние вашего здоровья?',
+    title: 'Есть ли у вас проблемы|со здоровьем?',
+    conditionsTitle: 'Какое состояние|вашего здоровья?',
     chips: {
       diabetes: 'Диабет',
       hypertension: 'Гипертония',
@@ -193,7 +193,7 @@ export const quiz = {
   },
   allergy: {
     title: 'Есть ли у вас аллергия на какие-либо продукты?',
-    allergensTitle: 'Укажите свою аллергию',
+    allergensTitle: 'Укажите свою|аллергию',
     chips: {
       lactose: 'Лактоза',
       gluten: 'Глютен',
@@ -219,7 +219,7 @@ export const quiz = {
   },
   dislikes: {
     title: 'Есть ли у вас неприязнь к каким-либо продуктам?',
-    textTitle: 'Какие продукты вы не любите?',
+    textTitle: 'Какие продукты|вы не любите?',
     placeholder: 'Например, оливки, свинина, кабачки…',
   },
   activity: {
@@ -231,7 +231,7 @@ export const quiz = {
       '5to6': '5–6 раз в неделю',
       daily: 'Ежедневно',
     },
-    strengthTitle: 'Занимаетесь ли вы силовыми тренировками?',
+    strengthTitle: 'Занимаетесь ли вы силовыми|тренировками?',
   },
   lifestyle: {
     title: 'Какой у вас образ жизни?',
@@ -244,7 +244,7 @@ export const quiz = {
     },
   },
   notes: {
-    title: 'Что нам следует знать?',
+    title: 'Что нам следует|знать?',
     placeholder: 'Например, обычно я завтракаю фруктами',
   },
   notices: {

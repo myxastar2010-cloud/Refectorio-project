@@ -23,7 +23,7 @@ type Props = {
 };
 
 /** The track's height over its width: the smallest visible fill is the rounded cap (as in the dish game mockup). */
-const CAP_SHARE = 24 / 440;
+const CAP_SHARE = 40 / 440;
 
 const headerItem = (calm: boolean, order: number) => ({
   initial: { opacity: 0, transform: 'translateY(-8px) scale(0.96)' },

@@ -77,7 +77,7 @@ export function OptionsStep({ step }: { readonly step: Step }) {
             ? quiz.notices.teenGoals
             : null;
       return (
-        <StepFrame icon={icon} title={quiz.goal.title}>
+        <StepFrame icon={icon} title={quiz.goal.title} className="quiz-frame--goal">
           <ChoiceList
             items={items}
             selected={a.goal}
@@ -94,7 +94,12 @@ export function OptionsStep({ step }: { readonly step: Step }) {
     }
     case 'foodStyle':
       return (
-        <StepFrame icon={icon} title={quiz.foodStyle.title} dense>
+        <StepFrame
+          icon={icon}
+          title={quiz.foodStyle.title}
+          dense
+          className="quiz-frame--food-style"
+        >
           <ChoiceList
             items={FOOD_STYLES.map((style) => ({
               value: style,
@@ -116,7 +121,7 @@ export function OptionsStep({ step }: { readonly step: Step }) {
     case 'macroProfile': {
       const keto = ketoAllowed(safety.decision);
       return (
-        <StepFrame icon={icon} title={quiz.macroProfile.title} dense>
+        <StepFrame icon={icon} title={quiz.macroProfile.title} dense className="quiz-frame--macro">
           <ChoiceList
             items={MACRO_PROFILES.map((profile) => ({
               value: profile,
@@ -140,7 +145,7 @@ export function OptionsStep({ step }: { readonly step: Step }) {
     }
     case 'activity':
       return (
-        <StepFrame icon={icon} title={quiz.activity.title} dense>
+        <StepFrame icon={icon} title={quiz.activity.title} dense className="quiz-frame--activity">
           <ChoiceList
             items={EXERCISE_FREQUENCIES.map((exercise) => ({
               value: exercise,
@@ -158,7 +163,7 @@ export function OptionsStep({ step }: { readonly step: Step }) {
       );
     case 'lifestyle':
       return (
-        <StepFrame icon={icon} title={quiz.lifestyle.title} dense>
+        <StepFrame icon={icon} title={quiz.lifestyle.title} dense className="quiz-frame--lifestyle">
           <ChoiceList
             items={LIFESTYLES.map((lifestyle) => ({
               value: lifestyle,
