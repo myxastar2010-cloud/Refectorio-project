@@ -14,8 +14,11 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# Pages must be switched on in the repository first (Settings → Pages → Source: GitHub Actions); until then
+# configure-pages answers 404 and main would be red. The repository variable PAGES_ENABLED=true opens the gate.
 jobs:
   build:
+    if: ${{ vars.PAGES_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -45,6 +48,7 @@ jobs:
           path: apps/web/dist
 
   deploy:
+    if: ${{ vars.PAGES_ENABLED == 'true' }}
     needs: build
     runs-on: ubuntu-latest
     environment:
