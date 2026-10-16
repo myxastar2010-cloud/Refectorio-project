@@ -644,3 +644,10 @@
     grid-template-columns: auto;
   }
 }
+
+/* The quiz on phones (ТЗ §7.10): «Вернуться» · progress · compact «Выйти» — the logo steps aside for them. */
+@media (max-width: 47.99rem) {
+  .site-header[data-mode='quiz'] .brand {
+    visibility: hidden;
+  }
+}

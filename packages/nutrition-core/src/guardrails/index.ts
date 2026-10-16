@@ -16,36 +16,56 @@ export const GUARDRAIL_STATUSES = [
 ] as const;
 export type GuardrailStatus = (typeof GUARDRAIL_STATUSES)[number];
 
-export type ReasonCode =
-  | 'AGE_UNDER_1'
-  | 'CHILD_NEEDS_ADULT'
-  | 'CHILD_FAMILY_MODE'
-  | 'TODDLER_NO_INDIVIDUAL_ENERGY'
-  | 'TEEN_NO_ENERGY_GOALS'
-  | 'PREGNANCY'
-  | 'LACTATION'
-  | 'DIABETES_INSULIN'
-  | 'DIABETES_TYPE2'
-  | 'KIDNEY_DISEASE'
-  | 'PKU'
-  | 'WARFARIN'
-  | 'MAOI'
-  | 'ED_SCREEN_POSITIVE'
-  | 'ED_HISTORY'
-  | 'BMI_UNDERWEIGHT'
-  | 'OLDER_ADULT_CAUTION';
+/** Machine-readable reasons (runtime list: the quiz contract validates stored decisions against it). */
+export const REASON_CODES = [
+  'AGE_UNDER_1',
+  'CHILD_NEEDS_ADULT',
+  'CHILD_FAMILY_MODE',
+  'TODDLER_NO_INDIVIDUAL_ENERGY',
+  'TEEN_NO_ENERGY_GOALS',
+  'PREGNANCY',
+  'LACTATION',
+  'DIABETES_INSULIN',
+  'DIABETES_TYPE2',
+  'KIDNEY_DISEASE',
+  'PKU',
+  'WARFARIN',
+  'MAOI',
+  'ED_SCREEN_POSITIVE',
+  'ED_HISTORY',
+  'BMI_UNDERWEIGHT',
+  'OLDER_ADULT_CAUTION',
+  'OLDER_ADULT_REGIMES',
+  'HYPERTENSION',
+  'HYPOTHYROIDISM',
+  'INSULIN_RESISTANCE',
+] as const;
+export type ReasonCode = (typeof REASON_CODES)[number];
 
-export type Specialist =
-  | 'pediatrician'
-  | 'obstetrician'
-  | 'endocrinologist'
-  | 'nephrologist'
-  | 'geneticist'
-  | 'mentalHealth'
-  | 'gp';
+export const SPECIALISTS = [
+  'pediatrician',
+  'obstetrician',
+  'endocrinologist',
+  'nephrologist',
+  'geneticist',
+  'mentalHealth',
+  'gp',
+] as const;
+export type Specialist = (typeof SPECIALISTS)[number];
 
-export type Regime = 'intermittentFasting' | 'keto' | 'vlcd';
-export type DishRule = 'stableVitaminK' | 'excludeHighTyramine';
+export const REGIMES = ['intermittentFasting', 'keto', 'vlcd'] as const;
+export type Regime = (typeof REGIMES)[number];
+/**
+ * Rules for the stage-3 dish filter. `limitSodium` and `limitAddedSugar` are soft preferences (salt < 5 g/day,
+ * fewer free sugars and refined starches — research/stage-2-mappings.md §3), not exclusions.
+ */
+export const DISH_RULES = [
+  'stableVitaminK',
+  'excludeHighTyramine',
+  'limitSodium',
+  'limitAddedSugar',
+] as const;
+export type DishRule = (typeof DISH_RULES)[number];
 
 export type GuardrailDecision = {
   readonly status: GuardrailStatus;
@@ -216,6 +236,20 @@ function healthEffects(q: Questionnaire): Effect[] {
       dishRules: ['excludeHighTyramine'],
     });
   }
+  // Common conditions that need no restriction of goals: the menu only follows food advice for them (stage 3).
+  if (has('hypertension')) {
+    effects.push({ status: 'allowed', reason: 'HYPERTENSION', dishRules: ['limitSodium'] });
+  }
+  if (has('hypothyroidism')) {
+    effects.push({ status: 'allowed', reason: 'HYPOTHYROIDISM' });
+  }
+  if (has('insulinResistance')) {
+    effects.push({
+      status: 'allowed',
+      reason: 'INSULIN_RESISTANCE',
+      dishRules: ['limitAddedSugar'],
+    });
+  }
   const edCommon = {
     status: 'limited' as const,
     goals: NO_ENERGY_GOALS,
@@ -244,11 +278,18 @@ function bodyEffects(q: Questionnaire): Effect[] {
       refer: ['gp'],
       goals: ['maintain', 'gain', 'habits'],
       noDeficit: true,
+      // No restrictive regimes either (Watanabe 2020; research/stage-2-mappings.md §2.3).
+      forbid: NO_DIETS,
     });
   }
   const older = q.ageYears >= AGE_LIMITS.olderAdultFromYears;
   if (older && (bmi < BMI_UNDERWEIGHT_BELOW || bmi >= BMI_OBESITY_FROM || q.goal === 'lose')) {
     effects.push({ status: 'requiresDoctor', reason: 'OLDER_ADULT_CAUTION', refer: ['gp'] });
+  }
+  if (older) {
+    // Keto and very-low-calorie diets after 65 only with support and monitoring (Watanabe 2020; research/
+    // stage-2-mappings.md §2.3–2.4): not offered at all.
+    effects.push({ status: 'allowed', reason: 'OLDER_ADULT_REGIMES', forbid: ['keto', 'vlcd'] });
   }
   return effects;
 }

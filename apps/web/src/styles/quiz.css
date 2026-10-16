@@ -1,0 +1,2354 @@
+/*
+ * The quiz (stage 2) — loaded with the quiz chunk only. Geometry comes from the team's 1920×1080 mockups
+ * (--quiz-* tokens in tokens.css, mockup px). One mockup px is --q: on the desktop frame the landing's --s times its
+ * --boost; on tablets a scale of its own; phones get explicit sizes (the mockups are desktop only, ТЗ §7.10). Every
+ * size below goes through the semantic --q-* variables set on .quiz, so the breakpoints only redefine those.
+ * Animations: transform and opacity only (blur on step changes is set by Motion and removed afterwards).
+ */
+
+/* ── Scale and semantic sizes ──────────────────────────────────────────────────────────── */
+
+.quiz {
+  /* Tablets and touch laptops: the mockup scaled to the window, never below ≈ 0.62 (touch targets stay ≥ 44 px). */
+  --q: max(0.62px, min(100vw / 1180, 100svh / 1000));
+  --q-outline: max(1.5px, calc(2 * var(--q)));
+  --q-gutter: max(16px, calc(32 * var(--q)));
+
+  --q-header-h: calc(126 * var(--q));
+  --q-progress-w: calc(var(--quiz-progress-w) * var(--q));
+  --q-progress-h: calc(var(--quiz-progress-h) * var(--q));
+  --q-progress-y: calc(var(--quiz-progress-y) * var(--q));
+  --q-back: max(44px, calc(var(--quiz-back-size) * var(--q)));
+  --q-back-gap: calc(var(--quiz-back-gap) * var(--q));
+
+  --q-top: calc(var(--quiz-icon-y) * var(--q));
+  --q-icon: calc(var(--quiz-icon-box) * var(--q));
+  --q-title: calc(var(--type-quiz-title-size) * var(--q));
+  --q-title-leading: calc(var(--type-quiz-title-leading) * var(--q));
+  --q-title-gap: calc(var(--quiz-title-gap) * var(--q));
+  --q-content-gap: calc(var(--quiz-content-gap) * var(--q));
+  --q-content-gap-dense: calc(var(--quiz-content-gap-dense) * var(--q));
+  --q-privacy-gap: calc(var(--quiz-privacy-gap) * var(--q));
+  --q-bottom: calc(var(--quiz-step-bottom) * var(--q));
+  --q-privacy: max(14px, calc(var(--type-quiz-privacy-size) * var(--q)));
+
+  --q-option: calc(var(--type-quiz-option-size) * var(--q));
+  --q-desc: max(14px, calc(var(--type-quiz-desc-size) * var(--q)));
+  --q-desc-leading: calc(var(--type-quiz-desc-leading) / var(--type-quiz-desc-size));
+  --q-pill-h: max(48px, calc(var(--quiz-pill-h) * var(--q)));
+  --q-pill-gap: calc(var(--quiz-pill-gap) * var(--q));
+  --q-pill-w-options: calc(var(--quiz-pill-w-options) * var(--q));
+  --q-pill-w-wide: calc(var(--quiz-pill-w-wide) * var(--q));
+  --q-pill-w-widest: calc(var(--quiz-pill-w-widest) * var(--q));
+  --q-pill-w-short: calc(var(--quiz-pill-w-short) * var(--q));
+  --q-pill-h-short: max(48px, calc(var(--quiz-pill-h-short) * var(--q)));
+  --q-pill-gap-short: calc(var(--quiz-pill-gap-short) * var(--q));
+  --q-pill-h-desc: max(56px, calc(var(--quiz-pill-h-desc) * var(--q)));
+  --q-pill-gap-desc: calc(var(--quiz-pill-gap-desc) * var(--q));
+  --q-pill-pad-x: calc(var(--quiz-pill-pad-x) * var(--q));
+  --q-option-icon: calc(var(--quiz-option-icon) * var(--q));
+  --q-option-icon-gap: calc(var(--quiz-option-icon-gap) * var(--q));
+  --q-tag: max(12px, calc(18 * var(--q)));
+
+  --q-yesno: calc(var(--type-quiz-yesno-size) * var(--q));
+  --q-yesno-h: max(52px, calc(var(--quiz-yesno-h) * var(--q)));
+  --q-yesno-gap: calc(var(--quiz-yesno-gap) * var(--q));
+  --q-radio: calc(var(--quiz-radio) * var(--q));
+  --q-radio-gap: calc(var(--quiz-radio-gap) * var(--q));
+
+  --q-row-w: calc(var(--quiz-pill-w-rows) * var(--q));
+  --q-row-pad-x: calc(var(--quiz-row-pad-x) * var(--q));
+  --q-value: max(15px, calc(var(--type-quiz-value-size) * var(--q)));
+  --q-chevron: calc(var(--quiz-chevron) * var(--q));
+
+  --q-chip: calc(var(--type-quiz-chip-size) * var(--q));
+  --q-chip-h: max(44px, calc(var(--quiz-chip-h) * var(--q)));
+  --q-chip-pad-x: calc(var(--quiz-chip-pad-x) * var(--q));
+  --q-chip-gap: calc(var(--quiz-chip-gap) * var(--q));
+  --q-chip-compact: calc(var(--type-quiz-chip-size) * 0.75 * var(--q));
+  --q-chip-h-compact: max(44px, calc(var(--quiz-chip-h) * 0.78 * var(--q)));
+  --q-chips-w: calc(1180 * var(--q));
+  --q-add-w: max(56px, calc(var(--quiz-add-w) * var(--q)));
+
+  --q-panel-w: calc(var(--quiz-panel-w) * var(--q));
+  --q-panel-h: calc(var(--quiz-panel-h) * var(--q));
+  --q-panel-radius: calc(var(--quiz-panel-radius) * var(--q));
+  --q-panel-title: calc(var(--type-quiz-panel-title-size) * var(--q));
+  --q-close: max(44px, calc(var(--quiz-panel-close) * var(--q)));
+  --q-input-w: calc(var(--quiz-input-w) * var(--q));
+  --q-input-h: max(48px, calc(var(--quiz-input-h) * var(--q)));
+  --q-input: max(16px, calc(var(--type-quiz-input-size) * var(--q)));
+  --q-done-w: calc(var(--quiz-done-w) * var(--q));
+  --q-done-h: max(44px, calc(var(--quiz-done-h) * var(--q)));
+  --q-done-gap: calc(var(--quiz-done-gap) * var(--q));
+  --q-button: max(16px, calc(var(--type-quiz-button-size) * var(--q)));
+
+  --q-textarea-w: calc(var(--quiz-textarea-w) * var(--q));
+  --q-textarea-h: calc(var(--quiz-textarea-h) * var(--q));
+  --q-textarea-radius: calc(var(--quiz-textarea-radius) * var(--q));
+  --q-textarea-pad: calc(var(--quiz-textarea-pad) * var(--q));
+
+  --q-note: max(14px, calc(22 * var(--q)));
+  --q-notice-w: calc(var(--quiz-notice-w) * var(--q));
+  --q-picker-w: max(300px, calc(var(--quiz-picker-w) * var(--q)));
+  --q-wheel-row: max(40px, calc(var(--quiz-picker-row) * var(--q)));
+  --q-wheel-font: max(22px, calc(34 * var(--q)));
+
+  /* The card is a picture, not text: it keeps to the window's height (the title, label, buttons, credit and margins
+     around it take ≈ 510 mockup px) rather than pushing the buttons off screen. */
+  --q-card-h: min(calc(var(--quiz-card-h) * var(--q)), calc(100svh - 497 * var(--q)));
+  --q-card-w: calc(var(--q-card-h) * var(--quiz-card-w) / var(--quiz-card-h));
+  --q-card-radius: calc(var(--q-card-w) * var(--quiz-card-radius) / var(--quiz-card-w));
+  --q-dish: max(18px, calc(var(--type-quiz-dish-size) * var(--q)));
+  --q-dish-y: calc(var(--quiz-card-name-y) * var(--q));
+  --q-game-title-y: calc(var(--quiz-game-title-y) * var(--q));
+  --q-game-button: max(56px, calc(var(--quiz-game-button) * var(--q)));
+  --q-game-skip-w: max(132px, calc(var(--quiz-game-skip-w) * var(--q)));
+  --q-game-gap: calc(var(--quiz-game-gap) * var(--q));
+  --q-game-buttons-gap: calc(var(--quiz-game-buttons-gap) * var(--q));
+
+  position: absolute;
+  inset: 0;
+  color: var(--color-ink);
+}
+
+/* Portrait tablets: the window is narrow and tall. A larger unit fills it better, and «Вернуться» with the bar get a
+   row of their own under the logo and «Выйти» (on one row they ran into «Refectorio»). */
+@media (min-width: 48rem) and (orientation: portrait) {
+  .quiz {
+    --q: max(0.62px, min(100vw / 1000, 100svh / 1000));
+    --q-tablet-row: 56px;
+    --q-header-h: calc(126 * var(--q) + var(--q-tablet-row));
+    --q-progress-y: calc(var(--quiz-progress-y) * var(--q) + var(--q-tablet-row));
+    --q-top: calc(var(--quiz-icon-y) * var(--q) + var(--q-tablet-row));
+    --q-game-title-y: calc(var(--quiz-game-title-y) * var(--q) + var(--q-tablet-row));
+    /* The longest health chip stays on one line at 768–1000 px. */
+    --q-chip-compact: calc(var(--type-quiz-chip-size) * 0.66 * var(--q));
+  }
+}
+
+/* The desktop frame: the mockup scaled by --s, without the landing's laptop --boost — every step of the mockups fills
+   one 1080 px screen, and boosted it would no longer fit a laptop window (1536×730). Small texts keep their own
+   minimum sizes below. */
+@media (min-width: 80rem) and (hover: hover) {
+  .quiz {
+    --q: var(--s);
+    --q-gutter: calc(var(--hero-side));
+  }
+}
+
+/* Phones: the mockups are desktop only — the same language at phone sizes (ТЗ §7.10). */
+@media (max-width: 47.99rem) {
+  .quiz {
+    --q-gutter: 16px;
+    --q-header-h: calc(72px + env(safe-area-inset-top));
+    --q-progress-w: auto;
+    --q-progress-h: 14px;
+    --q-progress-y: calc(env(safe-area-inset-top) + 27px);
+    --q-back: 44px;
+    --q-back-gap: 12px;
+    --q-top: calc(env(safe-area-inset-top) + 84px);
+    --q-icon: 68px;
+    --q-title: clamp(26px, 7.4vw, 32px);
+    --q-title-leading: 1.18em;
+    --q-title-gap: 6px;
+    --q-content-gap: 24px;
+    --q-content-gap-dense: 18px;
+    --q-privacy-gap: 18px;
+    --q-bottom: calc(28px + env(safe-area-inset-bottom));
+    --q-privacy: 14px;
+    --q-option: 18px;
+    --q-desc: 14px;
+    --q-pill-h: 56px;
+    --q-pill-gap: 10px;
+    --q-pill-w-options: 100%;
+    --q-pill-w-wide: 100%;
+    --q-pill-w-widest: 100%;
+    --q-pill-w-short: 100%;
+    --q-pill-h-short: 52px;
+    --q-pill-gap-short: 10px;
+    --q-pill-h-desc: 72px;
+    --q-pill-gap-desc: 10px;
+    --q-pill-pad-x: 18px;
+    --q-option-icon: 34px;
+    --q-option-icon-gap: 12px;
+    --q-tag: 12px;
+    --q-yesno: 22px;
+    --q-yesno-h: 60px;
+    --q-yesno-gap: 12px;
+    --q-radio: 26px;
+    --q-radio-gap: 16px;
+    --q-row-w: 100%;
+    --q-row-pad-x: 20px;
+    --q-value: 16px;
+    --q-chevron: 18px;
+    --q-chip: 16px;
+    --q-chip-h: 44px;
+    --q-chip-pad-x: 16px;
+    --q-chip-gap: 8px;
+    --q-chip-compact: 15px;
+    --q-chip-h-compact: 44px;
+    --q-chips-w: 100%;
+    --q-add-w: 56px;
+    --q-panel-w: 100%;
+    --q-panel-h: auto;
+    --q-panel-radius: 36px;
+    --q-panel-title: 20px;
+    --q-close: 44px;
+    --q-input-w: 100%;
+    --q-input-h: 48px;
+    --q-input: 16px;
+    --q-done-w: auto;
+    --q-done-h: 48px;
+    --q-done-gap: 14px;
+    --q-button: 16px;
+    --q-textarea-w: 100%;
+    --q-textarea-h: 200px;
+    --q-textarea-radius: 36px;
+    --q-textarea-pad: 22px;
+    --q-note: 14px;
+    --q-notice-w: 100%;
+    --q-picker-w: 100%;
+    --q-wheel-row: 42px;
+    --q-wheel-font: 24px;
+    --q-card-w: min(88vw, calc(0.77 * 62svh));
+    --q-card-h: calc(var(--q-card-w) * var(--quiz-card-h) / var(--quiz-card-w));
+    --q-dish: 20px;
+    --q-dish-y: 28px;
+    --q-game-title-y: calc(env(safe-area-inset-top) + 72px);
+    --q-game-button: 60px;
+    --q-game-skip-w: 136px;
+    --q-game-gap: 20px;
+    --q-game-buttons-gap: 16px;
+  }
+}
+
+/* Landscape phones and very low windows: the steps scroll as usual, only their icon and title get smaller; the game
+   keeps its card and its buttons on one screen — the card on the left, the buttons on the right. */
+@media (orientation: landscape) and (max-height: 31.25rem) and (min-width: 37.5rem) {
+  .quiz {
+    --q-icon: 48px;
+    --q-title: 24px;
+    --q-title-leading: 1.18em;
+    /* Right under «Вернуться», which sits centred on the progress bar. */
+    --q-game-title-y: calc(
+      var(--q-progress-y) + var(--q-progress-h) / 2 + var(--q-back) / 2 + 10px
+    );
+    /* Under the one-line title, with a little air at the bottom. */
+    --q-card-h: calc(100svh - var(--q-game-title-y) - 70px - env(safe-area-inset-bottom));
+    --q-card-w: calc(var(--q-card-h) * var(--quiz-card-w) / var(--quiz-card-h));
+  }
+}
+
+/* ── Header: «Вернуться» and the progress bar (ТЗ §7.2–7.3) ─────────────────────────────── */
+
+.quiz-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-scene) + 2);
+  height: var(--q-header-h);
+  pointer-events: none;
+}
+
+.quiz-progress-slot {
+  position: absolute;
+  top: var(--q-progress-y);
+  left: 50%;
+  width: var(--q-progress-w);
+  height: var(--q-progress-h);
+  margin-left: calc(var(--q-progress-w) / -2);
+}
+
+.quiz-progress {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-accent);
+}
+
+.quiz-progress-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: var(--color-accent);
+  will-change: transform;
+}
+
+/* The finale: after the fill a highlight sweeps once across the full bar (ТЗ §12.1). */
+.quiz-progress-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 25%,
+    rgb(255 255 255 / 0.55) 50%,
+    transparent 75%
+  );
+  transform: translateX(-100%);
+  animation: quiz-bar-shimmer var(--finale-shimmer-ms) var(--ease-in-out) var(--finale-fill-ms) 1
+    forwards;
+}
+
+@keyframes quiz-bar-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* From the hand-off on, the finale draws the bar (the same pixels, then the dot). */
+.quiz-progress[data-detached] {
+  visibility: hidden;
+}
+
+.quiz-back {
+  position: absolute;
+  top: calc(var(--q-progress-y) + var(--q-progress-h) / 2 - var(--q-back) / 2);
+  left: calc(50% - var(--q-progress-w) / 2 - var(--q-back-gap) - var(--q-back));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--q-back);
+  height: var(--q-back);
+  border-radius: 9999px;
+  color: var(--color-ink);
+  background-color: var(--color-bg-glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  pointer-events: auto;
+}
+
+.quiz-back[data-hidden] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Sized by the button, not by its content span (a percentage of the span would collapse). */
+.quiz-back-icon {
+  width: calc(var(--q-back) * 0.42);
+  height: calc(var(--q-back) * 0.42);
+}
+
+@media (max-width: 47.99rem) {
+  /* Between «Вернуться» and the compact «Выйти ×» pill of the landing header (≈ 116 px wide on phones). */
+  .quiz-progress-slot {
+    left: calc(var(--q-gutter) + var(--q-back) + var(--q-back-gap));
+    right: calc(var(--q-gutter) + 116px + var(--q-back-gap));
+    width: auto;
+    margin-left: 0;
+  }
+
+  .quiz-back {
+    left: var(--q-gutter);
+  }
+}
+
+/* A scrolled step slides under the header: a frosted band behind the logo, «Вернуться», the bar and «Выйти» (above
+   the steps, below both headers; StepStage sets data-scrolled). */
+.quiz::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-scene);
+  height: calc(var(--q-header-h) + 8px);
+  background-color: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  opacity: 0;
+  transition: opacity var(--quiz-fade-ms) var(--ease-out-soft);
+  pointer-events: none;
+}
+
+/* The blur costs a GPU pass: only while the band is shown. */
+.quiz[data-scrolled]::after {
+  opacity: 1;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* ── Steps: stage, screens and the common frame ─────────────────────────────────────────── */
+
+.quiz-stage {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-scene);
+}
+
+/* Each screen scrolls on its own (D-021); both screens of a change are stacked. */
+.quiz-screen {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* A focused element scrolled into view stays below the header (WCAG 2.4.11). */
+  scroll-padding-top: calc(var(--q-header-h) + 8px);
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.quiz-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100%;
+  padding: var(--q-top) var(--q-gutter) var(--q-bottom);
+  text-align: center;
+}
+
+.quiz-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.quiz-icon {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: var(--q-icon);
+}
+
+.quiz-icon picture,
+.quiz-icon img {
+  display: block;
+  height: 100%;
+  width: auto;
+}
+
+.quiz-title {
+  /* The longest one-line title of the mockups is 1410 px wide. */
+  max-width: min(100%, calc(1640 * var(--q)));
+  margin-top: var(--q-title-gap);
+  font-size: var(--q-title);
+  line-height: var(--q-title-leading);
+  font-weight: 700;
+  letter-spacing: var(--type-quiz-title-tracking);
+  /* The landing H1: Bold plus an outline of the same colour (Open Runde has no Black). */
+  -webkit-text-stroke: var(--type-hero-title-stroke) currentColor;
+  paint-order: stroke fill;
+  text-wrap: balance;
+  outline: none;
+}
+
+.quiz-answers {
+  margin-top: var(--q-content-gap);
+}
+
+.quiz-frame--dense .quiz-answers {
+  margin-top: var(--q-content-gap-dense);
+}
+
+.quiz-footer {
+  margin-top: var(--q-privacy-gap);
+}
+
+.quiz-privacy {
+  margin-top: var(--q-privacy-gap);
+}
+
+.quiz-note {
+  max-width: min(100%, calc(720 * var(--q)));
+  margin-top: calc(18 * var(--q));
+  font-size: var(--q-note);
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  text-wrap: pretty;
+}
+
+.quiz-note--warn {
+  color: var(--color-accent-deep);
+  font-weight: 600;
+}
+
+/* ── Privacy label (ТЗ §7.5): quiet text, the accent wave on hover ──────────────────────── */
+
+.quiz-privacy-label {
+  padding: calc(6 * var(--q)) calc(18 * var(--q));
+  border-radius: 9999px;
+  font-size: var(--q-privacy);
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+
+/* A text button, but a full touch target for fingers (CLAUDE.md: ≥ 44 px); with a mouse it keeps the mockup's size. */
+@media (pointer: coarse) {
+  .quiz-privacy-label {
+    min-height: 44px;
+  }
+}
+
+/* The accent wave with white text (the landing's accent layer keeps ink text): the deeper red, because the label is
+   small text — white on #C42532 is 5.7:1, on #E63946 only 4.2:1 (WCAG 1.4.3, D-040). */
+.wave-layer--accent-fill {
+  background-color: var(--color-accent-deep);
+  color: var(--color-on-accent);
+}
+
+/* ── Pill buttons («Далее», «Готово», notices) ─────────────────────────────────────────── */
+
+.quiz-pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--q-done-w);
+  height: var(--q-done-h);
+  padding: 0 calc(36 * var(--q));
+  border-radius: 9999px;
+  /* White on #E63946 is 4.17:1: the label is large text (≥ 18.67 px bold → 3:1, WCAG 1.4.3), never small. */
+  font-size: max(19px, var(--q-button));
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.quiz-pill-button--accent {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.quiz-pill-button--accent .wave-layer--ink {
+  background-color: var(--color-accent-deep);
+}
+
+.quiz-pill-button--outline {
+  color: var(--color-ink);
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+}
+
+.quiz-pill-button--muted {
+  background-color: var(--color-ink-muted);
+  color: var(--color-on-accent);
+}
+
+.quiz-pill-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* No reserved space: «Далее» rises in and the privacy label glides down (StepFrame), as close to the mockups as can be
+   while the answer is not complete. */
+.quiz-continue {
+  display: flex;
+  justify-content: center;
+}
+
+.quiz-continue:empty {
+  display: none;
+}
+
+.quiz-footer:has(> .quiz-continue:empty) {
+  margin-top: 0;
+}
+
+.quiz-continue-button {
+  min-width: var(--q-done-w);
+}
+
+/* ── Single choice (ТЗ §8.1–8.2) ─────────────────────────────────────────────────────────── */
+
+.quiz-choices {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--q-pill-gap);
+  width: 100%;
+}
+
+.quiz-choices--wide,
+.quiz-choices--widest {
+  gap: var(--q-pill-gap-desc);
+}
+
+.quiz-choices--short {
+  gap: var(--q-pill-gap-short);
+}
+
+.quiz-choices--yesno {
+  gap: var(--q-yesno-gap);
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  width: var(--q-pill-w-options);
+  max-width: 100%;
+  min-height: var(--q-pill-h);
+  padding: calc(10 * var(--q)) var(--q-pill-pad-x);
+  border-radius: 9999px;
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  text-align: left;
+  font-size: var(--q-option);
+  font-weight: var(--type-quiz-option-weight);
+  letter-spacing: var(--type-quiz-option-tracking);
+  color: var(--color-ink);
+}
+
+.quiz-option .wave-content,
+.quiz-option .wave-layer {
+  justify-content: flex-start;
+  gap: var(--q-option-icon-gap);
+  width: 100%;
+}
+
+.quiz-option .wave-layer {
+  padding: inherit;
+}
+
+.quiz-option--wide {
+  width: var(--q-pill-w-wide);
+  min-height: var(--q-pill-h-desc);
+}
+
+.quiz-option--widest {
+  width: var(--q-pill-w-widest);
+  min-height: var(--q-pill-h-desc);
+}
+
+/* Food preferences, diet type and lifestyle: the mockup's labels are muted, not black. */
+.quiz-option--wide,
+.quiz-option--widest,
+.quiz-choices--short .quiz-option--short:has(.quiz-option-icon) {
+  color: var(--color-ink-muted);
+}
+
+.quiz-option--short {
+  width: var(--q-pill-w-short);
+  min-height: var(--q-pill-h-short);
+}
+
+.quiz-option--yesno {
+  width: var(--q-row-w);
+  min-height: var(--q-yesno-h);
+  font-size: var(--q-yesno);
+  font-weight: 600;
+}
+
+.quiz-option--yesno .wave-content,
+.quiz-option--yesno .wave-layer {
+  gap: var(--q-radio-gap);
+}
+
+.quiz-option-icon {
+  flex: none;
+  width: var(--q-option-icon);
+  height: var(--q-option-icon);
+}
+
+.quiz-option-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.quiz-option-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.quiz-option-label {
+  line-height: 1.12;
+}
+
+.quiz-option-desc {
+  margin-top: calc(4 * var(--q));
+  font-size: var(--q-desc);
+  line-height: var(--q-desc-leading);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-quiz-desc);
+}
+
+.quiz-option-tag {
+  align-self: flex-start;
+  margin-bottom: calc(4 * var(--q));
+  font-size: var(--q-tag);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-accent-deep);
+}
+
+.quiz-radio {
+  flex: none;
+  position: relative;
+  width: var(--q-radio);
+  height: var(--q-radio);
+  border-radius: 50%;
+  /* The mockup's muted ring; chosen (white on black) and under the wave it follows the text. */
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+}
+
+.quiz-option.is-selected .quiz-radio,
+.quiz-option .wave-layer .quiz-radio {
+  box-shadow: inset 0 0 0 var(--q-outline) currentColor;
+}
+
+.quiz-radio.is-on::after {
+  content: '';
+  position: absolute;
+  inset: 24%;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Chosen: the finished ink wave (white content). */
+.quiz-option.is-selected {
+  background-color: var(--color-ink);
+  color: var(--color-on-accent);
+}
+
+.quiz-option.is-selected .quiz-option-desc,
+.quiz-option .wave-layer .quiz-option-desc,
+.quiz-option .wave-layer .quiz-option-tag {
+  color: rgb(255 255 255 / 0.82);
+}
+
+.quiz-option.is-disabled {
+  cursor: not-allowed;
+  color: var(--color-quiz-desc);
+  background-color: rgb(254 249 247 / 0.7);
+  box-shadow: inset 0 0 0 var(--q-outline) rgb(90 84 81 / 0.45);
+}
+
+.quiz-option.is-disabled .quiz-option-icon {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+/* ── Rows with pickers (ТЗ §8.3) ─────────────────────────────────────────────────────────── */
+
+.quiz-rows {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(32 * var(--q));
+  width: 100%;
+}
+
+.quiz-row {
+  display: flex;
+  align-items: center;
+  width: var(--q-row-w);
+  max-width: 100%;
+  min-height: var(--q-pill-h);
+  padding: 0 var(--q-row-pad-x);
+  border-radius: 9999px;
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  font-size: var(--q-option);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.quiz-row .wave-content,
+.quiz-row .wave-layer {
+  justify-content: space-between;
+  gap: calc(16 * var(--q));
+  width: 100%;
+}
+
+.quiz-row .wave-layer {
+  padding: 0 var(--q-row-pad-x);
+}
+
+.quiz-row-value {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6 * var(--q));
+  font-size: var(--q-value);
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+}
+
+/* «Выбрать ›»: the mockup's red, one step deeper — at row-value size #E63946 is 4.0:1, #C42532 is 5.4:1 (WCAG 1.4.3). */
+.quiz-row-value.is-empty {
+  color: var(--color-accent-deep);
+  font-weight: 700;
+}
+
+.quiz-row .wave-layer .quiz-row-value {
+  color: var(--color-on-accent);
+}
+
+.quiz-row-chevron {
+  width: var(--q-chevron);
+  height: var(--q-chevron);
+}
+
+.quiz-family {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(10 * var(--q));
+}
+
+.quiz-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: calc(14 * var(--q));
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: var(--q-note);
+  font-weight: 600;
+  color: var(--color-ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.quiz-check input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  accent-color: var(--color-ink);
+  cursor: pointer;
+}
+
+/* ── Picker panel and the wheel (ТЗ §8.3) ─────────────────────────────────────────────────── */
+
+.quiz-picker-layer,
+.quiz-sheet-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--q-gutter);
+}
+
+.quiz-scrim {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-scrim);
+}
+
+.quiz-scrim--light {
+  background-color: rgb(254 249 247 / 0.6);
+}
+
+.quiz-picker {
+  position: relative;
+  width: var(--q-picker-w);
+  max-width: 100%;
+  border-radius: calc(64 * var(--q));
+  background-color: var(--color-bg);
+  box-shadow:
+    inset 0 0 0 var(--q-outline) var(--color-ink-muted),
+    0 24px 60px rgb(0 0 0 / 0.12);
+}
+
+.quiz-picker-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(14 * var(--q));
+  padding: calc(34 * var(--q)) calc(36 * var(--q)) calc(36 * var(--q));
+}
+
+.quiz-picker-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--q-close);
+  padding: 0 calc(var(--q-close) + 8px);
+}
+
+.quiz-picker-title {
+  font-size: max(20px, calc(34 * var(--q)));
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.quiz-close {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--q-close);
+  height: var(--q-close);
+  margin-top: calc(var(--q-close) / -2);
+  border-radius: 50%;
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  background-color: var(--color-bg);
+}
+
+.quiz-close svg {
+  width: 56%;
+  height: 56%;
+}
+
+.quiz-picker-hint {
+  max-width: 34ch;
+  font-size: var(--q-note);
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  text-wrap: pretty;
+}
+
+.quiz-picker-control {
+  width: 100%;
+}
+
+.quiz-picker-done {
+  min-width: var(--q-done-w);
+}
+
+/* Phones: a bottom sheet instead of the floating panel. */
+.quiz-picker-layer[data-phone] {
+  align-items: flex-end;
+  padding: 0;
+}
+
+.quiz-picker--sheet {
+  width: 100%;
+  border-radius: 32px 32px 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.quiz-picker--sheet > .quiz-picker-head,
+.quiz-picker--sheet > .quiz-picker-hint,
+.quiz-picker--sheet > .quiz-picker-control,
+.quiz-picker--sheet > .quiz-picker-done,
+.quiz-picker--sheet > .quiz-sex {
+  margin-inline: auto;
+}
+
+.quiz-picker--sheet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+}
+
+.quiz-sex {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.quiz-sex-option {
+  min-height: var(--q-pill-h);
+  border-radius: 9999px;
+  font-size: var(--q-option);
+  font-weight: 600;
+  color: var(--color-ink);
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+}
+
+.quiz-sex-option.is-selected {
+  background-color: var(--color-ink);
+  color: var(--color-on-accent);
+}
+
+.quiz-wheel-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.quiz-wheel {
+  position: relative;
+  width: 100%;
+  height: calc(var(--q-wheel-row) * 6.6);
+  overflow: hidden;
+  border-radius: calc(32 * var(--q));
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.quiz-wheel:active {
+  cursor: grabbing;
+}
+
+.quiz-wheel-band {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 50%;
+  height: var(--q-wheel-row);
+  margin-top: calc(var(--q-wheel-row) / -2);
+  border-radius: 9999px;
+  background-color: rgb(0 0 0 / 0.06);
+}
+
+.quiz-wheel-items {
+  position: absolute;
+  inset: 0;
+}
+
+.quiz-wheel-item {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--q-wheel-row);
+  margin-top: calc(var(--q-wheel-row) / -2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--q-wheel-font);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  will-change: transform, opacity;
+}
+
+.quiz-wheel-unit {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + 2.4em);
+  transform: translateY(-50%);
+  font-size: var(--q-value);
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  pointer-events: none;
+}
+
+.quiz-wheel-input {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5.5em;
+  height: var(--q-wheel-row);
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  text-align: center;
+  font-size: var(--q-wheel-font);
+  font-weight: 700;
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 2px var(--color-ink);
+  outline: none;
+}
+
+.quiz-wheel-message {
+  min-height: 1.4em;
+  margin-top: 6px;
+  font-size: var(--q-note);
+  color: var(--color-ink-muted);
+}
+
+/* Landscape phones: the sheet fits the low screen — smaller rows, and the drum shows as many as there is room for. */
+@media (orientation: landscape) and (max-height: 31.25rem) and (min-width: 37.5rem) {
+  .quiz {
+    --q-wheel-row: 32px;
+    --q-wheel-font: 20px;
+  }
+
+  .quiz-picker--sheet {
+    gap: 8px;
+    padding-top: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .quiz-wheel {
+    height: min(calc(var(--q-wheel-row) * 6.6), calc(100svh - 168px));
+  }
+}
+
+/* ── Chips with «+» (ТЗ §8.5) ─────────────────────────────────────────────────────────────── */
+
+.quiz-chips-area {
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  width: 100%;
+}
+
+.quiz-chips-area > * {
+  grid-area: 1 / 1;
+}
+
+.quiz-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--q-chip-gap);
+  max-width: min(100%, var(--q-chips-w));
+}
+
+.quiz-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-height: var(--q-chip-h);
+  padding: calc(8 * var(--q)) var(--q-chip-pad-x);
+  border-radius: 9999px;
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  font-size: var(--q-chip);
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  text-align: center;
+}
+
+.quiz-chips.is-compact .quiz-chip {
+  min-height: var(--q-chip-h-compact);
+  font-size: var(--q-chip-compact);
+  padding-inline: calc(var(--q-chip-pad-x) * 0.8);
+}
+
+.quiz-chip.is-selected {
+  background-color: var(--color-ink);
+  color: var(--color-on-accent);
+  box-shadow: none;
+}
+
+.quiz-chip--add {
+  width: var(--q-add-w);
+  padding: 0;
+}
+
+.quiz-chip--add svg {
+  width: calc(var(--q-chip) * 1.15);
+  height: calc(var(--q-chip) * 1.15);
+}
+
+.quiz-chips.is-compact .quiz-chip--add {
+  width: calc(var(--q-add-w) * 0.85);
+  /* The compact chips' padding must not reach the «+» oval. */
+  padding: 0;
+}
+
+.quiz-chip--custom {
+  gap: calc(10 * var(--q));
+  padding-right: calc(10 * var(--q));
+  cursor: default;
+}
+
+.quiz-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  position: relative;
+  width: max(32px, 1.6em);
+  height: max(32px, 1.6em);
+  border-radius: 50%;
+  color: var(--color-on-accent);
+  background-color: rgb(255 255 255 / 0.14);
+}
+
+/* The circle stays small; the finger gets the full 44 px (CLAUDE.md). */
+.quiz-chip-remove::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+}
+
+.quiz-chip-remove svg {
+  width: 55%;
+  height: 55%;
+}
+
+.quiz-chips-below {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: calc(10 * var(--q));
+}
+
+.quiz-chips-below > .quiz-continue {
+  margin-top: var(--q-privacy-gap);
+}
+
+/* The «+» panel (design «подвопрос 26»): grows out of the oval; the chips cross-fade under it. */
+.quiz-add {
+  position: relative;
+  /* Scrolled into view (the phone keyboard), it stays below the header band. */
+  scroll-margin-top: var(--q-header-h);
+  width: var(--q-panel-w);
+  max-width: 100%;
+  min-height: var(--q-panel-h);
+  border-radius: var(--q-panel-radius);
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  transform-origin: 0 0;
+}
+
+.quiz-add-ink {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: var(--color-ink);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.quiz-add-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(38 * var(--q));
+  min-height: var(--q-panel-h);
+  padding: calc(40 * var(--q)) calc(72 * var(--q));
+}
+
+.quiz-add-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--q-close);
+  padding: 0 calc(var(--q-close) + 12px);
+}
+
+.quiz-add-title {
+  font-size: var(--q-panel-title);
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.quiz-add-input {
+  width: var(--q-input-w);
+  max-width: 100%;
+  height: var(--q-input-h);
+  padding: 0 calc(36 * var(--q));
+  border-radius: 9999px;
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  font-size: var(--q-input);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.quiz-add-input::placeholder,
+.quiz-textarea-field::placeholder {
+  color: var(--color-quiz-desc);
+  opacity: 1;
+}
+
+.quiz-add-done {
+  min-width: var(--q-done-w);
+}
+
+@media (max-width: 47.99rem) {
+  .quiz-add-content {
+    gap: 20px;
+    padding: 22px 18px 24px;
+  }
+
+  .quiz-add-head {
+    padding: 0 calc(var(--q-close) + 4px);
+  }
+}
+
+/* Inline questions under the chips: insulin, trimester, the baby's age. */
+.quiz-followup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(12 * var(--q));
+  margin-top: calc(22 * var(--q));
+}
+
+.quiz-followup-label {
+  font-size: max(16px, calc(28 * var(--q)));
+  font-weight: 700;
+}
+
+.quiz-segments {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: calc(10 * var(--q));
+}
+
+.quiz-segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: max(44px, calc(64 * var(--q)));
+  padding: 0 calc(28 * var(--q));
+  border-radius: 9999px;
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  font-size: max(15px, calc(24 * var(--q)));
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.quiz-segment.is-selected {
+  background-color: var(--color-ink);
+  color: var(--color-on-accent);
+  box-shadow: none;
+}
+
+.quiz-severe {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Text steps (ТЗ §8.6) ───────────────────────────────────────────────────────────────── */
+
+.quiz-textarea {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--q-textarea-w);
+  max-width: 100%;
+  min-height: var(--q-textarea-h);
+  padding: var(--q-textarea-pad) calc(var(--q-textarea-pad) * 1.6);
+  border-radius: var(--q-textarea-radius);
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  text-align: left;
+}
+
+.quiz-textarea:has(:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.quiz-textarea-field {
+  flex: 1;
+  width: 100%;
+  min-height: calc(var(--q-textarea-h) - 2 * var(--q-textarea-pad) - 1.6em);
+  resize: none;
+  overflow: hidden;
+  background: transparent;
+  font-size: var(--q-input);
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--color-ink);
+  outline: none;
+}
+
+.quiz-counter {
+  align-self: flex-end;
+  min-height: 1.4em;
+  font-size: max(13px, calc(18 * var(--q)));
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Safety summary and the refused end screen ────────────────────────────────────────────── */
+
+.quiz-adjustments {
+  display: flex;
+  flex-direction: column;
+  gap: calc(14 * var(--q));
+  max-width: min(100%, calc(760 * var(--q)));
+}
+
+.quiz-adjustment {
+  display: flex;
+  align-items: center;
+  gap: calc(16 * var(--q));
+  padding: calc(20 * var(--q)) calc(32 * var(--q));
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  background-color: var(--color-bg);
+  font-size: max(16px, calc(28 * var(--q)));
+  font-weight: 600;
+  text-align: left;
+}
+
+.quiz-adjustment-icon {
+  flex: none;
+  width: 1.3em;
+  height: 1.3em;
+  color: var(--color-like);
+}
+
+.quiz-refused {
+  display: flex;
+  flex-direction: column;
+  gap: calc(16 * var(--q));
+  max-width: min(100%, calc(820 * var(--q)));
+  font-size: max(16px, calc(26 * var(--q)));
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  text-wrap: pretty;
+}
+
+.quiz-refused-actions,
+.quiz-notice-actions,
+.quiz-sheet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ── Notices and the privacy sheet ─────────────────────────────────────────────────────────── */
+
+.quiz-notice-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--q-gutter);
+  pointer-events: none;
+}
+
+.quiz-notice-layer[data-open] {
+  pointer-events: auto;
+  background-color: rgb(254 249 247 / 0.55);
+}
+
+.quiz-notice-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.quiz-notice,
+.quiz-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: calc(22 * var(--q));
+  width: var(--q-notice-w);
+  max-width: 100%;
+  max-height: calc(100svh - 2 * var(--q-gutter));
+  overflow-y: auto;
+  padding: calc(44 * var(--q)) calc(52 * var(--q));
+  border-radius: calc(56 * var(--q));
+  background-color: var(--color-bg);
+  box-shadow:
+    inset 0 0 0 var(--q-outline) var(--color-ink-muted),
+    0 24px 70px rgb(0 0 0 / 0.14);
+  text-align: center;
+}
+
+@media (max-width: 47.99rem) {
+  .quiz-notice,
+  .quiz-sheet {
+    padding: 26px 22px;
+    border-radius: 32px;
+  }
+}
+
+.quiz-notice-text {
+  font-size: max(17px, calc(30 * var(--q)));
+  line-height: 1.38;
+  font-weight: 600;
+  text-wrap: pretty;
+}
+
+.quiz-helplines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: var(--q-note);
+  line-height: 1.4;
+  color: var(--color-ink-muted);
+}
+
+.quiz-helplines ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.quiz-helplines-checked {
+  font-size: 0.85em;
+}
+
+.quiz-sheet {
+  text-align: left;
+}
+
+.quiz-sheet-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: var(--q-close);
+  padding-right: calc(var(--q-close) + 12px);
+}
+
+.quiz-sheet-title {
+  font-size: max(22px, calc(40 * var(--q)));
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.quiz-sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 1.2em;
+  list-style: disc;
+  font-size: max(15px, calc(24 * var(--q)));
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+}
+
+.quiz-sheet-link a {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.quiz-sheet-actions {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.quiz-sheet-confirm,
+.quiz-sheet-done {
+  width: 100%;
+  font-weight: 600;
+}
+
+/* ── Resume toast ───────────────────────────────────────────────────────────────────────── */
+
+.quiz-toast-region {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: var(--z-toast);
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--q-gutter);
+  pointer-events: none;
+}
+
+.quiz-toast {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 12px 12px 22px;
+  border-radius: 9999px;
+  background-color: var(--color-ink);
+  color: var(--color-on-accent);
+  font-size: 16px;
+  font-weight: 600;
+  pointer-events: auto;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.2);
+}
+
+.quiz-toast-action {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  background-color: var(--color-on-accent);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+/* ── The dish game «Выберите блюдо» (ТЗ §9.1) ─────────────────────────────────────────────── */
+
+.quiz-frame--taste {
+  padding-top: var(--q-game-title-y);
+  padding-bottom: calc(16 * var(--q));
+}
+
+.quiz-frame--taste .quiz-title {
+  margin-top: 0;
+}
+
+.quiz-frame--taste .quiz-answers {
+  margin-top: 0;
+}
+
+.quiz-privacy--top {
+  margin-top: calc(8 * var(--q));
+}
+
+.quiz-card-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--q-card-w);
+  height: var(--q-card-h);
+  margin-top: calc(31 * var(--q));
+}
+
+.quiz-card {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--q-card-radius);
+  background-color: var(--card-color, var(--color-ink-deep));
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  will-change: transform;
+  /* The rounded clip of a transformed layer (Safari otherwise draws square corners while it moves). */
+  isolation: isolate;
+}
+
+.quiz-card:active {
+  cursor: grabbing;
+}
+
+.quiz-card.is-generated {
+  background: linear-gradient(160deg, var(--color-accent) 0%, var(--color-accent-deep) 100%);
+}
+
+.quiz-card-placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.quiz-card-generated-icon {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  width: 34%;
+  height: 34%;
+  transform: translate(-50%, -50%);
+  color: rgb(255 255 255 / 0.32);
+}
+
+.quiz-card-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--quiz-photo-fade-ms) var(--ease-out-soft);
+  pointer-events: none;
+}
+
+.quiz-card-photo.is-loaded {
+  opacity: 1;
+}
+
+/* The soft top: the photo's own blurred placeholder over it, masked by a gradient, plus a tint for the white name. */
+.quiz-card-top {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 42%;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 38%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 38%, transparent 100%);
+  background-color: rgb(0 0 0 / var(--card-tint, 0.36));
+  pointer-events: none;
+}
+
+.quiz-card-top-blur {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 238%;
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+}
+
+.quiz-card-name {
+  position: absolute;
+  top: var(--q-dish-y);
+  left: 10%;
+  right: 10%;
+  font-size: var(--q-dish);
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--color-on-accent);
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+
+.quiz-game-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--q-game-gap);
+  margin-top: var(--q-game-buttons-gap);
+}
+
+.quiz-game-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--q-game-button);
+  height: var(--q-game-button);
+  border-radius: 9999px;
+  color: var(--color-on-accent);
+  font-size: max(16px, calc(25.5 * var(--q)));
+  font-weight: 700;
+}
+
+.quiz-game-button svg {
+  width: calc(var(--q-game-button) * 0.46);
+  height: calc(var(--q-game-button) * 0.46);
+}
+
+.quiz-game-button--dislike {
+  background-color: var(--color-accent);
+}
+
+.quiz-game-button--skip {
+  width: var(--q-game-skip-w);
+  background-color: var(--color-ink-muted);
+}
+
+.quiz-game-button--like {
+  background-color: var(--color-like);
+}
+
+.quiz-game-button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+/* Their waves keep the white icon ≥ 3:1 (deep tones of the same colours). */
+.wave-layer--game-dislike {
+  background-color: var(--color-accent-deep);
+  color: var(--color-on-accent);
+}
+
+.wave-layer--game-skip {
+  background-color: var(--color-ink-deep);
+  color: var(--color-on-accent);
+}
+
+.wave-layer--game-like {
+  background-color: var(--color-like-deep);
+  color: var(--color-on-accent);
+}
+
+.quiz-game-credit {
+  min-height: 1.5em;
+  margin-top: calc(14 * var(--q));
+  font-size: max(13px, calc(18 * var(--q)));
+  font-weight: 500;
+  color: var(--color-ink-muted);
+}
+
+.quiz-game-credit a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  border-radius: 4px;
+}
+
+.quiz-game-hint {
+  max-width: min(100%, calc(560 * var(--q)));
+  margin-top: calc(8 * var(--q));
+  font-size: var(--q-note);
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+}
+
+@media (orientation: landscape) and (max-height: 31.25rem) and (min-width: 37.5rem) {
+  .quiz-frame--taste .quiz-answers {
+    display: grid;
+    grid-template-columns: var(--q-card-w) auto;
+    grid-template-rows: 1fr auto auto auto 1fr;
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+    column-gap: 32px;
+    margin-top: 12px;
+  }
+
+  .quiz-frame--taste .quiz-card-stage {
+    grid-row: 1 / -1;
+    grid-column: 1;
+    margin-top: 0;
+  }
+
+  .quiz-frame--taste .quiz-privacy--top {
+    grid-row: 2;
+    grid-column: 2;
+    margin-top: 0;
+  }
+
+  .quiz-frame--taste .quiz-game-controls {
+    grid-row: 3;
+    grid-column: 2;
+  }
+
+  .quiz-frame--taste .quiz-game-credit {
+    grid-row: 4;
+    grid-column: 2;
+  }
+
+  .quiz-frame--taste .quiz-game-hint {
+    grid-row: 5;
+    grid-column: 2;
+    align-self: start;
+  }
+}
+
+.quiz-game-moment {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10%;
+  font-size: max(20px, calc(40 * var(--q)));
+  line-height: 1.25;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+.quiz-game-exhausted {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 10%;
+  font-size: max(18px, calc(30 * var(--q)));
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.quiz-taste-debug {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: min(100%, 920px);
+  margin-top: 24px;
+  text-align: left;
+  font-size: 15px;
+}
+
+.quiz-taste-debug-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.quiz-taste-debug-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.quiz-taste-debug-columns h4 {
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.quiz-taste-debug-columns ol {
+  padding-left: 1.4em;
+  list-style: decimal;
+  line-height: 1.5;
+}
+
+.quiz-taste-debug-code {
+  width: 100%;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+/* ── Finale (ТЗ §12) ─────────────────────────────────────────────────────────────────────── */
+
+.quiz-finale {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: var(--q-header-h) var(--q-gutter) var(--q-bottom);
+}
+
+.quiz-finale-core {
+  display: grid;
+  place-items: center;
+}
+
+.quiz-core {
+  position: relative;
+  display: grid;
+  place-items: center;
+  max-width: 100%;
+}
+
+.quiz-core-canvas {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+/* The canvas shows from the moment the dot has arrived (the same colour and size at the switch). */
+.quiz-finale-core[data-shown] .quiz-core-canvas[data-ready] {
+  opacity: 1;
+}
+
+.quiz-core-css {
+  width: 48%;
+  height: 48%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.45) 0%, transparent 32%),
+    radial-gradient(
+      circle at 50% 50%,
+      var(--color-accent) 0%,
+      var(--color-accent) 55%,
+      var(--color-coral) 100%
+    );
+  animation: quiz-core-pulse var(--finale-core-pulse-s) var(--ease-in-out) infinite alternate;
+}
+
+/* The honest line is up: everything that moved in the finale stands still (WCAG 2.2.2). */
+.quiz-core-css.is-paused {
+  animation-play-state: paused;
+}
+
+.quiz-finale[data-paused] .quiz-shimmer {
+  display: none;
+}
+
+.quiz-core-css.is-calm {
+  animation: quiz-core-breathe var(--finale-core-breathe-s) var(--ease-in-out) infinite alternate;
+}
+
+@keyframes quiz-core-pulse {
+  from {
+    opacity: 0.88;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes quiz-core-breathe {
+  from {
+    opacity: 0.82;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.quiz-handoff {
+  position: fixed;
+  z-index: calc(var(--z-scene) + 3);
+  border-radius: 9999px;
+  background-color: var(--color-accent);
+  transform-origin: 50% 50%;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* The core's canvas keeps room for its satellites and ripple: the captions sit up into that empty lower band. */
+.quiz-finale-captions {
+  display: flex;
+  justify-content: center;
+  min-height: calc(var(--quiz-caption-h) + 8px);
+  margin-top: calc(var(--core-size, 360px) * -0.14);
+}
+
+.quiz-caption {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: var(--quiz-caption-h);
+}
+
+.quiz-caption-pill {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* 3-slice pill: two round caps and a middle stretched by scaleX (transform only, ТЗ §12.3). */
+.quiz-caption-cap,
+.quiz-caption-mid {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: var(--quiz-caption-h);
+  background-color: var(--color-bg);
+  border: 1.5px solid rgb(90 84 81 / 0.35);
+  will-change: transform;
+}
+
+.quiz-caption-cap {
+  width: calc(var(--quiz-caption-h) / 2 + 1px);
+}
+
+.quiz-caption-cap--left {
+  border-right: 0;
+  border-radius: 9999px 0 0 9999px;
+}
+
+.quiz-caption-cap--right {
+  border-left: 0;
+  border-radius: 0 9999px 9999px 0;
+  margin-left: -1px;
+}
+
+.quiz-caption-mid {
+  width: 100px;
+  border-left: 0;
+  border-right: 0;
+  transform-origin: 0 50%;
+}
+
+.quiz-caption-content {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--quiz-caption-pad-x);
+}
+
+.quiz-caption-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.quiz-caption-icon {
+  display: inline-flex;
+  color: var(--color-accent);
+}
+
+.quiz-caption-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.quiz-caption-text {
+  position: relative;
+}
+
+/* The last caption: a darker band travels over the muted text, AI-generation style (transform only). */
+.quiz-caption.is-final .quiz-caption-text {
+  color: var(--color-ink-muted);
+}
+
+.quiz-shimmer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.quiz-shimmer-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 35%, #000 65%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 35%, #000 65%, transparent);
+  animation: quiz-shimmer-band var(--finale-shimmer-loop-s) linear infinite;
+  will-change: transform;
+}
+
+.quiz-shimmer-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+  color: var(--color-ink);
+  animation: quiz-shimmer-text var(--finale-shimmer-loop-s) linear infinite;
+  will-change: transform;
+}
+
+/* The band moves 3.5 band widths; the text inside moves back by the same distance (1.4 of its own width). */
+@keyframes quiz-shimmer-band {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@keyframes quiz-shimmer-text {
+  from {
+    transform: translateX(40%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.quiz-finale-after {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 18px;
+  text-align: center;
+}
+
+.quiz-finale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  margin-top: 10px;
+}
+
+/* A quiet text button, the privacy label's sibling (no wave: it starts over at once). */
+.quiz-finale-again {
+  min-height: 44px;
+  padding: 0 calc(18 * var(--q));
+  border-radius: 9999px;
+  font-size: var(--q-privacy);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.quiz-finale-again:hover {
+  color: var(--color-accent-deep);
+}
+
+.quiz-finale-honest {
+  max-width: min(100%, 520px);
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  text-wrap: pretty;
+}
+
+.quiz-finale-debug {
+  width: min(100%, 900px);
+  margin-top: 24px;
+  text-align: left;
+  font-size: 12px;
+}
+
+.quiz-finale-debug summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.quiz-finale-debug pre {
+  max-height: 40svh;
+  overflow: auto;
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: rgb(0 0 0 / 0.05);
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  white-space: pre-wrap;
+}
+
+/* The reveal wave (ТЗ §12.5, ?reveal=demo). */
+.quiz-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-scene);
+  pointer-events: none;
+}
+
+.quiz-reveal-content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background-color: var(--color-bg);
+  clip-path: circle(0 at 50% 50%);
+  pointer-events: auto;
+}
+
+.quiz-reveal-text {
+  padding: 0 var(--q-gutter);
+  font-size: max(24px, calc(56 * var(--q)));
+  font-weight: 700;
+  -webkit-text-stroke: var(--type-hero-title-stroke) currentColor;
+  paint-order: stroke fill;
+  text-align: center;
+}
+
+.quiz-reveal-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.quiz-reveal-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px var(--color-coral),
+    0 0 18px 8px rgb(230 57 70 / 0.45);
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+/* ── Reduced motion: no shimmer bands moving, no pulses ─────────────────────────────────── */
+
+/* ── Mockup geometry per step (design review, 16.10): tablets and desktops; phones keep their own sizes ── */
+
+@media (min-width: 48rem) {
+  /* The mockups' own line breaks of the titles (TitleText, «|» in quiz.ru.ts). */
+  .quiz-title-line {
+    display: block;
+  }
+
+  .quiz-frame--goal .quiz-answers,
+  .quiz-frame--rows .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap) * var(--q));
+  }
+  .quiz-frame--yesno .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-yesno) * var(--q));
+  }
+  .quiz-frame--chips .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-chips) * var(--q));
+  }
+  .quiz-frame--text .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-text) * var(--q));
+  }
+  .quiz-frame--food-style .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-food-style) * var(--q));
+  }
+  .quiz-frame--macro .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-macro) * var(--q));
+  }
+  .quiz-frame--activity .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-activity) * var(--q));
+  }
+  .quiz-frame--lifestyle .quiz-answers {
+    margin-top: calc(var(--quiz-content-gap-lifestyle) * var(--q));
+  }
+
+  /* Question icons of different heights, as in the mockups; the box bottom stays on the same line. */
+  .quiz-icon {
+    --icon-box: 140;
+    height: calc(var(--q-icon) * var(--icon-box) / 140);
+    margin-top: calc(var(--q-icon) * (140 - var(--icon-box)) / 140);
+  }
+  .quiz-icon[data-icon='q-body'] {
+    --icon-box: 153;
+  }
+  .quiz-icon[data-icon='q-goal'] {
+    --icon-box: 133;
+  }
+  .quiz-icon[data-icon='q-food-style'] {
+    --icon-box: 106;
+  }
+  .quiz-icon[data-icon='q-health'] {
+    --icon-box: 102;
+  }
+  .quiz-icon[data-icon='q-allergy'] {
+    --icon-box: 109;
+  }
+  .quiz-icon[data-icon='q-activity'] {
+    --icon-box: 137;
+  }
+  .quiz-icon[data-icon='q-strength'] {
+    --icon-box: 119;
+  }
+  .quiz-icon[data-icon='q-lifestyle'] {
+    --icon-box: 156;
+  }
+  .quiz-icon[data-icon='q-notes'] {
+    --icon-box: 119;
+  }
+
+  /* Food preferences and diet type: a larger icon and the text column 140 mockup px from the pill's edge. */
+  .quiz-option--wide,
+  .quiz-option--widest {
+    --q-option-icon: calc(62 * var(--q));
+    --q-option-icon-gap: calc(21 * var(--q));
+    padding-block: calc(20 * var(--q));
+    padding-left: calc(57 * var(--q));
+    /* The descriptions keep the mockup's one or two lines (Open Runde is a little wider than SF Pro). */
+    padding-right: calc(28 * var(--q));
+  }
+  .quiz-choices--wide {
+    gap: calc(28 * var(--q));
+  }
+  .quiz-choices--widest {
+    gap: calc(13 * var(--q));
+  }
+  .quiz-frame--lifestyle .quiz-choices--short {
+    gap: calc(31 * var(--q));
+  }
+  .quiz-choices--short .quiz-option-icon {
+    width: calc(48 * var(--q));
+    height: calc(48 * var(--q));
+  }
+  .quiz-option--short:not(:has(.quiz-option-icon)) {
+    padding-left: calc(52 * var(--q));
+  }
+  .quiz-option--yesno {
+    padding-left: calc(35 * var(--q));
+  }
+
+  /* «Настройте свою цель»: the rows are as wide as the goal's options. */
+  .quiz-rows--wide .quiz-row {
+    width: var(--q-pill-w-options);
+  }
+
+  /* The «+» panel: the mockup's spacing. */
+  .quiz-add-content {
+    gap: calc(66 * var(--q));
+    padding: calc(40 * var(--q)) calc(94 * var(--q));
+  }
+
+  .quiz-frame--text .quiz-footer {
+    margin-top: calc(19 * var(--q));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-progress-shimmer,
+  .quiz-shimmer {
+    display: none;
+  }
+
+  .quiz-core-css {
+    animation: none;
+  }
+
+  .quiz-card-photo {
+    transition: none;
+  }
+}

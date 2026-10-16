@@ -17,9 +17,9 @@
 
 | Этап | Что | Состояние |
 |---|---|---|
-| 0 | Исследование, архитектура, дизайн-система, фундамент | в работе |
-| 1 | Главная страница | впереди |
-| 2 | Интерактивный тест и цели | впереди |
+| 0 | Исследование, архитектура, дизайн-система, фундамент | готово |
+| 1 | Главная страница | готово |
+| 2 | Интерактивный тест: игра «Выберите блюдо», вопросы о цели и здоровье, финал | готово (меню появится на этапе 3) |
 | 3 | Генерация меню, ИИ-помощник, аккаунты, дневник питания | впереди |
 
 Сайт: Render (основной) и GitHub Pages (зеркало) — адреса появятся после публикации.
@@ -41,11 +41,13 @@ npm run build   # сборка
 
 | Папка | Что внутри |
 |---|---|
-| `apps/web` | сайт: Vite + React + TypeScript + Tailwind CSS + Motion |
+| `apps/web` | сайт: Vite + React + TypeScript + Tailwind CSS + Motion; тест — `src/features/quiz` |
 | `packages/nutrition-core` | расчёт норм питания и правила безопасности, с тестами |
+| `packages/taste-core` | каталог блюд, модель вкуса и отбор карточек для игры «Выберите блюдо», симуляция |
+| `packages/contracts` | общие схемы данных: ответы теста `QuizAnswersV1`, профиль вкуса `TasteProfileV1` |
 | `assets-src` | исходные картинки; `npm run assets` делает из них оптимизированные AVIF/WebP |
-| `docs` | документация: [наука](docs/science/), [решения по архитектуре](docs/adr/), [дизайн-система](docs/design-system.md) |
-| `scripts` | служебные скрипты |
+| `docs` | документация: [наука](docs/science/), [архитектура](docs/architecture.md), [решения](docs/adr/), [дизайн-система](docs/design-system.md), [фото блюд](docs/photo-licensing.md) |
+| `scripts` | служебные скрипты; `scripts/photos` — подбор фото блюд (нужен ключ Unsplash) |
 
 ## Технологии
 
@@ -60,5 +62,7 @@ Refectorio не ставит диагнозы и не заменяет врач�
 ## Лицензия
 
 Код — [MIT](LICENSE). Шрифт Open Runde (скруглённый Inter) — SIL Open Font License 1.1. Иконки Tabler — MIT.
+Фото блюд — с [Unsplash](https://unsplash.com/?utm_source=refectorio&utm_medium=referral) по ссылкам сервиса, в репозитории
+их нет ([авторы](docs/photo-credits.md), [правила](docs/photo-licensing.md)).
 Иллюстрации еды и фон карточки команды в `assets-src/` предоставлены командой; их лицензия уточняется
 (подробности — в [`assets-src/README.md`](assets-src/README.md)).

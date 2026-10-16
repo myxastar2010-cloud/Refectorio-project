@@ -1,0 +1,3598 @@
+{
+  "version": 1,
+  "catalogVersion": "2026-10-09",
+  "updatedAt": "2026-10-11",
+  "photos": {
+    "d_oatmeal": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "5gTixp6KwtI",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-oatmeal-with-berries-on-top-5gTixp6KwtI?utm_source=refectorio&utm_medium=referral",
+        "author": "Eiliv Aceron",
+        "authorUrl": "https://unsplash.com/@shootdelicious?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1594490150174-b349c66d93c5?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OHx8b2F0bWVhbCUyMHBvcnJpZGdlJTIwYm93bCUyMGJlcnJpZXN8ZW58MXwxfHx8MTc5MTU3NjMzOXww&ixlib=rb-4.1.0",
+        "width": 4480,
+        "height": 6720,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#594026",
+        "blurhash": "LHHKwr,[s-nhs$NFjEo#03%2spV?",
+        "altRu": "Тарелка овсяной каши с ягодами и кусочком масла",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_buckwheat_porridge": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "U0De088vFiY",
+        "pageUrl": "https://unsplash.com/photos/clear-drinking-glass-with-beverage-inside-on-white-surface-U0De088vFiY?utm_source=refectorio&utm_medium=referral",
+        "author": "elizabeth lies",
+        "authorUrl": "https://unsplash.com/@elizabethlies?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1422190250491-77319cf2ffae?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8YnVja3doZWF0JTIwcG9ycmlkZ2V8ZW58MXwxfHx8MTc5MTcwMjQ1NHww&ixlib=rb-4.1.0",
+        "width": 2448,
+        "height": 3264,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LSNK6gD%x]%hx]RlROoe?wtRxtV?",
+        "altRu": "Тарелка рассыпчатой гречневой каши с кусочком сливочного масла",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_semolina_porridge": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_7pyFNWQCOE",
+        "pageUrl": "https://unsplash.com/photos/red-and-black-berries-on-white-ceramic-bowl-_7pyFNWQCOE?utm_source=refectorio&utm_medium=referral",
+        "author": "Ellie Ellien",
+        "authorUrl": "https://unsplash.com/@ellienelie?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1587708062699-8553e1b270ba?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8c2Vtb2xpbmElMjBwb3JyaWRnZSUyMGJvd2x8ZW58MXwxfHx8MTc5MTU3NjM0Mnww&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5472,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LfJ@]{xaV@t7_Na}R*WBIVRjxuRj",
+        "altRu": "Тарелка манной каши с маслом и ложкой варенья",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_millet_pumpkin_porridge": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "w-R_sfcakP0",
+        "pageUrl": "https://unsplash.com/photos/bowl-of-soup-near-two-pumpkins-w-R_sfcakP0?utm_source=refectorio&utm_medium=referral",
+        "author": "Monika Grabkowska",
+        "authorUrl": "https://unsplash.com/@moniqa?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1541095441899-5d96a6da10b8?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8bWlsbGV0JTIwcG9ycmlkZ2UlMjBwdW1wa2lufGVufDF8MXx8fDE3OTE1NzYzNDN8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LGM6|%C84?4:t9TyzmI@IvNyvyM{",
+        "altRu": "Пшённая каша с кусочками тыквы в глиняном горшочке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_syrniki": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "zoCJUIiu32Y",
+        "pageUrl": "https://unsplash.com/photos/brown-and-black-bread-on-blue-ceramic-plate-zoCJUIiu32Y?utm_source=refectorio&utm_medium=referral",
+        "author": "Valeriya Avdeeva",
+        "authorUrl": "https://unsplash.com/@valeriya2401?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1605547332519-fe2c869ed918?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8c3lybmlraSUyMGNvdHRhZ2UlMjBjaGVlc2UlMjBwYW5jYWtlc3xlbnwxfDF8fHwxNzkxNTc2MzQ0fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 5792,
+        "focal": {
+          "x": 0.5,
+          "y": 0.54
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LOLNJd9ZF|n4tArpxuO@0LrqspTd",
+        "altRu": "Румяные сырники со сметаной и ягодным вареньем",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_oladyi": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "vypfll7xE-A",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-food-with-a-bowl-of-sour-cream-vypfll7xE-A?utm_source=refectorio&utm_medium=referral",
+        "author": "Natasha Levai",
+        "authorUrl": "https://unsplash.com/@natashashome?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1678527051201-db85050003d9?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8a2VmaXIlMjBmcml0dGVycyUyMHNvdXIlMjBjcmVhbXxlbnwxfDF8fHwxNzkxNTc2MzQ3fDA&ixlib=rb-4.1.0",
+        "width": 3044,
+        "height": 4064,
+        "focal": {
+          "x": 0.5,
+          "y": 0.501
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LVMjda_N%MRPadxuozoL?vMxayxt",
+        "altRu": "Стопка пышных оладий со сметаной и вареньем",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_blini": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "QXXEAmnm_WY",
+        "pageUrl": "https://unsplash.com/photos/baked-pancakes-on-ceramic-plate-QXXEAmnm_WY?utm_source=refectorio&utm_medium=referral",
+        "author": "Nicole Pearce",
+        "authorUrl": "https://unsplash.com/@nicolepearce?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1570677500933-04dd59959424?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OXx8cnVzc2lhbiUyMGJsaW5pJTIwc3RhY2t8ZW58MXwxfHx8MTc5MTU3NjM0OXww&ixlib=rb-4.1.0",
+        "width": 3840,
+        "height": 5752,
+        "focal": {
+          "x": 0.5,
+          "y": 0.555
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LNEVQZayTK-U9Yxai^ae0MR*$fNH",
+        "altRu": "Стопка тонких блинов с маслом и сметаной",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_omelette": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ll--JgIgKb8",
+        "pageUrl": "https://unsplash.com/photos/pizza-with-green-vegetable-on-white-ceramic-plate-ll--JgIgKb8?utm_source=refectorio&utm_medium=referral",
+        "author": "Melissia Ohol",
+        "authorUrl": "https://unsplash.com/@mealontheplate?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1609272270052-5aa27050b578?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjJ8fGZsdWZmeSUyMG9tZWxldHRlJTIwcGxhdGV8ZW58MXwxfHx8MTc5MTU3NjM1Mnww&ixlib=rb-4.1.0",
+        "width": 3000,
+        "height": 3750,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LhL4vaMvtmM|?bRjt7s;.Ao$aJt7",
+        "altRu": "Пышный омлет на тарелке с зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_fried_eggs": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "fbzJU63ORIM",
+        "pageUrl": "https://unsplash.com/photos/a-single-fried-egg-cooking-in-a-pan-fbzJU63ORIM?utm_source=refectorio&utm_medium=referral",
+        "author": "Reinis Brūzītis",
+        "authorUrl": "https://unsplash.com/@reinisbruzitis?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1776596098517-9adeee94460e?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8c3VubnklMjBzaWRlJTIwdXAlMjBlZ2dzJTIwcGFufGVufDF8MXx8fDE3OTE1NzYzNTV8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#0c2626",
+        "blurhash": "LeDSm_nO4.XnsTjZWXW;0LXS-pn4",
+        "altRu": "Яичница-глазунья из двух яиц на сковороде",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_shakshuka": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_yAuXzeu5Q4",
+        "pageUrl": "https://unsplash.com/photos/food-in-bowl-_yAuXzeu5Q4?utm_source=refectorio&utm_medium=referral",
+        "author": "Jennifer Latuperisa-Andresen",
+        "authorUrl": "https://unsplash.com/@fraumuksch?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1570010357185-031e883754eb?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8c2hha3NodWthJTIwcGFufGVufDF8MXx8fDE3OTE1NzYzNTh8MA&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LGJj6qIA1QIBsmtlV??G9^xtxGRQ",
+        "altRu": "Яйца, запечённые в томатном соусе с перцем, на сковороде",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_tvorog_smetana": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "EtR0Pj0txhs",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-oatmeal-with-blackberries-and-cottage-cheese-EtR0Pj0txhs?utm_source=refectorio&utm_medium=referral",
+        "author": "Lala Azizli",
+        "authorUrl": "https://unsplash.com/@lazizli?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1720356778303-6cdc6d2e95ce?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTJ8fGNvdHRhZ2UlMjBjaGVlc2UlMjBzb3VyJTIwY3JlYW0lMjBib3dsfGVufDF8MXx8fDE3OTE1NzYzNTl8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9c0a6",
+        "blurhash": "LKLpBY#+xtD$yD~V4.E29FV@9tM{",
+        "altRu": "Миска рассыпчатого творога со сметаной и ягодами",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_granola_yogurt": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "GbCEo-Nwyj4",
+        "pageUrl": "https://unsplash.com/photos/shallow-focus-photo-of-clear-drinking-glass-GbCEo-Nwyj4?utm_source=refectorio&utm_medium=referral",
+        "author": "Tanaphong Toochinda",
+        "authorUrl": "https://unsplash.com/@daen_2chinda?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1571230389215-b34a89739ef1?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8Z3Jhbm9sYSUyMHlvZ3VydCUyMGJlcnJpZXN8ZW58MXwxfHx8MTc5MTU3NjM2Mnww&ixlib=rb-4.1.0",
+        "width": 2852,
+        "height": 3886,
+        "focal": {
+          "x": 0.5,
+          "y": 0.511
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LJODLMx]_NMx_NkC?bae8_n$MxkD",
+        "altRu": "Стакан йогурта с хрустящей гранолой и свежими ягодами",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_avocado_toast": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "qqHBM0MXaMY",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-food-qqHBM0MXaMY?utm_source=refectorio&utm_medium=referral",
+        "author": "Bakd&Raw by Karolin Baitinger",
+        "authorUrl": "https://unsplash.com/@bakdandraw?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1662375750607-d6d17e77a5ca?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTV8fGF2b2NhZG8lMjB0b2FzdHxlbnwxfDF8fHwxNzkxNTc2MzYzfDA&ixlib=rb-4.1.0",
+        "width": 4480,
+        "height": 6720,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#f3f3d9",
+        "blurhash": "LVOf.1%f_4R-%gITaKxZ_4V[E1ax",
+        "altRu": "Поджаренный хлеб с пастой из авокадо и черри",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pancakes": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "z3VYXRlOXxU",
+        "pageUrl": "https://unsplash.com/photos/a-stack-of-pancakes-covered-in-powdered-sugar-z3VYXRlOXxU?utm_source=refectorio&utm_medium=referral",
+        "author": "David Karimzadeh",
+        "authorUrl": "https://unsplash.com/@daakvisuals?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1575831967553-771b0db4f7c1?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTN8fHBhbmNha2UlMjBzdGFjayUyMGJlcnJpZXMlMjBzeXJ1cHxlbnwxfDF8fHwxNzkxNTc2MzY1fDA&ixlib=rb-4.1.0",
+        "width": 3532,
+        "height": 4903,
+        "focal": {
+          "x": 0.5,
+          "y": 0.52
+        },
+        "avgColor": "#262626",
+        "blurhash": "LF8:*IWq9_n~0gf5-7WX-pj[SOoL",
+        "altRu": "Стопка панкейков с ягодами и сладким сиропом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_cottage_cheese_casserole": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "sKeKpYvHTqc",
+        "pageUrl": "https://unsplash.com/photos/a-fork-cuts-into-a-slice-of-crumb-cake-sKeKpYvHTqc?utm_source=refectorio&utm_medium=referral",
+        "author": "Luan Hobold",
+        "authorUrl": "https://unsplash.com/@luanhobold?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1773399159685-20574d6ee8db?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8N3x8Y290dGFnZSUyMGNoZWVzZSUyMGNhc3Nlcm9sZSUyMHNsaWNlfGVufDF8MXx8fDE3OTE1NzYzNjh8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LLL;T:.8X9WB%NRPf5of%%MxnNt7",
+        "altRu": "Кусок творожной запеканки со сметаной",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_borscht": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "sJX3g_ftxcE",
+        "pageUrl": "https://unsplash.com/photos/soup-in-black-ceramic-bowl-beside-white-ceramic-bowl-on-brown-wooden-table-sJX3g_ftxcE?utm_source=refectorio&utm_medium=referral",
+        "author": "Vladimir Gladkov",
+        "authorUrl": "https://unsplash.com/@vovkapanda?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1611608927023-fa7c88f17a85?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8N3x8Ym9yc2NodCUyMHNvdXAlMjBib3dsfGVufDF8MXx8fDE3OTE1NzYzMjh8MA&ixlib=rb-4.1.0",
+        "width": 3272,
+        "height": 4908,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9a673",
+        "blurhash": "LVJjPG9uniT0M{R.NdNG}pWFOERj",
+        "altRu": "Тарелка борща со сметаной и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_shchi": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "osrRzwRbOAc",
+        "pageUrl": "https://unsplash.com/photos/napa-cabbage-soup-with-mushrooms-osrRzwRbOAc?utm_source=refectorio&utm_medium=referral",
+        "author": "tommao wang",
+        "authorUrl": "https://unsplash.com/@tommaomaoer?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1789296719195-729ce93ca4aa?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTh8fHNoY2hpJTIwY2FiYmFnZSUyMHNvdXB8ZW58MXwxfHx8MTc5MTU3NjM3MHww&ixlib=rb-4.1.0",
+        "width": 3642,
+        "height": 5464,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#8c8c8c",
+        "blurhash": "LQF}}-x]s=WXESShNHjZ02sSt2ay",
+        "altRu": "Тарелка щей из квашеной капусты со сметаной",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_solyanka": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "vgOTJtF1a9A",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-soup-with-bread-and-meat-in-the-background-vgOTJtF1a9A?utm_source=refectorio&utm_medium=referral",
+        "author": "Lily",
+        "authorUrl": "https://unsplash.com/@bluishlily?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1662076087180-46de3f8b7640?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjd8fHNvbHlhbmthJTIwc291cHxlbnwxfDF8fHwxNzkxNTc2MzcxfDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#262626",
+        "blurhash": "LLDbsOWB9[t79tbct7s.0gxZxDWC",
+        "altRu": "Мясная солянка с оливками, лимоном и сметаной",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_ukha": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "sIKxa702NbA",
+        "pageUrl": "https://unsplash.com/photos/delicious-hearty-vegetable-soup-with-carrots-and-herbs-sIKxa702NbA?utm_source=refectorio&utm_medium=referral",
+        "author": "Elena Leya",
+        "authorUrl": "https://unsplash.com/@foodistika?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1741796105489-33ea406ac1b7?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8cnVzc2lhbiUyMGZpc2glMjBzb3VwJTIwZGlsbHxlbnwxfDF8fHwxNzkxNTc2MzczfDA&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5472,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LGIhW@t,.8aJ4.4Txt%ME-?GITs:",
+        "altRu": "Прозрачная уха с кусками рыбы, картофелем и укропом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_rassolnik": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "9jdyCy-bMC4",
+        "pageUrl": "https://unsplash.com/photos/several-vegetable-dishes-9jdyCy-bMC4?utm_source=refectorio&utm_medium=referral",
+        "author": "Monika Grabkowska",
+        "authorUrl": "https://unsplash.com/@moniqa?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1511378156040-1259b5bcd0fb?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjl8fHBpY2tsZSUyMHNvdXB8ZW58MXwxfHx8MTc5MTcwMjQ1Nnww&ixlib=rb-4.1.0",
+        "width": 3846,
+        "height": 5890,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#402626",
+        "blurhash": "LMEe+0aI9uo#R*RjxZ%10LRjs9X8",
+        "altRu": "Рассольник с перловкой, солёными огурцами и сметаной",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_okroshka": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "eoHw1cKhKcc",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-soup-sits-on-a-table-next-to-a-plate-of-food-eoHw1cKhKcc?utm_source=refectorio&utm_medium=referral",
+        "author": "sehoon ye",
+        "authorUrl": "https://unsplash.com/@_3bread?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1672300389082-540b049e4786?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTF8fG9rcm9zaGthJTIwY29sZCUyMHNvdXB8ZW58MXwxfHx8MTc5MTU3NjM3N3ww&ixlib=rb-4.1.0",
+        "width": 3946,
+        "height": 5919,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LJHxZq-pH?%LNFxZ-pof0LRQ%1Sc",
+        "altRu": "Холодная окрошка с огурцом, яйцом, колбасой и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chicken_noodle_soup": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "k8_-Bsqajew",
+        "pageUrl": "https://unsplash.com/photos/white-soup-with-sliced-carrots-and-onions-in-white-ceramic-bowl-k8_-Bsqajew?utm_source=refectorio&utm_medium=referral",
+        "author": "Melissa Walker Horn",
+        "authorUrl": "https://unsplash.com/@sugercoatit?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1584003397550-9ec84af5fa56?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTJ8fGNoaWNrZW4lMjBub29kbGUlMjBzb3VwJTIwYm93bHxlbnwxfDF8fHwxNzkxNTc2Mzc4fDA&ixlib=rb-4.1.0",
+        "width": 4016,
+        "height": 6016,
+        "focal": {
+          "x": 0.5,
+          "y": 0.555
+        },
+        "avgColor": "#0c2626",
+        "blurhash": "LeFYS:kWj]R.S%RjWVf60$wvj@WB",
+        "altRu": "Тарелка куриного супа с домашней лапшой и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pea_soup": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Js9fw3IFs0I",
+        "pageUrl": "https://unsplash.com/photos/bowl-of-creamy-soup-topped-with-croutons-Js9fw3IFs0I?utm_source=refectorio&utm_medium=referral",
+        "author": "Dillon Lobo",
+        "authorUrl": "https://unsplash.com/@dillon_lobo?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1754652327641-d30039a89047?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8cGVhJTIwc291cCUyMGNyb3V0b25zfGVufDF8MXx8fDE3OTE1NzYzODB8MA&ixlib=rb-4.1.0",
+        "width": 3140,
+        "height": 3925,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#a68c73",
+        "blurhash": "LOH1h+%2R:s,~Vf6R*ayNNj?${R,",
+        "altRu": "Густой гороховый суп с копчёностями и сухариками",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_mushroom_soup": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "auTqcVC96X4",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-food-auTqcVC96X4?utm_source=refectorio&utm_medium=referral",
+        "author": "Green And Great",
+        "authorUrl": "https://unsplash.com/@greenandgreatfood?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1659603851579-17755833517e?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8bXVzaHJvb20lMjBwb3RhdG8lMjBzb3VwJTIwYm93bHxlbnwxfDF8fHwxNzkxNTc2MzgxfDA&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5472,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LVJa[$Rj?bjt~qfPV@j[.9f8D%az",
+        "altRu": "Грибной суп с картофелем, лесными грибами и сметаной",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pumpkin_cream_soup": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "8mVLMZ0WW98",
+        "pageUrl": "https://unsplash.com/photos/soup-in-white-ceramic-bowl-8mVLMZ0WW98?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Griss",
+        "authorUrl": "https://unsplash.com/@grissphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1608930532174-18ff53f01438?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTF8fHB1bXBraW4lMjBjcmVhbSUyMHNvdXB8ZW58MXwxfHx8MTc5MTU3NjM4Mnww&ixlib=rb-4.1.0",
+        "width": 3021,
+        "height": 3776,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#a6400c",
+        "blurhash": "LOC#VwBWEjWAInV?oMo#1$-B$fnN",
+        "altRu": "Оранжевый крем-суп из тыквы со сливками и семечками",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_minestrone": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "5eROVOJW2bA",
+        "pageUrl": "https://unsplash.com/photos/soup-in-white-ceramic-bowl-5eROVOJW2bA?utm_source=refectorio&utm_medium=referral",
+        "author": "Nathan Dumlao",
+        "authorUrl": "https://unsplash.com/@nate_dumlao?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1611068120813-eca5a8cbf793?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8bWluZXN0cm9uZSUyMHNvdXB8ZW58MXwxfHx8MTc5MTU3NjM4NHww&ixlib=rb-4.1.0",
+        "width": 5464,
+        "height": 8192,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#c0d9d9",
+        "blurhash": "LUH-}ia0pIt6*0xtt7kDKjR+ibWA",
+        "altRu": "Итальянский овощной суп с фасолью и мелкой пастой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_gazpacho": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "gpRdrgRuHKY",
+        "pageUrl": "https://unsplash.com/photos/two-glasses-of-tomato-soup-on-a-table-gpRdrgRuHKY?utm_source=refectorio&utm_medium=referral",
+        "author": "Clara Farràs",
+        "authorUrl": "https://unsplash.com/@clara_farras?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1647453075417-113ae59e8501?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTN8fGdhenBhY2hvfGVufDF8MXx8fDE3OTE1NzYzODV8MA&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 5184,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9f3",
+        "blurhash": "LdPrRlx]lAkXUHRPg4XnNIe8i^oz",
+        "altRu": "Холодный томатный суп гаспачо с огурцом и перцем",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_kharcho": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_jyB1ndDFQE",
+        "pageUrl": "https://unsplash.com/photos/two-bowls-of-soup-on-a-table-with-crackers-_jyB1ndDFQE?utm_source=refectorio&utm_medium=referral",
+        "author": "Elena Leya",
+        "authorUrl": "https://unsplash.com/@foodistika?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1648455320791-a667c8aab7e4?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTd8fGtoYXJjaG8lMjBzb3VwfGVufDF8MXx8fDE3OTE1NzYzODZ8MA&ixlib=rb-4.1.0",
+        "width": 3503,
+        "height": 5254,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LAMiWle9?^-pDNQ8QmL2R%I9xs9a",
+        "altRu": "Густой суп харчо с говядиной, рисом и кинзой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_shurpa": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "6IGhyJRm85E",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-soup-next-to-a-bowl-of-soup-6IGhyJRm85E?utm_source=refectorio&utm_medium=referral",
+        "author": "Laura Ohlman",
+        "authorUrl": "https://unsplash.com/@ohlmanphotography?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1664741319755-920c2c616bdb?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjd8fHNodXJwYSUyMGxhbWIlMjBzb3VwfGVufDF8MXx8fDE3OTE1NzYzODd8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#40260c",
+        "blurhash": "LDDk-{J7OZM_n2T1V@R+11#*aKbI",
+        "altRu": "Наваристая шурпа с бараниной, картофелем и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_lentil_soup": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "xVgE_mCA8fk",
+        "pageUrl": "https://unsplash.com/photos/orange-soup-in-black-ceramic-bowl-xVgE_mCA8fk?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Griss",
+        "authorUrl": "https://unsplash.com/@grissphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1620791144170-8a443bf37a33?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjB8fHJlZCUyMGxlbnRpbCUyMHNvdXAlMjBsZW1vbnxlbnwxfDF8fHwxNzkxNTc2Mzg5fDA&ixlib=rb-4.1.0",
+        "width": 3064,
+        "height": 3830,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LNEBv.4nK*E1kWRjxZS21Nay+[xu",
+        "altRu": "Крем-суп из красной чечевицы с долькой лимона",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_olivier": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "hjjiW17m54w",
+        "pageUrl": "https://unsplash.com/photos/cooked-vegetable-salad-with-braed-hjjiW17m54w?utm_source=refectorio&utm_medium=referral",
+        "author": "Alina Chernysheva",
+        "authorUrl": "https://unsplash.com/@achera?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1573544201621-addb25a893bc?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8cnVzc2lhbiUyMHNhbGFkfGVufDF8MXx8fDE3OTE3MDI0NTh8MA&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LNLgw:wb%hMx~Vs8S4bwRknNH?Rk",
+        "altRu": "Салат оливье с горошком в праздничной салатнице",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_vinegret": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "gvMwYzp-R2U",
+        "pageUrl": "https://unsplash.com/photos/vegetable-salad-topped-with-sesame-seeds-in-round-white-ceramic-bowl-beside-brown-wooden-ladle-gvMwYzp-R2U?utm_source=refectorio&utm_medium=referral",
+        "author": "Ala",
+        "authorUrl": "https://unsplash.com/@qqq_saharok?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1517609745605-f5d863332be1?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjl8fGJlZXRyb290JTIwdmluYWlncmV0dGUlMjBzYWxhZHxlbnwxfDF8fHwxNzkxNTc2Mzk1fDA&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 5184,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LVNAYT~qx^tRaetStRIA~qE1M|oI",
+        "altRu": "Винегрет из свёклы, картофеля, огурцов и квашеной капусты",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_caesar_chicken": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "n8cYehiYqz8",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-food-n8cYehiYqz8?utm_source=refectorio&utm_medium=referral",
+        "author": "Thomas Antonio",
+        "authorUrl": "https://unsplash.com/@thomasantonio_art?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1669283714145-f97867f6c238?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8Y2hpY2tlbiUyMGNhZXNhciUyMHNhbGFkfGVufDF8MXx8fDE3OTE1NzYzOTZ8MA&ixlib=rb-4.1.0",
+        "width": 2848,
+        "height": 3560,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LYMjgYtP%g%3-:xtRlog?ws;jEbb",
+        "altRu": "Салат цезарь с курицей, листьями романо, пармезаном и сухариками",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_greek_salad": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Dk4RNTHXlAA",
+        "pageUrl": "https://unsplash.com/photos/greek-salad-with-feta-cheese-tomatoes-and-onions-Dk4RNTHXlAA?utm_source=refectorio&utm_medium=referral",
+        "author": "william wallace",
+        "authorUrl": "https://unsplash.com/@williamwallace?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1769481614068-47cfb4d1f125?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8Z3JlZWslMjBzYWxhZHxlbnwxfDF8fHwxNzkxNTc2NDAwfDA&ixlib=rb-4.1.0",
+        "width": 4281,
+        "height": 5448,
+        "focal": {
+          "x": 0.501,
+          "y": 0.5
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LBJ@]-R%IyM__3-;IURkF8W88_nj",
+        "altRu": "Греческий салат с фетой, маслинами, огурцами и томатами",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_crab_stick_salad": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_64g_Bkxg2A",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-a-salad-covered-in-shrimp-_64g_Bkxg2A?utm_source=refectorio&utm_medium=referral",
+        "author": "Thembi Johnson",
+        "authorUrl": "https://unsplash.com/@tastytin?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1643594477713-8ce5e36f7433?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8Y3JhYiUyMHN0aWNrJTIwc2FsYWQlMjBjb3JufGVufDF8MXx8fDE3OTE1NzY0MDN8MA&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LXPGa2Ri-=t7_3t7Rjae?doLM_R*",
+        "altRu": "Салат из крабовых палочек с кукурузой, яйцом и рисом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_caprese": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_GM0Zvw3PzY",
+        "pageUrl": "https://unsplash.com/photos/closeup-photo-of-tofu-and-tomato-slices-_GM0Zvw3PzY?utm_source=refectorio&utm_medium=referral",
+        "author": "Markus Spiske",
+        "authorUrl": "https://unsplash.com/@markusspiske?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1529312266912-b33cfce2eefd?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8Y2FwcmVzZSUyMHNhbGFkfGVufDF8MXx8fDE3OTE1NzY0MDR8MA&ixlib=rb-4.1.0",
+        "width": 3840,
+        "height": 5760,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#264040",
+        "blurhash": "LNE2wo%2NHxu9aM|t7f60gNaNGM{",
+        "altRu": "Ломтики моцареллы и томатов с листьями базилика",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_nicoise": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_QUVNqu3WKQ",
+        "pageUrl": "https://unsplash.com/photos/chicken-salad-served-on-white-ceramic-plate-_QUVNqu3WKQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Katka Pavlickova",
+        "authorUrl": "https://unsplash.com/@katerinapavlickova?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1522251253478-4cae03d93949?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTF8fG5pY29pc2UlMjBzYWxhZHxlbnwxfDF8fHwxNzkxNTc2NDA1fDA&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 4608,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LMNJn0xbPW-:%3%#rsrXD4xZ%3Nt",
+        "altRu": "Салат нисуаз с тунцом, яйцом, фасолью и оливками",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_beet_garlic_salad": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "3MuiBoBaM5Y",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-food-3MuiBoBaM5Y?utm_source=refectorio&utm_medium=referral",
+        "author": "Elena Leya",
+        "authorUrl": "https://unsplash.com/@foodistika?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1660808600060-07b7115f3611?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8YmVldHJvb3QlMjBnYXJsaWMlMjBzYWxhZHxlbnwxfDF8fHwxNzkxNTc2NDA3fDA&ixlib=rb-4.1.0",
+        "width": 3411,
+        "height": 5116,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LAMtXA?w%f.St$8y.RpdTJ%hM^Mx",
+        "altRu": "Тёртая свёкла с чесноком и майонезом в салатнице",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_cucumber_tomato_salad": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "SrkT2uE6uxw",
+        "pageUrl": "https://unsplash.com/photos/fresh-salad-with-tomatoes-cucumber-and-asparagus-SrkT2uE6uxw?utm_source=refectorio&utm_medium=referral",
+        "author": "Jon Druker",
+        "authorUrl": "https://unsplash.com/@jdruker_67?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1752028935881-0674807b046c?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjd8fGN1Y3VtYmVyJTIwdG9tYXRvJTIwc2FsYWR8ZW58MXwxfHx8MTc5MTU3NjQwOHww&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 3395,
+        "focal": {
+          "x": 0.422,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9c0",
+        "blurhash": "LXKA}_t7?bNGs:ofofW:~qM|enWB",
+        "altRu": "Салат из свежих огурцов, помидоров, лука и укропа",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_tabbouleh": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Ez5jlU-BemI",
+        "pageUrl": "https://unsplash.com/photos/white-ceramic-bowl-with-food-Ez5jlU-BemI?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Griss",
+        "authorUrl": "https://unsplash.com/@grissphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1623009728715-5619cd30b48b?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8dGFiYm91bGVoJTIwc2FsYWQlMjBwYXJzbGV5JTIwYnVsZ3VyfGVufDF8MXx8fDE3OTE1Nzk2MzJ8MA&ixlib=rb-4.1.0",
+        "width": 3064,
+        "height": 3830,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#c0c0d9",
+        "blurhash": "LTJ@?~?wx^WB~qIoRijsTMs8e-f6",
+        "altRu": "Салат табуле из булгура, петрушки, мяты и томатов",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_korean_carrot": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "eoEnH4EpVs0",
+        "pageUrl": "https://unsplash.com/photos/a-carrot-with-a-bit-taken-out-of-it-eoEnH4EpVs0?utm_source=refectorio&utm_medium=referral",
+        "author": "Brayden Prato",
+        "authorUrl": "https://unsplash.com/@pratophoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1651255322374-eb71ee669d76?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjN8fGtvcmVhbiUyMGNhcnJvdCUyMHNhbGFkfGVufDF8MXx8fDE3OTE1Nzk2MzV8MA&ixlib=rb-4.1.0",
+        "width": 3862,
+        "height": 4827,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LlMQFk$%X,S40Lbas:ofu6S#rst7",
+        "altRu": "Острая морковь по-корейски тонкой соломкой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_beef_stroganoff": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "L2dCFW_lS9o",
+        "pageUrl": "https://unsplash.com/photos/thinly-sliced-meat-with-sauce-and-salad-on-flatbread-L2dCFW_lS9o?utm_source=refectorio&utm_medium=referral",
+        "author": "sweetgreen menu",
+        "authorUrl": "https://unsplash.com/@sweetgreenmenu?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1777740700709-20928c11c97c?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjR8fGJlZWYlMjBpbiUyMGNyZWFteSUyMHNhdWNlfGVufDF8MXx8fDE3OTE3MDI0Njd8MA&ixlib=rb-4.1.0",
+        "width": 3490,
+        "height": 4362,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#d9c0c0",
+        "blurhash": "LDI|:s?b_ND%9tWAMxIUL2o#D*t6",
+        "altRu": "Бефстроганов из говядины в сметанном соусе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_kotlety": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "5vELnqvup_0",
+        "pageUrl": "https://unsplash.com/photos/fried-meat-on-white-ceramic-plate-5vELnqvup_0?utm_source=refectorio&utm_medium=referral",
+        "author": "Karolina Kołodziejczak",
+        "authorUrl": "https://unsplash.com/@rabbit_in_blue?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1615385361723-9f4c2daf42f4?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTB8fGtvdGxldHklMjBtZWF0JTIwcGF0dGllc3xlbnwxfDF8fHwxNzkxNTc5NjQwfDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LEGk]@aKF1-p55tl$,InUa.9R%R5",
+        "altRu": "Сочные домашние котлеты из фарша на тарелке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pork_chop": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "gnOwI5PLFSM",
+        "pageUrl": "https://unsplash.com/photos/schnitzel-with-herb-butter-and-lemon-gnOwI5PLFSM?utm_source=refectorio&utm_medium=referral",
+        "author": "Grace Anne Bobadilla",
+        "authorUrl": "https://unsplash.com/@graceannefully?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1788172400221-6d7d417ee75f?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjV8fGJyZWFkZWQlMjBwb3JrJTIwY2hvcHxlbnwxfDF8fHwxNzkxNTc5NjQxfDA&ixlib=rb-4.1.0",
+        "width": 5152,
+        "height": 7728,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#40260c",
+        "blurhash": "LAEU=K=tIoD$pJRjNGIU1QM{ITE2",
+        "altRu": "Отбивная из свинины в золотистом кляре с овощами",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_goulash": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "C5UBZv67Cn8",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-a-salad-and-a-bowl-of-sauce-C5UBZv67Cn8?utm_source=refectorio&utm_medium=referral",
+        "author": "Frank",
+        "authorUrl": "https://unsplash.com/@generein?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1723195269662-c4addeef5f59?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8YmVlZiUyMGdvdWxhc2h8ZW58MXwxfHx8MTc5MTU3OTY0Mnww&ixlib=rb-4.1.0",
+        "width": 3000,
+        "height": 4000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#c0d9d9",
+        "blurhash": "LZJtxM%h*0o$w7pIxtV?%MOsr?wc",
+        "altRu": "Гуляш из говядины в густой подливе с паприкой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_tefteli": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "2cv20ukAkdo",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-meatballs-covered-in-sauce-2cv20ukAkdo?utm_source=refectorio&utm_medium=referral",
+        "author": "Olivier Amyot",
+        "authorUrl": "https://unsplash.com/@user90807060?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1729715433807-ee2938748daa?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OHx8bWVhdGJhbGxzJTIwdG9tYXRvJTIwc2F1Y2V8ZW58MXwxfHx8MTc5MTU3OTY0NHww&ixlib=rb-4.1.0",
+        "width": 4959,
+        "height": 6297,
+        "focal": {
+          "x": 0.477,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LFL4mJDh_Nt8_3NGRjoz%gf9DiR%",
+        "altRu": "Тефтели с рисом в томатной подливе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_beef_steak": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "oSZ8WBaCbcg",
+        "pageUrl": "https://unsplash.com/photos/grilled-meat-on-white-ceramic-plate-oSZ8WBaCbcg?utm_source=refectorio&utm_medium=referral",
+        "author": "Vladimir Gladkov",
+        "authorUrl": "https://unsplash.com/@vovkapanda?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1611171711791-b34fa42e9fc2?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjR8fGJlZWYlMjBzdGVhayUyMG1lZGl1bSUyMHJhcmV8ZW58MXwxfHx8MTc5MTU3OTY0Nnww&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 5184,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LhHeONohM{WAs:oeoLof0LV?sAt7",
+        "altRu": "Стейк из говядины средней прожарки на деревянной доске",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_golubtsy": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "PSBU6RMZW2k",
+        "pageUrl": "https://unsplash.com/photos/cooked-food-in-frying-pan-PSBU6RMZW2k?utm_source=refectorio&utm_medium=referral",
+        "author": "Monika Grabkowska",
+        "authorUrl": "https://unsplash.com/@moniqa?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1556741601-487d577bc244?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8c3R1ZmZlZCUyMGNhYmJhZ2UlMjByb2xscyUyMHNvdXIlMjBjcmVhbXxlbnwxfDF8fHwxNzkxNTc5NjQ4fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#8ca6a6",
+        "blurhash": "LND]o4_NOaXSaJads;ofpeW;R4RP",
+        "altRu": "Голубцы в капустных листьях со сметаной",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_stuffed_peppers": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ieJUV-Mrn3g",
+        "pageUrl": "https://unsplash.com/photos/brown-and-red-dish-on-brown-wooden-tray-ieJUV-Mrn3g?utm_source=refectorio&utm_medium=referral",
+        "author": "Markus Spiske",
+        "authorUrl": "https://unsplash.com/@markusspiske?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1592119747782-d8c12c2ea267?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8c3R1ZmZlZCUyMGJlbGwlMjBwZXBwZXJzfGVufDF8MXx8fDE3OTE1Nzk2NTB8MA&ixlib=rb-4.1.0",
+        "width": 2333,
+        "height": 3500,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#262626",
+        "blurhash": "LcJ6.]xuTKkqtkr=ofoz1No~xGS4",
+        "altRu": "Болгарский перец, фаршированный мясом и рисом, в томатном соусе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pelmeni": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "NSk5izRrz8Q",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-dumplings-with-sour-cream-and-herbs-NSk5izRrz8Q?utm_source=refectorio&utm_medium=referral",
+        "author": "Tina Kuzmina",
+        "authorUrl": "https://unsplash.com/@tintina1131?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1676899060873-0166b110e5ce?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8cnVzc2lhbiUyMGR1bXBsaW5ncyUyMHNvdXIlMjBjcmVhbXxlbnwxfDF8fHwxNzkxNTc5NjUyfDA&ixlib=rb-4.1.0",
+        "width": 5000,
+        "height": 6670,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LKM%TBIn*0RP%LRPMwx]?IRktRt6",
+        "altRu": "Тарелка пельменей со сметаной и чёрным перцем",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_french_style_meat": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "W5WlURtGAB4",
+        "pageUrl": "https://unsplash.com/photos/black-ceramic-bowl-with-soup-W5WlURtGAB4?utm_source=refectorio&utm_medium=referral",
+        "author": "Christine Isakzhanova",
+        "authorUrl": "https://unsplash.com/@bulochka?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1612949060117-eb84d49a03f4?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTJ8fGJha2VkJTIwcG9yayUyMGNoZWVzZSUyMHBvdGF0b3xlbnwxfDF8fHwxNzkxNTc5NjUzfDA&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 5184,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LbEorRf59GazNdayjZj[01WX%fkB",
+        "altRu": "Запечённая свинина с картофелем, луком и сырной корочкой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_liver_onions": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "OzyzMJc1bVk",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-food-with-meat-eggs-and-onions-OzyzMJc1bVk?utm_source=refectorio&utm_medium=referral",
+        "author": "Yuri Lima",
+        "authorUrl": "https://unsplash.com/@yuri785?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1770164678239-89706708a496?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTJ8fGJlZWYlMjBsaXZlciUyMG9uaW9uc3xlbnwxfDF8fHwxNzkxNTc5NjU1fDA&ixlib=rb-4.1.0",
+        "width": 5000,
+        "height": 6661,
+        "focal": {
+          "x": 0.501,
+          "y": 0.5
+        },
+        "avgColor": "#f3d9c0",
+        "blurhash": "LcNJXr-m%gj[A0Ips.of.Tf8t6a}",
+        "altRu": "Говяжья печень, тушённая с луком в сметане",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pork_ribs": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "G4ofZCBe4wI",
+        "pageUrl": "https://unsplash.com/photos/barbecue-ribs-with-potato-wedges-on-a-plate-G4ofZCBe4wI?utm_source=refectorio&utm_medium=referral",
+        "author": "Diego Arenas de Rodrigo",
+        "authorUrl": "https://unsplash.com/@diegoarenasderodrigo?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1761315413349-d303df5723ca?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OHx8YmJxJTIwcG9yayUyMHJpYnN8ZW58MXwxfHx8MTc5MTU3OTY1Nnww&ixlib=rb-4.1.0",
+        "width": 2000,
+        "height": 2997,
+        "focal": {
+          "x": 0.5,
+          "y": 0.555
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LOC=|}Mxo#V@0Mt7Rif+NaxuR+fk",
+        "altRu": "Свиные рёбрышки в глазури барбекю на доске",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_burger": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "JqG9YJWy6eI",
+        "pageUrl": "https://unsplash.com/photos/burger-with-lettuce-and-tomato-JqG9YJWy6eI?utm_source=refectorio&utm_medium=referral",
+        "author": "amirali mirhashemian",
+        "authorUrl": "https://unsplash.com/@amir_v_ali?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1596956470007-2bf6095e7e16?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OXx8YmVlZiUyMGNoZWVzZWJ1cmdlcnxlbnwxfDF8fHwxNzkxNTc5NjU4fDA&ixlib=rb-4.1.0",
+        "width": 2952,
+        "height": 4000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.508
+        },
+        "avgColor": "#262640",
+        "blurhash": "LUH-GH-So}R+03$%WBofxaR*V@WB",
+        "altRu": "Бургер с говяжьей котлетой, сыром, салатом и томатом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_zharkoe": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "WgrOML7JhSU",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-stew-with-potatoes-carrots-and-meat-WgrOML7JhSU?utm_source=refectorio&utm_medium=referral",
+        "author": "nilufar nattaq",
+        "authorUrl": "https://unsplash.com/@nillufar?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1689860892307-7db54ab276ba?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Nnx8cG90JTIwcm9hc3QlMjBtZWF0JTIwcG90YXRvZXN8ZW58MXwxfHx8MTc5MTU3OTY1OXww&ixlib=rb-4.1.0",
+        "width": 5504,
+        "height": 8256,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#402626",
+        "blurhash": "L88M?Q13bbjF}?I[NbxEJoxtxZs9",
+        "altRu": "Жаркое из мяса с картофелем в глиняном горшочке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chicken_kiev": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "As5fYl_6TME",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-meat-and-vegetables-As5fYl_6TME?utm_source=refectorio&utm_medium=referral",
+        "author": "R Eris",
+        "authorUrl": "https://unsplash.com/@eprayatama?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1680678605629-278edc5fe99d?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8Y2hpY2tlbiUyMGtpZXZ8ZW58MXwxfHx8MTc5MTU3OTY2NHww&ixlib=rb-4.1.0",
+        "width": 3375,
+        "height": 4218,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LUG[NDRjE3$jaKnjaKn$0fr=VYtR",
+        "altRu": "Котлета по-киевски в хрустящей панировке с маслом внутри",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_roast_chicken": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "e_A-SFvqV08",
+        "pageUrl": "https://unsplash.com/photos/roasted-chicken-on-black-metal-grill-e_A-SFvqV08?utm_source=refectorio&utm_medium=referral",
+        "author": "Amanda Lim",
+        "authorUrl": "https://unsplash.com/@mandimelanie?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1630564510761-a560db92a09b?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8cm9hc3QlMjBjaGlja2VuJTIwd2hvbGV8ZW58MXwxfHx8MTc5MTU3OTY2NXww&ixlib=rb-4.1.0",
+        "width": 4160,
+        "height": 6240,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#404040",
+        "blurhash": "LKBVInELNbs:I;xaR*a{1LxD$%R*",
+        "altRu": "Целая запечённая курица с румяной корочкой на блюде",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chicken_sour_cream": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "q6AUy_Q7JDw",
+        "pageUrl": "https://unsplash.com/photos/chicken-with-a-creamy-sauce-and-roasted-bread-q6AUy_Q7JDw?utm_source=refectorio&utm_medium=referral",
+        "author": "Sanket Deorukhkar",
+        "authorUrl": "https://unsplash.com/@visualcaches?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1748012199672-2a94ab9cbb19?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8N3x8Y2hpY2tlbiUyMGluJTIwc291ciUyMGNyZWFtJTIwc2F1Y2V8ZW58MXwxfHx8MTc5MTU3OTY2Nnww&ixlib=rb-4.1.0",
+        "width": 3375,
+        "height": 4219,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#40260c",
+        "blurhash": "LTE.,=ayS6WA00RjV@t7tSxaayNG",
+        "altRu": "Кусочки курицы, тушённые в сметанном соусе с чесноком",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chicken_wings": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "GOX0o9n2oPo",
+        "pageUrl": "https://unsplash.com/photos/crispy-fried-chicken-wings-with-dipping-sauce-and-vegetables-GOX0o9n2oPo?utm_source=refectorio&utm_medium=referral",
+        "author": "joe boshra",
+        "authorUrl": "https://unsplash.com/@joestudios?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1762631934523-f91b18cbf81d?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8YnVmZmFsbyUyMGNoaWNrZW4lMjB3aW5nc3xlbnwxfDF8fHwxNzkxNTc5NjY4fDA&ixlib=rb-4.1.0",
+        "width": 3434,
+        "height": 4579,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#735940",
+        "blurhash": "LHGaL957K4=w^ibaoyn$1K-o-UEM",
+        "altRu": "Острые жареные куриные крылышки в красном соусе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_turkey_vegetables": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "84JxtS4vI2A",
+        "pageUrl": "https://unsplash.com/photos/rice-with-sliced-vegetables-on-green-ceramic-plate-84JxtS4vI2A?utm_source=refectorio&utm_medium=referral",
+        "author": "Karolina Kołodziejczak",
+        "authorUrl": "https://unsplash.com/@rabbit_in_blue?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1606250593181-5a81736038ed?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OXx8YmFrZWQlMjB0dXJrZXklMjBmaWxsZXQlMjB2ZWdldGFibGVzfGVufDF8MXx8fDE3OTE1Nzk2Njl8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#595973",
+        "blurhash": "LXHLMJRkS%s;~qjFWCkDI_xaROWA",
+        "altRu": "Запечённое филе индейки с овощами на тарелке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chicken_curry": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "8zLfugmjMLc",
+        "pageUrl": "https://unsplash.com/photos/delicious-indian-butter-chicken-served-with-rice-8zLfugmjMLc?utm_source=refectorio&utm_medium=referral",
+        "author": "Imad 786",
+        "authorUrl": "https://unsplash.com/@imad8321?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1742599361498-79824d24e355?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OHx8Y2hpY2tlbiUyMGN1cnJ5JTIwcmljZXxlbnwxfDF8fHwxNzkxNTc5NjcxfDA&ixlib=rb-4.1.0",
+        "width": 3670,
+        "height": 4588,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LWO3qR=}%$.9_4V@RibJcatQnOe.",
+        "altRu": "Курица в жёлтом соусе карри с рисом басмати",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chicken_teriyaki": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "RK_L7fq7E0A",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-chicken-and-rice-on-a-table-RK_L7fq7E0A?utm_source=refectorio&utm_medium=referral",
+        "author": "Mayte Baque",
+        "authorUrl": "https://unsplash.com/@mtbaque?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1724441980118-741eaf55b0f8?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8Y2hpY2tlbiUyMHRlcml5YWtpJTIwcmljZXxlbnwxfDF8fHwxNzkxNTc5NjcyfDA&ixlib=rb-4.1.0",
+        "width": 2000,
+        "height": 2500,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LEFhhlZ$.8kqkqtQD%M{0#?bRPjF",
+        "altRu": "Курица в глазури терияки с рисом и кунжутом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chicken_fricassee": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "UdO-JP67I-4",
+        "pageUrl": "https://unsplash.com/photos/chicken-dinner-with-mushroom-sauce-UdO-JP67I-4?utm_source=refectorio&utm_medium=referral",
+        "author": "gabbiistudios",
+        "authorUrl": "https://unsplash.com/@gabrielonodegba?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1788462612914-44793f2980f2?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8N3x8Y2hpY2tlbiUyMGZyaWNhc3NlZXxlbnwxfDF8fHwxNzkxNTc5NjczfDA&ixlib=rb-4.1.0",
+        "width": 4322,
+        "height": 5402,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LgN,xgRjtmog%Mfkaeae?wofr;jY",
+        "altRu": "Курица с грибами в белом сливочном соусе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chicken_schnitzel": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "KBleNxk0HCI",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-rice-and-oranges-KBleNxk0HCI?utm_source=refectorio&utm_medium=referral",
+        "author": "Parnis Azimi",
+        "authorUrl": "https://unsplash.com/@parnissazimi?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1633436375313-9913ec647912?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTJ8fGNoaWNrZW4lMjBzY2huaXR6ZWwlMjBsZW1vbnxlbnwxfDF8fHwxNzkxNTc5Njc1fDA&ixlib=rb-4.1.0",
+        "width": 6192,
+        "height": 7738,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LMG*QP^%0gN{57R*g3oe0fNHxtIo",
+        "altRu": "Тонкий куриный шницель в панировке с долькой лимона",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_duck_apples": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "CRoAeTh5S_I",
+        "pageUrl": "https://unsplash.com/photos/cooked-food-on-white-ceramic-plate-CRoAeTh5S_I?utm_source=refectorio&utm_medium=referral",
+        "author": "Sebastian Coman Photography",
+        "authorUrl": "https://unsplash.com/@sebastiancoman?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1580554530778-ca36943938b2?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Nnx8cm9hc3QlMjBkdWNrJTIwd2l0aCUyMGFwcGxlc3xlbnwxfDF8fHwxNzkxNTc5Njc2fDA&ixlib=rb-4.1.0",
+        "width": 5019,
+        "height": 6274,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LSKwa?IU?dsCE4M{M_W:0LIUxWn~",
+        "altRu": "Запечённая утка с печёными яблоками на праздничном блюде",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_baked_salmon": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "vtmpJdNt2pc",
+        "pageUrl": "https://unsplash.com/photos/salmon-fillet-with-lemon-and-capers-over-pasta-vtmpJdNt2pc?utm_source=refectorio&utm_medium=referral",
+        "author": "Brelyn Bashrum",
+        "authorUrl": "https://unsplash.com/@brelynkk?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1773113634819-8869cc893ea3?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjh8fGJha2VkJTIwc2FsbW9uJTIwbGVtb24lMjBkaWxsfGVufDF8MXx8fDE3OTE1Nzk2Nzh8MA&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 5184,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LrJH8G%KR.n$0LV@s.ofJDt7slkC",
+        "altRu": "Стейк лосося, запечённый с лимоном и укропом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_fried_pollock": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "n9OypKLcoYM",
+        "pageUrl": "https://unsplash.com/photos/fried-food-on-white-ceramic-plate-n9OypKLcoYM?utm_source=refectorio&utm_medium=referral",
+        "author": "Chaya Ruangsiri",
+        "authorUrl": "https://unsplash.com/@chaya2498?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1625060829572-462facbecc7a?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTF8fGZyaWVkJTIwcG9sbG9jayUyMGZpc2h8ZW58MXwxfHx8MTc5MTU3OTY4MHww&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#59260c",
+        "blurhash": "LGHB3tVrDmxu~BxZxbsV0MX-i]X9",
+        "altRu": "Кусочки жареного минтая в мучной панировке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_herring_potatoes": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "sxK4YtmLfHI",
+        "pageUrl": "https://unsplash.com/photos/grilled-sardines-with-fresh-salad-and-boiled-potatoes-sxK4YtmLfHI?utm_source=refectorio&utm_medium=referral",
+        "author": "Johan Mouchet",
+        "authorUrl": "https://unsplash.com/@johanmouchet?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1785567773155-c673cf8297ec?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8aGVycmluZyUyMHdpdGglMjBib2lsZWQlMjBwb3RhdG9lc3xlbnwxfDF8fHwxNzkxNTc5NjgxfDA&ixlib=rb-4.1.0",
+        "width": 3903,
+        "height": 5854,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#a68c73",
+        "blurhash": "LEIqfV9J0KMu%j%MDgVs77XmDNrw",
+        "altRu": "Селёдка с луком и варёным картофелем с укропом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_fish_cakes": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "HMGaDUg81WQ",
+        "pageUrl": "https://unsplash.com/photos/fried-food-on-white-ceramic-plate-HMGaDUg81WQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Carlos Perales",
+        "authorUrl": "https://unsplash.com/@karloswayne?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1607877200924-1762edf69437?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8ZmlzaCUyMGNha2VzfGVufDF8MXx8fDE3OTE1Nzk2ODN8MA&ixlib=rb-4.1.0",
+        "width": 4080,
+        "height": 6159,
+        "focal": {
+          "x": 0.5,
+          "y": 0.558
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LPF=KrIA.7M{0iM|n,oL4otRMxbc",
+        "altRu": "Румяные рыбные котлеты с долькой лимона",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_smoked_mackerel": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "R4bdOKH3o64",
+        "pageUrl": "https://unsplash.com/photos/selective-focus-photography-of-skewered-fish-R4bdOKH3o64?utm_source=refectorio&utm_medium=referral",
+        "author": "Denis Agati",
+        "authorUrl": "https://unsplash.com/@denisagati?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1577193120905-21e0c301d5d4?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8c21va2VkJTIwbWFja2VyZWx8ZW58MXwxfHx8MTc5MTU3OTY4NXww&ixlib=rb-4.1.0",
+        "width": 3072,
+        "height": 4608,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#8c8c8c",
+        "blurhash": "LBEyPZVr-kSi}i~BI;WA#j%gS%bc",
+        "altRu": "Золотистая копчёная скумбрия, нарезанная кусками",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_grilled_trout": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "zF-rR96njjk",
+        "pageUrl": "https://unsplash.com/photos/grilled-fish-zF-rR96njjk?utm_source=refectorio&utm_medium=referral",
+        "author": "Asiia Zaitseva",
+        "authorUrl": "https://unsplash.com/@asiiazaitseva?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1541934593604-ac0c865f3212?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8Z3JpbGxlZCUyMHRyb3V0JTIwbGVtb258ZW58MXwxfHx8MTc5MTU3OTY4Nnww&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#402626",
+        "blurhash": "LAGb3GyE.Ax]R4k7-OxYD%xuNZoK",
+        "altRu": "Целая форель на гриле с лимоном и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_fish_and_chips": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "DyGo_AGOQwI",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-fried-fish-and-fries-DyGo_AGOQwI?utm_source=refectorio&utm_medium=referral",
+        "author": "Winston Tjia",
+        "authorUrl": "https://unsplash.com/@winstontjia?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1697748836791-9ddf7e616ece?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8ZmlzaCUyMGFuZCUyMGNoaXBzfGVufDF8MXx8fDE3OTE1Nzk2ODl8MA&ixlib=rb-4.1.0",
+        "width": 4528,
+        "height": 6792,
+        "focal": {
+          "x": 0.5,
+          "y": 0.468
+        },
+        "avgColor": "#8c590c",
+        "blurhash": "LFH1hv-RIr4;0i%1$xtP4?-ORiR*",
+        "altRu": "Рыба в хрустящем кляре с картофелем фри и соусом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_tuna_steak": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "vcau65x1v1c",
+        "pageUrl": "https://unsplash.com/photos/sliced-bread-with-green-vegetable-on-white-ceramic-plate-vcau65x1v1c?utm_source=refectorio&utm_medium=referral",
+        "author": "sunorwind",
+        "authorUrl": "https://unsplash.com/@sunorwind?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1583953595980-e58272121563?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8c2VhcmVkJTIwdHVuYSUyMHN0ZWFrfGVufDF8MXx8fDE3OTE1Nzk2OTB8MA&ixlib=rb-4.1.0",
+        "width": 3492,
+        "height": 4656,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LQFqwGm+%gRP0zpIRPkW9bxas+s:",
+        "altRu": "Обжаренный стейк тунца с розовой серединой и кунжутом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_zander_polish": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "MWJYKPZjXMk",
+        "pageUrl": "https://unsplash.com/photos/vegetable-salad-on-white-ceramic-plate-MWJYKPZjXMk?utm_source=refectorio&utm_medium=referral",
+        "author": "Farhad Ibrahimzade",
+        "authorUrl": "https://unsplash.com/@ferhadd?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1625938399755-bf44eb6c24c0?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8N3x8cG9hY2hlZCUyMHBpa2UlMjBwZXJjaCUyMGVnZyUyMHNhdWNlfGVufDF8MXx8fDE3OTE1Nzk2OTF8MA&ixlib=rb-4.1.0",
+        "width": 4480,
+        "height": 5600,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9f3",
+        "blurhash": "LUJ7%ZROMyVr.TNZRkjv8^xtxtxw",
+        "altRu": "Отварной судак с яично-масляным соусом и картофелем",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_steamed_cod": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "E04RKGe_vm8",
+        "pageUrl": "https://unsplash.com/photos/sliced-vegetables-on-white-ceramic-plate-E04RKGe_vm8?utm_source=refectorio&utm_medium=referral",
+        "author": "Hanxiao Xu",
+        "authorUrl": "https://unsplash.com/@hanxiaoyaaaaa?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1598577103688-a4b6883815a1?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjR8fHN0ZWFtZWQlMjBjb2QlMjB2ZWdldGFibGVzfGVufDF8MXx8fDE3OTE1Nzk2OTN8MA&ixlib=rb-4.1.0",
+        "width": 4312,
+        "height": 6258,
+        "focal": {
+          "x": 0.5,
+          "y": 0.541
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LgL}4-9Fn,kX_NIUM|sAxaxtoLV[",
+        "altRu": "Филе трески на пару с брокколи и морковью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_marinated_fish": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ShT71sT0avQ",
+        "pageUrl": "https://unsplash.com/photos/sliced-orange-fruit-on-black-round-plate-ShT71sT0avQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Eiliv Aceron",
+        "authorUrl": "https://unsplash.com/@shootdelicious?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1585383121535-126d4c06db8c?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjR8fGZyaWVkJTIwZmlzaCUyMHRvbWF0byUyMGNhcnJvdCUyMG1hcmluYWRlfGVufDF8MXx8fDE3OTE1Nzk2OTd8MA&ixlib=rb-4.1.0",
+        "width": 3766,
+        "height": 5633,
+        "focal": {
+          "x": 0.5,
+          "y": 0.446
+        },
+        "avgColor": "#262626",
+        "blurhash": "LMDSOHxu0zj=s;adRjR*5Rt8=_WC",
+        "altRu": "Жареная рыба под овощным маринадом из моркови и лука",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_garlic_shrimp": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "czGLRsKGdeE",
+        "pageUrl": "https://unsplash.com/photos/shrimp-with-tomatoes-and-herbs-in-a-pan-czGLRsKGdeE?utm_source=refectorio&utm_medium=referral",
+        "author": "joe boshra",
+        "authorUrl": "https://unsplash.com/@joestudios?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1762631934037-5d19a6d9454a?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjB8fGdhcmxpYyUyMGJ1dHRlciUyMHNocmltcHxlbnwxfDF8fHwxNzkxNTc5Njk5fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 5333,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#c0a68c",
+        "blurhash": "LPH,;U56%gM{~Vr?WYofpIslxZt6",
+        "altRu": "Креветки, обжаренные в чесночно-сливочном соусе с зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_mussels": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "GHD_ec2-L1w",
+        "pageUrl": "https://unsplash.com/photos/a-pot-of-mussels-and-fries-on-a-table-GHD_ec2-L1w?utm_source=refectorio&utm_medium=referral",
+        "author": "Cathrine Skovly",
+        "authorUrl": "https://unsplash.com/@cathrinesk?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1715249792920-bfe1a3b9d79e?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8bXVzc2VscyUyMGNyZWFtJTIwc2F1Y2V8ZW58MXwxfHx8MTc5MTU3OTcwMXww&ixlib=rb-4.1.0",
+        "width": 5304,
+        "height": 6630,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LOHLVd4.%2%g~ptRs8Rkn3.8ITax",
+        "altRu": "Кастрюля мидий в ракушках в сливочном соусе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_fried_calamari": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "-kvVkjNO65Q",
+        "pageUrl": "https://unsplash.com/photos/fried-seafood-platter-with-dipping-sauce-on-a-wooden-table--kvVkjNO65Q?utm_source=refectorio&utm_medium=referral",
+        "author": "tommao wang",
+        "authorUrl": "https://unsplash.com/@tommaomaoer?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1780823231663-6f08dde9b54c?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8ZnJpZWQlMjBjYWxhbWFyaSUyMHJpbmdzfGVufDF8MXx8fDE3OTE1Nzk3MDJ8MA&ixlib=rb-4.1.0",
+        "width": 3984,
+        "height": 5976,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#a68c8c",
+        "blurhash": "LPHL3cu6E2iuv~s8R*Sh9*xaoHR+",
+        "altRu": "Хрустящие кольца кальмара в кляре с лимоном",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_seafood_paella": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "tZwPAHuvE0U",
+        "pageUrl": "https://unsplash.com/photos/seafood-paella-is-cooking-in-a-large-pan-tZwPAHuvE0U?utm_source=refectorio&utm_medium=referral",
+        "author": "Camila Vélez",
+        "authorUrl": "https://unsplash.com/@camivg?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1747709790554-092f0e5723df?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OHx8c2VhZm9vZCUyMHBhZWxsYXxlbnwxfDF8fHwxNzkxNjA0NTAwfDA&ixlib=rb-4.1.0",
+        "width": 3304,
+        "height": 4405,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LJHm[b~CNa-T5Soes:WY0#ozs:jZ",
+        "altRu": "Сковорода паэльи с креветками, мидиями и шафрановым рисом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_grilled_octopus": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "FrWT5qiCkWE",
+        "pageUrl": "https://unsplash.com/photos/grilled-octopus-tentacles-with-fresh-green-herbs-FrWT5qiCkWE?utm_source=refectorio&utm_medium=referral",
+        "author": "Tomi Saputra",
+        "authorUrl": "https://unsplash.com/@udatommo?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1764397514672-63b1a7a79110?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8Z3JpbGxlZCUyMG9jdG9wdXN8ZW58MXwxfHx8MTc5MTYwNDUwM3ww&ixlib=rb-4.1.0",
+        "width": 3376,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.375
+        },
+        "avgColor": "#734026",
+        "blurhash": "LTKcg.0zI@i}l6obR-V]S$%1xFWC",
+        "altRu": "Щупальца осьминога на гриле с лимоном и оливковым маслом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_crab_cakes": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "RA__jLpYoEY",
+        "pageUrl": "https://unsplash.com/photos/fried-food-on-white-ceramic-plate-RA__jLpYoEY?utm_source=refectorio&utm_medium=referral",
+        "author": "Zoe Richardson",
+        "authorUrl": "https://unsplash.com/@farmsteadphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1586971878888-6a650afce686?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8Y3JhYiUyMGNha2V8ZW58MXwxfHx8MTc5MTcwMjQzNnww&ixlib=rb-4.1.0",
+        "width": 2000,
+        "height": 3000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LJN,xdt7u6x[MxoJozWrKlWUDgM{",
+        "altRu": "Котлеты из крабового мяса с соусом и долькой лимона",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_shrimp_tempura": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ErSmnThoeJI",
+        "pageUrl": "https://unsplash.com/photos/crispy-golden-tempura-is-displayed-closely-ErSmnThoeJI?utm_source=refectorio&utm_medium=referral",
+        "author": "Jay",
+        "authorUrl": "https://unsplash.com/@ja024?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1750308250192-af7aefcc4459?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTN8fHNocmltcCUyMHRlbXB1cmF8ZW58MXwxfHx8MTc5MTYwNDUwOHww&ixlib=rb-4.1.0",
+        "width": 3200,
+        "height": 4800,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#a6590c",
+        "blurhash": "LXLCw*nNT1t70g-nNHI@9ysnRPNI",
+        "altRu": "Креветки в лёгком хрустящем кляре темпура с соусом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_vegetable_stew": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ZkHRnBIvias",
+        "pageUrl": "https://unsplash.com/photos/selective-focus-photography-of-vegetable-dish-in-pot-ZkHRnBIvias?utm_source=refectorio&utm_medium=referral",
+        "author": "Joseph Gonzalez",
+        "authorUrl": "https://unsplash.com/@miracletwentyone?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1503243368095-00d2d648be32?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjJ8fHZlZ2V0YWJsZSUyMHN0ZXd8ZW58MXwxfHx8MTc5MTYwNDUxMXww&ixlib=rb-4.1.0",
+        "width": 3627,
+        "height": 5169,
+        "focal": {
+          "x": 0.5,
+          "y": 0.468
+        },
+        "avgColor": "#a67340",
+        "blurhash": "LBHwoZml0$Vrogx]9us94=o~ROxa",
+        "altRu": "Овощное рагу из кабачков, картофеля, моркови и перца",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_ratatouille": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "3vDJ--i7w88",
+        "pageUrl": "https://unsplash.com/photos/a-pan-filled-with-sliced-up-vegetables-on-top-of-a-wooden-table-3vDJ--i7w88?utm_source=refectorio&utm_medium=referral",
+        "author": "Marjan Sadeghi",
+        "authorUrl": "https://unsplash.com/@marijeane?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1652622550740-f90d03edfbf0?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8cmF0YXRvdWlsbGV8ZW58MXwxfHx8MTc5MTYwNDUxMnww&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#735959",
+        "blurhash": "LKExtxR+NKRjbcayt7of0Ms:oLs.",
+        "altRu": "Рататуй из кружочков баклажана, кабачка и томата",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_falafel": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "FIZm4yokxo8",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-food-that-includes-rice-meatballs-and-salad-FIZm4yokxo8?utm_source=refectorio&utm_medium=referral",
+        "author": "Burak B",
+        "authorUrl": "https://unsplash.com/@brkbbygt?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1701688596783-231b3764ef67?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8ZmFsYWZlbCUyMHRhaGluaXxlbnwxfDF8fHwxNzkxNjA0NTEzfDA&ixlib=rb-4.1.0",
+        "width": 4160,
+        "height": 6240,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LQJj-%%g%gNG~qjbn$R*I_ITR6s:",
+        "altRu": "Шарики фалафеля из нута с соусом тахини и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_dal": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "6ZxmoCTe9PU",
+        "pageUrl": "https://unsplash.com/photos/orange-round-bowl-with-rice-and-vegetables-6ZxmoCTe9PU?utm_source=refectorio&utm_medium=referral",
+        "author": "Kalyani Akella",
+        "authorUrl": "https://unsplash.com/@mekalluakella?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1596560314766-08c0c6890024?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8ZGFsJTIwbGVudGlsJTIwY3Vycnl8ZW58MXwxfHx8MTc5MTYwNDUxNXww&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5472,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#262626",
+        "blurhash": "LMG@F~?F5U%1}TsmI?R+4=RRR*NI",
+        "altRu": "Густое индийское рагу из чечевицы со специями",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_draniki": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "qbjkVIixPCY",
+        "pageUrl": "https://unsplash.com/photos/brown-bread-on-black-ceramic-plate-qbjkVIixPCY?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Griss",
+        "authorUrl": "https://unsplash.com/@grissphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1607095591644-9f97a2099c92?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTN8fHBvdGF0byUyMHBhbmNha2VzJTIwc291ciUyMGNyZWFtfGVufDF8MXx8fDE3OTE2MDQ1MTd8MA&ixlib=rb-4.1.0",
+        "width": 3064,
+        "height": 3830,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#595959",
+        "blurhash": "LCB{oj=g5rkq_2WFNGt617J6-6RP",
+        "altRu": "Румяные картофельные драники со сметаной",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_vegetable_lasagna": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "GWWOvuVB1NI",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-a-slice-of-lasagna-next-to-a-bowl-of-GWWOvuVB1NI?utm_source=refectorio&utm_medium=referral",
+        "author": "Parnis Azimi",
+        "authorUrl": "https://unsplash.com/@parnissazimi?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1633436374784-7f9502eb348a?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8N3x8dmVnZXRhYmxlJTIwbGFzYWduYXxlbnwxfDF8fHwxNzkxNjA0NTE5fDA&ixlib=rb-4.1.0",
+        "width": 5556,
+        "height": 6944,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LWMGee^$-;b_W.t6jGe=YRx]XTt7",
+        "altRu": "Кусок овощной лазаньи с кабачками, шпинатом и сыром",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_tofu_vegetables": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "nygqOioV-S4",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-rice-and-vegetables-nygqOioV-S4?utm_source=refectorio&utm_medium=referral",
+        "author": "Healthy Bowl",
+        "authorUrl": "https://unsplash.com/@healthy_bowl_com?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1644527199848-94b0b067a689?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Nnx8dG9mdSUyMHN0aXIlMjBmcnklMjB2ZWdldGFibGVzfGVufDF8MXx8fDE3OTE2MDQ1MjB8MA&ixlib=rb-4.1.0",
+        "width": 3840,
+        "height": 5760,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LJK,NpNFyrI.~ptkD%xttTxbM{JT",
+        "altRu": "Обжаренные кубики тофу с брокколи и перцем в соевом соусе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chickpea_curry": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Z4g11oNG3dQ",
+        "pageUrl": "https://unsplash.com/photos/sliced-lemon-on-black-ceramic-bowl-Z4g11oNG3dQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Shannon Nickerson",
+        "authorUrl": "https://unsplash.com/@shanriley?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1590374562254-412968e4daaa?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Nnx8Y2hpY2twZWElMjBjdXJyeXxlbnwxfDF8fHwxNzkxNjA0NTIyfDA&ixlib=rb-4.1.0",
+        "width": 3162,
+        "height": 3952,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LNGt.{X7BVn48^xTWB%13ExG]}kV",
+        "altRu": "Нут в густом томатном соусе карри с кинзой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_eggplant_parmigiana": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Y9iaZNbUHtQ",
+        "pageUrl": "https://unsplash.com/photos/a-dish-of-food-on-a-wooden-table-Y9iaZNbUHtQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Moira Nazzari",
+        "authorUrl": "https://unsplash.com/@moiranazzari?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1632229095740-8c75082087c5?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8ZWdncGxhbnQlMjBwYXJtaWdpYW5hfGVufDF8MXx8fDE3OTE2MDQ1MjN8MA&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#8c8c8c",
+        "blurhash": "LDH21TR7yZxXQ,MJxFj]EU%1#jpI",
+        "altRu": "Запечённые баклажаны с томатным соусом, моцареллой и пармезаном",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_varenyky_potato": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "mr1o568mdEc",
+        "pageUrl": "https://unsplash.com/photos/white-cream-on-brown-round-bowl-mr1o568mdEc?utm_source=refectorio&utm_medium=referral",
+        "author": "Victoria Shes",
+        "authorUrl": "https://unsplash.com/@victoriakosmo?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1581515092908-42bae9a80350?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8cGllcm9naSUyMGZyaWVkJTIwb25pb24lMjBzb3VyJTIwY3JlYW18ZW58MXwxfHx8MTc5MTYwNDUyOHww&ixlib=rb-4.1.0",
+        "width": 3744,
+        "height": 5616,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#c0d9d9",
+        "blurhash": "LNL4j9JDtmTJwIyERPRP9b.TMbRi",
+        "altRu": "Вареники с картошкой, жареным луком и сметаной",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_mushroom_stroganoff": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_za4UCkrD8g",
+        "pageUrl": "https://unsplash.com/photos/vegetable-salad-on-black-ceramic-bowl-beside-stainless-steel-fork-and-knife-_za4UCkrD8g?utm_source=refectorio&utm_medium=referral",
+        "author": "Fathul Abrar",
+        "authorUrl": "https://unsplash.com/@f_abrarrr?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1586511925208-cbe6532bf9fd?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjl8fG11c2hyb29tJTIwc3Ryb2dhbm9mZnxlbnwxfDF8fHwxNzkxNjA0NTMxfDA&ixlib=rb-4.1.0",
+        "width": 2373,
+        "height": 3559,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LgL;QyM_R.Rj_NM_RiWBRjM_WAWU",
+        "altRu": "Шампиньоны в сметанном соусе по рецепту бефстроганова",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_veggie_burger": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "rbcvIrxw6KA",
+        "pageUrl": "https://unsplash.com/photos/selective-focus-photography-of-burger-on-top-of-table-rbcvIrxw6KA?utm_source=refectorio&utm_medium=referral",
+        "author": "Lefteris kallergis",
+        "authorUrl": "https://unsplash.com/@lefterisk?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1520073201527-6b044ba2ca9f?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8dmVnZ2llJTIwYnVyZ2VyfGVufDF8MXx8fDE3OTE2MDQ1MzJ8MA&ixlib=rb-4.1.0",
+        "width": 4775,
+        "height": 6733,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LFCh+txu9vWB%MozjEax0~ay$$jZ",
+        "altRu": "Бургер с котлетой из фасоли, салатом и томатом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_fried_potatoes_mushrooms": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "BE2ilK_mggg",
+        "pageUrl": "https://unsplash.com/photos/plate-of-stir-fried-potatoes-BE2ilK_mggg?utm_source=refectorio&utm_medium=referral",
+        "author": "John Fornander",
+        "authorUrl": "https://unsplash.com/@johnfo?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1578352529599-a48f0577a51d?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTN8fGZyaWVkJTIwcG90YXRvZXMlMjBtdXNocm9vbXMlMjBza2lsbGV0fGVufDF8MXx8fDE3OTE2MDQ1MzR8MA&ixlib=rb-4.1.0",
+        "width": 5304,
+        "height": 7952,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LHEB~f%L0LD*4:E2-o%2D*?H-ooM",
+        "altRu": "Сковорода жареной картошки с грибами и луком",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_grilled_vegetables": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "FWfxbacB_tw",
+        "pageUrl": "https://unsplash.com/photos/dinner-plates-with-chicken-and-vegetables-FWfxbacB_tw?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Bvp",
+        "authorUrl": "https://unsplash.com/@maxbvp?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1788580210985-051fea8ca7fa?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjV8fGdyaWxsZWQlMjB2ZWdldGFibGVzfGVufDF8MXx8fDE3OTE2MDQ1NDF8MA&ixlib=rb-4.1.0",
+        "width": 4672,
+        "height": 7008,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#a6a6a6",
+        "blurhash": "LDEorh-q.Tb^IoV?MxkDE2%MV?xu",
+        "altRu": "Ассорти овощей гриль: перец, кабачок, баклажан и томаты",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_mashed_potatoes": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "qrDM1rmKgOQ",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-mashed-potatoes-topped-with-gravy-qrDM1rmKgOQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Parnis Azimi",
+        "authorUrl": "https://unsplash.com/@parnissazimi?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1633436375153-d7045cb93e38?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8bWFzaGVkJTIwcG90YXRvZXMlMjBidXR0ZXJ8ZW58MXwxfHx8MTc5MTYwNDU1MXww&ixlib=rb-4.1.0",
+        "width": 7778,
+        "height": 9722,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#404040",
+        "blurhash": "LaEy3u^%M|buxuoeR,WY0ME3xZV@",
+        "altRu": "Тарелка нежного картофельного пюре с кусочком масла",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_spaghetti_bolognese": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "2eVu7_gBnV0",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-spaghetti-with-sauce-and-bread-on-a-table-2eVu7_gBnV0?utm_source=refectorio&utm_medium=referral",
+        "author": "Natalie Behn",
+        "authorUrl": "https://unsplash.com/@natalie_behn?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1692071097529-320eb2b32292?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8c3BhZ2hldHRpJTIwYm9sb2duZXNlfGVufDF8MXx8fDE3OTE2MDQ1NTN8MA&ixlib=rb-4.1.0",
+        "width": 2161,
+        "height": 3237,
+        "focal": {
+          "x": 0.5,
+          "y": 0.499
+        },
+        "avgColor": "#f3d9d9",
+        "blurhash": "LINSf}~VAJyE?v0LROIpcuSjr=nN",
+        "altRu": "Спагетти с мясным соусом болоньезе и тёртым пармезаном",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_carbonara": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "pbEsK_CMJfg",
+        "pageUrl": "https://unsplash.com/photos/pasta-dish-on-white-ceramic-plate-pbEsK_CMJfg?utm_source=refectorio&utm_medium=referral",
+        "author": "Dionysius Samuel",
+        "authorUrl": "https://unsplash.com/@samull?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1591972774172-084d6be1b72c?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTd8fHNwYWdoZXR0aSUyMGNhcmJvbmFyYXxlbnwxfDF8fHwxNzkxNjA0NTU0fDA&ixlib=rb-4.1.0",
+        "width": 3264,
+        "height": 4896,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LYFr;p%MNyR+M{j]ogay0KM_i^s:",
+        "altRu": "Спагетти карбонара с беконом, желтком и пармезаном",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pesto_pasta": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "docP-fBTnjw",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-pasta-with-broccoli-and-parmesan-cheese-docP-fBTnjw?utm_source=refectorio&utm_medium=referral",
+        "author": "shibani Mishra",
+        "authorUrl": "https://unsplash.com/@shivsm_30?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1707448460889-e268eb742820?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTR8fHBlc3RvJTIwcGFzdGF8ZW58MXwxfHx8MTc5MTYwNDU1Nnww&ixlib=rb-4.1.0",
+        "width": 4854,
+        "height": 6381,
+        "focal": {
+          "x": 0.493,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LdJ*;kaLs?M{_4oLjXWU9IWUoZa}",
+        "altRu": "Паста с зелёным соусом песто из базилика и пармезана",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_navy_pasta": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "atPsXuiYwl8",
+        "pageUrl": "https://unsplash.com/photos/a-pan-of-pasta-with-meat-and-parmesan-cheese-atPsXuiYwl8?utm_source=refectorio&utm_medium=referral",
+        "author": "The Fry Family Food Co.",
+        "authorUrl": "https://unsplash.com/@fryfamilyfoodco?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1696935315145-3b902ea6b076?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTR8fHBhc3RhJTIwd2l0aCUyMGdyb3VuZCUyMGJlZWZ8ZW58MXwxfHx8MTc5MTYwNDU1N3ww&ixlib=rb-4.1.0",
+        "width": 3543,
+        "height": 5315,
+        "focal": {
+          "x": 0.5,
+          "y": 0.468
+        },
+        "avgColor": "#735940",
+        "blurhash": "LJF#?pr;NH%gt3%2S4xZ01ozoeM{",
+        "altRu": "Макароны с обжаренным мясным фаршем и луком",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_buckwheat_mushrooms": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "bsFzFUmZwwg",
+        "pageUrl": "https://unsplash.com/photos/a-white-bowl-filled-with-food-on-top-of-a-wooden-board-bsFzFUmZwwg?utm_source=refectorio&utm_medium=referral",
+        "author": "Joanna Stołowicz",
+        "authorUrl": "https://unsplash.com/@joanna_stolowicz?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1670843629580-475c9d1da4e2?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OXx8YnVja3doZWF0JTIwd2l0aCUyMG11c2hyb29tc3xlbnwxfDF8fHwxNzkxNjA0NTU5fDA&ixlib=rb-4.1.0",
+        "width": 5504,
+        "height": 6880,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LcMjdd-:%$R+?^tRRjRjx^xuaKV?",
+        "altRu": "Гречка с обжаренными грибами и луком в миске",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_mushroom_risotto": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "gg_PV3EvCaM",
+        "pageUrl": "https://unsplash.com/photos/mushroom-risotto-dinner-with-parmesan-gg_PV3EvCaM?utm_source=refectorio&utm_medium=referral",
+        "author": "khloe arledge",
+        "authorUrl": "https://unsplash.com/@khloephoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1572424075298-e17403e6f3bf?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTR8fG11c2hyb29tJTIwcmlzb3R0b3xlbnwxfDF8fHwxNzkxNjA0NTYwfDA&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5472,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LFLqqZ?v?c.9R3?cH=Ip_4-=8^M{",
+        "altRu": "Сливочное ризотто с белыми грибами и пармезаном",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_lasagna": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ofpQwWR4dfs",
+        "pageUrl": "https://unsplash.com/photos/a-slice-of-lasagna-is-served-from-a-baking-dish-ofpQwWR4dfs?utm_source=refectorio&utm_medium=referral",
+        "author": "sheri silver",
+        "authorUrl": "https://unsplash.com/@sheri_silver?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1770908811367-e1232962e81b?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTd8fGxhc2FnbmF8ZW58MXwxfHx8MTc5MTYwNDU2Mnww&ixlib=rb-4.1.0",
+        "width": 2187,
+        "height": 2916,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LLN9zpL~={%2znL#VEyXV[xHWAkq",
+        "altRu": "Слоёная лазанья с мясным соусом и сыром",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_mac_and_cheese": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Vkx_ZpQwQgE",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-macaroni-and-cheese-Vkx_ZpQwQgE?utm_source=refectorio&utm_medium=referral",
+        "author": "Leanna Myers",
+        "authorUrl": "https://unsplash.com/@myerslk88?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1667499989723-c4ab9549d63c?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8bWFjJTIwYW5kJTIwY2hlZXNlfGVufDF8MXx8fDE3OTE2MDQ1NjN8MA&ixlib=rb-4.1.0",
+        "width": 3805,
+        "height": 5085,
+        "focal": {
+          "x": 0.5,
+          "y": 0.499
+        },
+        "avgColor": "#0c2640",
+        "blurhash": "LoHLF*NftSt8%fWAozbH0$xBxZj?",
+        "altRu": "Запечённые макароны в сырном соусе с румяной корочкой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_couscous_vegetables": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "XL3UhgGNa8c",
+        "pageUrl": "https://unsplash.com/photos/cooked-food-on-blue-ceramic-bowl-XL3UhgGNa8c?utm_source=refectorio&utm_medium=referral",
+        "author": "Anto Meneghini",
+        "authorUrl": "https://unsplash.com/@antomeneghini?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1626901148200-0e934140a02b?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8Y291c2NvdXMlMjB2ZWdldGFibGVzfGVufDF8MXx8fDE3OTE2MDQ1NjR8MA&ixlib=rb-4.1.0",
+        "width": 2971,
+        "height": 4456,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LRKTi7yZX:?a%1s:ozozk[%z-Vv~",
+        "altRu": "Рассыпчатый кус-кус с тушёными овощами и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_egg_fried_rice": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "OZXQcw8W4H0",
+        "pageUrl": "https://unsplash.com/photos/fried-rice-with-mixed-vegetables-OZXQcw8W4H0?utm_source=refectorio&utm_medium=referral",
+        "author": "Zoshua Colah",
+        "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1788603907442-253dd51b1aec?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjl8fGVnZyUyMGZyaWVkJTIwcmljZXxlbnwxfDF8fHwxNzkxNjA0NTY2fDA&ixlib=rb-4.1.0",
+        "width": 6120,
+        "height": 7477,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#d9a659",
+        "blurhash": "LRLCUkaK-TOp~ANGs:SNoNxC%0$%",
+        "altRu": "Жареный рис с яйцом, горошком и морковью в миске",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_bulgur_vegetables": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "3nNoai7MP0A",
+        "pageUrl": "https://unsplash.com/photos/baked-dish-with-tomatoes-and-mint-tea-3nNoai7MP0A?utm_source=refectorio&utm_medium=referral",
+        "author": "Raamin ka",
+        "authorUrl": "https://unsplash.com/@raaminka?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1759216282424-a48582525298?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MzB8fGJ1bGd1ciUyMHBpbGFmJTIwdmVnZXRhYmxlc3xlbnwxfDF8fHwxNzkxNjA0NTY4fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#8c5926",
+        "blurhash": "LEFzp2D+KiNdOYn~bGjF0#K49uxF",
+        "altRu": "Булгур с томатами, перцем и зеленью на тарелке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chicken_mushroom_pasta": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "z1_YJH33tqc",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-pasta-and-mushrooms-z1_YJH33tqc?utm_source=refectorio&utm_medium=referral",
+        "author": "Oscar Ramirez",
+        "authorUrl": "https://unsplash.com/@oscareduardohr?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1689793603236-b44d6e7a3fa0?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTZ8fGNyZWFteSUyMGNoaWNrZW4lMjBtdXNocm9vbSUyMHBhc3RhfGVufDF8MXx8fDE3OTE2MDQ1NzJ8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 5000,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#d9c0c0",
+        "blurhash": "LuK^aGadWGofXBWGoef60qj=NHa}",
+        "altRu": "Паста с курицей и шампиньонами в сливочном соусе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_sushi_rolls": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "O00sI0sKtFc",
+        "pageUrl": "https://unsplash.com/photos/assortment-of-salmon-and-avocado-sushi-rolls-O00sI0sKtFc?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Griss",
+        "authorUrl": "https://unsplash.com/@grissphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1774635800472-41eaa93c1453?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTZ8fHN1c2hpJTIwcm9sbHMlMjBzZXR8ZW58MXwxfHx8MTc5MTYwNDU3Nnww&ixlib=rb-4.1.0",
+        "width": 3547,
+        "height": 4434,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LaFFNcM|9as:-oNHR-s.0LWB%2fk",
+        "altRu": "Набор суши-роллов с лососем, имбирём и васаби",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_ramen": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "KRYuPwvyEys",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-ramen-with-chopsticks-and-an-egg-KRYuPwvyEys?utm_source=refectorio&utm_medium=referral",
+        "author": "Hailey Tong",
+        "authorUrl": "https://unsplash.com/@haileytong?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1734313276354-75c96b3c0c36?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8cmFtZW4lMjBib3dsfGVufDF8MXx8fDE3OTE2MDQ1Nzh8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LHEC8zr?0Mo|~TXAIuskNwM{w[sm",
+        "altRu": "Миска рамена с лапшой, свининой, яйцом и зелёным луком",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pho_bo": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ualwAKxto5U",
+        "pageUrl": "https://unsplash.com/photos/pho-bowl-with-beef-meatballs-ualwAKxto5U?utm_source=refectorio&utm_medium=referral",
+        "author": "Fujiphilm",
+        "authorUrl": "https://unsplash.com/@fujiphilm?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1790175012904-ee099101b7f8?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8cGhvJTIwYm98ZW58MXwxfHx8MTc5MTYwNDU3OXww&ixlib=rb-4.1.0",
+        "width": 3131,
+        "height": 4697,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LFBo?P9^rsNH~URkn+R+D*jEX8s.",
+        "altRu": "Вьетнамский суп фо с говядиной, рисовой лапшой и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_tom_yum": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "zb6GZ6e2VR0",
+        "pageUrl": "https://unsplash.com/photos/spicy-shrimp-soup-with-rice-and-decorative-items-zb6GZ6e2VR0?utm_source=refectorio&utm_medium=referral",
+        "author": "PHEAP MOEU",
+        "authorUrl": "https://unsplash.com/@moeupheap?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1761037994516-502ed10932b0?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8dG9tJTIweXVtJTIwc291cHxlbnwxfDF8fHwxNzkxNjA0NTgyfDA&ixlib=rb-4.1.0",
+        "width": 2667,
+        "height": 4000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#a6c0c0",
+        "blurhash": "LNH{ZoHqx{OYX,V?ROWANzavaiaJ",
+        "altRu": "Острый тайский суп том ям с креветками и грибами",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pad_thai": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_wBJ0cvKhIE",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-food-on-a-wooden-table-_wBJ0cvKhIE?utm_source=refectorio&utm_medium=referral",
+        "author": "John Aledia",
+        "authorUrl": "https://unsplash.com/@johnaledja?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1637806930600-37fa8892069d?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8cGFkJTIwdGhhaXxlbnwxfDF8fHwxNzkxNjA0NTg0fDA&ixlib=rb-4.1.0",
+        "width": 3264,
+        "height": 4928,
+        "focal": {
+          "x": 0.5,
+          "y": 0.442
+        },
+        "avgColor": "#8c400c",
+        "blurhash": "LIGj{9AHi{kRtQRnIpfO8zoyR%jJ",
+        "altRu": "Рисовая лапша пад тай с курицей, ростками и арахисом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_kung_pao_chicken": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ijx5tcp2lIg",
+        "pageUrl": "https://unsplash.com/photos/two-dishes-of-asian-food-on-a-table-ijx5tcp2lIg?utm_source=refectorio&utm_medium=referral",
+        "author": "tommao wang",
+        "authorUrl": "https://unsplash.com/@tommaomaoer?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1776729851079-686daa8ff9aa?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8a3VuZyUyMHBhbyUyMGNoaWNrZW58ZW58MXwxfHx8MTc5MTYwNDU4NXww&ixlib=rb-4.1.0",
+        "width": 3984,
+        "height": 5976,
+        "focal": {
+          "x": 0.5,
+          "y": 0.468
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LYHn.~yE%MoJ00IAj?WYElxZV@M{",
+        "altRu": "Кусочки курицы с арахисом и острым перцем в соусе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_sweet_sour_pork": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "mnpp17AFFVA",
+        "pageUrl": "https://unsplash.com/photos/meat-dish-on-round-white-plate-mnpp17AFFVA?utm_source=refectorio&utm_medium=referral",
+        "author": "Eiliv Aceron",
+        "authorUrl": "https://unsplash.com/@shootdelicious?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1537516803400-bf9d09ae3d2f?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8c3dlZXQlMjBhbmQlMjBzb3VyJTIwcG9ya3xlbnwxfDF8fHwxNzkxNjA0NTg4fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LgM@G$nO%#of_NRjRif,yYtSi_M{",
+        "altRu": "Кусочки свинины в кляре с ананасом и перцем в соусе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_gyoza": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "1obbVYT6BYU",
+        "pageUrl": "https://unsplash.com/photos/golden-pan-fried-dumplings-on-a-banana-leaf-with-garnish-1obbVYT6BYU?utm_source=refectorio&utm_medium=referral",
+        "author": "Sergio Mena Ferreira",
+        "authorUrl": "https://unsplash.com/@sergiomenamx?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1768326119773-05cae29f4106?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8Z3lvemF8ZW58MXwxfHx8MTc5MTYwNDU5MHww&ixlib=rb-4.1.0",
+        "width": 7000,
+        "height": 10491,
+        "focal": {
+          "x": 0.5,
+          "y": 0.445
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LJHUUdMzEgay-obIofxF4USznOR*",
+        "altRu": "Японские обжаренные пельмени гёдза с соевым соусом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_bibimbap": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "SbHulgzS_eo",
+        "pageUrl": "https://unsplash.com/photos/korean-bibimbap-with-side-dishes-is-served-SbHulgzS_eo?utm_source=refectorio&utm_medium=referral",
+        "author": "Dmitry Pavlovsky",
+        "authorUrl": "https://unsplash.com/@vectorburn?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1741295017668-c8132acd6fc0?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8YmliaW1iYXB8ZW58MXwxfHx8MTc5MTYwNDU5MXww&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LRID:H#p0$J7X.kpVsV@A1Iq-6xF",
+        "altRu": "Миска риса с овощами, говядиной, яйцом и острой пастой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_spring_rolls": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "zW8wA4QwS2M",
+        "pageUrl": "https://unsplash.com/photos/white-green-and-red-flower-bouquet-zW8wA4QwS2M?utm_source=refectorio&utm_medium=referral",
+        "author": "Cocobols",
+        "authorUrl": "https://unsplash.com/@coco_bols?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1600850056064-a8b380df8395?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8dmVnZXRhYmxlJTIwc3ByaW5nJTIwcm9sbHN8ZW58MXwxfHx8MTc5MTYwNDU5M3ww&ixlib=rb-4.1.0",
+        "width": 2912,
+        "height": 4368,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#a68c73",
+        "blurhash": "LHHV3Jtn~D-pOj4oMy$z^ND-9GVq",
+        "altRu": "Хрустящие жареные спринг-роллы с овощами и сладким соусом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_wok_noodles": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "kTROrGtnm7U",
+        "pageUrl": "https://unsplash.com/photos/chicken-stir-fry-with-noodles-and-vegetables-in-a-bowl-kTROrGtnm7U?utm_source=refectorio&utm_medium=referral",
+        "author": "Denis",
+        "authorUrl": "https://unsplash.com/@denis96?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1758979690131-11e2aa0b142b?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTJ8fGNoaWNrZW4lMjB3b2slMjBub29kbGVzfGVufDF8MXx8fDE3OTE2MDQ4MzJ8MA&ixlib=rb-4.1.0",
+        "width": 3985,
+        "height": 5977,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#262626",
+        "blurhash": "LQE.LYxCbws;-:W=bcWr0#o#xCof",
+        "altRu": "Лапша вок с курицей и овощами в коробочке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_poke": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "IrohWzafmmA",
+        "pageUrl": "https://unsplash.com/photos/vegetable-salad-on-black-ceramic-bowl-IrohWzafmmA?utm_source=refectorio&utm_medium=referral",
+        "author": "Anto Meneghini",
+        "authorUrl": "https://unsplash.com/@antomeneghini?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1626711934535-9749ea30dba8?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8c2FsbW9uJTIwcG9rZSUyMGJvd2x8ZW58MXwxfHx8MTc5MTYwNDgzNHww&ixlib=rb-4.1.0",
+        "width": 3306,
+        "height": 4959,
+        "focal": {
+          "x": 0.5,
+          "y": 0.468
+        },
+        "avgColor": "#262626",
+        "blurhash": "LTE2Xj$*58NaXmWEr?s-0hI:%0xG",
+        "altRu": "Боул поке с рисом, лососем, авокадо и эдамаме",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_peking_duck": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ntG14vqEEP0",
+        "pageUrl": "https://unsplash.com/photos/crispy-roasted-duck-slices-on-a-white-plate-ntG14vqEEP0?utm_source=refectorio&utm_medium=referral",
+        "author": "tom tang",
+        "authorUrl": "https://unsplash.com/@tom729?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1756139705997-f92690428d66?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8cm9hc3QlMjBkdWNrJTIwc2xpY2VkfGVufDF8MXx8fDE3OTE3MDI0NDB8MA&ixlib=rb-4.1.0",
+        "width": 4672,
+        "height": 7008,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LFM%G+^+_NMy1bW9M|M{GGaLDjWA",
+        "altRu": "Ломтики утки по-пекински с блинчиками, огурцом и соусом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_kimchi_jjigae": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_dE1Z3gS0P0",
+        "pageUrl": "https://unsplash.com/photos/a-bubbling-pot-of-korean-stew-with-noodles-and-tofu-_dE1Z3gS0P0?utm_source=refectorio&utm_medium=referral",
+        "author": "note thanun",
+        "authorUrl": "https://unsplash.com/@notethanun?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1777113310299-c3e41dec4e0f?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8a2ltY2hpJTIwamppZ2FlfGVufDF8MXx8fDE3OTE2MDQ4Mzd8MA&ixlib=rb-4.1.0",
+        "width": 3072,
+        "height": 4080,
+        "focal": {
+          "x": 0.502,
+          "y": 0.5
+        },
+        "avgColor": "#0c2626",
+        "blurhash": "LIIXKhTKE,$z_NtlNHxZ7$%M,nNH",
+        "altRu": "Острый корейский суп из кимчи со свининой и тофу",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_miso_soup": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "GUr6n5vmoBc",
+        "pageUrl": "https://unsplash.com/photos/miso-soup-and-green-tea-GUr6n5vmoBc?utm_source=refectorio&utm_medium=referral",
+        "author": "Precious Madubuike",
+        "authorUrl": "https://unsplash.com/@preciousm?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1744116927815-a04ba6629cf3?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8bWlzbyUyMHNvdXB8ZW58MXwxfHx8MTc5MTYwNDg0MXww&ixlib=rb-4.1.0",
+        "width": 4160,
+        "height": 6240,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#262626",
+        "blurhash": "LBDb[-aK^GRjys^zivtK%hW;==r;",
+        "altRu": "Чашка мисо-супа с тофу, водорослями и зелёным луком",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_dim_sum": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "i9D04SH71NY",
+        "pageUrl": "https://unsplash.com/photos/steamed-dim-sum-sits-inside-a-wooden-steamer-i9D04SH71NY?utm_source=refectorio&utm_medium=referral",
+        "author": "Harrison Chang",
+        "authorUrl": "https://unsplash.com/@harrisonchang?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1743297907360-21ef4eb1cee0?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjh8fHNocmltcCUyMGRpbSUyMHN1bXxlbnwxfDF8fHwxNzkxNjA0ODQyfDA&ixlib=rb-4.1.0",
+        "width": 3563,
+        "height": 4454,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#59738c",
+        "blurhash": "LUEfA;IoD*t8NLtSadRP0.jExYt7",
+        "altRu": "Паровые димсамы с креветками в бамбуковой корзинке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_khachapuri": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "mCoF2SriSNY",
+        "pageUrl": "https://unsplash.com/photos/khachapuri-with-egg-and-butter-on-white-paper-mCoF2SriSNY?utm_source=refectorio&utm_medium=referral",
+        "author": "Haris khan",
+        "authorUrl": "https://unsplash.com/@hariskhan488?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1758714068469-75887ca0b8c3?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8YWRqYXJpYW4lMjBraGFjaGFwdXJpfGVufDF8MXx8fDE3OTE2MDQ4NDV8MA&ixlib=rb-4.1.0",
+        "width": 2611,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.569
+        },
+        "avgColor": "#a6d9f3",
+        "blurhash": "LVHoB$X:Kmbw4nrpnhbc0:tRxAi^",
+        "altRu": "Хачапури-лодочка с расплавленным сыром, желтком и маслом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_khinkali": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "BFdgd6UfZcU",
+        "pageUrl": "https://unsplash.com/photos/plate-of-khinkali-dumplings-on-a-patterned-tablecloth-BFdgd6UfZcU?utm_source=refectorio&utm_medium=referral",
+        "author": "Nikita Pishchugin",
+        "authorUrl": "https://unsplash.com/@nikita_pishchugin?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1762206083047-d83b6db1f757?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8a2hpbmthbGl8ZW58MXwxfHx8MTc5MTYwNDg0OHww&ixlib=rb-4.1.0",
+        "width": 4160,
+        "height": 6240,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#262626",
+        "blurhash": "LOFY.4-PxuoeMJRkIUWB0hNLaxa#",
+        "altRu": "Хинкали с сочной мясной начинкой и чёрным перцем",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_shashlik": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "WHtVB-RiW2I",
+        "pageUrl": "https://unsplash.com/photos/grilled-meat-skewers-with-fries-WHtVB-RiW2I?utm_source=refectorio&utm_medium=referral",
+        "author": "Markus Winkler",
+        "authorUrl": "https://unsplash.com/@markuswinkler?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTJ8fHBvcmslMjBzaGFzaGxpayUyMG9uaW9ufGVufDF8MXx8fDE3OTE2MDQ4NTF8MA&ixlib=rb-4.1.0",
+        "width": 2999,
+        "height": 3999,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LNJGisJ}=|S2?XX9ERE2lSQ.0%M}",
+        "altRu": "Шашлык из свинины на шампурах с луком и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_plov": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "a85Px4ZCSK4",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-food-with-meat-rice-and-tomatoes-a85Px4ZCSK4?utm_source=refectorio&utm_medium=referral",
+        "author": "otabek xatipov",
+        "authorUrl": "https://unsplash.com/@arrogant_7007?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1671048116810-6f885b2b35a5?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OHx8dXpiZWslMjBwbG92fGVufDF8MXx8fDE3OTE2MDQ4NTJ8MA&ixlib=rb-4.1.0",
+        "width": 4160,
+        "height": 6240,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#59260c",
+        "blurhash": "LHHJs+~AEfRP0gJ7xtoy0MIVWBof",
+        "altRu": "Плов с бараниной, морковью и головкой чеснока на блюде",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_lagman": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Prtmg56zIX0",
+        "pageUrl": "https://unsplash.com/photos/noodles-with-sliced-red-bell-pepper-carrots-and-meat-Prtmg56zIX0?utm_source=refectorio&utm_medium=referral",
+        "author": "Ēriks Irmejs",
+        "authorUrl": "https://unsplash.com/@erxxx?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1565628308934-c731959645f2?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8aGFuZCUyMHB1bGxlZCUyMG5vb2RsZXMlMjBiZWVmfGVufDF8MXx8fDE3OTE3MDI0NzJ8MA&ixlib=rb-4.1.0",
+        "width": 3767,
+        "height": 4709,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#738c8c",
+        "blurhash": "LFHU^70z75^jyY-;nNbb0gn%$eR*",
+        "altRu": "Густой лагман с тянутой лапшой, говядиной и овощами",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_samsa": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "3oc6OzX4LaQ",
+        "pageUrl": "https://unsplash.com/photos/samosa-on-table-3oc6OzX4LaQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Juli Moreira",
+        "authorUrl": "https://unsplash.com/@julimoreira?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1572099107898-46f22b3af4f9?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8c2Ftc2ElMjBwYXN0cnl8ZW58MXwxfHx8MTc5MTYwNDg1N3ww&ixlib=rb-4.1.0",
+        "width": 3836,
+        "height": 5373,
+        "focal": {
+          "x": 0.5,
+          "y": 0.524
+        },
+        "avgColor": "#402626",
+        "blurhash": "LRDR=+IqE2t6E3WVxtja0$$$xtRk",
+        "altRu": "Треугольная слоёная самса с мясом и кунжутом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chakhokhbili": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "TLOHHQ3tjCM",
+        "pageUrl": "https://unsplash.com/photos/roasted-chicken-on-bowl-TLOHHQ3tjCM?utm_source=refectorio&utm_medium=referral",
+        "author": "Naitian（Tony） Wang",
+        "authorUrl": "https://unsplash.com/@tonywang7?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1572265045111-69a78b458fa6?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTZ8fGNoaWNrZW4lMjBzdGV3JTIwdG9tYXRvfGVufDF8MXx8fDE3OTE3MDI0NDN8MA&ixlib=rb-4.1.0",
+        "width": 4878,
+        "height": 7314,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#59260c",
+        "blurhash": "LEC#bxjF0#$*KjRjv}bvF|Rji^t7",
+        "altRu": "Курица, тушённая с томатами, луком и кинзой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chebureki": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "kJ6myhO23PI",
+        "pageUrl": "https://unsplash.com/photos/brown-bread-on-gray-round-plate-kJ6myhO23PI?utm_source=refectorio&utm_medium=referral",
+        "author": "Anton",
+        "authorUrl": "https://unsplash.com/@uniqueton?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1624128082323-beb6b8b508db?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Nnx8ZnJpZWQlMjBtZWF0JTIwcGFzdGllc3xlbnwxfDF8fHwxNzkxNjA0ODY2fDA&ixlib=rb-4.1.0",
+        "width": 3946,
+        "height": 4932,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#a68c73",
+        "blurhash": "LCHB3dklBYV?-m9Zk7WA3G-NxtRj",
+        "altRu": "Хрустящие чебуреки с мясной начинкой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_shawarma": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Spp1G283dow",
+        "pageUrl": "https://unsplash.com/photos/white-and-brown-food-on-white-ceramic-plate-Spp1G283dow?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Griss",
+        "authorUrl": "https://unsplash.com/@grissphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjB8fGNoaWNrZW4lMjBzaGF3YXJtYSUyMHdyYXB8ZW58MXwxfHx8MTc5MTYwNDg2OXww&ixlib=rb-4.1.0",
+        "width": 3064,
+        "height": 3830,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LLKmzt00bHadAe$wxsoJ-qR*Riog",
+        "altRu": "Шаурма с курицей и овощами в лаваше с чесночным соусом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_ajapsandali": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "B8GOd-eYzkM",
+        "pageUrl": "https://unsplash.com/photos/vegetable-salad-on-white-ceramic-plate-B8GOd-eYzkM?utm_source=refectorio&utm_medium=referral",
+        "author": "Christine Isakzhanova",
+        "authorUrl": "https://unsplash.com/@bulochka?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1608032075746-2e2516ef4a1a?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OHx8YWphcHNhbmRhbGl8ZW58MXwxfHx8MTc5MTYwNDg3MHww&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 5184,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LRJ8Fi~q.9x]01D%NGWX.T9FD%RP",
+        "altRu": "Грузинское овощное рагу из баклажанов, перца и томатов",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_lula_kebab": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "HbVpKntpMts",
+        "pageUrl": "https://unsplash.com/photos/fries-and-meat-on-brown-woven-tray-HbVpKntpMts?utm_source=refectorio&utm_medium=referral",
+        "author": "Eiliv Aceron",
+        "authorUrl": "https://unsplash.com/@shootdelicious?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1594489883219-010b0e5eeb9d?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Nnx8bGFtYiUyMGtvZnRhJTIwa2ViYWJ8ZW58MXwxfHx8MTc5MTYwNDg3M3ww&ixlib=rb-4.1.0",
+        "width": 4184,
+        "height": 6277,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#262626",
+        "blurhash": "LHA]$%s*9ZItR:NKs.s*0gbJ%1sl",
+        "altRu": "Люля-кебаб из рубленой баранины с луком и зеленью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_meat_pirozhki": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Wo0_UjY0irI",
+        "pageUrl": "https://unsplash.com/photos/fried-food-on-white-ceramic-plate-Wo0_UjY0irI?utm_source=refectorio&utm_medium=referral",
+        "author": "Bakd&Raw by Karolin Baitinger",
+        "authorUrl": "https://unsplash.com/@bakdandraw?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1626004780822-d084fcae95cd?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8cGlyb3poa2klMjB3aXRoJTIwbWVhdHxlbnwxfDF8fHwxNzkxNjA0ODc0fDA&ixlib=rb-4.1.0",
+        "width": 4273,
+        "height": 6409,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LWPiq^TKx^x]yFI9RjWVysxaemV@",
+        "altRu": "Жареные пирожки с мясной начинкой на тарелке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_cabbage_pie": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "qMPHPivB_78",
+        "pageUrl": "https://unsplash.com/photos/pie-on-brown-wood-slab-qMPHPivB_78?utm_source=refectorio&utm_medium=referral",
+        "author": "Rebecca Matthews",
+        "authorUrl": "https://unsplash.com/@rebeccamatthews?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1546024664-9226c2d3819b?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8Y2FiYmFnZSUyMHBpZXxlbnwxfDF8fHwxNzkxNjA0ODc1fDA&ixlib=rb-4.1.0",
+        "width": 3333,
+        "height": 4000,
+        "focal": {
+          "x": 0.45,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LlJ%wnt7?wj[-pj]R*jZx^oft7WB",
+        "altRu": "Кусок румяного пирога с капустной начинкой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pizza_margherita": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "wgq8NVyXsYY",
+        "pageUrl": "https://unsplash.com/photos/a-pizza-with-cheese-and-basil-wgq8NVyXsYY?utm_source=refectorio&utm_medium=referral",
+        "author": "Luigi Boccardo",
+        "authorUrl": "https://unsplash.com/@lboccardo95?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1664309641932-0e03e0771b97?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8OHx8cGl6emElMjBtYXJnaGVyaXRhfGVufDF8MXx8fDE3OTE2MDQ4Nzd8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LOKTe|6AEhoz?vITD%M{1*waeSVs",
+        "altRu": "Пицца маргарита с томатами, моцареллой и базиликом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pizza_pepperoni": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "C4VX3KS3nwk",
+        "pageUrl": "https://unsplash.com/photos/a-pepperoni-pizza-with-black-olives-and-cheese-C4VX3KS3nwk?utm_source=refectorio&utm_medium=referral",
+        "author": "Oscar Ramirez",
+        "authorUrl": "https://unsplash.com/@oscareduardohr?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1689793601983-d0ce3178a4e3?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjB8fHBlcHBlcm9uaSUyMHBpenphfGVufDF8MXx8fDE3OTE2MDQ4Nzh8MA&ixlib=rb-4.1.0",
+        "width": 3386,
+        "height": 4233,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#a60c0c",
+        "blurhash": "L5O0_4:*-Vx:4T%yw^%LRj02O?9G",
+        "altRu": "Пицца с колбасками пепперони и тянущимся сыром",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_croissant": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "jQFnfddT9_M",
+        "pageUrl": "https://unsplash.com/photos/a-croissant-sitting-on-a-white-plate-on-a-wooden-table-jQFnfddT9_M?utm_source=refectorio&utm_medium=referral",
+        "author": "Brayden Prato",
+        "authorUrl": "https://unsplash.com/@pratophoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1681072368184-a5a906887cf2?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTV8fGNyb2lzc2FudHxlbnwxfDF8fHwxNzkxNjA0ODc5fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "L#M%1QT1WBt7u6-oWXt7ofoMs.az",
+        "altRu": "Слоёный золотистый круассан на тарелке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_kulebyaka": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "WS5K4u3B1R8",
+        "pageUrl": "https://unsplash.com/photos/pie-on-brown-wooden-table-WS5K4u3B1R8?utm_source=refectorio&utm_medium=referral",
+        "author": "Gaelle Marcel",
+        "authorUrl": "https://unsplash.com/@gaellemarcel?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1584289135692-d5e5e4574864?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTR8fHNhbG1vbiUyMHBpZXxlbnwxfDF8fHwxNzkxNzAyNDQ4fDA&ixlib=rb-4.1.0",
+        "width": 3950,
+        "height": 5937,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#262626",
+        "blurhash": "LHBW3yOZNy$fXUxas:WV0fxCxCNH",
+        "altRu": "Разрез кулебяки с рыбой, рисом и яйцом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_focaccia": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ZRIs5xcMFeE",
+        "pageUrl": "https://unsplash.com/photos/focaccia-bread-with-tomatoes-and-rosemary-on-wood-ZRIs5xcMFeE?utm_source=refectorio&utm_medium=referral",
+        "author": "Diego Arenas de Rodrigo",
+        "authorUrl": "https://unsplash.com/@diegoarenasderodrigo?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1767065887015-8f368d4c689d?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8Zm9jYWNjaWElMjByb3NlbWFyeXxlbnwxfDF8fHwxNzkxNjA0ODg3fDA&ixlib=rb-4.1.0",
+        "width": 4004,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.445
+        },
+        "avgColor": "#594026",
+        "blurhash": "LRF4_vNHWBR*~AWVafjZn$s,j[s:",
+        "altRu": "Фокачча с розмарином, оливковым маслом и крупной солью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_quiche": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "KMZlAUMHNls",
+        "pageUrl": "https://unsplash.com/photos/brown-and-white-pie-on-white-ceramic-plate-KMZlAUMHNls?utm_source=refectorio&utm_medium=referral",
+        "author": "Keriliwi",
+        "authorUrl": "https://unsplash.com/@keriliwi?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1608855725042-e95ffd4ca487?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTJ8fHF1aWNoZSUyMGJhY29uJTIwY2hlZXNlJTIwc2xpY2V8ZW58MXwxfHx8MTc5MTYwNDg5MHww&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LPNTOLVr%iRP.Ax^VrjY%%R+RitR",
+        "altRu": "Кусок открытого пирога киш с беконом и сыром",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_cinnamon_bun": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "2hDXXFXXJJU",
+        "pageUrl": "https://unsplash.com/photos/a-single-cinnamon-roll-on-parchment-paper-2hDXXFXXJJU?utm_source=refectorio&utm_medium=referral",
+        "author": "Anhelina Vasylyk",
+        "authorUrl": "https://unsplash.com/@___vasilik?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1756137948759-a6454e107c6b?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTZ8fGNpbm5hbW9uJTIwcm9sbHxlbnwxfDF8fHwxNzkxNjA0ODkzfDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#c08c59",
+        "blurhash": "LQK+$2-o-:t7%KRQaLoy~Ux[Rkoy",
+        "altRu": "Сдобная булочка с корицей и сахарной глазурью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_napoleon": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "79eRhfXD3Js",
+        "pageUrl": "https://unsplash.com/photos/a-slice-of-cake-on-a-plate-79eRhfXD3Js?utm_source=refectorio&utm_medium=referral",
+        "author": "Andrijana Bozic",
+        "authorUrl": "https://unsplash.com/@vesnikproleca?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1662751381695-396624641958?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MzB8fG1pbGxlJTIwZmV1aWxsZSUyMGNha2UlMjBzbGljZXxlbnwxfDF8fHwxNzkxNjA0ODk2fDA&ixlib=rb-4.1.0",
+        "width": 2996,
+        "height": 4508,
+        "focal": {
+          "x": 0.5,
+          "y": 0.443
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LZNmyQIUXTx]4TM{NFtR4;RjW9of",
+        "altRu": "Кусок торта наполеон с заварным кремом и слоёной крошкой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_medovik": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "diVU8-tGO0U",
+        "pageUrl": "https://unsplash.com/photos/sliced-of-cake-on-white-ceramic-plate-diVU8-tGO0U?utm_source=refectorio&utm_medium=referral",
+        "author": "Diliara Garifullina",
+        "authorUrl": "https://unsplash.com/@dilja96?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1624000961428-eeece184988b?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8bWVkb3ZpayUyMGhvbmV5JTIwY2FrZXxlbnwxfDF8fHwxNzkxNjA0ODk4fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#262626",
+        "blurhash": "LTG[Ax9b9bR*-UEMslWB0fRj%LR*",
+        "altRu": "Кусок медового торта со сметанным кремом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_tiramisu": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "0DIJIynObx4",
+        "pageUrl": "https://unsplash.com/photos/plastic-box-of-ice-cream-0DIJIynObx4?utm_source=refectorio&utm_medium=referral",
+        "author": "Victoria Aleksandrova",
+        "authorUrl": "https://unsplash.com/@vicaleksa?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1568627175730-73d05bd69ca9?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8dGlyYW1pc3V8ZW58MXwxfHx8MTc5MTYwNDg5OXww&ixlib=rb-4.1.0",
+        "width": 4912,
+        "height": 7360,
+        "focal": {
+          "x": 0.5,
+          "y": 0.555
+        },
+        "avgColor": "#262626",
+        "blurhash": "LBByp$ENJD^j.9$%kDS5.Ax]kCj]",
+        "altRu": "Порция тирамису с маскарпоне и какао",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_cheesecake": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "TB0Ao4CQRqc",
+        "pageUrl": "https://unsplash.com/photos/sliced-cake-with-berries-on-top-TB0Ao4CQRqc?utm_source=refectorio&utm_medium=referral",
+        "author": "Waranya Mooldee",
+        "authorUrl": "https://unsplash.com/@anyadiary?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1567171466295-4afa63d45416?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NHx8bmV3JTIweW9yayUyMGNoZWVzZWNha2V8ZW58MXwxfHx8MTc5MTYwODQzM3ww&ixlib=rb-4.1.0",
+        "width": 2722,
+        "height": 4083,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LULqd~?aM{-p01w]RPt7tmf*RkSh",
+        "altRu": "Кусок сливочного чизкейка на песочной основе",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_ice_cream": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "a7B4MtrNycM",
+        "pageUrl": "https://unsplash.com/photos/two-scoops-of-ice-cream-in-a-white-bowl-a7B4MtrNycM?utm_source=refectorio&utm_medium=referral",
+        "author": "carlos lugo",
+        "authorUrl": "https://unsplash.com/@carlos95lugo?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1724805053558-aea1220afbfa?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mjh8fHZhbmlsbGElMjBpY2UlMjBjcmVhbSUyMHNjb29wc3xlbnwxfDF8fHwxNzkxNjA4NDM1fDA&ixlib=rb-4.1.0",
+        "width": 3543,
+        "height": 5315,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LVPGT-Mwo$t7yZkXRiWCa1jYovf5",
+        "altRu": "Шарики белого пломбира в креманке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_panna_cotta": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "lK1Q5RyD6tc",
+        "pageUrl": "https://unsplash.com/photos/sliced-strawberries-in-clear-glass-jar-with-cream-lK1Q5RyD6tc?utm_source=refectorio&utm_medium=referral",
+        "author": "Karly Gomez",
+        "authorUrl": "https://unsplash.com/@karlygomez?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1488477181946-6428a0291777?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8cGFubmElMjBjb3R0YXxlbnwxfDF8fHwxNzkxNjA4NDM4fDA&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5472,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LQP6p#~qO@$%MxITxbRP.SjFR%tR",
+        "altRu": "Панна-котта с ягодным соусом на тарелке",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_sharlotka": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "vzhNdon7OhM",
+        "pageUrl": "https://unsplash.com/photos/bread-on-brown-wooden-round-plate-vzhNdon7OhM?utm_source=refectorio&utm_medium=referral",
+        "author": "Kateryna Hliznitsova",
+        "authorUrl": "https://unsplash.com/@kate_gliz?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1586613338082-1290227805c9?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTB8fGFwcGxlJTIwc3BvbmdlJTIwY2FrZXxlbnwxfDF8fHwxNzkxNjA4NDQyfDA&ixlib=rb-4.1.0",
+        "width": 2592,
+        "height": 3241,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LAJ7]z9EF}tS?^s8VX%M59xuibsk",
+        "altRu": "Кусок пышной яблочной шарлотки с сахарной пудрой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_brownie": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "MONzTP2XxUE",
+        "pageUrl": "https://unsplash.com/photos/brown-chocolate-cake-on-white-ceramic-plate-MONzTP2XxUE?utm_source=refectorio&utm_medium=referral",
+        "author": "Alena Ganzhela",
+        "authorUrl": "https://unsplash.com/@alenaganzhela?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1590841609987-4ac211afdde1?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTN8fGNob2NvbGF0ZSUyMGJyb3duaWV8ZW58MXwxfHx8MTc5MTYwODQ0NHww&ixlib=rb-4.1.0",
+        "width": 5250,
+        "height": 7000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LcMZ?w4n_NR5MdRPWBV@~qoJD%kD",
+        "altRu": "Квадратики шоколадного брауни с влажной серединой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_chocolate_fondant": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "gHm50qaMaXc",
+        "pageUrl": "https://unsplash.com/photos/oozing-caramel-cake-gHm50qaMaXc?utm_source=refectorio&utm_medium=referral",
+        "author": "Jennifer Schmidt",
+        "authorUrl": "https://unsplash.com/@jsfoodphotography?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1511911063855-2bf39afa5b2e?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8Y2hvY29sYXRlJTIwZm9uZGFudHxlbnwxfDF8fHwxNzkxNjA4NDQ1fDA&ixlib=rb-4.1.0",
+        "width": 3437,
+        "height": 5155,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LuQ05ORjx]o0_Nt7WCj[yDRjMxWV",
+        "altRu": "Шоколадный фондан с жидкой серединой и шариком мороженого",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_eclairs": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "RGSuAtFyd5w",
+        "pageUrl": "https://unsplash.com/photos/white-and-red-pastry-on-black-wooden-table-RGSuAtFyd5w?utm_source=refectorio&utm_medium=referral",
+        "author": "Razvan Mirel",
+        "authorUrl": "https://unsplash.com/@razvan_mirel?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1616534900667-d1e0ec646975?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8ZWNsYWlyc3xlbnwxfDF8fHwxNzkxNjA4NDQ3fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 5333,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#d9f3f3",
+        "blurhash": "LbLD.Bozcuof_3WBbcjYTKsmr=R+",
+        "altRu": "Эклеры с заварным кремом и шоколадной глазурью",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_pavlova": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "5nCTfEru3Do",
+        "pageUrl": "https://unsplash.com/photos/two-desserts-on-a-white-plate-with-strawberries-and-blueberries-5nCTfEru3Do?utm_source=refectorio&utm_medium=referral",
+        "author": "Eugene Krasnaok",
+        "authorUrl": "https://unsplash.com/@krasnaok?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1634324040880-63dbf9a4e5ac?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8cGF2bG92YXxlbnwxfDF8fHwxNzkxNjA4NDQ4fDA&ixlib=rb-4.1.0",
+        "width": 3000,
+        "height": 4500,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LIMjt6Mvt8V@.9WCt6tR%%t8RiyD",
+        "altRu": "Безе павлова со взбитыми сливками и свежими ягодами",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_creme_brulee": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Wp7ZsJYWP0M",
+        "pageUrl": "https://unsplash.com/photos/white-ceramic-bowl-with-brown-soup-Wp7ZsJYWP0M?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Griss",
+        "authorUrl": "https://unsplash.com/@grissphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1615235739538-95040f341ba8?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8Y3JlbWUlMjBicnVsZWV8ZW58MXwxfHx8MTc5MTYwODQ1MXww&ixlib=rb-4.1.0",
+        "width": 3064,
+        "height": 3830,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LGK^NnDNOsF|Hq%h+tWAo#F3#l-o",
+        "altRu": "Крем-брюле в формочке с карамельной корочкой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_fruit_salad": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "2cXZQ862gws",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-food-2cXZQ862gws?utm_source=refectorio&utm_medium=referral",
+        "author": "Fatane Rahimi",
+        "authorUrl": "https://unsplash.com/@fatane?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1658431618300-a69b07fb5782?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8ZnJ1aXQlMjBzYWxhZCUyMGJvd2x8ZW58MXwxfHx8MTc5MTYwODQ1M3ww&ixlib=rb-4.1.0",
+        "width": 3840,
+        "height": 5760,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#d9f3f3",
+        "blurhash": "LfL}1,HqV?W=DOM|o~jYXSb^X7j@",
+        "altRu": "Миска нарезанных свежих фруктов и ягод",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_hot_dog": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ssKZHiHOtxA",
+        "pageUrl": "https://unsplash.com/photos/hotdog-sandwich-with-mustard-and-ketchup-ssKZHiHOtxA?utm_source=refectorio&utm_medium=referral",
+        "author": "Ball Park Brand",
+        "authorUrl": "https://unsplash.com/@ballparkbrand?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1612392061981-9d086fe894ed?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTB8fGhvdCUyMGRvZyUyMG11c3RhcmR8ZW58MXwxfHx8MTc5MTYwODQ1Nnww&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 4560,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#c08c59",
+        "blurhash": "L9J?$i9Zj[IV^KNGEO%00MTJD*WC",
+        "altRu": "Хот-дог с сосиской, горчицей и кетчупом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_nachos": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "b-2uxjTcxH0",
+        "pageUrl": "https://unsplash.com/photos/green-vegetable-salad-on-white-paper-b-2uxjTcxH0?utm_source=refectorio&utm_medium=referral",
+        "author": "Jay Gajjar",
+        "authorUrl": "https://unsplash.com/@jaygajjar?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1619604107557-b5321217aee7?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8bmFjaG9zJTIwY2hlZXNlfGVufDF8MXx8fDE3OTE2MDg0NTd8MA&ixlib=rb-4.1.0",
+        "width": 4160,
+        "height": 5547,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#40260c",
+        "blurhash": "LOKcbAVs9Ht7}@N^xCxF8xS#TIt7",
+        "altRu": "Кукурузные чипсы начос с расплавленным сыром и халапеньо",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_hummus_pita": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "n5I4Ix008-0",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-hummus-pita-bread-and-a-bowl-of-olive-oil-n5I4Ix008-0?utm_source=refectorio&utm_medium=referral",
+        "author": "Imad 786",
+        "authorUrl": "https://unsplash.com/@imad8321?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1697126248475-a537cc5cce28?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8aHVtbXVzJTIwcGl0YXxlbnwxfDF8fHwxNzkxNjA4NDU5fDA&ixlib=rb-4.1.0",
+        "width": 3780,
+        "height": 4725,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#c0c0d9",
+        "blurhash": "LEL47[*0_31m%4S5R%%JyG6XnhxB",
+        "altRu": "Тарелка хумуса с оливковым маслом и тёплой питой",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_bruschetta": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "FjryWdaqGEc",
+        "pageUrl": "https://unsplash.com/photos/gray-steel-spoon-on-brown-board-FjryWdaqGEc?utm_source=refectorio&utm_medium=referral",
+        "author": "Mariana Medvedeva",
+        "authorUrl": "https://unsplash.com/@nobiteuntilphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1505575967455-40e256f73376?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjB8fHRvbWF0byUyMGJydXNjaGV0dGF8ZW58MXwxfHx8MTc5MTYwODQ2MHww&ixlib=rb-4.1.0",
+        "width": 3744,
+        "height": 5616,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3d9",
+        "blurhash": "LkKv~ttlt6n%~qozWBaeO@sCV[WV",
+        "altRu": "Поджаренный хлеб с томатами, чесноком и базиликом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_french_fries": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "h-S2RyyYthQ",
+        "pageUrl": "https://unsplash.com/photos/french-fries-on-white-ceramic-plate-h-S2RyyYthQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Fernanda Martinez",
+        "authorUrl": "https://unsplash.com/@fermtz05?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1630431341771-1ceb084d6607?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTB8fGZyZW5jaCUyMGZyaWVzfGVufDF8MXx8fDE3OTE2MDg0NjF8MA&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 5184,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#a68c73",
+        "blurhash": "L7KJ;[~W?b.7aJ4;?G$yp00M?A%2",
+        "altRu": "Порция золотистого картофеля фри с кетчупом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_deviled_eggs": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "fMqL1pY5Dq0",
+        "pageUrl": "https://unsplash.com/photos/fried-food-on-white-ceramic-bowl-fMqL1pY5Dq0?utm_source=refectorio&utm_medium=referral",
+        "author": "Tahirah Walker",
+        "authorUrl": "https://unsplash.com/@tahirahjwalker?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1623031843775-11ef477a7724?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MXx8ZGV2aWxlZCUyMGVnZ3N8ZW58MXwxfHx8MTc5MTYwODQ2Mnww&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#594026",
+        "blurhash": "LYHd.@V?R-t7tSM{xtV@0iR*ozRj",
+        "altRu": "Половинки яиц с начинкой из желтка и майонеза",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_cheese_sandwich": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "AKxNTx-QGhw",
+        "pageUrl": "https://unsplash.com/photos/burger-with-cheese-and-lettuce-AKxNTx-QGhw?utm_source=refectorio&utm_medium=referral",
+        "author": "Llio Angharad",
+        "authorUrl": "https://unsplash.com/@llioangharad?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1630330159773-4b2e6e5b8a56?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8M3x8Y2hlZXNlJTIwc2FuZHdpY2glMjBvcGVufGVufDF8MXx8fDE3OTE2MDg0Njd8MA&ixlib=rb-4.1.0",
+        "width": 2656,
+        "height": 3984,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#c0a673",
+        "blurhash": "LHJ7m#?GJESj~A-:IWog%#ofMwso",
+        "altRu": "Ломтик хлеба с маслом и сыром",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_cheese_plate": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "P-oXFsK6STQ",
+        "pageUrl": "https://unsplash.com/photos/sliced-cheese-on-brown-wooden-chopping-board-P-oXFsK6STQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Lee Vue",
+        "authorUrl": "https://unsplash.com/@lkvue?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1592790064984-b715a1040f35?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MTF8fGNoZWVzZSUyMHBsYXR0ZXJ8ZW58MXwxfHx8MTc5MTYwODQ2OXww&ixlib=rb-4.1.0",
+        "width": 2400,
+        "height": 3600,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LSELg7bwW=RP0Lr=aekD9aR*WBs:",
+        "altRu": "Ассорти твёрдых и мягких сыров с орехами и мёдом",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_popcorn": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "PvAAYZx-yf8",
+        "pageUrl": "https://unsplash.com/photos/photo-of-popcorn-kernels-PvAAYZx-yf8?utm_source=refectorio&utm_medium=referral",
+        "author": "charlesdeluvio",
+        "authorUrl": "https://unsplash.com/@charlesdeluvio?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1512149177596-f817c7ef5d4c?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8Mnx8c2FsdGVkJTIwcG9wY29ybnxlbnwxfDF8fHwxNzkxNjA4NDcxfDA&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5292,
+        "focal": {
+          "x": 0.5,
+          "y": 0.54
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LWIX,A?wOaxv%2WBogofJ;xaxBRi",
+        "altRu": "Ведёрко солёного попкорна",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_zucchini_caviar": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "6eIkDKgX3UE",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-tomato-stew-with-toasted-bread-slices-6eIkDKgX3UE?utm_source=refectorio&utm_medium=referral",
+        "author": "Husien Bisky",
+        "authorUrl": "https://unsplash.com/@husien_bisky1?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1777891257668-c51358311eed?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8MjZ8fHp1Y2NoaW5pJTIwY2F2aWFyJTIwc3ByZWFkfGVufDF8MXx8fDE3OTE2MDg0NzN8MA&ixlib=rb-4.1.0",
+        "width": 3840,
+        "height": 5120,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LLQm3RM{.9oLofM{j[ay?woLH?kC",
+        "altRu": "Кабачковая икра в пиале с ломтиком хлеба",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_guacamole": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "hC2lI2x0E6g",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-filled-with-guacamole-and-chips-hC2lI2x0E6g?utm_source=refectorio&utm_medium=referral",
+        "author": "Gonzalo Mendiola",
+        "authorUrl": "https://unsplash.com/@mendiolamilla10?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1635107420413-05e5d6576795?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8N3x8Z3VhY2Ftb2xlJTIwdG9ydGlsbGElMjBjaGlwc3xlbnwxfDF8fHwxNzkxNjA4NDc1fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#c0d9f3",
+        "blurhash": "LbODzlMbp0WABXofRjbIPXT0ROog",
+        "altRu": "Пюре из авокадо гуакамоле с кукурузными чипсами",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_tacos": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ZAW0C46XvSo",
+        "pageUrl": "https://unsplash.com/photos/three-tacos-on-a-plate-with-limes-and-cilantro-ZAW0C46XvSo?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Griss",
+        "authorUrl": "https://unsplash.com/@grissphoto?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1690874684451-92358e91b14c?ixid=M3wxMDk3NjgwfDB8MXxzZWFyY2h8NXx8YmVlZiUyMHRhY29zfGVufDF8MXx8fDE3OTE2MDg0Nzl8MA&ixlib=rb-4.1.0",
+        "width": 3547,
+        "height": 4434,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LHDvJ#-;4?RjD%E2t5xt0OIoxo%0",
+        "altRu": "Кукурузные тортильи тако с говядиной, сальсой и сыром",
+        "chosenAt": "2026-10-11",
+        "downloadTrackedAt": "2026-10-11"
+      }
+    }
+  }
+}

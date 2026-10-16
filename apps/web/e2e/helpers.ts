@@ -52,6 +52,30 @@ export async function seriousViolations(page: Page) {
   await page.waitForFunction(() =>
     document.getAnimations().every((animation) => animation.playState !== 'running'),
   );
+  // JS-driven springs (Motion writes inline styles every frame) are invisible to getAnimations(): wait for 300 ms
+  // without inline-style writes outside the food field (capped, so a living page cannot hang the test).
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        const finish = () => {
+          observer.disconnect();
+          clearTimeout(cap);
+          resolve();
+        };
+        let quiet = setTimeout(finish, 300);
+        const cap = setTimeout(finish, 5000);
+        const observer = new MutationObserver((records) => {
+          if (records.every((record) => (record.target as Element).closest('.food-layer'))) return;
+          clearTimeout(quiet);
+          quiet = setTimeout(finish, 300);
+        });
+        observer.observe(document.body, {
+          attributes: true,
+          attributeFilter: ['style'],
+          subtree: true,
+        });
+      }),
+  );
   const { violations } = await new AxeBuilder({ page })
     .exclude('.feature-text')
     .exclude('.info-lead')

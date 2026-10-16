@@ -190,3 +190,117 @@ export const NAME_FLIP = {
   /** The way back starts only if the cursor stays away this long (no flicker at the edge). */
   leaveDelayMs: 90,
 } as const;
+
+/**
+ * Quiz scene (stage 2, ТЗ §7). Entry mirrors hero → about: part 1 lifts and dissolves (heroVariants), the food
+ * recedes (SCENE.food), the «О проекте» pill turns into «Выйти ×»; then the quiz header draws in and the first step
+ * comes into focus. Times in ms from the click.
+ */
+export const QUIZ = {
+  /** Input is locked while the scene changes (≈ hero → about). */
+  inputLockMs: 1150,
+  /** Food in the quiz: the about camera, slower drift. */
+  foodSpeed: 0.65,
+  /** Soft avoidance of the central column (share of the viewport width) and its strength (× FIELD default). */
+  foodColumn: 0.42,
+  foodAvoidStrength: 0.35,
+  /** «О проекте» → «Выйти ×» label cross-fade. */
+  pillLabel: { delayMs: 120, durationMs: 300 },
+  header: { delayMs: 420, durationMs: 420 },
+  firstStepDelayMs: 560,
+  /** Step transition «blur dissolve» (ТЗ §7.6; radii and curves of stage 1, D-030). */
+  stepOut: { durationMs: 320, blurPx: 12, scale: 0.98 },
+  stepIn: { delayMs: 170, durationMs: 500, blurPx: 10, risePx: 12, staggerMs: 50 },
+  /** Single choice: the wave completes, a small bounce, then the step changes (≤ ≈ 450 ms). */
+  choice: { bounceScale: 0.96, pressMs: 80, settleMs: 140 },
+  choiceSpring: { type: 'spring', visualDuration: 0.22, bounce: 0.3 },
+  /** A chip toggles with a micro-bounce from this scale. */
+  chipPressScale: 0.94,
+  chipSpring: { type: 'spring', visualDuration: 0.2, bounce: 0.35 },
+  /** Progress fill. */
+  progressSpring: { type: 'spring', visualDuration: 0.55, bounce: 0.12 },
+  /** «Далее» / «Готово» rise in when the answer is complete. */
+  continueIn: { durationMs: 360, risePx: 14 },
+  /** «+» → add panel and row → picker panel (transform-only shape morph). */
+  panelSpring: { stiffness: 420, damping: 38, mass: 0.9 },
+  panelContentAt: 0.6,
+  /** «Продолжаем с вопроса n»: long enough to read and reach «Начать заново»; paused under the pointer or focus. */
+  toastMs: 12000,
+  /** The quiz chunk is fetched on idle once the landing has settled — never during its first animations. */
+  prefetchAfterMs: 5000,
+  /** The finale's chunks are fetched on idle during the last steps. */
+  finalePrefetchIdleMs: 2000,
+  /** history.go() that never arrives (the browser trimmed old entries): reset without waiting for it. */
+  historyFallbackMs: 600,
+  /** Notice cards and sheets. */
+  sheet: { durationMs: 340, risePx: 24 },
+} as const;
+
+/** The dish game «Выберите блюдо» (ТЗ §9.1). */
+export const TINDER = {
+  /** A swipe commits beyond this share of the card width (or by fling speed). */
+  commitShare: 0.3,
+  commitDownShare: 0.22,
+  flingPxS: 650,
+  /** …but a fling commits only after this share of the width (a twitch of the finger is not an answer). */
+  flingMinShare: 0.12,
+  maxRotateDeg: 12,
+  /** The matching button swells as the card moves towards it. */
+  buttonSwell: 0.18,
+  /** Card flying away: its own speed, at least this fast. */
+  flyMinPxS: 1400,
+  flyDurationMs: 380,
+  /** The next card rises from slightly behind. */
+  nextFromScale: 0.94,
+  nextFromOpacity: 0.55,
+  springBack: { type: 'spring', stiffness: 520, damping: 32, mass: 0.8 },
+  rise: { type: 'spring', visualDuration: 0.42, bounce: 0.14 },
+  /** A second answer sooner than this after the previous one is a double tap, not a decision. */
+  answerGapMs: 160,
+  /** Pointer velocity is measured over the last samples of this window (cards and the wheel). */
+  velocityWindowMs: 100,
+  /** The next cards' photos are fetched on idle, at most this late. */
+  lookaheadIdleMs: 300,
+  /** «Запомнили…» appears when the flying card is this far gone. */
+  momentAtShare: 0.6,
+  /** The gentle hint after this many skips in a row (ТЗ §9.1). */
+  skipHintAfter: 5,
+  /** «Запомнили: …» moment after the last answer. */
+  rememberedMs: 1400,
+  /** A photo that has not arrived by now falls back to the next source of the chain. */
+  photoTimeoutMs: 4000,
+} as const;
+
+/** Wheel picker physics (ТЗ §8.3): item units, seconds. Unit-tested in components/wheelPhysics.ts. */
+export const WHEEL = {
+  visible: 7,
+  itemDeg: 18,
+  /** Exponential friction of a flick (per second). */
+  friction: 4.2,
+  /** Below this speed (items/s) the wheel snaps. */
+  snapSpeed: 1.2,
+  snap: { stiffness: 260, damping: 30 },
+  /** One mouse-wheel notch = one value, after this pause a new gesture starts. */
+  wheelQuietMs: 70,
+  maxFlingItemsS: 60,
+} as const;
+
+/** Generation finale (ТЗ §12). */
+export const FINALE = {
+  fillMs: 700,
+  shimmerMs: 900,
+  dotMs: 520,
+  glideMs: 700,
+  /** The dot grows into the full core. */
+  introMs: 900,
+  /** The first caption appears once the core has begun to grow. */
+  firstCaptionMs: 350,
+  captionMinMs: 2200,
+  captionMaxMs: 3200,
+  captionSpring: { type: 'spring', stiffness: 380, damping: 30, mass: 0.8 },
+  honestAfterMs: 40_000,
+  revealDemoAfterMs: 6000,
+  revealMs: 1600,
+  canvasMaxPx: 520,
+  dprMax: 2,
+} as const;

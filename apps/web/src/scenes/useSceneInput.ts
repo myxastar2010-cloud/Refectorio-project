@@ -64,7 +64,11 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
     // (inertia included); only a gesture that starts at the edge switches scenes.
     let nativeUntilMs = Number.NEGATIVE_INFINITY;
 
+    // The quiz owns all input while it is open (ТЗ §7.1): scene gestures never switch scenes there.
+    const inQuiz = () => sceneRef.current === 'quiz';
+
     const onWheel = (event: WheelEvent) => {
+      if (inQuiz()) return;
       // Sideways scrolling is the browser's (a sideways touchpad swipe has a little vertical drift too).
       if (event.deltaY === 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       const delta = normalizeWheelDelta(event.deltaY, event.deltaMode, window.innerHeight);
@@ -82,6 +86,7 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (inQuiz()) return;
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       const target = event.target as Element | null;
       if (target?.closest(OWNS_KEYS)) return;
@@ -108,6 +113,10 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
     };
     let touch: TouchStart | null = null;
     const onTouchStart = (event: TouchEvent) => {
+      if (inQuiz()) {
+        touch = null;
+        return;
+      }
       const point = event.touches[0];
       if (!point || event.touches.length > 1) {
         touch = null;

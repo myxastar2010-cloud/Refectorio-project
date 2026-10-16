@@ -503,13 +503,21 @@
   opacity: 0;
 }
 
-.food-layer[data-scene='about'] .food-item {
+/* Part 2 and the quiz show the pre-blurred food (ТЗ §7.9). */
+.food-layer[data-scene='about'] .food-item,
+.food-layer[data-scene='quiz'] .food-item {
   opacity: 0;
   transition-delay: var(--food-fade-delay-ms);
 }
 
-.food-layer[data-scene='about'] .food-item--blur {
+.food-layer[data-scene='about'] .food-item--blur,
+.food-layer[data-scene='quiz'] .food-item--blur {
   opacity: var(--food-about-opacity);
+}
+
+/* The quiz finale dissolves the food in its core frame by frame (engine.ts): no transition may lag behind. */
+.food-layer[data-attract] .food-item {
+  transition: none;
 }
 
 .food-item picture,
@@ -527,7 +535,8 @@
   }
 
   .food-item,
-  .food-layer[data-scene='about'] .food-item {
+  .food-layer[data-scene='about'] .food-item,
+  .food-layer[data-scene='quiz'] .food-item {
     transition-duration: var(--motion-fade, 200ms);
     transition-delay: 0s;
   }
@@ -555,4 +564,37 @@
 .flip-char {
   display: inline-block;
   will-change: transform, opacity;
+}
+
+/* «О проекте» ⇄ «Выйти ×» (the quiz, D-036): both labels live in the same pill, stacked; Motion fades one in and the
+   other out. Defined here, not in the quiz chunk: the exit label is in the landing's DOM from the start. */
+.pill-labels {
+  display: grid;
+  place-items: center;
+}
+
+.pill-label {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32em;
+  white-space: nowrap;
+}
+
+.pill-exit-icon {
+  width: 1em;
+  height: 1em;
+}
+
+/* «Загружаем тест…» while the quiz chunk is on its way (app/QuizBoundary.tsx). */
+.quiz-loading {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-scene);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  pointer-events: none;
 }

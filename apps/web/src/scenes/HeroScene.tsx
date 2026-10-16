@@ -32,13 +32,22 @@ type Props = {
   readonly scrollerRef: Ref<HTMLElement>;
   readonly onScrolled: (scrolled: boolean) => void;
   readonly onCreateMenu: (event: MouseEvent<HTMLAnchorElement>) => void;
+  /** Hover, focus or touch on «Создать меню» starts loading the quiz chunk. */
+  readonly onPrefetch: () => void;
 };
 
 /**
  * Part 1: heading, lead, «Создать меню» and the four feature cards (ТЗ 6.2; the cards are not shown on phones);
  * the header is SiteHeader.
  */
-export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMenu }: Props) {
+export function HeroScene({
+  phase,
+  instant,
+  scrollerRef,
+  onScrolled,
+  onCreateMenu,
+  onPrefetch,
+}: Props) {
   const calm = useCalmMotion();
   const hidden = phase === 'hidden';
   const {
@@ -92,6 +101,18 @@ export function HeroScene({ phase, instant, scrollerRef, onScrolled, onCreateMen
               afterCtaWave(event, onCreateMenu);
             }}
             {...ctaWave}
+            onPointerEnter={(event) => {
+              onPrefetch();
+              ctaWave.onPointerEnter(event);
+            }}
+            onPointerDown={(event) => {
+              onPrefetch();
+              ctaWave.onPointerDown(event);
+            }}
+            onFocus={(event) => {
+              onPrefetch();
+              ctaWave.onFocus(event);
+            }}
           >
             <span className="wave-content">
               <span>{site.hero.cta.label}</span>

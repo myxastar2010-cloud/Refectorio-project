@@ -8,6 +8,7 @@ import type {
   Goal,
   HealthFlag,
   Lactation,
+  MacroProfile,
   Mode,
   Pregnancy,
   Questionnaire,
@@ -28,6 +29,11 @@ export const INPUT_LIMITS = {
   dislikesMaxItems: 20,
   dislikeMaxLength: 40,
   dislikesOtherMaxLength: 150,
+  /** Items typed in the quiz «+» panels (health conditions, allergies): each trimmed, deduplicated. */
+  customItemsMaxItems: 10,
+  customItemMaxLength: 40,
+  /** «Что нам следует знать?» */
+  notesMaxLength: 300,
 } as const;
 
 export type InputErrorCode =
@@ -63,9 +69,41 @@ export type QuestionnaireInput = {
   budget?: Budget;
   dislikes?: readonly string[];
   dislikesOther?: string;
+  macroProfile?: MacroProfile;
+  strengthTraining?: boolean;
+  healthOther?: readonly string[];
+  allergensOther?: readonly string[];
+  notes?: string;
 };
 
 const DEFAULT_MEALS_PER_DAY = 4;
+
+/** Trimmed, non-empty, case-insensitively unique items (the first spelling wins). */
+export function cleanItems(items: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const raw of items) {
+    const item = raw.trim();
+    const key = item.toLocaleLowerCase('ru');
+    if (!item || seen.has(key)) continue;
+    seen.add(key);
+    result.push(item);
+  }
+  return result;
+}
+
+function checkItems(
+  errors: InputError[],
+  field: 'healthOther' | 'allergensOther',
+  items: readonly string[],
+): void {
+  if (items.length > INPUT_LIMITS.customItemsMaxItems) {
+    errors.push({ field, code: 'TOO_MANY_ITEMS' });
+  }
+  if (items.some((item) => item.length > INPUT_LIMITS.customItemMaxLength)) {
+    errors.push({ field, code: 'TOO_LONG' });
+  }
+}
 
 function checkRange(
   errors: InputError[],
@@ -123,6 +161,14 @@ export function validateQuestionnaire(
   if ((input.dislikesOther?.length ?? 0) > INPUT_LIMITS.dislikesOtherMaxLength) {
     errors.push({ field: 'dislikesOther', code: 'TOO_LONG' });
   }
+  const healthOther = cleanItems(input.healthOther ?? []);
+  const allergensOther = cleanItems(input.allergensOther ?? []);
+  checkItems(errors, 'healthOther', healthOther);
+  checkItems(errors, 'allergensOther', allergensOther);
+  const notes = input.notes?.trim();
+  if ((notes?.length ?? 0) > INPUT_LIMITS.notesMaxLength) {
+    errors.push({ field: 'notes', code: 'TOO_LONG' });
+  }
 
   if (errors.length > 0) return err(errors);
 
@@ -150,5 +196,10 @@ export function validateQuestionnaire(
     budget: input.budget ?? 'unlimited',
     dislikes: dislikes.map((item) => item.trim()).filter(Boolean),
     ...(input.dislikesOther !== undefined ? { dislikesOther: input.dislikesOther.trim() } : {}),
+    macroProfile: input.macroProfile ?? 'recommended',
+    strengthTraining: input.strengthTraining ?? false,
+    healthOther,
+    allergensOther,
+    ...(notes ? { notes } : {}),
   });
 }

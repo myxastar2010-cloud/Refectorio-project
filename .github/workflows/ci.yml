@@ -25,6 +25,12 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
+      # Self-hosted dish photos (scripts/photos/materialize.mjs) are downloaded once per manifest version.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/dish-photos
+          key: dish-photos-${{ hashFiles('packages/taste-core/data/photo-manifest.json') }}
+          restore-keys: dish-photos-
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:coverage

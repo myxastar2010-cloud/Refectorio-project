@@ -125,6 +125,26 @@ describe('guardrails: health', () => {
     expect(screen.reasons).toEqual(['ED_SCREEN_POSITIVE']);
   });
 
+  it('hypertension, hypothyroidism and insulin resistance restrict nothing but carry food rules', () => {
+    const d = evaluateGuardrails(
+      q({ health: ['hypertension', 'hypothyroidism', 'insulinResistance'], goal: 'lose' }),
+    );
+    expect(d.status).toBe('allowed');
+    expect(d.reasons).toEqual(['HYPERTENSION', 'HYPOTHYROIDISM', 'INSULIN_RESISTANCE']);
+    expect(d.dishRules).toEqual(['limitSodium', 'limitAddedSugar']);
+    expect(d.allowedGoals).toEqual(['maintain', 'lose', 'gain', 'habits']);
+    expect(d.energyDeficitAllowed).toBe(true);
+    expect(d.forbiddenRegimes).toEqual([]);
+    expect(d.referToDoctor).toEqual([]);
+  });
+
+  it('a common condition never softens a stricter one', () => {
+    const d = evaluateGuardrails(q({ health: ['hypertension', 'diabetesType2'] }));
+    expect(d.status).toBe('limited');
+    expect(d.forbiddenRegimes).toContain('keto');
+    expect(d.dishRules).toEqual(['limitSodium']);
+  });
+
   it('merges: strictest status wins, referrals and restrictions accumulate', () => {
     const d = evaluateGuardrails(
       q({ health: ['warfarin', 'kidneyDisease'], edScreenPositive: true }),
@@ -143,21 +163,31 @@ describe('guardrails: body', () => {
     expect(d.reasons).toEqual(['BMI_UNDERWEIGHT']);
     expect(d.allowedGoals).toEqual(['maintain', 'gain', 'habits']);
     expect(d.energyDeficitAllowed).toBe(false);
+    expect(d.forbiddenRegimes).toEqual(['intermittentFasting', 'keto', 'vlcd']);
   });
 
   it('older adults: caution for low or high BMI and for weight loss', () => {
     expect(evaluateGuardrails(q({ ageYears: 70, weightKg: 45 })).reasons).toEqual([
       'BMI_UNDERWEIGHT',
       'OLDER_ADULT_CAUTION',
+      'OLDER_ADULT_REGIMES',
     ]);
     // 85 kg / 1.65² = 31.2
     expect(evaluateGuardrails(q({ ageYears: 70, weightKg: 85 })).reasons).toEqual([
       'OLDER_ADULT_CAUTION',
+      'OLDER_ADULT_REGIMES',
     ]);
     const losing = evaluateGuardrails(q({ ageYears: 70, goal: 'lose' }));
     expect(losing.status).toBe('requiresDoctor');
     expect(losing.allowedGoals).toContain('lose');
     expect(evaluateGuardrails(q({ ageYears: 70 })).status).toBe('allowed');
+  });
+
+  it('older adults: no keto and no very-low-calorie diet (Watanabe 2020)', () => {
+    const d = evaluateGuardrails(q({ ageYears: 70 }));
+    expect(d.forbiddenRegimes).toEqual(['keto', 'vlcd']);
+    expect(d.reasons).toEqual(['OLDER_ADULT_REGIMES']);
+    expect(evaluateGuardrails(q({ ageYears: 64 })).forbiddenRegimes).toEqual([]);
   });
 
   it('does not apply adult BMI rules to minors', () => {

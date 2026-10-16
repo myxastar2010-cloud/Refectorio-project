@@ -1,25 +1,62 @@
-import { IconApple } from '@tabler/icons-react';
+import { IconApple, IconX } from '@tabler/icons-react';
 import { m } from 'motion/react';
 import { site } from '../content/site.ru';
 import { useCalmMotion } from '../motion/hooks';
+import { DURATION, EASE_IN_OUT, EASE_OUT_SOFT, QUIZ } from '../motion/tokens';
 import { useWave } from '../motion/useWave';
 import { WaveLayer } from '../motion/WaveHover';
 import { heroFadeVariants, heroLiftVariants, type Phase } from './choreography';
 
 type Props = {
-  readonly phase: Phase;
+  /** `quiz`: the header stays (logo) and its pill becomes «Выйти ×» (ТЗ §7.1). */
+  readonly phase: Phase | 'quiz';
   readonly instant: boolean;
   /** Part 1 is scrolled (small screens): the header gets its own background over the content. */
   readonly scrolled: boolean;
   readonly onAbout: () => void;
+  readonly onExit: () => void;
 };
+
+/** The pill label: «О проекте» ⇄ «Выйти ×» cross-fade in the same pill (D-036: same size, no morph of the box). */
+function PillLabel({ quiz, calm }: { readonly quiz: boolean; readonly calm: boolean }) {
+  const label = QUIZ.pillLabel;
+  const fade = (shown: boolean) => ({
+    opacity: shown ? 1 : 0,
+    transform: shown ? 'translateY(0px)' : `translateY(${quiz ? -6 : 6}px)`,
+    transition: calm
+      ? { duration: DURATION.fade }
+      : {
+          duration: label.durationMs / 1000,
+          ease: shown ? EASE_OUT_SOFT : EASE_IN_OUT,
+          delay: shown ? label.delayMs / 1000 : 0,
+        },
+  });
+  return (
+    <span className="pill-labels">
+      <m.span className="pill-label" initial={false} animate={fade(!quiz)} aria-hidden={quiz}>
+        {site.hero.aboutButton}
+      </m.span>
+      <m.span
+        className="pill-label pill-label--exit"
+        initial={false}
+        animate={fade(quiz)}
+        aria-hidden={!quiz}
+      >
+        {site.quizShell.exit}
+        <IconX aria-hidden className="pill-exit-icon" stroke={2.25} />
+      </m.span>
+    </span>
+  );
+}
 
 /**
  * Logo and «О проекте» (ТЗ 6.2). It belongs to part 1 and leaves with it, but lives outside <main>, so it stays
- * the page's banner landmark.
+ * the page's banner landmark. In the quiz the logo stays and the pill exits the quiz.
  */
-export function SiteHeader({ phase, instant, scrolled, onAbout }: Props) {
+export function SiteHeader({ phase, instant, scrolled, onAbout, onExit }: Props) {
   const calm = useCalmMotion();
+  const quiz = phase === 'quiz';
+  const motionPhase: Phase = phase === 'hidden' ? 'hidden' : 'shown';
   const hidden = phase === 'hidden';
   const { setHost, handlers, clipPath, act } = useWave<HTMLButtonElement>();
 
@@ -29,9 +66,10 @@ export function SiteHeader({ phase, instant, scrolled, onAbout }: Props) {
       inert={hidden}
       aria-hidden={hidden}
       data-scrolled={scrolled || undefined}
+      data-mode={quiz ? 'quiz' : undefined}
       // The header only moves: the glass of «О проекте» must see the food behind it all the time (choreography.ts).
       variants={heroLiftVariants(0, calm)}
-      animate={phase}
+      animate={motionPhase}
       {...(instant ? { initial: false as const } : {})}
     >
       <m.div className="brand" variants={heroFadeVariants(0, calm)}>
@@ -45,14 +83,17 @@ export function SiteHeader({ phase, instant, scrolled, onAbout }: Props) {
         type="button"
         variants={heroFadeVariants(0, calm)}
         className="about-pill at box wave-host focus-ring"
+        aria-label={quiz ? site.quizShell.exitLabel : undefined}
         onClick={(event) => {
-          act(event, onAbout);
+          act(event, quiz ? onExit : onAbout);
         }}
         {...handlers}
       >
-        <span className="wave-content">{site.hero.aboutButton}</span>
+        <span className="wave-content">
+          <PillLabel quiz={quiz} calm={calm} />
+        </span>
         <WaveLayer clipPath={clipPath} className="wave-layer--ink">
-          {site.hero.aboutButton}
+          <PillLabel quiz={quiz} calm={calm} />
         </WaveLayer>
       </m.button>
     </m.header>

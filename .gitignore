@@ -30,3 +30,9 @@ Thumbs.db
 !.vscode/extensions.json
 .playwright-mcp/
 .claude/settings.local.json
+
+# Caches of scripts (photo downloads, simulation bundle)
+.cache/
+
+# Dish photos are built from the manifest at build time and never committed (Pexels licence, ТЗ §9.7)
+apps/web/public/dish-photos/

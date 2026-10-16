@@ -1,0 +1,165 @@
+{
+  "q-body": {
+    "width": 190,
+    "height": 280,
+    "box": 140,
+    "density": 2
+  },
+  "q-goal": {
+    "width": 244,
+    "height": 280,
+    "box": 140,
+    "density": 2
+  },
+  "q-food-style": {
+    "width": 280,
+    "height": 223,
+    "box": 140,
+    "density": 2
+  },
+  "q-macro": {
+    "width": 278,
+    "height": 280,
+    "box": 140,
+    "density": 2
+  },
+  "q-health": {
+    "width": 273,
+    "height": 280,
+    "box": 140,
+    "density": 2
+  },
+  "q-allergy": {
+    "width": 276,
+    "height": 280,
+    "box": 140,
+    "density": 2
+  },
+  "q-activity": {
+    "width": 247,
+    "height": 280,
+    "box": 140,
+    "density": 2
+  },
+  "q-strength": {
+    "width": 280,
+    "height": 245,
+    "box": 140,
+    "density": 2
+  },
+  "q-notes": {
+    "width": 280,
+    "height": 279,
+    "box": 140,
+    "density": 2
+  },
+  "o-goal-lose": {
+    "width": 99,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-goal-gain": {
+    "width": 113,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-goal-maintain": {
+    "width": 128,
+    "height": 120,
+    "box": 64,
+    "density": 2
+  },
+  "o-diet-omnivore": {
+    "width": 128,
+    "height": 97,
+    "box": 64,
+    "density": 2
+  },
+  "o-diet-pescatarian": {
+    "width": 128,
+    "height": 101,
+    "box": 64,
+    "density": 2
+  },
+  "o-diet-vegetarian": {
+    "width": 115,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-diet-vegan": {
+    "width": 67,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-macro-recommended": {
+    "width": 125,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-macro-high-protein": {
+    "width": 128,
+    "height": 101,
+    "box": 64,
+    "density": 2
+  },
+  "o-macro-low-carb": {
+    "width": 103,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-macro-keto": {
+    "width": 81,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-macro-low-fat": {
+    "width": 128,
+    "height": 116,
+    "box": 64,
+    "density": 2
+  },
+  "o-life-sitting": {
+    "width": 35,
+    "height": 65,
+    "box": 64,
+    "density": 1
+  },
+  "o-life-sometimes": {
+    "width": 34,
+    "height": 64,
+    "box": 64,
+    "density": 1
+  },
+  "o-life-standing": {
+    "width": 43,
+    "height": 67,
+    "box": 64,
+    "density": 1
+  },
+  "o-life-moving": {
+    "width": 48,
+    "height": 60,
+    "box": 64,
+    "density": 1
+  },
+  "o-life-labour": {
+    "width": 44,
+    "height": 68,
+    "box": 64,
+    "density": 1
+  },
+  "q-lifestyle": {
+    "width": 104,
+    "height": 154,
+    "box": 140,
+    "density": 1,
+    "temporary": true
+  }
+}

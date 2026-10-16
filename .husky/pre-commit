@@ -1,2 +1,4 @@
-npx lint-staged
+# Windows: cmd.exe stops at 8191 characters, and this project lives under a long Cyrillic path —
+# lint-staged splits the file list into chunks that fit.
+npx lint-staged --max-arg-length 4000
 npm run typecheck --silent

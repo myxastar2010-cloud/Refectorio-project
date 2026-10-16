@@ -1,0 +1,23 @@
+{
+  "name": "@refectorio/taste-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Refectorio — каталог вкусов блюд и байесовское адаптивное определение вкуса (игра «Выберите блюдо»). Чистый TypeScript.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./data/catalog.json": "./data/catalog.json",
+    "./data/photo-manifest.json": "./data/photo-manifest.json",
+    "./data/photo-runtime.json": "./data/photo-runtime.json"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "sim": "node sim/run.mjs"
+  },
+  "dependencies": {
+    "@refectorio/contracts": "*",
+    "@refectorio/nutrition-core": "*",
+    "zod": "^4.6.5"
+  }
+}
