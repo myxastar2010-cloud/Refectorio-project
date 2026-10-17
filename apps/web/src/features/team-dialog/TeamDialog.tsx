@@ -4,12 +4,12 @@ import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 
 import { site } from '../../content/site.ru';
 import { focusQuietly } from '../../lib/quietFocus';
 import { useCalmMotion } from '../../motion/hooks';
-import { DIALOG, DURATION, EASE_OUT_SOFT, SPRING } from '../../motion/tokens';
+import { revealMotion, useCornerMorph } from '../../motion/cornerMorph';
+import { DIALOG, DURATION } from '../../motion/tokens';
 import { useWave } from '../../motion/useWave';
 import { WaveLayer } from '../../motion/WaveHover';
 import { TeamDialogSurface } from './TeamSurface';
 import { NameFlip } from './NameFlip';
-import { useCornerMorph } from './useCornerMorph';
 import { Lines } from '../../components/Lines';
 
 type Props = {
@@ -55,9 +55,14 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
 
   useCornerMorph({
     surface: surfaceRef,
-    picture: pictureRef,
-    logo: logoRef,
-    tile: tileRef,
+    anchor: tileRef,
+    picture: {
+      image: pictureRef,
+      logo: logoRef,
+      spec: DIALOG.picture,
+      dockedBelow: DIALOG.dockedBelow,
+      logoCrossfadeEnd: DIALOG.logoCrossfadeEnd,
+    },
     present,
     calm,
     onReveal: () => {
@@ -93,28 +98,7 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
     }
   };
 
-  // The text comes in once the card itself is far enough open — by its shape, not by a clock: the flight may start
-  // a little later (the picture is decoded first), and the text must never hang in the air outside the card.
-  const content = (index: number) => {
-    const delay = (index * DIALOG.contentStaggerMs) / 1000;
-    const hidden = { opacity: 0, transform: `translate3d(0px, ${calm ? 0 : 16}px, 0px)` };
-    return {
-      initial: hidden,
-      animate: revealed
-        ? {
-            opacity: 1,
-            transform: 'translate3d(0px, 0px, 0px)',
-            transition: calm
-              ? { duration: DURATION.fade }
-              : {
-                  default: { ...SPRING.dialogContent, delay },
-                  opacity: { duration: 0.35, ease: EASE_OUT_SOFT, delay },
-                },
-          }
-        : hidden,
-      exit: { opacity: 0, transition: { duration: DIALOG.contentExitS } },
-    };
-  };
+  const content = (index: number) => revealMotion(index, revealed, calm);
 
   return (
     // While the card flies back, the dialog is already gone for keyboards and screen readers.
