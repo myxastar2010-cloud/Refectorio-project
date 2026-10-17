@@ -211,7 +211,7 @@
     --q-picker-w: 100%;
     --q-wheel-row: 42px;
     --q-wheel-font: 24px;
-    --q-card-w: min(88vw, calc(0.77 * 62svh));
+    --q-card-w: min(88vw, calc(0.76 * 62svh));
     --q-card-h: calc(var(--q-card-w) * var(--quiz-card-h) / var(--quiz-card-w));
     --q-dish: 20px;
     --q-dish-y: 28px;

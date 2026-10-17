@@ -269,11 +269,12 @@ test.describe('the whole path', () => {
     await choose(page, 'Нет', 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
     await choose(page, 'В основном сидя', 'notes');
-    // The honest line comes after 40 s: the page clock runs them in a moment.
+    // The honest line comes after 40 s: the page clock jumps over them. A jump, not runFor: running 45 s of animation
+    // frames one by one took WebKit most of the test's budget (a timeout under load in the stage-3 baseline).
     await page.clock.install();
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
-    await page.clock.runFor(45_000);
+    await page.clock.fastForward(45_000);
     // Once on screen and once in the status region (it is announced): the visible line.
     await expect(
       page.locator('.quiz-finale-after').getByText(/мы дорабатываем генерацию/),
@@ -282,7 +283,7 @@ test.describe('the whole path', () => {
       page.getByRole('button', { name: 'Как мы используем ваши данные?' }),
     ).toBeVisible();
     await page.getByRole('button', { name: 'Пройти тест заново' }).click();
-    await page.clock.runFor(5_000);
+    await page.clock.fastForward(5_000);
     await onScreen(page, 'taste', 'Выберите блюдо');
     await expect.poll(async () => (await draft(page))?.answers.tasteDecisions.length ?? 0).toBe(0);
   });
