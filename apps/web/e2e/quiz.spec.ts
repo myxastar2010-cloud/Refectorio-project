@@ -274,13 +274,18 @@ test.describe('the whole path', () => {
     await page.clock.install();
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
-    // The generation runs (its timers are set) once the first caption is on screen.
-    await expect(page.locator('.quiz-caption')).toBeVisible();
-    await page.clock.fastForward(45_000);
-    // Once on screen and once in the status region (it is announced): the visible line.
-    await expect(
-      page.locator('.quiz-finale-after').getByText(/мы дорабатываем генерацию/),
-    ).toBeVisible();
+    // Jumps of 5 s until the line is there: the finale's chunk and timers may come a little later under load, and a
+    // jump fires only the timers that exist by then.
+    const honest = page.locator('.quiz-finale-after').getByText(/мы дорабатываем генерацию/);
+    await expect
+      .poll(
+        async () => {
+          await page.clock.fastForward(5_000);
+          return honest.isVisible();
+        },
+        { timeout: 40_000 },
+      )
+      .toBe(true);
     await expect(
       page.getByRole('button', { name: 'Как мы используем ваши данные?' }),
     ).toBeVisible();
@@ -310,6 +315,8 @@ test.describe('the wheel', () => {
 
 test.describe('safety', () => {
   test('a teenager: no weight goals, a kind line instead', async ({ page }) => {
+    // The whole way from the game to the goal (slow in WebKit under a full parallel run).
+    test.slow();
     await openQuiz(page);
     await playDishes(page, TEN_DECISIVE);
     await page.getByRole('button', { name: /^Пол/ }).click();
@@ -473,7 +480,14 @@ test.describe('quality', () => {
     const policy = await page
       .locator('meta[http-equiv="Content-Security-Policy"]')
       .getAttribute('content');
-    expect(policy).toContain("img-src 'self' data:;");
+    // Antivirus web protection (Kaspersky on the team's computers) adds its own hosts to every directive.
+    const imgSrc = (policy ?? '')
+      .split(';')
+      .map((directive) => directive.trim().split(/\s+/))
+      .find(([name]) => name === 'img-src')
+      ?.slice(1)
+      .filter((source) => !/kaspersky-labs\.com/i.test(source));
+    expect(imgSrc).toEqual(["'self'", 'data:']);
     expect(policy).not.toContain('unsplash');
     expect(await page.evaluate(() => (window as Window & { __csp?: string[] }).__csp)).toEqual([]);
   });
