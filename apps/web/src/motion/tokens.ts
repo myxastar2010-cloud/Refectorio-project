@@ -166,6 +166,8 @@ export const MORPH = {
   maxStepS: 0.05,
   /** Opening waits at most this long for the card picture to be decoded before the flight starts. */
   startWaitMs: 120,
+  /** A text label as the anchor (the privacy sheet): the surface fades in and out over this first share of the way. */
+  labelFadeBelow: 0.16,
 } as const;
 
 /**

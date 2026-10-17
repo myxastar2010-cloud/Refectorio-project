@@ -1447,6 +1447,39 @@
   text-align: center;
 }
 
+/* The privacy sheet draws its shape on a surface of its own: the corner morph (motion/cornerMorph) squeezes it onto
+   the label and lets it grow; the text lies on top and comes in at ≈ 70 % of the shape. */
+.quiz-sheet {
+  isolation: isolate;
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+}
+
+.quiz-sheet-surface {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: var(--color-bg);
+  box-shadow:
+    inset 0 0 0 var(--q-outline) var(--color-ink-muted),
+    0 24px 70px rgb(0 0 0 / 0.14);
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Under an open dialog the step behind blurs — only its own content, like the about cards under the team card
+   (D-030: blurring the whole screen costs the GPU far more for the same look). */
+.quiz-frame {
+  transition: filter var(--motion-scrim, 350ms) var(--ease-out-expo);
+}
+
+.quiz[data-dialog-open] .quiz-screen:not([inert]) .quiz-frame {
+  filter: blur(var(--team-open-blur));
+  transition-delay: var(--team-open-blur-delay);
+}
+
 @media (max-width: 47.99rem) {
   .quiz-notice,
   .quiz-sheet {
@@ -1511,12 +1544,6 @@
   line-height: 1.45;
   font-weight: 500;
   color: var(--color-ink-muted);
-}
-
-.quiz-sheet-link a {
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .quiz-sheet-actions {

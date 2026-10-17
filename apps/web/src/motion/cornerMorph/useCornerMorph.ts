@@ -59,6 +59,11 @@ type Options = {
   readonly onDone: () => void;
   /** Every drawn frame: how open the shape is (0 — anchor, 1 — open). */
   readonly onFrame?: (openness: number) => void;
+  /**
+   * An anchor that does not look like the surface (a text label): the surface fades in over this first share of the
+   * way and fades out as it lands, so it grows out of the label and melts back into it.
+   */
+  readonly fadeBelow?: number;
 };
 
 const boxOf = (rect: DOMRect): Box => ({
@@ -216,6 +221,8 @@ export function useCornerMorph(options: Options) {
         latest.current.onReveal();
       }
       latest.current.onFrame?.(open);
+      const fadeBelow = latest.current.fadeBelow;
+      if (fadeBelow) element.style.opacity = clamp01(open / fadeBelow).toFixed(3);
       const { radii } = s;
       const radius = radii.tilePx + (radii.dialogPx - radii.tilePx) * open;
       // The surface is drawn at its final size and squeezed: the radius is pre-stretched to look round on screen.
@@ -272,6 +279,7 @@ export function useCornerMorph(options: Options) {
       s.corners = null;
       element.style.transform = '';
       element.style.borderRadius = '';
+      element.style.opacity = '';
       const spec = latest.current.picture;
       const image = elementOf(spec?.image);
       if (image) image.style.transform = '';

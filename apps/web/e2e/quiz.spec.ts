@@ -274,6 +274,8 @@ test.describe('the whole path', () => {
     await page.clock.install();
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
+    // The generation runs (its timers are set) once the first caption is on screen.
+    await expect(page.locator('.quiz-caption')).toBeVisible();
     await page.clock.fastForward(45_000);
     // Once on screen and once in the status region (it is announced): the visible line.
     await expect(
@@ -404,6 +406,40 @@ test.describe('safety', () => {
     const answers = (await draft(page))?.answers;
     expect(answers?.goal).toBe('maintain');
     expect(answers?.macroProfile).toBe('recommended');
+  });
+});
+
+test.describe('the privacy sheet', () => {
+  test('grows out of its label, blurs the step behind, and returns focus to the label', async ({
+    page,
+  }) => {
+    await openQuiz(page);
+    const label = page.getByRole('button', { name: 'Как мы используем ваши данные?' });
+    await label.click();
+    const sheet = page.getByRole('dialog', { name: 'Как мы используем ваши данные' });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByText(/с нашего сайта/)).toBeVisible();
+    // Nothing about photo services or their authors any more (ТЗ этапа 3, 4.3).
+    await expect(sheet).not.toContainText(/Unsplash|IP-адрес|Авторы фотографий/);
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const frame = document.querySelector('.quiz-frame');
+          return frame ? getComputedStyle(frame).filter : null;
+        }),
+      )
+      .toContain('blur');
+    await page.keyboard.press('Escape');
+    await expect(sheet).toHaveCount(0);
+    await expect(label).toBeFocused();
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const frame = document.querySelector('.quiz-frame');
+          return frame ? getComputedStyle(frame).filter : null;
+        }),
+      )
+      .toBe('none');
   });
 });
 
