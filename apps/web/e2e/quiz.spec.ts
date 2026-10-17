@@ -175,8 +175,10 @@ test.describe('the dish game', () => {
     await expect(page.locator('section.quiz > p[role="status"]')).toContainText(
       `Нравится: ${dish}`,
     );
-    // The next card first (a second answer within a blink is taken for a double tap).
+    // The next card first, and the answered one gone: a second answer within TINDER.answerGapMs is a double tap, and
+    // a fast machine (CI) clicks again before that.
     await expect(currentDish(page)).not.toHaveText(dish);
+    await expect(page.locator('.quiz-card')).toHaveCount(1);
     await page.getByRole('button', { name: 'Пропустить' }).click();
     await expect.poll(async () => (await draft(page))?.answers.tasteDecisions.length).toBe(2);
     expect((await draft(page))?.answers.tasteDecisions.map((d) => d.answer)).toEqual([
