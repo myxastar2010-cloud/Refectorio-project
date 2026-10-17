@@ -46,11 +46,14 @@ async function throughGoal(
 
 /** Waits for the finite animations only (the finale's shimmer and core pulse never end). */
 async function axeSerious(page: Page) {
-  // Panels morph on motion values (not in document.getAnimations()): their content is fully shown first.
+  // Panels morph on motion values (not in document.getAnimations()), and a notice may not have started its fade yet
+  // when it is first seen (a slow CI machine): their content is fully shown first.
   await page.waitForFunction(() =>
-    [...document.querySelectorAll<HTMLElement>('.quiz-add-content, .quiz-picker-content')].every(
-      (element) => getComputedStyle(element).opacity === '1',
-    ),
+    [
+      ...document.querySelectorAll<HTMLElement>(
+        '.quiz-add-content, .quiz-picker-content, .quiz-notice, .quiz-sheet > :not(.quiz-sheet-surface)',
+      ),
+    ].every((element) => getComputedStyle(element).opacity === '1'),
   );
   await page.waitForFunction(() =>
     document
