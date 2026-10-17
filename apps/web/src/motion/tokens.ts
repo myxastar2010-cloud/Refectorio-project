@@ -219,8 +219,10 @@ export const QUIZ = {
   /** A chip toggles with a micro-bounce from this scale. */
   chipPressScale: 0.94,
   chipSpring: { type: 'spring', visualDuration: 0.2, bounce: 0.35 },
-  /** Progress fill. */
+  /** Progress fill: a spring with a tiny settle. */
   progressSpring: { type: 'spring', visualDuration: 0.55, bounce: 0.12 },
+  /** …and a light band that runs along the fill once when it grows (starts as the fill begins to move). */
+  progressSheen: { durationMs: 750, delayMs: 60 },
   /** «Далее» / «Готово» rise in when the answer is complete. */
   continueIn: { durationMs: 360, risePx: 14 },
   /** «+» → add panel and row → picker panel (transform-only shape morph). */

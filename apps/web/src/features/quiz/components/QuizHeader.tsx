@@ -1,6 +1,6 @@
 import { IconArrowLeft } from '@tabler/icons-react';
 import { animate, m, useMotionValue, useTransform } from 'motion/react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { quiz } from '../../../content/quiz.ru';
 import { useCalmMotion } from '../../../motion/hooks';
 import { DURATION, EASE_IN_OUT, EASE_OUT_SOFT, QUIZ } from '../../../motion/tokens';
@@ -48,8 +48,9 @@ const headerItem = (calm: boolean, order: number) => ({
 });
 
 /**
- * Progress (ТЗ §7.3): the fill is a full-width pill moved by translateX inside a rounded track (transform only),
- * on a spring; it never shows less than its rounded cap. role="progressbar" with «Вопрос n из 11».
+ * Progress (ТЗ §7.3, stage 3 — 4.14): an outlined track with the fill floating inside it; the fill is a full-width
+ * pill moved by translateX (transform only) on a spring with a tiny settle, and never shows less than its rounded cap.
+ * When it grows, a light band runs along it once. role="progressbar" with «Вопрос n из 12».
  */
 export function ProgressBar({
   value,
@@ -67,15 +68,40 @@ export function ProgressBar({
   const calm = useCalmMotion();
   const shown = useMotionValue(Math.max(CAP_SHARE, value));
   const transform = useTransform(shown, (v) => `translateX(${((v - 1) * 100).toFixed(3)}%)`);
+  const sheenRef = useRef<HTMLSpanElement>(null);
+  const previous = useRef(value);
   useEffect(() => {
     const target = Math.max(CAP_SHARE, value);
+    const grew = value > previous.current;
+    previous.current = value;
     const controls = calm
       ? animate(shown, target, { duration: 0 })
       : animate(shown, target, QUIZ.progressSpring);
+    const sheen = sheenRef.current;
+    let run: Animation | null = null;
+    if (grew && !calm && !finale && sheen) {
+      // From the rail's start to the fill's new end, in the fill's own coordinates (it is moved left by 1 − value).
+      const band = sheen.offsetWidth;
+      const width = sheen.parentElement?.offsetWidth ?? 0;
+      const from = (1 - target) * width - band;
+      const to = width;
+      run = sheen.animate(
+        [
+          { transform: `translateX(${from.toFixed(1)}px)`, opacity: 1 },
+          { transform: `translateX(${to.toFixed(1)}px)`, opacity: 1 },
+        ],
+        {
+          duration: QUIZ.progressSheen.durationMs,
+          delay: QUIZ.progressSheen.delayMs,
+          easing: `cubic-bezier(${EASE_IN_OUT.join(', ')})`,
+        },
+      );
+    }
     return () => {
       controls.stop();
+      run?.cancel();
     };
-  }, [value, calm, shown]);
+  }, [value, calm, shown, finale]);
   return (
     <div
       className="quiz-progress"
@@ -92,7 +118,12 @@ export function ProgressBar({
           : valueText
       }
     >
-      <m.div className="quiz-progress-fill" style={{ transform }} />
+      <div className="quiz-progress-rail">
+        <m.div className="quiz-progress-fill" style={{ transform }}>
+          <span ref={sheenRef} className="quiz-progress-sheen" aria-hidden />
+        </m.div>
+      </div>
+      <span className="quiz-progress-solid" aria-hidden />
       {finale && !calm ? <span className="quiz-progress-shimmer" aria-hidden /> : null}
     </div>
   );

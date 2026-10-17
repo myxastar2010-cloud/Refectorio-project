@@ -132,12 +132,7 @@
   /* White on #E63946 is 4.16:1: text must be "large" for WCAG (≥ 18.66 px bold or ≥ 24 px) — hence bold sizes ≥ 19 px. */
   .cta {
     gap: 8px;
-    font-size: 19px;
-  }
-
-  .cta-icon {
-    width: 22px;
-    height: 22px;
+    font-size: 21px;
   }
 
   .feature-card {
@@ -222,7 +217,9 @@
 
   .info-surface {
     display: grid;
-    grid-template-columns: 96px 1fr;
+    /* The tile and the text are one group centred in the card, like on desktop (stage 3, 4.17). */
+    grid-template-columns: 96px minmax(0, max-content);
+    justify-content: center;
     grid-template-areas:
       'label label'
       'tile name'
@@ -367,7 +364,7 @@
   }
 
   .info-surface {
-    grid-template-columns: 140px 1fr;
+    grid-template-columns: 140px minmax(0, max-content);
     padding: 40px 48px 44px;
   }
 
@@ -547,7 +544,7 @@
   }
 
   .info-surface {
-    grid-template-columns: 84px 1fr;
+    grid-template-columns: 84px minmax(0, max-content);
     gap: 6px 16px;
     padding: 24px 26px;
   }

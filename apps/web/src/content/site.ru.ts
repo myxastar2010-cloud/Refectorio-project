@@ -57,8 +57,8 @@ export const site = {
       leadLines: ['Учащиеся школы', '#2107'],
       image: 'teamLogo',
       imageAlt: 'Логотип команды Modern Manifesto',
-      more: 'Ещё',
-      moreLabel: 'Ещё о команде Modern Manifesto',
+      more: 'Подробнее',
+      moreLabel: 'Подробнее о команде Modern Manifesto',
     },
     project: {
       label: 'Проект:',

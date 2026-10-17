@@ -151,10 +151,6 @@
   text-decoration: none;
 }
 
-.cta-icon {
-  flex: none;
-}
-
 /* The label and the icon keep the button's gap on both layers of the wave. */
 .cta .wave-content,
 .cta .wave-layer {
@@ -623,9 +619,14 @@
   white-space: nowrap;
 }
 
+/* «Выйти» reads a little larger than «О проекте» in the same pill (stage 3, 4.16); the door is Tabler's IconDoorExit. */
+.pill-label--exit {
+  font-size: 1.15em;
+}
+
 .pill-exit-icon {
-  width: 1em;
-  height: 1em;
+  width: 1.1em;
+  height: 1.1em;
 }
 
 /* «Загружаем тест…» while the quiz chunk is on its way (app/QuizBoundary.tsx). */

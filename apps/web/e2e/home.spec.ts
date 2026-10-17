@@ -167,9 +167,9 @@ test.describe('team dialog', () => {
     await settled(page, 'about');
   });
 
-  const more = (page: Page) => page.getByRole('button', { name: /Ещё о команде/ });
+  const more = (page: Page) => page.getByRole('button', { name: /Подробнее о команде/ });
 
-  test('opens, traps focus, closes with Esc and returns focus to «Ещё»', async ({ page }) => {
+  test('opens, traps focus, closes with Esc and returns focus to «Подробнее»', async ({ page }) => {
     await more(page).click();
     const dialog = page.getByRole('dialog', { name: /Modern Manifesto/ });
     await expect(dialog).toBeVisible();
@@ -343,7 +343,7 @@ test.describe('quality', () => {
     expect(await check()).toEqual([]);
     await page.keyboard.press('ArrowDown');
     await settled(page, 'about');
-    await page.getByRole('button', { name: /Ещё о команде/ }).click();
+    await page.getByRole('button', { name: /Подробнее о команде/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     expect(await check()).toEqual([]);
   });
@@ -355,7 +355,7 @@ test.describe('quality', () => {
     await page.keyboard.press('ArrowDown');
     await settled(page, 'about');
     expect(await seriousViolations(page)).toEqual([]);
-    await page.getByRole('button', { name: /Ещё о команде/ }).click();
+    await page.getByRole('button', { name: /Подробнее о команде/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     expect(await seriousViolations(page)).toEqual([]);
   });

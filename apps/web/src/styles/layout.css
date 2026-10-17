@@ -199,11 +199,6 @@
     gap: calc(var(--hero-cta-gap) * var(--s));
   }
 
-  .cta-icon {
-    width: calc(var(--hero-cta-icon-size) * var(--s));
-    height: calc(var(--hero-cta-icon-size) * var(--s));
-  }
-
   /* Four cards between the side margins. */
   .feature-card {
     --card-w: calc((100% - 2 * var(--hero-side) - 3 * var(--hero-cards-gap-w)) / 4);
@@ -527,11 +522,6 @@
   .cta {
     font-size: max(19px, calc(var(--type-cta-label-size) * var(--boost) * var(--s)));
     gap: calc(var(--hero-cta-gap) * var(--boost) * var(--s));
-  }
-
-  .cta-icon {
-    width: calc(var(--hero-cta-icon-size) * var(--boost) * var(--s));
-    height: calc(var(--hero-cta-icon-size) * var(--boost) * var(--s));
   }
 
   /* The cards grow upwards, keeping the space under them. */

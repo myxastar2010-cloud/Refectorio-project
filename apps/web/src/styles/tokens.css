@@ -98,7 +98,7 @@
   --type-hero-lead-leading: 29;
   --type-hero-lead-tracking: -0.0203em;
 
-  --type-cta-label-size: 24.7; /* «Создать меню» */
+  --type-cta-label-size: 26.9; /* «Создать меню»: +9 % without the ⊕ icon (stage 3, 4.20), the button keeps its size */
   --type-cta-label-weight: 700;
   --type-cta-label-tracking: -0.0051em;
 
@@ -129,7 +129,7 @@
   --type-info-lead-leading: 29;
   --type-info-lead-tracking: -0.0307em;
 
-  --type-more-label-size: 25.65; /* «Ещё» */
+  --type-more-label-size: 25.65; /* «Подробнее» */
   --type-more-label-weight: 600;
   --type-more-label-tracking: -0.0594em;
 
@@ -193,7 +193,6 @@
   --hero-cta-y: 595;
   --hero-cta-w: 440;
   --hero-cta-h: 83;
-  --hero-cta-icon-size: 28;
   --hero-cta-gap: 5;
   --hero-cards-y: 844;
   --hero-card-h: 178; /* mockup 161: a little more room around the same texts */
@@ -227,7 +226,7 @@
   --about-lead-x: 372;
   --about-lead-baseline: 285;
   --about-more-y: 376;
-  --about-more-w: 113;
+  --about-more-w: 172; /* «Подробнее» (the mockup's «Ещё» was 113): the same pill, wide enough for the word */
   --about-more-h: 62;
   --about-more-border: 2;
   --about-links-y: 374;
@@ -274,7 +273,8 @@
   /* ── Quiz (stage 2), frame 1920×1080 — measured on the team's screenshots ──────────────────
      design/analysis/09_quiz_geometry.py, 10_quiz_text.py (refectorio-workspace). Mockup px × --s like the landing. */
   --quiz-progress-w: 440;
-  --quiz-progress-h: 24;
+  --quiz-progress-h: 32; /* stage 3 (4.14): a third thicker than the mockup's 24 */
+  --quiz-progress-inset: 3; /* the fill floats this far inside the outlined track */
   --quiz-progress-y: 84; /* top of the bar; its centre line is y = 96 */
   --quiz-progress-border: 2;
   --quiz-back-size: 64; /* not in the mockups: round «Вернуться» left of the bar */
@@ -373,6 +373,8 @@
   --quiz-caption-pad-x: 22px;
   --finale-fill-ms: 700ms;
   --finale-shimmer-ms: 900ms;
+  /* The progress fill: a light band runs along it once when it grows (mirror of QUIZ.progressSheen). */
+  --quiz-progress-sheen-ms: 750ms;
   /* Quiet CSS fades and loops of the quiz (the frosted header band, a photo arriving, the CSS core, the shimmer). */
   --quiz-fade-ms: 200ms;
   --quiz-photo-fade-ms: 220ms;

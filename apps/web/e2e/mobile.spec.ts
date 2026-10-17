@@ -39,7 +39,7 @@ test('phones: no feature cards, and both parts fit one screen', async ({ page })
 test('the team card is the tall phone card, centred on the screen', async ({ page }) => {
   await page.goto('./?seed=1#about');
   await settled(page, 'about');
-  await page.getByRole('button', { name: /Ещё о команде/ }).click();
+  await page.getByRole('button', { name: /Подробнее о команде/ }).click();
   const dialog = page.locator('.team-dialog');
   await expect(dialog).toBeVisible();
   const box = await dialog.boundingBox();

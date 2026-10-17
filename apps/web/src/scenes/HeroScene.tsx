@@ -1,5 +1,4 @@
 import {
-  IconCirclePlusFilled,
   IconPencilFilled,
   IconSchoolFilled,
   IconShieldCheckFilled,
@@ -116,11 +115,9 @@ export function HeroScene({
           >
             <span className="wave-content">
               <span>{site.hero.cta.label}</span>
-              <IconCirclePlusFilled aria-hidden className="cta-icon" />
             </span>
             <WaveLayer clipPath={ctaClip} className="wave-layer--ink">
               <span>{site.hero.cta.label}</span>
-              <IconCirclePlusFilled aria-hidden className="cta-icon" />
             </WaveLayer>
           </m.a>
         </TiltGlare>
