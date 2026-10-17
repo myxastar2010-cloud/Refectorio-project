@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hexLuminance, photosFor, tintFor } from './photos';
+import { hexLuminance, HOTLINKED, photosFor, tintFor } from './photos';
 
 describe('dish photos', () => {
   it('a dish without a photo gets the generated placeholder only', () => {
@@ -7,21 +7,28 @@ describe('dish photos', () => {
       sources: [],
       blurhash: null,
       avgColor: null,
+      blurred: null,
     });
   });
 
-  it('a curated dish gets an Unsplash hotlink cropped around its focal point, in three widths', () => {
+  it('a curated dish is served from our own origin in three widths, AVIF and WebP, with no credit (ADR 0011)', () => {
+    expect(HOTLINKED).toBe(false);
     const photos = photosFor('d_oatmeal');
     const [first] = photos.sources;
-    expect(first?.provider).toBe('unsplash');
-    const url = new URL(first?.src ?? '');
-    expect(url.hostname).toBe('images.unsplash.com');
-    // The view-tracking parameter of the API guidelines stays on every size.
-    expect(url.searchParams.has('ixid')).toBe(true);
-    expect(url.searchParams.get('fit')).toBe('crop');
-    expect(url.searchParams.get('crop')).toBe('focalpoint');
+    expect(photos.sources).toHaveLength(1);
+    expect(first?.src).toBe('/dish-photos/unsplash-5gTixp6KwtI-f500x444-v1-720.webp');
     expect(first?.srcSet.split(', ')).toHaveLength(3);
-    expect(first?.providerUrl).toContain('utm_source=refectorio');
+    expect(first?.avifSrcSet?.split(', ')).toEqual([
+      '/dish-photos/unsplash-5gTixp6KwtI-f500x444-v1-480.avif 480w',
+      '/dish-photos/unsplash-5gTixp6KwtI-f500x444-v1-720.avif 720w',
+      '/dish-photos/unsplash-5gTixp6KwtI-f500x444-v1-960.avif 960w',
+    ]);
+    // Nothing points to a third-party host, and there is nothing to credit under the card.
+    for (const url of [first?.src, first?.srcSet, first?.avifSrcSet]) {
+      expect(url).not.toMatch(/https?:/);
+    }
+    expect(first?.credit).toBeUndefined();
+    expect(photos.blurred).toBe('/dish-photos/unsplash-5gTixp6KwtI-f500x444-v1-blur.webp');
     expect(photos.blurhash).toMatch(/^.{6,}$/);
   });
 

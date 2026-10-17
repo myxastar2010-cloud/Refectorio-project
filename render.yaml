@@ -11,6 +11,9 @@ services:
     envVars:
       - key: VITE_BASE
         value: /
+      # Dish photos from our own origin (ADR 0011). With `unsplash`, add https://images.unsplash.com to img-src below.
+      - key: PHOTO_HOSTING
+        value: self
       - key: HUSKY
         value: '0'
     headers:
@@ -21,13 +24,10 @@ services:
       - path: /index.html
         name: Cache-Control
         value: no-cache
-      # Dish photo names carry a content hash; the index of them may change with every build.
+      # Dish photo names carry the photo, its crop and the pipeline version (scripts/photos/files.mjs): never change.
       - path: /dish-photos/*
         name: Cache-Control
         value: public, max-age=31536000, immutable
-      - path: /dish-photos/index.json
-        name: Cache-Control
-        value: no-cache
       - path: /*
         name: X-Content-Type-Options
         value: nosniff
@@ -45,4 +45,4 @@ services:
         value: max-age=31536000
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"

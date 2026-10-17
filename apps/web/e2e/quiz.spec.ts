@@ -408,9 +408,16 @@ test.describe('safety', () => {
 });
 
 test.describe('quality', () => {
-  test('nothing leaves the site but the photos; no CSP violations', async ({ page }) => {
+  test('nothing leaves the site: the dish photos come from our own origin, no credit line, no CSP violations', async ({
+    page,
+  }) => {
     const hosts = new Set<string>();
-    page.on('request', (request) => hosts.add(new URL(request.url()).host));
+    const photos = new Set<string>();
+    page.on('request', (request) => {
+      const url = new URL(request.url());
+      hosts.add(url.host);
+      if (url.pathname.includes('/dish-photos/')) photos.add(url.pathname);
+    });
     await page.addInitScript(() => {
       const w = window as Window & { __csp?: string[] };
       w.__csp = [];
@@ -421,10 +428,17 @@ test.describe('quality', () => {
     await openQuiz(page);
     await playDishes(page, ['d', 'a', 'd', 's']);
     const own = new URL(page.url()).host;
-    const foreign = [...hosts].filter((host) => host !== own && host !== 'images.unsplash.com');
+    const foreign = [...hosts].filter((host) => host !== own);
     expect(foreign.filter((host) => !/kaspersky-labs\.com$/i.test(host))).toEqual([]);
-    expect([...hosts]).not.toContain('api.unsplash.com');
-    expect([...hosts]).not.toContain('api.pexels.com');
+    // The cards shown and the ones looked ahead: all of them from /dish-photos/ (ADR 0011).
+    expect(photos.size).toBeGreaterThanOrEqual(4);
+    await expect(page.getByText(/^Фото:/)).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /Unsplash/ })).toHaveCount(0);
+    const policy = await page
+      .locator('meta[http-equiv="Content-Security-Policy"]')
+      .getAttribute('content');
+    expect(policy).toContain("img-src 'self' data:;");
+    expect(policy).not.toContain('unsplash');
     expect(await page.evaluate(() => (window as Window & { __csp?: string[] }).__csp)).toEqual([]);
   });
 

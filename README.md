@@ -62,7 +62,7 @@ Refectorio не ставит диагнозы и не заменяет врач�
 ## Лицензия
 
 Код — [MIT](LICENSE). Шрифт Open Runde (скруглённый Inter) — SIL Open Font License 1.1. Иконки Tabler — MIT.
-Фото блюд — с [Unsplash](https://unsplash.com/?utm_source=refectorio&utm_medium=referral) по ссылкам сервиса, в репозитории
-их нет ([авторы](docs/photo-credits.md), [правила](docs/photo-licensing.md)).
+Фото блюд — с [Unsplash](https://unsplash.com/?utm_source=refectorio&utm_medium=referral) по лицензии Unsplash; сайт
+собирает их копии при сборке, в репозитории их нет ([авторы](docs/photo-credits.md), [правила](docs/photo-licensing.md)).
 Иллюстрации еды и фон карточки команды в `assets-src/` предоставлены командой; их лицензия уточняется
 (подробности — в [`assets-src/README.md`](assets-src/README.md)).

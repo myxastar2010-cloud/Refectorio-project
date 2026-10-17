@@ -30,7 +30,9 @@ export { candidates, score, selectNext, SELECTION, type Strategy } from './selec
 export { PRIOR_SKIP_BELIEF, SKIP_MODEL, skipProbability, updateSkipBelief } from './skip';
 export { bald, predictiveProbability, sigmoid } from './stats';
 export {
+  PHOTO_PIPELINE_VERSION,
   PHOTO_PROVIDERS,
+  photoFileBase,
   photoManifestSchema,
   photoSchema,
   type DishPhoto,

@@ -1,8 +1,18 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, type Plugin } from 'vite';
 import { site } from './src/content/site.ru';
+
+/**
+ * Where the dish photos come from (ADR 0011, D-048): `self` (default) — our own copies built by
+ * scripts/photos/materialize.mjs, served from this origin without a credit line; `unsplash` — the stage-2 hotlinks of
+ * images.unsplash.com with the credit line (the site then reads the full manifest, and render.yaml's CSP must allow
+ * that host again).
+ */
+const PHOTO_HOSTING = process.env.PHOTO_HOSTING === 'unsplash' ? 'unsplash' : 'self';
+const hotlinked = PHOTO_HOSTING === 'unsplash';
 
 /**
  * Preloads the Open Runde weights that the first screen needs (bold titles and buttons, semibold lead and cards),
@@ -50,8 +60,8 @@ const META_CSP =
     "default-src 'self'",
     "script-src 'self'",
     "style-src 'self' 'unsafe-inline'",
-    // Dish photos from Unsplash are hotlinked (API guidelines); nothing else leaves the site.
-    "img-src 'self' data: https://images.unsplash.com",
+    // Dish photos are served from this origin; the hotlink mode allows images.unsplash.com. Nothing else leaves the site.
+    `img-src 'self' data:${hotlinked ? ' https://images.unsplash.com' : ''}`,
     "font-src 'self'",
     "connect-src 'self'",
     "manifest-src 'self'",
@@ -101,6 +111,17 @@ function base(): string {
 
 export default defineConfig({
   base: base(),
+  define: { __PHOTO_HOSTING__: JSON.stringify(PHOTO_HOSTING) },
+  resolve: {
+    alias: hotlinked
+      ? {
+          // The hotlink mode needs the CDN addresses and authors, which the slim runtime copy leaves out.
+          '@refectorio/taste-core/data/photo-runtime.json': fileURLToPath(
+            new URL('../../packages/taste-core/data/photo-manifest.json', import.meta.url),
+          ),
+        }
+      : {},
+  },
   plugins: [
     react(),
     tailwindcss(),
