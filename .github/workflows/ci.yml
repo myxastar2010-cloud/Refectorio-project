@@ -25,11 +25,12 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      # Self-hosted dish photos (scripts/photos/materialize.mjs) are downloaded once per manifest version.
+      # Self-hosted dish photos (scripts/photos/materialize.mjs, ADR 0011): downloaded and encoded once per manifest and
+      # pipeline version; without the cache a clean run takes ≈ 4–6 min.
       - uses: actions/cache@v4
         with:
           path: .cache/dish-photos
-          key: dish-photos-${{ hashFiles('packages/taste-core/data/photo-manifest.json') }}
+          key: dish-photos-${{ hashFiles('packages/taste-core/data/photo-manifest.json', 'scripts/photos/files.mjs') }}
           restore-keys: dish-photos-
       - run: npm run lint
       - run: npm run typecheck

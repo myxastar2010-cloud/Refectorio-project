@@ -101,6 +101,7 @@ flowchart TB
   app[App.tsx<br/>сцены hero / about / quiz] -- "наведение, фокус, простой" --> load[loadQuiz.ts]
   load --> scene[QuizScene<br/>чанк теста ≤ 90 КБ gz]
   load --> photos[(photo-runtime.json<br/>свой чанк ≤ 25 КБ gz)]
+  photos -. "имена файлов" .-> files[(/dish-photos/<br/>фото с нашего сайта)]
   scene --> flow[flow/<br/>steps · machine · safety · persistence]
   scene --> stage[components/StepStage<br/>переходы шагов]
   stage --> steps[steps/<br/>варианты · Да/Нет · строки + колесо · чипы + «+» · текст]
@@ -154,9 +155,16 @@ flowchart LR
   finalize --> manifest[(photo-manifest.json<br/>метаданные, в git)]
   finalize --> runtime[(photo-runtime.json<br/>копия для сайта)]
   finalize --> credits[docs/photo-credits.md]
-  runtime --> card[Карточка блюда<br/>хотлинк images.unsplash.com]
+  manifest --> materialize[materialize.mjs<br/>при каждой сборке: скачать · 3:4 · AVIF/WebP · размытая копия]
+  materialize --> cache[(.cache/dish-photos<br/>вне git)]
+  materialize --> public[(public/dish-photos<br/>вне git, уходит на хостинг)]
+  runtime --> card[Карточка блюда<br/>фото с нашего сайта]
+  public --> card
 ```
 
 - Ключи читают только скрипты (переменная окружения или `.secrets/` вне git); сайт к API не обращается.
-- Цепочка на карточке: фото → (запасное фото) → заглушка из blurhash с названием блюда; после двух неудач подряд
-  игра перестаёт ждать сервис. Файлов фото в git нет — правила сервисов в `docs/photo-licensing.md`, ADR 0009.
+- Фото раздаёт наш сайт (ADR 0011, D-048): `materialize.mjs` собирает их при каждой сборке, имена файлов
+  (`<провайдер>-<id>-f<x>x<y>-v<версия>-<ширина>`) браузер строит сам по `photo-runtime.json`. Повторная сборка без
+  изменений пропускается по хэшу манифеста; сборка для публикации падает, если не хватает больше 5 % фото.
+- Цепочка на карточке: наше фото → заглушка из blurhash с названием блюда. Файлов фото в git нет — правила в
+  `docs/photo-licensing.md`. Флаг `PHOTO_HOSTING=unsplash` возвращает хотлинк с подписью этапа 2.

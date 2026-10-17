@@ -87,12 +87,12 @@ type Props = {
   readonly onSwipe: (answer: TasteAnswer, velocity: { vx: number; vy: number }) => boolean;
   /** The card moved: shares of the commit distances towards each answer (the buttons swell). */
   readonly onMove: (towards: { like: number; dislike: number; skip: number }) => void;
-  /** The photo source shown now (null: the placeholder) — for the credit line. */
-  readonly onSource: (source: PhotoSource | null) => void;
+  /** The photo source shown now (null: the placeholder) — for the credit line of the hotlink mode. */
+  readonly onSource?: ((source: PhotoSource | null) => void) | undefined;
 };
 
 /**
- * A dish card (ТЗ §9.1): the photo (chain: Unsplash hotlink / self-hosted → placeholder), the dish name in white at the
+ * A dish card (ТЗ §9.1): the photo (chain: our own copy → placeholder, ADR 0011), the dish name in white at the
  * top over the photo's own blurred placeholder masked by a gradient plus a tint that keeps the name ≥ 4.5:1 — no live
  * blur. Drag/swipe with pointer events on motion values; leaving and arriving are driven by presence.
  */
@@ -274,12 +274,12 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
   const [loaded, setLoaded] = useState(false);
   const source = photos.sources[step] ?? null;
   useEffect(() => {
-    onSource(loaded ? source : null);
+    onSource?.(loaded ? source : null);
   }, [loaded, source, onSource]);
   useEffect(() => {
     if (!source || loaded) return undefined;
     const timer = window.setTimeout(() => {
-      reportPhoto(source, false);
+      reportPhoto(false);
       setStep((s) => s + 1);
     }, TINDER.photoTimeoutMs);
     return () => {
@@ -336,11 +336,11 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
             fetchPriority={interactive ? 'high' : 'auto'}
             draggable={false}
             onLoad={() => {
-              reportPhoto(source, true);
+              reportPhoto(true);
               setLoaded(true);
             }}
             onError={() => {
-              reportPhoto(source, false);
+              reportPhoto(false);
               setLoaded(false);
               setStep((s) => s + 1);
             }}

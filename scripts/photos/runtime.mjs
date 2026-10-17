@@ -1,19 +1,11 @@
-// The site's copy of the photo manifest (ТЗ budget ≤ 25 KB gz): only the fields the photo chain reads in the browser.
-// The manifest keeps the rest (sizes, page links, choice and tracking dates) for the scripts and the credits page.
+// The site's copy of the photo manifest (ТЗ budget ≤ 25 KB gz): only what the browser needs to name the self-hosted
+// files (provider, id, focal — files.mjs) and to draw the placeholder (avgColor, blurhash). The manifest keeps the rest
+// (CDN source, authors, page links, choice and tracking dates) for the scripts and the credits page (ADR 0011).
 // finalize.mjs writes it next to the manifest; `node scripts/photos/runtime.mjs` rewrites it from the manifest.
 import { pathToFileURL } from 'node:url';
 import { MANIFEST_FILE, readJson, RUNTIME_MANIFEST_FILE, writeJson } from './lib.mjs';
 
-export const RUNTIME_FIELDS = [
-  'provider',
-  'id',
-  'src',
-  'author',
-  'authorUrl',
-  'focal',
-  'avgColor',
-  'blurhash',
-];
+export const RUNTIME_FIELDS = ['provider', 'id', 'focal', 'avgColor', 'blurhash'];
 
 const keep = (photo) => Object.fromEntries(RUNTIME_FIELDS.map((key) => [key, photo[key]]));
 

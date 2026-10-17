@@ -145,6 +145,25 @@
     --outline-w: calc(var(--hero-about-border) * var(--s));
   }
 
+  /* «Цены»: the same pill, shorter, left of «О проекте». Out of the flow: a wave host is position: relative, and two
+     of them in a row would push «О проекте» down by a pill. */
+  .site-header .pricing-pill {
+    position: absolute;
+  }
+
+  .pricing-pill {
+    --y: var(--hero-about-y);
+    --w: var(--hero-pricing-w);
+    --h: var(--hero-about-h);
+    left: calc(
+      100% - var(--hero-side) -
+        (var(--hero-about-w) + var(--hero-pills-gap) + var(--hero-pricing-w)) * var(--s)
+    );
+    border-radius: calc(var(--h) / 2 * var(--s));
+    font-size: calc(var(--type-pill-label-size) * var(--s));
+    --outline-w: calc(var(--hero-about-border) * var(--s));
+  }
+
   .hero-title,
   .hero-lead,
   .cta-slot {
@@ -352,7 +371,8 @@
   paint-order: stroke fill;
 }
 
-.about-pill {
+.about-pill,
+.pricing-pill {
   font-weight: var(--type-pill-label-weight);
   letter-spacing: var(--type-pill-label-tracking);
 }

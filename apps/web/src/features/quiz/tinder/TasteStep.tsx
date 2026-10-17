@@ -17,7 +17,8 @@ import { StepFrame } from '../components/StepFrame';
 import { fill, useQuiz } from '../quizContext';
 import { DishCard, type CardEnter, type CardExit } from './DishCard';
 import { GameControls, type Swell } from './GameControls';
-import { loadLocalPhotoIndex, preloadPhoto, type PhotoSource } from './photos';
+import { PhotoCredit } from './PhotoCredit';
+import { HOTLINKED, preloadPhoto, type PhotoSource } from './photos';
 import { TasteDebug } from './TasteDebug';
 import { sessionFor } from './tasteSession';
 
@@ -48,47 +49,6 @@ function answerOfKey(event: KeyboardEvent): TasteAnswer | null {
   if (event.code === 'KeyS' || event.key === 'ArrowDown') return 'skip';
   if (event.code === 'KeyD' || event.key === 'ArrowRight') return 'like';
   return null;
-}
-
-function Credit({ source }: { readonly source: PhotoSource | null }) {
-  if (!source) return <p className="quiz-game-credit" aria-hidden />;
-  const provider = quiz.taste.providers[source.provider];
-  const parts = quiz.taste.credit.split(/(\{author\}|\{provider\})/);
-  return (
-    <p className="quiz-game-credit">
-      {parts.map((part, index) => {
-        if (part === '{author}') {
-          return (
-            <a
-              key={index}
-              href={source.authorUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="focus-ring"
-              aria-label={fill(quiz.taste.creditLabel, { author: source.author, provider })}
-            >
-              {source.author}
-            </a>
-          );
-        }
-        if (part === '{provider}') {
-          return (
-            <a
-              key={index}
-              href={source.providerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="focus-ring"
-              aria-label={fill(quiz.taste.providerLabel, { provider })}
-            >
-              {provider}
-            </a>
-          );
-        }
-        return part;
-      })}
-    </p>
-  );
 }
 
 type Track = {
@@ -216,7 +176,6 @@ export function TasteStep() {
 
   // Lookahead: the card after each possible answer is fetched and decoded while this one is shown.
   useEffect(() => {
-    loadLocalPhotoIndex();
     if (!current) return undefined;
     return whenIdle(() => {
       for (const answer of TASTE_ANSWERS) {
@@ -285,7 +244,7 @@ export function TasteStep() {
               calm={calm}
               onSwipe={commit}
               onMove={onMove}
-              onSource={setCredit}
+              onSource={HOTLINKED ? setCredit : undefined}
             />
           ) : null}
         </AnimatePresence>
@@ -322,7 +281,7 @@ export function TasteStep() {
         ) : null}
       </div>
       <GameControls swell={swell} disabled={!current || complete || blocked} onAnswer={commit} />
-      <Credit source={current ? credit : null} />
+      {HOTLINKED ? <PhotoCredit source={current ? credit : null} /> : null}
       <AnimatePresence>
         {skipHint ? (
           <m.p

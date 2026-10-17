@@ -269,20 +269,28 @@ test.describe('the whole path', () => {
     await choose(page, 'Нет', 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
     await choose(page, 'В основном сидя', 'notes');
-    // The honest line comes after 40 s: the page clock runs them in a moment.
+    // The honest line comes after 40 s: the page clock jumps over them. A jump, not runFor: running 45 s of animation
+    // frames one by one took WebKit most of the test's budget (a timeout under load in the stage-3 baseline).
     await page.clock.install();
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
-    await page.clock.runFor(45_000);
-    // Once on screen and once in the status region (it is announced): the visible line.
-    await expect(
-      page.locator('.quiz-finale-after').getByText(/мы дорабатываем генерацию/),
-    ).toBeVisible();
+    // Jumps of 5 s until the line is there: the finale's chunk and timers may come a little later under load, and a
+    // jump fires only the timers that exist by then.
+    const honest = page.locator('.quiz-finale-after').getByText(/мы дорабатываем генерацию/);
+    await expect
+      .poll(
+        async () => {
+          await page.clock.fastForward(5_000);
+          return honest.isVisible();
+        },
+        { timeout: 40_000 },
+      )
+      .toBe(true);
     await expect(
       page.getByRole('button', { name: 'Как мы используем ваши данные?' }),
     ).toBeVisible();
     await page.getByRole('button', { name: 'Пройти тест заново' }).click();
-    await page.clock.runFor(5_000);
+    await page.clock.fastForward(5_000);
     await onScreen(page, 'taste', 'Выберите блюдо');
     await expect.poll(async () => (await draft(page))?.answers.tasteDecisions.length ?? 0).toBe(0);
   });
@@ -307,6 +315,8 @@ test.describe('the wheel', () => {
 
 test.describe('safety', () => {
   test('a teenager: no weight goals, a kind line instead', async ({ page }) => {
+    // The whole way from the game to the goal (slow in WebKit under a full parallel run).
+    test.slow();
     await openQuiz(page);
     await playDishes(page, TEN_DECISIVE);
     await page.getByRole('button', { name: /^Пол/ }).click();
@@ -406,10 +416,51 @@ test.describe('safety', () => {
   });
 });
 
+test.describe('the privacy sheet', () => {
+  test('grows out of its label, blurs the step behind, and returns focus to the label', async ({
+    page,
+  }) => {
+    await openQuiz(page);
+    const label = page.getByRole('button', { name: 'Как мы используем ваши данные?' });
+    await label.click();
+    const sheet = page.getByRole('dialog', { name: 'Как мы используем ваши данные' });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByText(/с нашего сайта/)).toBeVisible();
+    // Nothing about photo services or their authors any more (ТЗ этапа 3, 4.3).
+    await expect(sheet).not.toContainText(/Unsplash|IP-адрес|Авторы фотографий/);
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const frame = document.querySelector('.quiz-frame');
+          return frame ? getComputedStyle(frame).filter : null;
+        }),
+      )
+      .toContain('blur');
+    await page.keyboard.press('Escape');
+    await expect(sheet).toHaveCount(0);
+    await expect(label).toBeFocused();
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const frame = document.querySelector('.quiz-frame');
+          return frame ? getComputedStyle(frame).filter : null;
+        }),
+      )
+      .toBe('none');
+  });
+});
+
 test.describe('quality', () => {
-  test('nothing leaves the site but the photos; no CSP violations', async ({ page }) => {
+  test('nothing leaves the site: the dish photos come from our own origin, no credit line, no CSP violations', async ({
+    page,
+  }) => {
     const hosts = new Set<string>();
-    page.on('request', (request) => hosts.add(new URL(request.url()).host));
+    const photos = new Set<string>();
+    page.on('request', (request) => {
+      const url = new URL(request.url());
+      hosts.add(url.host);
+      if (url.pathname.includes('/dish-photos/')) photos.add(url.pathname);
+    });
     await page.addInitScript(() => {
       const w = window as Window & { __csp?: string[] };
       w.__csp = [];
@@ -420,10 +471,24 @@ test.describe('quality', () => {
     await openQuiz(page);
     await playDishes(page, ['d', 'a', 'd', 's']);
     const own = new URL(page.url()).host;
-    const foreign = [...hosts].filter((host) => host !== own && host !== 'images.unsplash.com');
+    const foreign = [...hosts].filter((host) => host !== own);
     expect(foreign.filter((host) => !/kaspersky-labs\.com$/i.test(host))).toEqual([]);
-    expect([...hosts]).not.toContain('api.unsplash.com');
-    expect([...hosts]).not.toContain('api.pexels.com');
+    // The cards shown and the ones looked ahead: all of them from /dish-photos/ (ADR 0011).
+    expect(photos.size).toBeGreaterThanOrEqual(4);
+    await expect(page.getByText(/^Фото:/)).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /Unsplash/ })).toHaveCount(0);
+    const policy = await page
+      .locator('meta[http-equiv="Content-Security-Policy"]')
+      .getAttribute('content');
+    // Antivirus web protection (Kaspersky on the team's computers) adds its own hosts to every directive.
+    const imgSrc = (policy ?? '')
+      .split(';')
+      .map((directive) => directive.trim().split(/\s+/))
+      .find(([name]) => name === 'img-src')
+      ?.slice(1)
+      .filter((source) => !/kaspersky-labs\.com/i.test(source));
+    expect(imgSrc).toEqual(["'self'", 'data:']);
+    expect(policy).not.toContain('unsplash');
     expect(await page.evaluate(() => (window as Window & { __csp?: string[] }).__csp)).toEqual([]);
   });
 

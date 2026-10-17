@@ -249,8 +249,6 @@ export const quizContentSchema = z.object({
     deleteYes: text,
     deleteNo: text,
     deleted: text,
-    credits: text,
-    creditsUrl: z.url(),
   }),
   finale: z.object({
     captions: z.array(z.object({ text, icon: z.string().min(1) })).min(6),

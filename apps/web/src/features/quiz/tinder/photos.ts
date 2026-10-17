@@ -1,18 +1,23 @@
 import type { DishPhotoRuntime, PhotoRuntimeManifest } from '@refectorio/taste-core';
+import { photoFileBase } from '@refectorio/taste-core';
 import runtimeJson from '@refectorio/taste-core/data/photo-runtime.json';
 import { decode } from 'blurhash';
 
 /**
- * The runtime photo chain of a dish card (ТЗ §9.6): primary (an Unsplash hotlink, or a self-hosted Pexels file when
- * one was materialized) → the curated Unsplash fallback → a generated placeholder (blurhash or average colour + the
- * dish name). A source that fails or is late (TINDER.photoTimeoutMs) moves down the chain: never a broken image.
+ * The runtime photo chain of a dish card (ADR 0011): the photo from our own origin (built from the manifest by
+ * scripts/photos/materialize.mjs) → a generated placeholder (blurhash or average colour + the dish name). A source that
+ * fails or is late (TINDER.photoTimeoutMs) moves down the chain: never a broken image. The build flag
+ * PHOTO_HOSTING=unsplash switches back to hotlinking images.unsplash.com with a credit line (vite.config.ts).
  * The data is the site's copy of the manifest (taste-core/data/photo-runtime.json, checked against the validated
- * manifest by the scripts' tests): a chunk of its own (ТЗ: ≤ 25 KB gz) — loadQuiz also imports it, which keeps it out
- * of the quiz chunk and fetches both in parallel.
+ * manifest by the scripts' tests): a chunk of its own — loadQuiz also imports it, which keeps it out of the quiz chunk
+ * and fetches both in parallel.
  */
 const manifest = runtimeJson as unknown as PhotoRuntimeManifest;
 
-/** Card widths of the image set (srcset 480w/720w/960w, same as scripts/photos/crop.mjs). */
+/** Hotlinks with a credit line instead of our own copies (build flag, D-048). */
+export const HOTLINKED = __PHOTO_HOSTING__ === 'unsplash';
+
+/** Card widths of the image set (srcset 480w/720w/960w, same as scripts/photos/files.mjs). */
 export const PHOTO_WIDTHS = [480, 720, 960] as const;
 /** The card's aspect (448 × 583 in the mockup). */
 export const CARD_ASPECT = 583 / 448;
@@ -21,15 +26,12 @@ export const PHOTO_SIZES = '(max-width: 47.99rem) 88vw, 24vw';
 
 export type PhotoSource = {
   readonly key: string;
-  readonly provider: DishPhotoRuntime['provider'];
   readonly src: string;
   readonly srcSet: string;
   /** A self-hosted AVIF set (`<source type="image/avif">`). */
   readonly avifSrcSet?: string;
-  readonly author: string;
-  readonly authorUrl: string;
-  /** The provider's site with the referral parameters its guidelines ask for. */
-  readonly providerUrl: string;
+  /** Hotlink mode only: the credit line under the card. */
+  readonly credit?: { readonly author: string; readonly authorUrl: string };
 };
 
 export type DishPhotos = {
@@ -37,36 +39,27 @@ export type DishPhotos = {
   /** For the placeholder and the soft gradient under the dish name. */
   readonly blurhash: string | null;
   readonly avgColor: string | null;
+  /** The small pre-blurred copy behind the dish info (self-hosted only). */
+  readonly blurred: string | null;
 };
 
-const UNSPLASH_HOME = 'https://unsplash.com/?utm_source=refectorio&utm_medium=referral';
-const PEXELS_HOME = 'https://www.pexels.com';
+const fileUrl = (photo: DishPhotoRuntime, suffix: string) =>
+  `${import.meta.env.BASE_URL}dish-photos/${photoFileBase(photo)}-${suffix}`;
 
-/** Self-hosted Pexels files: which dishes were materialized (public/dish-photos/index.json, fetched once). */
-type LocalIndex = {
-  readonly widths: readonly number[];
-  readonly files: Readonly<Record<string, string>>;
-};
-let localIndex: LocalIndex | null = null;
-let localIndexRequested = false;
-export function loadLocalPhotoIndex(): void {
-  if (localIndexRequested) return;
-  localIndexRequested = true;
-  const hasPexels = Object.values(manifest.photos).some((set) => set.primary.provider === 'pexels');
-  if (!hasPexels) return;
-  void fetch(`${import.meta.env.BASE_URL}dish-photos/index.json`)
-    .then((response) => (response.ok ? (response.json() as Promise<LocalIndex>) : null))
-    .then((index) => {
-      localIndex = index;
-    })
-    .catch(() => {
-      localIndex = null;
-    });
+function selfSource(photo: DishPhotoRuntime): PhotoSource {
+  return {
+    key: `${photo.provider}:${photo.id}`,
+    src: fileUrl(photo, '720.webp'),
+    srcSet: PHOTO_WIDTHS.map((w) => `${fileUrl(photo, `${w}.webp`)} ${w}w`).join(', '),
+    avifSrcSet: PHOTO_WIDTHS.map((w) => `${fileUrl(photo, `${w}.avif`)} ${w}w`).join(', '),
+  };
 }
 
-function unsplashSource(photo: DishPhotoRuntime): PhotoSource {
+function hotlinkSource(photo: DishPhotoRuntime): PhotoSource | null {
+  if (photo.provider !== 'unsplash' || !photo.src) return null;
+  const raw = photo.src;
   const sized = (width: number) => {
-    const url = new URL(photo.src);
+    const url = new URL(raw);
     url.searchParams.set('w', String(width));
     url.searchParams.set('h', String(Math.round(width * CARD_ASPECT)));
     url.searchParams.set('fit', 'crop');
@@ -77,32 +70,14 @@ function unsplashSource(photo: DishPhotoRuntime): PhotoSource {
     url.searchParams.set('q', '70');
     return url.toString();
   };
-  return {
-    key: `unsplash:${photo.id}`,
-    provider: 'unsplash',
+  const source = {
+    key: `hotlink:${photo.id}`,
     src: sized(720),
     srcSet: PHOTO_WIDTHS.map((w) => `${sized(w)} ${w}w`).join(', '),
-    author: photo.author,
-    authorUrl: photo.authorUrl,
-    providerUrl: UNSPLASH_HOME,
   };
-}
-
-function localSource(dishId: string, photo: DishPhotoRuntime): PhotoSource | null {
-  const hash = localIndex?.files[dishId];
-  if (!hash) return null;
-  const file = (width: number, ext: 'avif' | 'webp') =>
-    `${import.meta.env.BASE_URL}dish-photos/${dishId}-${hash}-${width}.${ext}`;
-  return {
-    key: `pexels:${photo.id}`,
-    provider: 'pexels',
-    src: file(720, 'webp'),
-    srcSet: PHOTO_WIDTHS.map((w) => `${file(w, 'webp')} ${w}w`).join(', '),
-    avifSrcSet: PHOTO_WIDTHS.map((w) => `${file(w, 'avif')} ${w}w`).join(', '),
-    author: photo.author,
-    authorUrl: photo.authorUrl,
-    providerUrl: PEXELS_HOME,
-  };
+  return photo.author && photo.authorUrl
+    ? { ...source, credit: { author: photo.author, authorUrl: photo.authorUrl } }
+    : source;
 }
 
 /** A curated photo exists (the game offers only these dishes). */
@@ -111,31 +86,32 @@ export const hasPhoto = (dishId: string): boolean => dishId in manifest.photos;
 /** The chain of a dish (empty: placeholder only). */
 export function photosFor(dishId: string): DishPhotos {
   const set = manifest.photos[dishId];
-  if (!set) return { sources: [], blurhash: null, avgColor: null };
+  if (!set) return { sources: [], blurhash: null, avgColor: null, blurred: null };
   const sources: PhotoSource[] = [];
   for (const photo of [set.primary, set.fallback]) {
     if (!photo) continue;
-    const source =
-      photo.provider === 'unsplash' ? unsplashSource(photo) : localSource(dishId, photo);
-    if (source && (source.provider !== 'unsplash' || unsplashHealthy())) sources.push(source);
+    const source = HOTLINKED ? (hotlinkHealthy() ? hotlinkSource(photo) : null) : selfSource(photo);
+    if (source) sources.push(source);
   }
   return {
     sources,
     blurhash: set.primary.blurhash,
     avgColor: set.primary.avgColor,
+    blurred: HOTLINKED ? null : fileUrl(set.primary, 'blur.webp'),
   };
 }
 
 /**
- * Provider health (ТЗ §9.6, D-037): images.unsplash.com may be slow or blocked for some networks. After two late or
- * failed photos in a row the game stops waiting for it and shows placeholders at once (until the page reloads).
+ * Hotlink health (D-037): images.unsplash.com may be slow or blocked for some networks. After two late or failed
+ * photos in a row the game stops waiting for it and shows placeholders at once (until the page reloads). Our own
+ * files are never given up on: a missing one simply falls back to its placeholder.
  */
-let unsplashFailures = 0;
-const UNSPLASH_GIVE_UP_AFTER = 2;
-export const unsplashHealthy = () => unsplashFailures < UNSPLASH_GIVE_UP_AFTER;
-export function reportPhoto(source: PhotoSource, ok: boolean): void {
-  if (source.provider !== 'unsplash') return;
-  unsplashFailures = ok ? 0 : unsplashFailures + 1;
+let hotlinkFailures = 0;
+const HOTLINK_GIVE_UP_AFTER = 2;
+const hotlinkHealthy = () => hotlinkFailures < HOTLINK_GIVE_UP_AFTER;
+export function reportPhoto(ok: boolean): void {
+  if (!HOTLINKED) return;
+  hotlinkFailures = ok ? 0 : hotlinkFailures + 1;
 }
 
 /** Lookahead (ТЗ §9.1): the next cards' photos are fetched and decoded while this one is shown. */

@@ -186,6 +186,8 @@
   --hero-about-w: 210;
   --hero-about-h: 88;
   --hero-about-border: 2;
+  --hero-pricing-w: 150; /* «Цены»: the «О проекте» pill, as wide as its shorter label needs */
+  --hero-pills-gap: 16;
   --hero-title-baseline: 278.5;
   --hero-lead-baseline: 518;
   --hero-cta-y: 595;

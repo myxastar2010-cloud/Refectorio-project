@@ -319,14 +319,6 @@ export function RowsStep({ step }: { readonly step: Step }) {
           </label>
         </div>
       ) : null}
-      {step === 'goalSetup' && recommended && !maintain && !open ? (
-        <p className="quiz-note">
-          {fill(older ? quiz.goalSetup.recommendedOlder : quiz.goalSetup.recommended, {
-            min: recommended.minKg,
-            max: recommended.maxKg,
-          })}
-        </p>
-      ) : null}
       {implausible ? (
         <p className="quiz-note quiz-note--warn" role="alert">
           {quiz.body.implausible}

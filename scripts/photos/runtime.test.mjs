@@ -34,6 +34,10 @@ describe("the site's copy of the photo manifest", () => {
       },
     });
     expect(Object.keys(copy.photos.d_test.primary)).toEqual(RUNTIME_FIELDS);
+    // The photos are served from our own origin: no CDN address and no credit data in the browser (ADR 0011).
+    for (const key of ['src', 'author', 'authorUrl', 'pageUrl']) {
+      expect(copy.photos.d_test.primary).not.toHaveProperty(key);
+    }
     expect(copy.photos.d_test.fallback).toBeUndefined();
   });
 });

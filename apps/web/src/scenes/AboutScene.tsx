@@ -1,4 +1,4 @@
-import { IconArrowUpRight, IconChevronUp } from '@tabler/icons-react';
+import { IconApple, IconArrowUpRight, IconChevronUp } from '@tabler/icons-react';
 import { m, type MotionStyle } from 'motion/react';
 import { useEffect, useRef, type Ref } from 'react';
 import { site } from '../content/site.ru';
@@ -9,7 +9,6 @@ import { TILT } from '../motion/tokens';
 import { TiltGlare, type TiltHandle } from '../motion/TiltGlare';
 import { useWave } from '../motion/useWave';
 import { WaveLayer } from '../motion/WaveHover';
-import { images } from '../lib/assets';
 import { aboutCardVariants, aboutTitleVariants, type Phase } from './choreography';
 import { Lines } from '../components/Lines';
 
@@ -28,6 +27,8 @@ type Props = {
   readonly onOpenTeam: () => void;
   /** Receives the «Ещё» button so focus can return to it after the dialog closes. */
   readonly onMoreRef: (node: HTMLButtonElement | null) => void;
+  /** A short message (the project links do not work yet). */
+  readonly onNotify: (message: string) => void;
 };
 
 /** Part 2 «О проекте»: the title (a button back to the start) and the team and project cards (ТЗ 6.3). */
@@ -41,6 +42,7 @@ export function AboutScene({
   tileRef,
   onOpenTeam,
   onMoreRef,
+  onNotify,
 }: Props) {
   const calm = useCalmMotion();
   const hidden = phase === 'hidden';
@@ -144,14 +146,9 @@ export function AboutScene({
       >
         <TiltGlare maxDeg={TILT.infoCardMaxDeg} className="info-surface">
           <p className="info-label at text-at">{project.label}</p>
-          <picture className="info-tile at box">
-            <source type="image/avif" srcSet={images[project.image].avifSrcSet} />
-            <img
-              src={images[project.image].fallback}
-              srcSet={images[project.image].webpSrcSet}
-              alt={project.imageAlt}
-            />
-          </picture>
+          <div className="info-tile at box project-tile" role="img" aria-label={project.logoAlt}>
+            <IconApple aria-hidden className="project-tile-icon" stroke={2} />
+          </div>
           <h3 id="project-card-name" className="info-name at text-at">
             <Lines lines={project.nameLines} />
           </h3>
@@ -161,7 +158,12 @@ export function AboutScene({
           <ul className="info-links at">
             {project.links.map((link) => (
               <li key={link.label}>
-                <SoonLink label={link.label} href={link.href} hint={link.soonHint} />
+                <SoonLink
+                  label={link.label}
+                  onPress={() => {
+                    onNotify(site.notices.workingOnIt);
+                  }}
+                />
               </li>
             ))}
           </ul>
@@ -173,14 +175,15 @@ export function AboutScene({
 
 type SoonLinkProps = {
   readonly label: string;
-  readonly href: string | null;
-  readonly hint: string;
+  readonly onPress: () => void;
 };
 
-/** Link with a round arrow; while the address is unknown it is disabled with a «Скоро» hint, the wave still works. */
-function SoonLink({ label, href, hint }: SoonLinkProps) {
-  const { setHost: linkRef, handlers: linkWave, clipPath: linkClip } = useWave<HTMLAnchorElement>();
-  const disabled = href === null;
+/**
+ * A project link with a round arrow. The source code and the documentation are not public yet: a press says «Мы
+ * работаем над этим» (a button — it goes nowhere). The wave works as on every control.
+ */
+function SoonLink({ label, onPress }: SoonLinkProps) {
+  const { setHost, handlers, clipPath, act } = useWave<HTMLButtonElement>();
   const content = (tone: 'base' | 'wave') => (
     <>
       <span>{label}</span>
@@ -190,26 +193,19 @@ function SoonLink({ label, href, hint }: SoonLinkProps) {
     </>
   );
   return (
-    <a
-      ref={linkRef}
+    <button
+      ref={setHost}
+      type="button"
       className="info-link wave-host focus-ring"
-      href={href ?? undefined}
-      role={disabled ? 'link' : undefined}
-      tabIndex={0}
-      aria-disabled={disabled || undefined}
-      title={disabled ? hint : undefined}
-      target={disabled ? undefined : '_blank'}
-      rel={disabled ? undefined : 'noreferrer'}
       onClick={(event) => {
-        if (disabled) event.preventDefault();
+        act(event, onPress);
       }}
-      {...linkWave}
+      {...handlers}
     >
       <span className="wave-content info-link-content">{content('base')}</span>
-      <WaveLayer clipPath={linkClip} className="wave-layer--accent info-link-content">
+      <WaveLayer clipPath={clipPath} className="wave-layer--accent info-link-content">
         {content('wave')}
       </WaveLayer>
-      {disabled && <span className="visually-hidden">{` (${hint})`}</span>}
-    </a>
+    </button>
   );
 }

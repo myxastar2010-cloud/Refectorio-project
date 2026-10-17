@@ -143,6 +143,7 @@ export function QuizScene({ instant, onExit, params }: Props) {
       <m.section
         className="quiz"
         data-screen={screen}
+        data-dialog-open={privacyOpener !== false || undefined}
         aria-labelledby="quiz-step-title"
         exit={{ zIndex: 0 }}
       >

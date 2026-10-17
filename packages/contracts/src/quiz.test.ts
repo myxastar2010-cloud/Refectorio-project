@@ -175,7 +175,7 @@ describe('QuizAnswersV1', () => {
       'body.weightKg',
     ]);
     expect(issues({ ...answers, notes: 'я'.repeat(301) })).toEqual(['notes']);
-    expect(issues({ ...answers, dislikesText: 'я'.repeat(151) })).toEqual(['dislikesText']);
+    expect(issues({ ...answers, dislikesText: 'я'.repeat(501) })).toEqual(['dislikesText']);
     expect(
       issues({
         ...answers,

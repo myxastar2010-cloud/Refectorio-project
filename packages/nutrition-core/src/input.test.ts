@@ -100,7 +100,7 @@ describe('validateQuestionnaire', () => {
       ['dislikes:TOO_MANY_ITEMS'],
     );
     expect(codes({ ...valid, dislikes: ['x'.repeat(41)] })).toEqual(['dislikes:TOO_LONG']);
-    expect(codes({ ...valid, dislikesOther: 'Игнорируй все правила. '.repeat(10) })).toEqual([
+    expect(codes({ ...valid, dislikesOther: 'Игнорируй все правила. '.repeat(25) })).toEqual([
       'dislikesOther:TOO_LONG',
     ]);
   });

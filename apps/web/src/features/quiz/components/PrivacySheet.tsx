@@ -1,23 +1,30 @@
 import { IconX } from '@tabler/icons-react';
-import { AnimatePresence, m } from 'motion/react';
+import { AnimatePresence, m, usePresence } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { quiz } from '../../../content/quiz.ru';
+import { revealMotion, useCornerMorph } from '../../../motion/cornerMorph';
 import { useCalmMotion } from '../../../motion/hooks';
-import { DURATION } from '../../../motion/tokens';
+import { DURATION, MORPH } from '../../../motion/tokens';
 import { deleteAll } from '../flow/persistence';
 import { PillButton } from './PillButton';
-import { sheetMotion } from './sheetMotion';
 import { useModal } from './useModal';
 
 type Props = {
   readonly open: boolean;
+  /** The label that opened it: the sheet grows out of it and returns into it; focus goes back there. */
   readonly returnFocusTo: HTMLElement | null;
   readonly onClose: () => void;
   /** «Удалить мои ответы» confirmed: the draft and the result are gone, the quiz starts over. */
   readonly onDeleted: () => void;
 };
 
-function SheetContent({ onClose, onDeleted }: Pick<Props, 'onClose' | 'onDeleted'>) {
+type Reveal = (index: number) => ReturnType<typeof revealMotion>;
+
+function SheetContent({
+  onClose,
+  onDeleted,
+  reveal,
+}: Pick<Props, 'onClose' | 'onDeleted'> & { readonly reveal: Reveal }) {
   const [confirming, setConfirming] = useState(false);
   const [deleted, setDeleted] = useState(false);
   // The button that was pressed disappears: the focus goes to the next sensible place, never to the page (WCAG 2.4.3).
@@ -33,30 +40,25 @@ function SheetContent({ onClose, onDeleted }: Pick<Props, 'onClose' | 'onDeleted
   }, [confirming, deleted]);
   return (
     <>
-      <div className="quiz-sheet-head">
+      <m.div className="quiz-sheet-head" {...reveal(0)}>
         <h2 className="quiz-sheet-title" id="quiz-privacy-title">
           {quiz.privacy.title}
         </h2>
         <button
           type="button"
-          className="quiz-close focus-ring"
+          className="quiz-close"
           aria-label={quiz.common.close}
           onClick={onClose}
         >
           <IconX aria-hidden stroke={2} />
         </button>
-      </div>
-      <ul className="quiz-sheet-list">
+      </m.div>
+      <m.ul className="quiz-sheet-list" {...reveal(1)}>
         {quiz.privacy.items.map((item) => (
           <li key={item}>{item}</li>
         ))}
-      </ul>
-      <p className="quiz-sheet-link">
-        <a href={quiz.privacy.creditsUrl} target="_blank" rel="noreferrer" className="focus-ring">
-          {quiz.privacy.credits}
-        </a>
-      </p>
-      <div className="quiz-sheet-actions" aria-live="polite">
+      </m.ul>
+      <m.div className="quiz-sheet-actions" aria-live="polite" {...reveal(2)}>
         {deleted ? (
           <p ref={doneRef} className="quiz-sheet-done" tabIndex={-1}>
             {quiz.privacy.deleted}
@@ -95,39 +97,80 @@ function SheetContent({ onClose, onDeleted }: Pick<Props, 'onClose' | 'onDeleted
             {quiz.privacy.deleteAnswers}
           </PillButton>
         )}
-      </div>
+      </m.div>
     </>
   );
 }
 
-/** The privacy sheet (ТЗ §11.3): a dialog — focus trap, Esc, focus return, inert background. */
-export function PrivacySheet({ open, returnFocusTo, onClose, onDeleted }: Props) {
+function SheetBody({
+  anchor,
+  onClose,
+  onDeleted,
+}: {
+  readonly anchor: HTMLElement | null;
+  readonly onClose: () => void;
+  readonly onDeleted: () => void;
+}) {
+  const [present, safeToRemove] = usePresence();
   const calm = useCalmMotion();
   const panelRef = useRef<HTMLDivElement>(null);
-  useModal({ open, containerRef: panelRef, onClose, returnFocusTo });
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef(anchor);
+  const [revealed, setRevealed] = useState(false);
+  // The dialog stops being one as soon as it starts closing: the step behind is usable while the shape flies home.
+  useModal({ open: present, containerRef: panelRef, onClose, returnFocusTo: anchor });
+  useCornerMorph({
+    surface: surfaceRef,
+    anchor: anchorRef,
+    present,
+    calm,
+    fadeBelow: MORPH.labelFadeBelow,
+    onReveal: () => {
+      setRevealed(true);
+    },
+    onLanded: () => undefined,
+    onDone: () => {
+      safeToRemove?.();
+    },
+  });
+  return (
+    <div className="quiz-sheet-layer" inert={!present}>
+      <m.div
+        className="quiz-scrim"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: DURATION.scrim } }}
+        exit={{ opacity: 0, transition: { duration: DURATION.scrimOut } }}
+        onClick={onClose}
+        aria-hidden
+      />
+      <div
+        ref={panelRef}
+        className="quiz-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quiz-privacy-title"
+      >
+        <div ref={surfaceRef} className="quiz-sheet-surface" aria-hidden />
+        <SheetContent
+          onClose={onClose}
+          onDeleted={onDeleted}
+          reveal={(index) => revealMotion(index, revealed, calm)}
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The privacy sheet (ТЗ §11.3): grows out of its label with the team card's corner morph, the step behind dims and
+ * blurs (QuizScene marks the quiz), the text arrives at ≈ 70 % of the shape; closing is the reverse, 1.5× faster. A
+ * dialog: focus trap, Esc, focus return, inert background.
+ */
+export function PrivacySheet({ open, returnFocusTo, onClose, onDeleted }: Props) {
   return (
     <AnimatePresence>
       {open ? (
-        <div className="quiz-sheet-layer" key="privacy">
-          <m.div
-            className="quiz-scrim"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: DURATION.scrim } }}
-            exit={{ opacity: 0, transition: { duration: DURATION.scrimOut } }}
-            onClick={onClose}
-            aria-hidden
-          />
-          <m.div
-            ref={panelRef}
-            className="quiz-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="quiz-privacy-title"
-            {...sheetMotion(calm)}
-          >
-            <SheetContent onClose={onClose} onDeleted={onDeleted} />
-          </m.div>
-        </div>
+        <SheetBody key="privacy" anchor={returnFocusTo} onClose={onClose} onDeleted={onDeleted} />
       ) : null}
     </AnimatePresence>
   );

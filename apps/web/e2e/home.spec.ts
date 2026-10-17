@@ -300,7 +300,7 @@ test.describe('quality', () => {
     const errors = collectErrors(page);
     await page.goto('./?seed=1');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Питаться полезно и вкусно сейчас',
+      'Форма мечты начинается с тарелки',
     );
     const faces = await page.evaluate(async () => {
       const loaded = await document.fonts.load('700 16px "Open Runde"', 'Питаться Refectorio');
@@ -358,5 +358,93 @@ test.describe('quality', () => {
     await page.getByRole('button', { name: /Ещё о команде/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     expect(await seriousViolations(page)).toEqual([]);
+  });
+
+  test('accessibility: the plans card has no serious violations', async ({ page }) => {
+    await page.goto('./?seed=1&freeze=1');
+    await settled(page, 'hero');
+    await page.getByRole('button', { name: 'Цены' }).click();
+    await expect(page.getByRole('dialog', { name: 'Выберите свой темп' })).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+  });
+});
+
+test.describe('«Цены»', () => {
+  const pricing = (page: Page) => page.getByRole('button', { name: 'Цены' });
+  const card = (page: Page) => page.getByRole('dialog', { name: 'Выберите свой темп' });
+
+  test('the plans grow out of «Цены», blur the page, and close back with focus on «Цены»', async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await page.goto('./?seed=1');
+    await settled(page, 'hero');
+    await pricing(page).click();
+    await expect(card(page)).toBeVisible();
+    for (const plan of ['Бесплатно', 'Premium', 'Для компаний']) {
+      await expect(card(page).getByRole('heading', { name: plan })).toBeVisible();
+    }
+    await expect(card(page)).toContainText('299 ₽');
+    await expect(card(page)).toContainText('1 990 ₽ в год');
+    await expect(card(page)).toContainText('150 ₽');
+    // The page behind blurs (the heading carries the filter while the card is open).
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const title = document.querySelector('.hero-title');
+          return title ? getComputedStyle(title).filter : null;
+        }),
+      )
+      .toContain('blur');
+    // Keys and the wheel do not change the scene while the card is open.
+    await page.mouse.wheel(0, 120);
+    await expect(scene(page)).toHaveAttribute('data-scene', 'hero');
+    await page.keyboard.press('Escape');
+    await expect(card(page)).toHaveCount(0);
+    await expect(pricing(page)).toBeFocused();
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const title = document.querySelector('.hero-title');
+          return title ? getComputedStyle(title).filter : null;
+        }),
+      )
+      .toBe('none');
+    expect(errors).toEqual([]);
+  });
+
+  test('a paid plan says there is no payment yet; «Начать бесплатно» opens the quiz', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=1');
+    await settled(page, 'hero');
+    await pricing(page).click();
+    await card(page).getByRole('button', { name: 'Оформить подписку' }).click();
+    await expect(
+      page.getByRole('status').getByText('Это проект, тут пока нет оплаты'),
+    ).toBeVisible();
+    await card(page).getByRole('button', { name: 'Подключить компанию' }).click();
+    await expect(
+      page.getByRole('status').getByText('Это проект, тут пока нет оплаты'),
+    ).toBeVisible();
+    await card(page).getByRole('button', { name: 'Начать бесплатно' }).click();
+    await expect(card(page)).toHaveCount(0);
+    await expect(scene(page)).toHaveAttribute('data-scene', 'quiz');
+    // In the quiz the «Цены» pill steps aside.
+    await expect(pricing(page)).toHaveCount(0);
+  });
+
+  test('the project card: the apple logo, and its links say «Мы работаем над этим»', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=1#about');
+    await settled(page, 'about');
+    await expect(page.getByRole('img', { name: 'Логотип Refectorio — яблоко' })).toBeVisible();
+    for (const label of ['Исходный код', 'Документация']) {
+      await page.getByRole('button', { name: label }).click();
+      await expect(page.getByRole('status').getByText('Мы работаем над этим')).toBeVisible();
+    }
+    // Nothing opened in a new tab.
+    expect(page.context().pages()).toHaveLength(1);
   });
 });
