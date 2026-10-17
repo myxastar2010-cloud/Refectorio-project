@@ -2,16 +2,17 @@ import type { SiteContent } from './schema';
 
 /**
  * All user-facing text of the site (see .claude/rules/content.md).
- * Mockup texts are kept; only typos and punctuation are fixed:
- * «то что» → «то, что»; «ИИ помощник» → «ИИ-помощник»; « поможет» → «Поможет»;
- * «настроивайте» → «настраивайте»; «Ясинский алексей» → «Ясинский Алексей»;
- * «Название Проекта» (placeholder) → «Refectorio».
+ * 17.10: the team asked for new, «selling» slogans — the site sells the goal, not the menu — and for the «Цены»
+ * block (plans from the project's business model). The texts of part 1 and of the project card are therefore new;
+ * the rest keeps the mockups with typos fixed («Ясинский алексей» → «Ясинский Алексей», «Название Проекта» →
+ * «Refectorio»).
  */
 export const site = {
   meta: {
     lang: 'ru',
-    title: 'Refectorio — питаться полезно и вкусно',
-    description: 'Создавайте меню под свои цели: научный расчёт, ИИ-помощник и персонализация.',
+    title: 'Refectorio — форма мечты начинается с тарелки',
+    description:
+      'Поставьте цель — Refectorio соберёт вкусное меню, которое к ней ведёт: расчёт по науке, ИИ-помощник и меню под вас.',
   },
   brand: {
     name: 'Refectorio',
@@ -19,29 +20,30 @@ export const site = {
   },
   hero: {
     aboutButton: 'О проекте',
-    titleLines: ['Питаться', 'полезно и', 'вкусно сейчас'],
-    leadLines: ['Создавайте меню, выбирайте то, что', 'любите, ставьте цели, в пару кликов'],
+    pricingButton: 'Цены',
+    titleLines: ['Форма мечты', 'начинается', 'с тарелки'],
+    leadLines: ['Вы ставите цель, а мы собираем меню,', 'которое к ней ведёт — вкусно и легко'],
     cta: { label: 'Создать меню', href: '#quiz' },
     featuresLabel: 'Возможности Refectorio',
     features: [
       {
-        title: 'Наука',
-        textLines: ['Генерация основана на', 'реальных исследованиях'],
+        title: 'Исследования',
+        textLines: ['Нормы — из науки,', 'а не из соцсетей'],
         icon: 'school',
       },
       {
         title: 'ИИ-помощник',
-        textLines: ['Поможет исправить меню', 'под ваши задачи'],
+        textLines: ['Рядом на каждом шаге —', 'от меню до результата'],
         icon: 'sparkles',
       },
       {
-        title: 'Персонализация',
-        textLines: ['Редактируйте меню и', 'настраивайте для себя'],
+        title: 'Только ваше',
+        textLines: ['Меню под ваш вкус,', 'ритм жизни и цель'],
         icon: 'pencil',
       },
       {
-        title: 'Гарантия',
-        textLines: ['Открытый исходный код и', 'сохранение ваших данных'],
+        title: 'Честно',
+        textLines: ['Открытый код, а данные', 'остаются только у вас'],
         icon: 'shieldCheck',
       },
     ],
@@ -61,21 +63,9 @@ export const site = {
     project: {
       label: 'Проект:',
       nameLines: ['Refectorio'],
-      leadLines: ['Учащиеся школы', '#2107'],
-      image: 'projectLogo',
-      imageAlt: 'Логотип проекта (временный)',
-      links: [
-        {
-          label: 'Исходный код',
-          href: 'https://github.com/myxastar2010-cloud/Refectorio-project',
-          soonHint: 'Скоро',
-        },
-        {
-          label: 'Документация',
-          href: 'https://github.com/myxastar2010-cloud/Refectorio-project/tree/main/docs',
-          soonHint: 'Скоро',
-        },
-      ],
+      leadLines: ['Ваша цель —', 'наше меню'],
+      logoAlt: 'Логотип Refectorio — яблоко',
+      links: [{ label: 'Исходный код' }, { label: 'Документация' }],
     },
   },
   quizShell: {
@@ -96,6 +86,67 @@ export const site = {
       ['Ясинский Алексей', 'Щербюк Анна'],
     ],
     close: 'Закрыть',
+  },
+  pricing: {
+    title: 'Выберите свой темп',
+    lead: 'Начните бесплатно — переходите на Premium, когда захочется большего.',
+    plansLabel: 'Тарифы',
+    close: 'Закрыть',
+    plans: [
+      {
+        id: 'free',
+        name: 'Бесплатно',
+        price: '0 ₽',
+        period: 'навсегда',
+        tagline: 'Чтобы сделать первый шаг',
+        features: [
+          'Тест, игра с блюдами и расчёт норм',
+          'Меню на неделю с рецептами — 1 раз',
+          'Корзина в магазине в один клик',
+          'Сканер штрихкодов — 3 в день',
+          'ИИ-помощник — 5 вопросов в день',
+          'График веса',
+        ],
+        action: 'Начать бесплатно',
+      },
+      {
+        id: 'premium',
+        name: 'Premium',
+        price: '299 ₽',
+        period: 'в месяц',
+        note: 'или 1 990 ₽ в год — это 166 ₽ в месяц',
+        tagline: 'Для тех, кто идёт к цели всерьёз',
+        badge: 'Рекомендуем',
+        features: [
+          'Всё из бесплатного',
+          'Новое меню каждую неделю',
+          'Замена любого блюда',
+          'Сравнение цен в 2–3 магазинах',
+          'Ланч-боксы и готовка на неделю за 2 часа',
+          'Дома и в офисе — одно меню',
+          'Режим «без готовки» и кафе на карте',
+          'Сканер и ИИ-помощник без лимитов',
+          'Меню подстраивается под ваш вес',
+          'Без предложений партнёров',
+          'Семья: +149 ₽ за человека',
+        ],
+        action: 'Оформить подписку',
+      },
+      {
+        id: 'business',
+        name: 'Для компаний',
+        price: '150 ₽',
+        period: 'за сотрудника в месяц',
+        tagline: 'Забота о команде без лишних хлопот',
+        features: ['Premium для каждого сотрудника', 'Командные челленджи', 'Отчёт для HR'],
+        action: 'Подключить компанию',
+      },
+    ],
+  },
+  notices: {
+    workingOnIt: 'Мы работаем над этим',
+    noPayment: 'Это проект, тут пока нет оплаты',
+    loadError: 'Не получилось открыть. Проверьте интернет и попробуйте ещё раз.',
   },
   food: {
     names: {

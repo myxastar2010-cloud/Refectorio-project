@@ -1,6 +1,7 @@
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation } from 'motion/react';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
-import { Toast } from '../components/Toast';
+import { Toast, type ToastMessage } from '../components/Toast';
+import type { PlanId } from '../content/schema';
 import { site } from '../content/site.ru';
 import { FoodFieldLayer } from '../engine/food-field/FoodFieldLayer';
 import { loadQuiz } from '../features/quiz/loadQuiz';
@@ -20,6 +21,20 @@ import { useScene, type Scene } from './useScene';
 const TOAST_MS = 3200;
 const params = readTestParams(window.location.search);
 const noop = (): void => undefined;
+
+/** «Цены»: a chunk of its own, fetched on hover, focus, touch or idle — the landing does not carry it. */
+const loadPricing = () => import('../features/pricing/PricingDialog');
+const PricingDialog = lazy(() =>
+  loadPricing().then((module) => ({ default: module.PricingDialog })),
+);
+let pricingRequested = false;
+const prefetchPricing = () => {
+  if (pricingRequested) return;
+  pricingRequested = true;
+  void loadPricing().catch(() => {
+    pricingRequested = false;
+  });
+};
 
 /** A fresh lazy component: after a failed load the next «Создать меню» must try again, not rethrow. */
 const lazyQuiz = () => lazy(() => loadQuiz().then((module) => ({ default: module.QuizScene })));
@@ -50,7 +65,17 @@ function Page() {
   // From the click on «Ещё» until the closed card has landed back on its icon.
   const [teamOut, setTeamOut] = useState(false);
   const teamTileRef = useRef<HTMLDivElement>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  // «Цены»: open, and out (open or flying back to its pill).
+  const [pricingOpen, setPricingOpen] = useState(false);
+  const [pricingOut, setPricingOut] = useState(false);
+  const [pricingMounted, setPricingMounted] = useState(false);
+  const pricingRef = useRef<HTMLButtonElement>(null);
+  const pricingOutRef = useRef(false);
+  const quizAfterPricing = useRef(false);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+  const notify = useCallback((text: string) => {
+    setToast({ text, id: performance.now() });
+  }, []);
   const [QuizScene, setQuizScene] = useState(lazyQuiz);
   // Exposed as data-busy: e2e tests wait for the end of a transition by state, not by timeouts.
   const [busy, setBusy] = useState(false);
@@ -67,7 +92,7 @@ function Page() {
   }, [teamOpen]);
 
   const locked = useCallback(
-    () => performance.now() < lockedUntil.current || teamOpenRef.current,
+    () => performance.now() < lockedUntil.current || teamOpenRef.current || pricingOutRef.current,
     [],
   );
 
@@ -97,8 +122,8 @@ function Page() {
     quizRequested = false;
     setQuizScene(() => lazyQuiz());
     exitQuiz();
-    setToast(site.quizShell.loadError);
-  }, [exitQuiz]);
+    notify(site.quizShell.loadError);
+  }, [exitQuiz, notify]);
 
   // Entering part 2 moves focus to its title (ТЗ 6.5); leaving it returns focus to «О проекте». The quiz moves focus
   // to its own step title.
@@ -136,7 +161,10 @@ function Page() {
     }
     let cancel = noop;
     const timer = window.setTimeout(() => {
-      cancel = whenIdle(prefetchQuiz, QUIZ.prefetchAfterMs);
+      cancel = whenIdle(() => {
+        prefetchQuiz();
+        prefetchPricing();
+      }, QUIZ.prefetchAfterMs);
     }, QUIZ.prefetchAfterMs);
     return () => {
       window.clearTimeout(timer);
@@ -162,6 +190,9 @@ function Page() {
   const setMoreRef = useCallback((node: HTMLButtonElement | null) => {
     moreRef.current = node;
   }, []);
+  const setPricingRef = useCallback((node: HTMLButtonElement | null) => {
+    pricingRef.current = node;
+  }, []);
 
   // Closing the team card returns focus to «Ещё» at once: the page is interactive again right away,
   // while the card's shape still settles back into the tile.
@@ -176,6 +207,52 @@ function Page() {
     setTeamOpen(true);
   };
 
+  const openPricing = () => {
+    if (locked()) return;
+    pricingOutRef.current = true;
+    setPricingOut(true);
+    // Opened once its chunk is here (usually prefetched on hover); a failed load unlocks the page and says so.
+    loadPricing()
+      .then(() => {
+        setPricingMounted(true);
+        setPricingOpen(true);
+      })
+      .catch(() => {
+        pricingRequested = false;
+        pricingOutRef.current = false;
+        setPricingOut(false);
+        notify(site.notices.loadError);
+      });
+  };
+
+  // Closing the plans returns focus to «Цены» at once (like the team card and «Ещё»).
+  const wasPricingOpen = useRef(pricingOpen);
+  useEffect(() => {
+    if (wasPricingOpen.current && !pricingOpen && !quizAfterPricing.current) {
+      focusQuietly(pricingRef.current);
+    }
+    wasPricingOpen.current = pricingOpen;
+  }, [pricingOpen]);
+
+  const pricingLanded = () => {
+    pricingOutRef.current = false;
+    setPricingOut(false);
+    if (quizAfterPricing.current) {
+      quizAfterPricing.current = false;
+      goScene('quiz');
+    }
+  };
+
+  const choosePlan = (plan: PlanId) => {
+    if (plan === 'free') {
+      // «Начать бесплатно»: the card returns to its pill, then the quiz opens.
+      quizAfterPricing.current = true;
+      setPricingOpen(false);
+      return;
+    }
+    notify(site.notices.noPayment);
+  };
+
   const inQuiz = scene === 'quiz';
   return (
     <div
@@ -183,10 +260,12 @@ function Page() {
       className="page"
       data-scene={scene}
       data-team-open={teamOpen || undefined}
+      data-pricing-open={pricingOpen || undefined}
+      data-pricing-out={pricingOut || undefined}
       data-busy={busy || undefined}
     >
-      <FoodFieldLayer scene={scene} params={params} teamOpen={teamOpen} />
-      <div className="stage" inert={teamOpen}>
+      <FoodFieldLayer scene={scene} params={params} teamOpen={teamOpen} pricingOpen={pricingOpen} />
+      <div className="stage" inert={teamOpen || pricingOpen}>
         <SiteHeader
           phase={scene === 'hero' ? 'shown' : inQuiz ? 'quiz' : 'hidden'}
           instant={instant}
@@ -195,6 +274,10 @@ function Page() {
             goScene('about');
           }}
           onExit={exitQuiz}
+          pricingRef={setPricingRef}
+          pricingOpen={pricingOpen}
+          onPricing={openPricing}
+          onPricingPrefetch={prefetchPricing}
         />
         <main className="scenes" inert={inQuiz}>
           <HeroScene
@@ -218,6 +301,7 @@ function Page() {
               tileRef={teamTileRef}
               onOpenTeam={openTeam}
               onMoreRef={setMoreRef}
+              onNotify={notify}
             />
           </div>
         </main>
@@ -241,6 +325,19 @@ function Page() {
           setTeamOut(false);
         }}
       />
+      {pricingMounted ? (
+        <Suspense fallback={null}>
+          <PricingDialog
+            open={pricingOpen}
+            onClose={() => {
+              setPricingOpen(false);
+            }}
+            anchorRef={pricingRef}
+            onLanded={pricingLanded}
+            onChoose={choosePlan}
+          />
+        </Suspense>
+      ) : null}
       <Toast message={toast} />
     </div>
   );

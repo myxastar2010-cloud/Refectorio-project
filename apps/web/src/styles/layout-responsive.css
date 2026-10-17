@@ -40,12 +40,23 @@
     line-height: 1;
   }
 
-  .about-pill {
+  .about-pill,
+  .pricing-pill {
     min-height: var(--touch-target-min);
     padding: 0 18px;
     border-radius: 9999px;
     font-size: 16px;
     --outline-w: 1.5px;
+  }
+
+  /* «Цены» sits right next to «О проекте» on the right of the header. */
+  .pricing-pill {
+    margin-left: auto;
+    margin-right: 8px;
+  }
+
+  .brand {
+    flex: none;
   }
 
   /* ── Part 1 ───────────────────────────────────────────────────────────────────────────── */
@@ -649,5 +660,31 @@
 @media (max-width: 47.99rem) {
   .site-header[data-mode='quiz'] .brand {
     visibility: hidden;
+  }
+}
+
+/* Phones: the logo and both pills share one row — a little more compact (each pill stays a 44 px touch target). */
+@media (max-width: 29.99rem) {
+  .brand {
+    gap: 6px;
+  }
+
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brand-name {
+    font-size: 21px;
+  }
+
+  .about-pill,
+  .pricing-pill {
+    padding: 0 12px;
+    font-size: 15px;
+  }
+
+  .pricing-pill {
+    margin-right: 6px;
   }
 }

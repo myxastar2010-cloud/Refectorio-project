@@ -1,16 +1,20 @@
 import { AnimatePresence, m } from 'motion/react';
 import { DURATION, EASE_OUT_EXPO } from '../motion/tokens';
 
-type Props = { readonly message: string | null };
+/** `id` changes with every new message: the same text twice in a row keeps the message up for another while. */
+export type ToastMessage = { readonly text: string; readonly id: number };
+
+type Props = { readonly message: ToastMessage | null };
 
 /** Small non-modal message (role="status"): announced by screen readers, never steals focus. */
 export function Toast({ message }: Props) {
   return (
     <div className="toast-region" role="status" aria-live="polite">
-      <AnimatePresence>
+      {/* One at a time: the next message waits for the previous one to leave; the same text again just stays. */}
+      <AnimatePresence mode="wait">
         {message && (
           <m.p
-            key={message}
+            key={message.text}
             className="toast"
             initial={{ opacity: 0, y: 16 }}
             animate={{
@@ -20,7 +24,7 @@ export function Toast({ message }: Props) {
             }}
             exit={{ opacity: 0, y: 8, transition: { duration: DURATION.micro } }}
           >
-            {message}
+            {message.text}
           </m.p>
         )}
       </AnimatePresence>

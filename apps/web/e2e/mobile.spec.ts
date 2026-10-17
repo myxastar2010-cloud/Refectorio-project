@@ -71,3 +71,35 @@ for (const hash of ['', '#about']) {
     expect(await seriousViolations(page)).toEqual([]);
   });
 }
+
+test('phones: the logo and both pills share the header row; the plans show one at a time', async ({
+  page,
+}) => {
+  await page.goto('./?seed=1');
+  await settled(page, 'hero');
+  const viewport = page.viewportSize() ?? { width: 390, height: 844 };
+  const brand = await page.locator('.brand-name').boundingBox();
+  const pricingPill = await page.getByRole('button', { name: 'Цены' }).boundingBox();
+  const aboutPill = await page
+    .getByRole('button', { name: 'О проекте', exact: true })
+    .boundingBox();
+  if (!brand || !pricingPill || !aboutPill) throw new Error('no header');
+  expect(brand.x + brand.width).toBeLessThanOrEqual(pricingPill.x);
+  expect(pricingPill.x + pricingPill.width).toBeLessThanOrEqual(aboutPill.x);
+  expect(aboutPill.x + aboutPill.width).toBeLessThanOrEqual(viewport.width);
+  expect(pricingPill.height).toBeGreaterThanOrEqual(44);
+
+  await page.getByRole('button', { name: 'Цены' }).click();
+  const card = page.getByRole('dialog', { name: 'Выберите свой темп' });
+  await expect(card).toBeVisible();
+  const box = await card.boundingBox();
+  if (!box) throw new Error('no card');
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+  // Premium first; the switch shows the other plans.
+  await expect(card.getByRole('heading', { name: 'Premium' })).toBeVisible();
+  await expect(card.getByRole('heading', { name: 'Бесплатно' })).toBeHidden();
+  await card.getByRole('button', { name: 'Бесплатно' }).click();
+  await expect(card.getByRole('heading', { name: 'Бесплатно' })).toBeVisible();
+  await expect(card.getByRole('heading', { name: 'Premium' })).toBeHidden();
+});

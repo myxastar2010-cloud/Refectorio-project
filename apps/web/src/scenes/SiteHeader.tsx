@@ -15,7 +15,69 @@ type Props = {
   readonly scrolled: boolean;
   readonly onAbout: () => void;
   readonly onExit: () => void;
+  /** «Цены»: the plans card grows out of this pill. */
+  readonly pricingRef: (node: HTMLButtonElement | null) => void;
+  readonly pricingOpen: boolean;
+  readonly onPricing: () => void;
+  /** Hover, focus or touch on «Цены»: fetch the plans card before the click. */
+  readonly onPricingPrefetch: () => void;
 };
+
+/** «Цены», left of «О проекте»: the same glass pill; it steps aside in the quiz. */
+function PricingPill({
+  shown,
+  calm,
+  open,
+  pricingRef,
+  onPricing,
+  onPrefetch,
+}: {
+  readonly shown: boolean;
+  readonly calm: boolean;
+  readonly open: boolean;
+  readonly pricingRef: (node: HTMLButtonElement | null) => void;
+  readonly onPricing: () => void;
+  readonly onPrefetch: () => void;
+}) {
+  const { setHost, handlers, clipPath, act } = useWave<HTMLButtonElement>();
+  return (
+    <m.button
+      ref={(node: HTMLButtonElement | null) => {
+        setHost(node);
+        pricingRef(node);
+      }}
+      type="button"
+      variants={heroFadeVariants(0, calm)}
+      animate={shown ? 'shown' : 'hidden'}
+      className="pricing-pill at box wave-host focus-ring"
+      aria-haspopup="dialog"
+      aria-expanded={open}
+      inert={!shown}
+      aria-hidden={!shown || undefined}
+      onClick={(event) => {
+        act(event, onPricing);
+      }}
+      {...handlers}
+      onPointerEnter={(event) => {
+        onPrefetch();
+        handlers.onPointerEnter(event);
+      }}
+      onPointerDown={(event) => {
+        onPrefetch();
+        handlers.onPointerDown(event);
+      }}
+      onFocus={(event) => {
+        onPrefetch();
+        handlers.onFocus(event);
+      }}
+    >
+      <span className="wave-content">{site.hero.pricingButton}</span>
+      <WaveLayer clipPath={clipPath} className="wave-layer--ink">
+        {site.hero.pricingButton}
+      </WaveLayer>
+    </m.button>
+  );
+}
 
 /** The pill label: «О проекте» ⇄ «Выйти ×» cross-fade in the same pill (D-036: same size, no morph of the box). */
 function PillLabel({ quiz, calm }: { readonly quiz: boolean; readonly calm: boolean }) {
@@ -53,7 +115,17 @@ function PillLabel({ quiz, calm }: { readonly quiz: boolean; readonly calm: bool
  * Logo and «О проекте» (ТЗ 6.2). It belongs to part 1 and leaves with it, but lives outside <main>, so it stays
  * the page's banner landmark. In the quiz the logo stays and the pill exits the quiz.
  */
-export function SiteHeader({ phase, instant, scrolled, onAbout, onExit }: Props) {
+export function SiteHeader({
+  phase,
+  instant,
+  scrolled,
+  onAbout,
+  onExit,
+  pricingRef,
+  pricingOpen,
+  onPricing,
+  onPricingPrefetch,
+}: Props) {
   const calm = useCalmMotion();
   const quiz = phase === 'quiz';
   const motionPhase: Phase = phase === 'hidden' ? 'hidden' : 'shown';
@@ -78,6 +150,14 @@ export function SiteHeader({ phase, instant, scrolled, onAbout, onExit }: Props)
           {site.brand.name}
         </span>
       </m.div>
+      <PricingPill
+        shown={phase === 'shown'}
+        calm={calm}
+        open={pricingOpen}
+        pricingRef={pricingRef}
+        onPricing={onPricing}
+        onPrefetch={onPricingPrefetch}
+      />
       <m.button
         ref={setHost}
         type="button"
