@@ -28,7 +28,8 @@ export const INPUT_LIMITS = {
   bmi: { min: 10, max: 100, maxUnder18: 50 },
   dislikesMaxItems: 20,
   dislikeMaxLength: 40,
-  dislikesOtherMaxLength: 150,
+  /** Raised from 150 at the team's request (stage 3); untrusted text for the future AI (ADR 0003). */
+  dislikesOtherMaxLength: 500,
   /** Items typed in the quiz «+» panels (health conditions, allergies): each trimmed, deduplicated. */
   customItemsMaxItems: 10,
   customItemMaxLength: 40,

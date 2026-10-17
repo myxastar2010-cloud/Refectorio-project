@@ -761,8 +761,15 @@
   padding: 0 var(--q-row-pad-x);
 }
 
+/* A row never wraps («Текущий вес», «Целевой вес»): the label keeps one line, the value keeps its size. */
+.quiz-row-label {
+  min-width: 0;
+  white-space: nowrap;
+}
+
 .quiz-row-value {
   display: inline-flex;
+  flex: none;
   align-items: center;
   gap: calc(6 * var(--q));
   font-size: var(--q-value);

@@ -84,7 +84,7 @@ export const quiz = {
     implausible: 'Проверьте рост и вес — кажется, где-то опечатка.',
   },
   goal: {
-    title: 'Какова ваша цель?',
+    title: 'Ваша цель?',
     options: {
       lose: { label: 'Сжигание жира' },
       gain: { label: 'Набор мышечной массы' },
@@ -153,7 +153,7 @@ export const quiz = {
   },
   yesNo: { yes: 'Да', no: 'Нет' },
   health: {
-    title: 'Есть ли у вас проблемы|со здоровьем?',
+    title: 'Есть ли у вас особенности|здоровья?',
     conditionsTitle: 'Какое состояние|вашего здоровья?',
     chips: {
       diabetes: 'Диабет',
