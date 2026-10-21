@@ -23,7 +23,7 @@ import { FOOD_STYLE_DIET, type Answers } from './types';
  * neutral stand-in is used that triggers no rule (BMI 22, moderate activity), so nothing is restricted too early.
  */
 
-/** Women of these ages see the pregnancy and breastfeeding chips (research/stage-2-mappings.md §3.4). */
+/** Women of these ages may choose pregnancy and breastfeeding (research/stage-2-mappings.md §3.4). */
 export const REPRODUCTIVE_AGE = { min: 14, max: 55 } as const;
 /** Children 1–13 (family mode): only the conditions that really occur in children (§3.5). */
 const CHILD_HEALTH_CHIPS: readonly HealthChipId[] = [
@@ -32,9 +32,21 @@ const CHILD_HEALTH_CHIPS: readonly HealthChipId[] = [
   'pku',
   'hypothyroidism',
 ];
+/**
+ * The chips the design shows (stage 3, 4.13). The other conditions keep their ids and every rule, and appear as chips
+ * only when the «+» text names them (flow/healthSynonyms.ts), like the extra allergens.
+ */
+export const SHOWN_HEALTH_CHIPS: readonly HealthChipId[] = [
+  'diabetes',
+  'hypertension',
+  'hypothyroidism',
+  'insulinResistance',
+  'pregnancy',
+];
 const NEUTRAL_BMI = 22;
 
-export function visibleHealthChips(answers: Answers): HealthChipId[] {
+/** Conditions this person may have by age and sex (a man cannot be pregnant; children see child conditions). */
+export function eligibleHealthChips(answers: Answers): HealthChipId[] {
   const age = answers.ageYears ?? 30;
   const reproductive =
     answers.sex === 'female' && age >= REPRODUCTIVE_AGE.min && age <= REPRODUCTIVE_AGE.max;
@@ -45,11 +57,16 @@ export function visibleHealthChips(answers: Answers): HealthChipId[] {
   });
 }
 
-/** Health chips that are active now (the parent said «Да» and the chip is visible). */
+/** The chips shown from the start: the design's, among the eligible ones. */
+export function visibleHealthChips(answers: Answers): HealthChipId[] {
+  return eligibleHealthChips(answers).filter((chip) => SHOWN_HEALTH_CHIPS.includes(chip));
+}
+
+/** Health chips that are active now: the parent said «Да» and the chip is eligible (shown or found through «+»). */
 export function activeHealthChips(answers: Answers): HealthChipId[] {
   if (answers.health !== 'yes') return [];
-  const visible = new Set(visibleHealthChips(answers));
-  return answers.healthChips.filter((chip) => visible.has(chip));
+  const eligible = new Set(eligibleHealthChips(answers));
+  return answers.healthChips.filter((chip) => eligible.has(chip));
 }
 
 const DIRECT_FLAGS: Partial<Record<HealthChipId, HealthFlag>> = {

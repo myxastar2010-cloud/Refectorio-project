@@ -188,6 +188,8 @@ export const quizContentSchema = z.object({
     chips: chipMap(HEALTH_CHIP_IDS),
     addTitle: text,
     addPlaceholder: text,
+    matched: template('chips'),
+    matchedCheck: template('chips'),
     insulinQuestion: text,
     insulinOptions: z.object({ yes: text, no: text, unknown: text }),
     trimesterQuestion: text,

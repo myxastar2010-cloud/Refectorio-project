@@ -44,6 +44,23 @@ async function throughGoal(
   await onScreen(page, 'foodStyle');
 }
 
+/** Types a condition into the «+» panel of the health chips and waits for the panel to close. */
+async function addHealth(page: Page, text: string) {
+  await page.getByRole('button', { name: 'Добавить другое' }).click();
+  await page.getByRole('textbox', { name: 'Добавить условие' }).fill(text);
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.quiz-add')).toHaveCount(0);
+}
+
+/** The game, «О вас», the goal, the food steps and «Да»: the health chips of a 35-year-old woman. */
+async function toHealthChips(page: Page) {
+  await openQuiz(page);
+  await throughGoal(page);
+  await choose(page, /Сбалансированное питание/, 'macroProfile');
+  await choose(page, /Рекомендуется/, 'health');
+  await choose(page, 'Да', 'healthConditions');
+}
+
 /** Waits for the finite animations only (the finale's shimmer and core pulse never end). */
 async function axeSerious(page: Page) {
   // Panels morph on motion values (not in document.getAnimations()), and a notice may not have started its fade yet
@@ -421,6 +438,95 @@ test.describe('safety', () => {
   });
 });
 
+test.describe("health chips: the design's five, the rest through «+» (4.13)", () => {
+  test('pregnancy by its chip or by a word; breastfeeding, warfarin and MAOI found in the text, with their questions and notes', async ({
+    page,
+  }) => {
+    test.slow();
+    await toHealthChips(page);
+    const chips = page.getByRole('group', { name: /Какое состояние/ });
+    for (const name of ['Диабет', 'Гипертония', 'Гипотиреоз', 'Беременность']) {
+      await expect(chips.getByRole('button', { name, exact: true })).toBeVisible();
+    }
+    await expect(chips.getByRole('button', { name: 'Кормление грудью' })).toHaveCount(0);
+    await expect(page.getByRole('textbox')).toHaveCount(0);
+
+    // A word ticks the visible chip it names, and the text is kept.
+    await addHealth(page, 'беременна');
+    await expect(chips.getByRole('button', { name: 'Беременность', pressed: true })).toBeVisible();
+    await expect(page.getByRole('radiogroup', { name: 'Срок беременности' })).toBeVisible();
+    await chips.getByRole('button', { name: 'Беременность', exact: true }).click();
+
+    await addHealth(page, 'кормлю грудью');
+    await expect(
+      chips.getByRole('button', { name: 'Кормление грудью', pressed: true }),
+    ).toBeVisible();
+    await expect(
+      page.locator('.quiz-note', { hasText: 'Отметили: Кормление грудью' }),
+    ).toBeVisible();
+    await expect(page.getByRole('radiogroup', { name: 'Сколько месяцев ребёнку?' })).toBeVisible();
+
+    await addHealth(page, 'пью варфарин и ИМАО');
+    await expect(
+      chips.getByRole('button', { name: 'Принимаю варфарин', pressed: true }),
+    ).toBeVisible();
+    await expect(
+      chips.getByRole('button', { name: 'Принимаю ингибиторы МАО', pressed: true }),
+    ).toBeVisible();
+    await expect(page.locator('.quiz-note', { hasText: 'витамин K' })).toBeVisible();
+    await expect(page.locator('.quiz-note', { hasText: 'тирамина' })).toBeVisible();
+
+    // Somebody else's condition: the chip is offered unticked, the person decides.
+    await addHealth(page, 'мама на диализе');
+    await expect(
+      chips.getByRole('button', { name: 'Хроническая болезнь почек', pressed: false }),
+    ).toBeVisible();
+    await expect(
+      page.locator('.quiz-note', { hasText: 'Если это про вас, отметьте' }),
+    ).toBeVisible();
+
+    const saved = (await draft(page))?.answers;
+    expect(saved?.healthChips).toEqual(['lactation', 'warfarin', 'maoi']);
+    expect(saved?.healthCustom).toEqual([
+      'беременна',
+      'кормлю грудью',
+      'пью варфарин и ИМАО',
+      'мама на диализе',
+    ]);
+  });
+
+  test('«ФКУ» and «почки» typed in «+»: the doctor notice, as with their chips before', async ({
+    page,
+  }) => {
+    test.slow();
+    await toHealthChips(page);
+    await addHealth(page, 'ФКУ');
+    await expect(page.getByRole('button', { name: 'Фенилкетонурия', pressed: true })).toBeVisible();
+    await addHealth(page, 'почки');
+    await expect(
+      page.getByRole('button', { name: 'Хроническая болезнь почек', pressed: true }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await expect(page.getByRole('alertdialog')).toContainText('вместе с врачом');
+  });
+
+  test('«РПП» typed in «+»: the calm notice with the helplines', async ({ page }) => {
+    test.slow();
+    await toHealthChips(page);
+    await addHealth(page, 'РПП');
+    await expect(
+      page.getByRole('button', {
+        name: 'Расстройство пищевого поведения (сейчас или в прошлом)',
+        pressed: true,
+      }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Готово' }).click();
+    const notice = page.getByRole('alertdialog');
+    await expect(notice).toContainText('меньше цифр');
+    await expect(notice).toContainText('112');
+  });
+});
+
 test.describe('the privacy sheet', () => {
   test('grows out of its label, blurs the step behind, and returns focus to the label', async ({
     page,
@@ -523,9 +629,8 @@ test.describe('quality', () => {
     await page.getByRole('button', { name: 'Добавить другое' }).click();
     expect(await axeSerious(page)).toEqual([]);
     await page.keyboard.press('Escape');
-    await page
-      .getByRole('button', { name: 'Расстройство пищевого поведения (сейчас или в прошлом)' })
-      .click();
+    // The eating-disorder chip is reached through «+» now (4.13).
+    await addHealth(page, 'РПП');
     await page.getByRole('button', { name: 'Готово' }).click();
     await expect(page.getByRole('alertdialog')).toBeVisible();
     expect(await axeSerious(page)).toEqual([]);
