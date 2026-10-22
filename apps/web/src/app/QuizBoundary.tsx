@@ -8,10 +8,10 @@ type Props = { readonly onError: () => void; readonly children: ReactNode };
 type State = { readonly failed: boolean };
 
 /**
- * The quiz chunk did not arrive (offline, a deploy replaced the files): the landing comes back with a kind note
- * instead of an empty screen (ТЗ §7.1).
+ * A lazy chunk (the quiz, «Цены») did not arrive (offline, a deploy replaced the files): the landing comes back with a
+ * kind note instead of an empty screen (ТЗ §7.1).
  */
-export class QuizBoundary extends Component<Props, State> {
+export class ChunkBoundary extends Component<Props, State> {
   override state: State = { failed: false };
 
   static getDerivedStateFromError(): State {

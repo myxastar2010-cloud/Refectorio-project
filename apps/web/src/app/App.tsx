@@ -1,7 +1,6 @@
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation } from 'motion/react';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import { Toast, type ToastMessage } from '../components/Toast';
-import type { PlanId } from '../content/schema';
 import { site } from '../content/site.ru';
 import { FoodFieldLayer } from '../engine/food-field/FoodFieldLayer';
 import { loadQuiz } from '../features/quiz/loadQuiz';
@@ -10,23 +9,22 @@ import { whenIdle } from '../lib/idle';
 import { readTestParams } from '../lib/params';
 import { focusQuietly, trackInputModality } from '../lib/quietFocus';
 import { useCalmMotion } from '../motion/hooks';
-import { DURATION, QUIZ, SCENE } from '../motion/tokens';
+import type { PlanPictures } from '../features/pricing/pictures';
+import { DURATION, PRICING, QUIZ, SCENE } from '../motion/tokens';
 import { AboutScene } from '../scenes/AboutScene';
 import { HeroScene } from '../scenes/HeroScene';
 import { SiteHeader } from '../scenes/SiteHeader';
 import { useSceneInput } from '../scenes/useSceneInput';
-import { QuizBoundary, QuizLoading } from './QuizBoundary';
+import { ChunkBoundary, QuizLoading } from './QuizBoundary';
 import { useScene, type Scene } from './useScene';
 
 const TOAST_MS = 3200;
 const params = readTestParams(window.location.search);
 const noop = (): void => undefined;
 
-/** «Цены»: a chunk of its own, fetched on hover, focus, touch or idle — the landing does not carry it. */
-const loadPricing = () => import('../features/pricing/PricingDialog');
-const PricingDialog = lazy(() =>
-  loadPricing().then((module) => ({ default: module.PricingDialog })),
-);
+/** «Цены»: a chunk of its own (with its card pictures), fetched on hover, focus, touch or idle. */
+const loadPricing = () => import('../features/pricing');
+const PricingScene = lazy(() => loadPricing().then((module) => ({ default: module.PricingScene })));
 let pricingRequested = false;
 const prefetchPricing = () => {
   if (pricingRequested) return;
@@ -65,13 +63,13 @@ function Page() {
   // From the click on «Ещё» until the closed card has landed back on its icon.
   const [teamOut, setTeamOut] = useState(false);
   const teamTileRef = useRef<HTMLDivElement>(null);
-  // «Цены»: open, and out (open or flying back to its pill).
-  const [pricingOpen, setPricingOpen] = useState(false);
-  const [pricingOut, setPricingOut] = useState(false);
+  // «Цены»: the scene is mounted from its first visit on (it must be there, hidden, to come in like part 2).
   const [pricingMounted, setPricingMounted] = useState(false);
+  const [pricingPictures, setPricingPictures] = useState<PlanPictures | null>(null);
+  /** The next visit's pictures: chosen and loading from the first hover on «Цены», taken by the click. */
+  const nextPricingVisit = useRef<Promise<PlanPictures> | null>(null);
   const pricingRef = useRef<HTMLButtonElement>(null);
-  const pricingOutRef = useRef(false);
-  const quizAfterPricing = useRef(false);
+  const pricingScrollRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const notify = useCallback((text: string) => {
     setToast({ text, id: performance.now() });
@@ -92,7 +90,7 @@ function Page() {
   }, [teamOpen]);
 
   const locked = useCallback(
-    () => performance.now() < lockedUntil.current || teamOpenRef.current || pricingOutRef.current,
+    () => performance.now() < lockedUntil.current || teamOpenRef.current,
     [],
   );
 
@@ -125,8 +123,8 @@ function Page() {
     notify(site.quizShell.loadError);
   }, [exitQuiz, notify]);
 
-  // Entering part 2 moves focus to its title (ТЗ 6.5); leaving it returns focus to «О проекте». The quiz moves focus
-  // to its own step title.
+  // Entering part 2 moves focus to its title (ТЗ 6.5); leaving it returns focus to «О проекте» («Цены» likewise to its
+  // own button). The quiz and «Цены» move focus to their own titles.
   const previousScene = useRef(scene);
   useEffect(() => {
     if (previousScene.current === scene) return;
@@ -135,14 +133,21 @@ function Page() {
     if (scene === 'about') focusQuietly(aboutTitleRef.current);
     else if (scene === 'hero' && from === 'quiz') {
       focusQuietly(document.querySelector<HTMLAnchorElement>('.cta'));
-    } else if (scene === 'hero')
+    } else if (scene === 'hero' && from === 'pricing') focusQuietly(pricingRef.current);
+    else if (scene === 'hero')
       focusQuietly(document.querySelector<HTMLButtonElement>('.about-pill'));
   }, [scene]);
 
   // Stable: a new function on every render would re-create the input listeners and reset the wheel gesture.
   const scrollerOf = useCallback(
     (of: Scene): HTMLElement | null =>
-      of === 'hero' ? heroRef.current : of === 'about' ? aboutRef.current : null,
+      of === 'hero'
+        ? heroRef.current
+        : of === 'about'
+          ? aboutRef.current
+          : of === 'pricing'
+            ? pricingScrollRef.current
+            : null,
     [],
   );
   useSceneInput({ scene, go: goScene, locked, scrollerOf });
@@ -207,51 +212,74 @@ function Page() {
     setTeamOpen(true);
   };
 
+  /**
+   * Chooses the next visit's pair of card pictures and loads them with the chunk (once per visit): from a hover on
+   * «Цены» the click finds them ready. A failed load is forgotten, so the next attempt tries again.
+   */
+  const prepareVisit = useCallback(() => {
+    nextPricingVisit.current ??= loadPricing().then(async (module) => {
+      setPricingMounted(true);
+      const pictures = module.pickPictures();
+      await module.preloadPictures(pictures, PRICING.pictureWaitMs);
+      return pictures;
+    });
+    const visit = nextPricingVisit.current;
+    visit.catch(() => {
+      if (nextPricingVisit.current === visit) nextPricingVisit.current = null;
+    });
+    return visit;
+  }, []);
+
+  const takeVisit = useCallback(
+    () =>
+      prepareVisit().then((pictures) => {
+        nextPricingVisit.current = null;
+        setPricingPictures(pictures);
+      }),
+    [prepareVisit],
+  );
+
+  // «Цены»: its scene opens once the chunk and this visit's pictures are here (at most PRICING.pictureWaitMs for them).
+  const openingPricing = useRef(false);
   const openPricing = () => {
-    if (locked()) return;
-    pricingOutRef.current = true;
-    setPricingOut(true);
-    // Opened once its chunk is here (usually prefetched on hover); a failed load unlocks the page and says so.
-    loadPricing()
+    if (locked() || openingPricing.current) return;
+    openingPricing.current = true;
+    takeVisit()
       .then(() => {
-        setPricingMounted(true);
-        setPricingOpen(true);
+        goScene('pricing');
       })
       .catch(() => {
         pricingRequested = false;
-        pricingOutRef.current = false;
-        setPricingOut(false);
         notify(site.notices.loadError);
+      })
+      .finally(() => {
+        openingPricing.current = false;
       });
   };
 
-  // Closing the plans returns focus to «Цены» at once (like the team card and «Ещё»).
-  const wasPricingOpen = useRef(pricingOpen);
+  // A direct visit to #pricing (or Back / Forward to it) has no pictures yet: they come with the chunk.
   useEffect(() => {
-    if (wasPricingOpen.current && !pricingOpen && !quizAfterPricing.current) {
-      focusQuietly(pricingRef.current);
+    if (scene === 'pricing' && !pricingPictures) {
+      takeVisit().catch(() => {
+        notify(site.notices.loadError);
+      });
     }
-    wasPricingOpen.current = pricingOpen;
-  }, [pricingOpen]);
+  }, [scene, pricingPictures, takeVisit, notify]);
 
-  const pricingLanded = () => {
-    pricingOutRef.current = false;
-    setPricingOut(false);
-    if (quizAfterPricing.current) {
-      quizAfterPricing.current = false;
-      goScene('quiz');
-    }
-  };
+  const closePricing = useCallback(() => {
+    goScene('hero');
+  }, [goScene]);
 
-  const choosePlan = (plan: PlanId) => {
-    if (plan === 'free') {
-      // «Начать бесплатно»: the card returns to its pill, then the quiz opens.
-      quizAfterPricing.current = true;
-      setPricingOpen(false);
-      return;
-    }
+  // Nothing can be bought yet.
+  const choosePlan = useCallback(() => {
     notify(site.notices.noPayment);
-  };
+  }, [notify]);
+
+  const pricingFailed = useCallback(() => {
+    pricingRequested = false;
+    goScene('hero');
+    notify(site.notices.loadError);
+  }, [goScene, notify]);
 
   const inQuiz = scene === 'quiz';
   return (
@@ -260,12 +288,10 @@ function Page() {
       className="page"
       data-scene={scene}
       data-team-open={teamOpen || undefined}
-      data-pricing-open={pricingOpen || undefined}
-      data-pricing-out={pricingOut || undefined}
       data-busy={busy || undefined}
     >
-      <FoodFieldLayer scene={scene} params={params} teamOpen={teamOpen} pricingOpen={pricingOpen} />
-      <div className="stage" inert={teamOpen || pricingOpen}>
+      <FoodFieldLayer scene={scene} params={params} teamOpen={teamOpen} />
+      <div className="stage" inert={teamOpen}>
         <SiteHeader
           phase={scene === 'hero' ? 'shown' : inQuiz ? 'quiz' : 'hidden'}
           instant={instant}
@@ -275,9 +301,10 @@ function Page() {
           }}
           onExit={exitQuiz}
           pricingRef={setPricingRef}
-          pricingOpen={pricingOpen}
           onPricing={openPricing}
-          onPricingPrefetch={prefetchPricing}
+          onPricingPrefetch={() => {
+            void prepareVisit();
+          }}
         />
         <main className="scenes" inert={inQuiz}>
           <HeroScene
@@ -304,14 +331,29 @@ function Page() {
               onNotify={notify}
             />
           </div>
+          <div className="pricing-scroller" ref={pricingScrollRef} inert={scene !== 'pricing'}>
+            {(pricingMounted || scene === 'pricing') && (
+              <ChunkBoundary onError={pricingFailed}>
+                <Suspense fallback={null}>
+                  <PricingScene
+                    phase={scene === 'pricing' ? 'shown' : 'hidden'}
+                    instant={instant}
+                    pictures={pricingPictures}
+                    onClose={closePricing}
+                    onChoose={choosePlan}
+                  />
+                </Suspense>
+              </ChunkBoundary>
+            )}
+          </div>
         </main>
         <AnimatePresence>
           {inQuiz && (
-            <QuizBoundary key="quiz" onError={quizFailed}>
+            <ChunkBoundary key="quiz" onError={quizFailed}>
               <Suspense fallback={<QuizLoading />}>
                 <QuizScene instant={instant} onExit={exitQuiz} params={params} />
               </Suspense>
-            </QuizBoundary>
+            </ChunkBoundary>
           )}
         </AnimatePresence>
       </div>
@@ -325,19 +367,6 @@ function Page() {
           setTeamOut(false);
         }}
       />
-      {pricingMounted ? (
-        <Suspense fallback={null}>
-          <PricingDialog
-            open={pricingOpen}
-            onClose={() => {
-              setPricingOpen(false);
-            }}
-            anchorRef={pricingRef}
-            onLanded={pricingLanded}
-            onChoose={choosePlan}
-          />
-        </Suspense>
-      ) : null}
       <Toast message={toast} />
     </div>
   );

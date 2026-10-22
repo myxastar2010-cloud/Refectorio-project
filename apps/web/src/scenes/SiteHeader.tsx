@@ -1,4 +1,4 @@
-import { IconApple, IconDoorExit } from '@tabler/icons-react';
+import { IconApple } from '@tabler/icons-react';
 import { m } from 'motion/react';
 import { site } from '../content/site.ru';
 import { useCalmMotion } from '../motion/hooks';
@@ -15,11 +15,10 @@ type Props = {
   readonly scrolled: boolean;
   readonly onAbout: () => void;
   readonly onExit: () => void;
-  /** «Цены»: the plans card grows out of this pill. */
+  /** «Цены»: opens its scene; focus returns here when the scene closes. */
   readonly pricingRef: (node: HTMLButtonElement | null) => void;
-  readonly pricingOpen: boolean;
   readonly onPricing: () => void;
-  /** Hover, focus or touch on «Цены»: fetch the plans card before the click. */
+  /** Hover, focus or touch on «Цены»: fetch the scene and its pictures before the click. */
   readonly onPricingPrefetch: () => void;
 };
 
@@ -27,14 +26,12 @@ type Props = {
 function PricingPill({
   shown,
   calm,
-  open,
   pricingRef,
   onPricing,
   onPrefetch,
 }: {
   readonly shown: boolean;
   readonly calm: boolean;
-  readonly open: boolean;
   readonly pricingRef: (node: HTMLButtonElement | null) => void;
   readonly onPricing: () => void;
   readonly onPrefetch: () => void;
@@ -50,8 +47,6 @@ function PricingPill({
       variants={heroFadeVariants(0, calm)}
       animate={shown ? 'shown' : 'hidden'}
       className="pricing-pill at box wave-host focus-ring"
-      aria-haspopup="dialog"
-      aria-expanded={open}
       inert={!shown}
       aria-hidden={!shown || undefined}
       onClick={(event) => {
@@ -79,7 +74,7 @@ function PricingPill({
   );
 }
 
-/** The pill label: «О проекте» ⇄ «Выйти» with a door cross-fade in the same pill (D-036: same size, no morph). */
+/** The pill label: «О проекте» ⇄ «Выйти» cross-fade in the same pill (D-036: same size, no morph; no icon, 22.10). */
 function PillLabel({ quiz, calm }: { readonly quiz: boolean; readonly calm: boolean }) {
   const label = QUIZ.pillLabel;
   const fade = (shown: boolean) => ({
@@ -105,7 +100,6 @@ function PillLabel({ quiz, calm }: { readonly quiz: boolean; readonly calm: bool
         aria-hidden={!quiz}
       >
         {site.quizShell.exit}
-        <IconDoorExit aria-hidden className="pill-exit-icon" stroke={2} />
       </m.span>
     </span>
   );
@@ -122,7 +116,6 @@ export function SiteHeader({
   onAbout,
   onExit,
   pricingRef,
-  pricingOpen,
   onPricing,
   onPricingPrefetch,
 }: Props) {
@@ -153,7 +146,6 @@ export function SiteHeader({
       <PricingPill
         shown={phase === 'shown'}
         calm={calm}
-        open={pricingOpen}
         pricingRef={pricingRef}
         onPricing={onPricing}
         onPrefetch={onPricingPrefetch}

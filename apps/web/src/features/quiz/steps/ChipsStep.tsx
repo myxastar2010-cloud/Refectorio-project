@@ -71,6 +71,9 @@ export function ChipsStep({ step }: { readonly step: Step }) {
   const health = step === 'healthConditions';
   const [adding, setAdding] = useState(false);
   const [closing, setClosing] = useState(false);
+  // Every opening is a panel of its own: «+» pressed again while the last one still fades out must not bring that
+  // one back (it is already leaving — inert and hidden from screen readers).
+  const [addVisit, setAddVisit] = useState(0);
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   const [matchedNote, setMatchedNote] = useState<string | null>(null);
   // An extra allergen chip stays for this visit once shown: unticking it must not make it vanish under the pointer.
@@ -297,6 +300,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
                 setMatchedNote(null);
                 setAnchor(element);
                 setClosing(false);
+                setAddVisit((visit) => visit + 1);
                 setAdding(true);
               }}
             />
@@ -305,7 +309,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
         <AnimatePresence>
           {adding ? (
             <AddPanel
-              key="add"
+              key={`add-${String(addVisit)}`}
               anchor={anchor}
               calm={calm}
               title={health ? quiz.health.addTitle : quiz.allergy.addTitle}

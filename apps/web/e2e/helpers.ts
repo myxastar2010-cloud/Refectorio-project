@@ -22,7 +22,7 @@ export function collectErrors(page: Page): string[] {
 export const scene = (page: Page) => page.locator('.page');
 
 /** Waits until a scene transition (input lock) is over — by state, not by timeouts. */
-export async function settled(page: Page, expected: 'hero' | 'about') {
+export async function settled(page: Page, expected: 'hero' | 'about' | 'pricing') {
   await expect(scene(page)).toHaveAttribute('data-ready', '');
   await expect(scene(page)).toHaveAttribute('data-scene', expected);
   await expect(scene(page)).not.toHaveAttribute('data-busy', /.*/);

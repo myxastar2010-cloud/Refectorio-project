@@ -352,32 +352,6 @@
   transition-delay: var(--team-open-blur-delay);
 }
 
-/*
- * Under the plans card part 1 blurs the same way — only what is seen: the logo, the pills, the heading, the lead, the
- * button and the cards (the food switches to its pre-blurred sprites). Some of them carry Motion's inline filter
- * from the scene choreography, hence !important; while the card is out the scenes cannot change (App locks them).
- */
-.page[data-pricing-out]
-  :is(.brand, .about-pill, .pricing-pill, .hero-title, .hero-lead, .cta-tilt, .feature-surface) {
-  transition: filter var(--motion-scrim, 350ms) var(--ease-out-expo) !important;
-}
-
-.page[data-pricing-open]
-  :is(.brand, .about-pill, .pricing-pill, .hero-title, .hero-lead, .cta-tilt, .feature-surface) {
-  filter: blur(var(--team-open-blur)) !important;
-  transition-delay: var(--team-open-blur-delay) !important;
-}
-
-.food-layer[data-veiled] .food-item {
-  opacity: 0;
-  transition-delay: var(--team-open-blur-delay);
-}
-
-.food-layer[data-veiled] .food-item--blur {
-  opacity: 1;
-  transition-delay: var(--team-open-blur-delay);
-}
-
 .team-dialog {
   --dialog-box-w: calc(var(--dialog-w) * var(--sd));
   --dialog-box-h: calc(var(--dialog-h) * var(--sd));
@@ -541,14 +515,16 @@
   opacity: 0;
 }
 
-/* Part 2 and the quiz show the pre-blurred food (ТЗ §7.9). */
+/* Part 2, «Цены» and the quiz show the pre-blurred food (ТЗ §7.9). */
 .food-layer[data-scene='about'] .food-item,
+.food-layer[data-scene='pricing'] .food-item,
 .food-layer[data-scene='quiz'] .food-item {
   opacity: 0;
   transition-delay: var(--food-fade-delay-ms);
 }
 
 .food-layer[data-scene='about'] .food-item--blur,
+.food-layer[data-scene='pricing'] .food-item--blur,
 .food-layer[data-scene='quiz'] .food-item--blur {
   opacity: var(--food-about-opacity);
 }
@@ -574,6 +550,7 @@
 
   .food-item,
   .food-layer[data-scene='about'] .food-item,
+  .food-layer[data-scene='pricing'] .food-item,
   .food-layer[data-scene='quiz'] .food-item {
     transition-duration: var(--motion-fade, 200ms);
     transition-delay: 0s;
@@ -619,14 +596,9 @@
   white-space: nowrap;
 }
 
-/* «Выйти» reads a little larger than «О проекте» in the same pill (stage 3, 4.16); the door is Tabler's IconDoorExit. */
+/* «Выйти» reads a little larger than «О проекте» in the same pill (stage 3, 4.16); no icon (the team, 22.10). */
 .pill-label--exit {
   font-size: 1.15em;
-}
-
-.pill-exit-icon {
-  width: 1.1em;
-  height: 1.1em;
 }
 
 /* «Загружаем тест…» while the quiz chunk is on its way (app/QuizBoundary.tsx). */
