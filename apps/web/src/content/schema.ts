@@ -4,25 +4,25 @@ const text = z.string().trim().min(1);
 /** Lines as in the mockup: rendered with explicit breaks on desktop, joined on small screens. */
 const lines = z.array(text).min(1);
 
-const featureIcon = z.enum(['school', 'sparkles', 'pencil', 'shieldCheck']);
+const featureIcon = z.enum(['school', 'sparkles', 'listDetails', 'shieldCheck']);
 const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamCard']);
 
 /** A link of the project card: not working yet — a press says «Мы работаем над этим». */
 const link = z.object({ label: text });
 
-export const PLAN_IDS = ['free', 'premium', 'business'] as const;
+export const PLAN_IDS = ['free', 'premium'] as const;
+export const BILLING_PERIODS = ['month', 'year'] as const;
+
+/** A price for each billing period: the amount and the words after it («навсегда», «в месяц»). */
+const price = z.object({ amount: text, per: text });
 
 const plan = z.object({
   id: z.enum(PLAN_IDS),
   name: text,
-  price: text,
-  period: text,
-  /** A second price line (the yearly Premium). */
-  note: text.optional(),
   tagline: text,
-  badge: text.optional(),
-  features: z.array(text).min(1),
-  action: text,
+  prices: z.object({ month: price, year: price }),
+  /** Each feature as lines, broken where the mockup breaks them. */
+  features: z.array(lines).min(1),
 });
 
 export const siteContentSchema = z.object({
@@ -76,13 +76,23 @@ export const siteContentSchema = z.object({
     members: z.array(z.array(text).min(1)).length(2),
     close: text,
   }),
-  /** «Цены»: the plans of the business model (the team's tables, 17.10). Nothing can be bought yet. */
+  /**
+   * «Цены»: a part of the page of its own (the team's mockups «цены дизайн», 22.10). Nothing can be bought yet: choosing
+   * a plan says so.
+   */
   pricing: z.object({
     title: text,
+    heading: text,
     lead: text,
-    plansLabel: text,
     close: text,
-    plans: z.array(plan).length(3),
+    periodsLabel: text,
+    periods: z.object({ month: text, year: text, yearDiscount: text }),
+    plansLabel: text,
+    /** The accessible name of a plan card's button: «{name}» is replaced. */
+    choose: text.includes('{name}'),
+    plans: z.tuple([plan, plan]),
+    /** Premium's «Ещё...»: the rest of its features on the blurred card. */
+    more: z.object({ label: text, open: text, close: text, features: z.array(lines).min(1) }),
   }),
   /** Short messages (Toast). */
   notices: z.object({ workingOnIt: text, noPayment: text, loadError: text }),
@@ -94,4 +104,5 @@ export const siteContentSchema = z.object({
 export type SiteContent = z.infer<typeof siteContentSchema>;
 export type FeatureIcon = z.infer<typeof featureIcon>;
 export type PlanId = (typeof PLAN_IDS)[number];
+export type BillingPeriod = (typeof BILLING_PERIODS)[number];
 export type ImageKey = z.infer<typeof imageKey>;

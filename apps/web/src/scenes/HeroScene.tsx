@@ -1,5 +1,5 @@
 import {
-  IconPencilFilled,
+  IconListDetails,
   IconSchoolFilled,
   IconShieldCheckFilled,
   IconSparklesFilled,
@@ -20,7 +20,7 @@ import { Lines } from '../components/Lines';
 const FEATURE_ICONS: Record<FeatureIcon, Icon> = {
   school: IconSchoolFilled,
   sparkles: IconSparklesFilled,
-  pencil: IconPencilFilled,
+  listDetails: IconListDetails, // the team's own pick (22.10): an outline icon among the filled ones
   shieldCheck: IconShieldCheckFilled,
 };
 

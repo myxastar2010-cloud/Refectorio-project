@@ -89,9 +89,7 @@
   --type-hero-title-stroke: 0.045em; /* …and this outline brings it to the weight of the mockup;
      the tracking below gives back +0.018em of the space the outline takes between letters */
   --type-hero-title-leading: 84.5;
-  --type-hero-title-tracking-1: 0.0145em; /* «Питаться» (per line: exact widths) */
-  --type-hero-title-tracking-2: 0.021em; /* «полезно и» */
-  --type-hero-title-tracking-3: 0.0143em; /* «вкусно сейчас» */
+  --type-hero-title-tracking: 0.0145em;
 
   --type-hero-lead-size: 22.8;
   --type-hero-lead-weight: 600;
@@ -188,15 +186,17 @@
   --hero-about-border: 2;
   --hero-pricing-w: 150; /* «Цены»: the «О проекте» pill, as wide as its shorter label needs */
   --hero-pills-gap: 16;
-  --hero-title-baseline: 278.5;
-  --hero-lead-baseline: 518;
-  --hero-cta-y: 595;
+  /* 22.10 (D-052): the team's longer texts — the title, the lead and the button sit 16 higher than on the mockup,
+     the cards are taller and 8 lower, so the text block and the cards keep air between them on laptops. */
+  --hero-title-baseline: 262.5;
+  --hero-lead-baseline: 502;
+  --hero-cta-y: 579;
   --hero-cta-w: 440;
   --hero-cta-h: 83;
   --hero-cta-gap: 5;
-  --hero-cards-y: 844;
-  --hero-card-h: 178; /* mockup 161: a little more room around the same texts */
-  --hero-cards-bottom: 58; /* space under the cards (mockup 86: the row sits a little lower, D-029) */
+  --hero-cards-y: 798; /* 1080 − card − the space under it */
+  --hero-card-h: 232; /* a title and up to five lines (mockup 161: a title and two) */
+  --hero-cards-bottom: 50; /* space under the cards (mockup 86: the row sits lower, D-029, D-052) */
   --hero-card-pad-x: 44; /* text origin of title and text (ink + side bearing) */
   --hero-card-title-leading: 36;
   --hero-card-text-gap: 12; /* title line box → text: baselines 38 apart (mockup 32) */
@@ -233,6 +233,45 @@
   --about-link-circle: 34;
   --about-link-gap: 11; /* text ink → circle */
   --about-links-gap: 44; /* between the two links */
+
+  /* ── «Цены» (the team's mockups «цены дизайн», 1920×1080; mockup px, measured in the JPEGs) ─────────────── */
+  /* Tall windows show the whole mockup frame (1920×1080 — exactly the mockup); lower ones only the composition, the
+     title down to under the frame (y 60…1050), so a laptop shows it a little larger than the frame scale --s would. */
+  --pricing-fit-w: 1400;
+  --pricing-fit-h: 990;
+  --pricing-fit-y: 60;
+  --pricing-title-top: 78.06; /* the title's line box: baseline 131 */
+  --pricing-board-top: 181;
+  --pricing-board-w: 1246;
+  --pricing-board-h: 844;
+  --pricing-board-radius: 170;
+  --pricing-board-border: 5;
+  --pricing-head-pad: 26.2; /* heading baseline 259 */
+  --pricing-heading-size: 60;
+  --pricing-lead-gap: 27.4; /* lead baseline 315.5 */
+  --pricing-lead-size: 24.4;
+  --pricing-switch-gap: 29; /* the pills at 348 */
+  --pricing-switch-w: 188.5;
+  --pricing-switch-h: 70;
+  --pricing-switch-between: 20;
+  --pricing-switch-border: 2;
+  --pricing-switch-size: 30;
+  --pricing-discount-size: 18;
+  --pricing-plans-gap-y: 26; /* the cards at 444 */
+  --pricing-plans-gap-x: 38;
+  --pricing-close-size: 50;
+  --pricing-close-top: 76;
+  --pricing-close-right: 78;
+  --pricing-close-border: 2.5;
+  /* A plan card: the pictures' own size (407 × 542 drawn at 544), corners r = 62. */
+  --plan-w: 407;
+  --plan-h: 544;
+  --plan-radius: 62;
+  --plan-ring-gap: 8; /* hover ring: this far off the card, this thick */
+  --plan-ring-width: 3;
+  --color-plan-free: #2d5a27; /* while a picture loads: its mean colour */
+  --color-plan-premium: #c0333a;
+  --plan-text-shadow: 0 1px 12px rgb(0 0 0 / 0.22); /* white text on bright fruit (oranges, honey) */
 
   /* ── Team dialog (expanded card) ───────────────────────────────────────────────────────── */
   --dialog-w: 1401;

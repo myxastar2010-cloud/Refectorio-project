@@ -24,21 +24,26 @@ describe('site content', () => {
   it('keeps the mockup typos fixed', () => {
     const all = strings(site).join('\n');
     expect(all).not.toMatch(/настроивайте|то что|ИИ помощник|Ясинский алексей|Название Проекта/);
-    expect(all).toContain('ИИ-помощник');
+    expect(all).toContain('ИИ-консультант');
     expect(all).toContain('Ясинский Алексей');
   });
 
   it('has a 3-line heading, as the composition of part 1 expects', () => {
     expect(site.hero.titleLines).toHaveLength(3);
-    expect(site.hero.titleLines.join(' ')).toBe('Форма мечты начинается с тарелки');
+    expect(site.hero.titleLines.join(' ')).toBe(
+      'Максимум результата, минимум усилий и никаких диет',
+    );
   });
 
-  it('shows the three plans of the business model', () => {
-    const [free, premium, business] = site.pricing.plans;
-    expect(free.price).toBe('0 ₽');
-    expect(premium.price).toBe('299 ₽');
-    expect(premium.note).toContain('1 990 ₽ в год');
-    expect(business.period).toBe('за сотрудника в месяц');
+  it('shows the two plans of the mockups, a month and a year of Premium', () => {
+    const [free, premium] = site.pricing.plans;
+    expect(free.prices.month).toEqual({ amount: '0 ₽', per: 'навсегда' });
+    expect(free.prices.year).toEqual(free.prices.month);
+    expect(premium.prices.month).toEqual({ amount: '299 ₽', per: 'в месяц' });
+    expect(premium.prices.year).toEqual({ amount: '1990 ₽', per: 'в год' });
+    // «−44%»: a year costs 44 % less than twelve months (1990 against 12 × 299 = 3588).
+    expect(Math.floor((1 - 1990 / (12 * 299)) * 100)).toBe(44);
+    expect(site.pricing.periods.yearDiscount).toBe('−44%');
     // No brand names of other services in the plan texts.
     expect(strings(site.pricing).join(' ')).not.toMatch(/Тиндер|Tinder|Купер/);
   });

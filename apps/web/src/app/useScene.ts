@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type Scene = 'hero' | 'about' | 'quiz';
+export type Scene = 'hero' | 'about' | 'pricing' | 'quiz';
 
 export const ABOUT_HASH = '#about';
+export const PRICING_HASH = '#pricing';
 export const QUIZ_HASH = '#quiz';
 
-const sceneFromHash = (hash: string): Scene =>
-  hash === ABOUT_HASH ? 'about' : hash === QUIZ_HASH ? 'quiz' : 'hero';
+const HASH_SCENES: Readonly<Record<string, Scene>> = {
+  [ABOUT_HASH]: 'about',
+  [PRICING_HASH]: 'pricing',
+  [QUIZ_HASH]: 'quiz',
+};
+
+const sceneFromHash = (hash: string): Scene => HASH_SCENES[hash] ?? 'hero';
 
 /**
  * History entries the site writes. Inside the quiz every step and every dish answer is an entry of its own (`quiz` =
@@ -20,8 +26,8 @@ export type HistoryState = {
 } | null;
 
 /**
- * Scene state synced with the address: part 2 lives at #about, the quiz at #quiz; the browser Back button works,
- * a direct visit opens the scene without the long transition (`instant`).
+ * Scene state synced with the address: part 2 lives at #about, «Цены» at #pricing, the quiz at #quiz; the browser Back
+ * button works, a direct visit opens the scene without the long transition (`instant`).
  */
 /**
  * True from «Выйти» until the browser has rewound the quiz's entries: the quiz's own history listener must not take
@@ -58,16 +64,17 @@ export function useScene() {
   const go = useCallback((next: Scene) => {
     if (sceneRef.current === next) return;
     const state = window.history.state as HistoryState;
-    if (next === 'about') {
-      window.history.pushState({ scene: 'about' } satisfies HistoryState, '', ABOUT_HASH);
+    if (next === 'about' || next === 'pricing') {
+      const hash = next === 'about' ? ABOUT_HASH : PRICING_HASH;
+      window.history.pushState({ scene: next } satisfies HistoryState, '', hash);
     } else if (next === 'quiz') {
       window.history.pushState(
         { scene: 'quiz', quiz: 0, fromLanding: true } satisfies HistoryState,
         '',
         QUIZ_HASH,
       );
-    } else if (state?.scene === 'about') {
-      // We added the #about entry ourselves: going back keeps the history short and Back predictable.
+    } else if (state?.scene === 'about' || state?.scene === 'pricing') {
+      // We added the #about / #pricing entry ourselves: going back keeps the history short and Back predictable.
       window.history.back();
     } else {
       const { pathname, search } = window.location;

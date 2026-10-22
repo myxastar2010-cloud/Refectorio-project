@@ -46,7 +46,8 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
     const navigate = (direction: Direction) => {
       const current = sceneRef.current;
       if (direction === 'down' && current === 'hero') go('about');
-      else if (direction === 'up' && current === 'about') go('hero');
+      // «Цены» is reached only by its button; a scroll up leaves it, like part 2.
+      else if (direction === 'up' && (current === 'about' || current === 'pricing')) go('hero');
       else return false;
       wheel.consume();
       return true;
