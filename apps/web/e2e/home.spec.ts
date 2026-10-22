@@ -300,7 +300,7 @@ test.describe('quality', () => {
     const errors = collectErrors(page);
     await page.goto('./?seed=1');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Максимум результата, минимум усилий и никаких диет',
+      'Максимум результата, минимум усилий',
     );
     const faces = await page.evaluate(async () => {
       const loaded = await document.fonts.load('700 16px "Open Runde"', 'Питаться Refectorio');

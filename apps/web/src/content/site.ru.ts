@@ -4,13 +4,13 @@ import type { SiteContent } from './schema';
  * All user-facing text of the site (see .claude/rules/content.md).
  * 17.10: the team asked for new, «selling» slogans — the site sells the goal, not the menu — and for the «Цены»
  * block (plans from the project's business model). The texts of part 1 and of the project card are therefore new
- * (part 1 rewritten by the team once more on 22.10, D-052); the rest keeps the mockups with typos fixed («Ясинский
+ * (part 1 rewritten by the team on 22.10, D-052, as on their screenshots); the rest keeps the mockups with typos fixed («Ясинский
  * алексей» → «Ясинский Алексей», «Название Проекта» → «Refectorio»).
  */
 export const site = {
   meta: {
     lang: 'ru',
-    title: 'Refectorio — максимум результата, минимум усилий и никаких диет',
+    title: 'Refectorio — максимум результата, минимум усилий',
     description:
       'Refectorio возьмёт на себя планирование вашего меню: худейте без диет или просто питайтесь вовремя. Расчёт по науке, ИИ-консультант и меню под вас.',
   },
@@ -21,10 +21,11 @@ export const site = {
   hero: {
     aboutButton: 'О проекте',
     pricingButton: 'Цены',
-    titleLines: ['Максимум результата,', 'минимум усилий', 'и никаких диет'],
+    titleLines: ['Максимум результата,', 'минимум усилий'],
     leadLines: [
-      'Refectorio возьмёт на себя планирование вашего меню. Худейте без диет',
-      'или просто питайтесь вовремя, даже если весь день не встаёте из-за стола',
+      'Refectorio возьмёт на себя планирование вашего меню.',
+      'Худейте без диет или просто питайтесь вовремя, даже',
+      'если весь день не встаёте из-за стола',
     ],
     cta: { label: 'Создать меню', href: '#quiz' },
     featuresLabel: 'Возможности Refectorio',
@@ -37,21 +38,18 @@ export const site = {
       {
         title: 'ИИ-консультант',
         textLines: [
-          'Всегда на связи, чтобы',
-          'давать советы и держать',
-          'вашу мотивацию',
-          'на максимуме',
+          'Всегда на связи, чтобы давать',
+          'советы и держать вашу',
+          'мотивацию на максимуме',
         ],
         icon: 'sparkles',
       },
       {
         title: 'Ваш комфорт',
         textLines: [
-          'Точный расчёт калорий',
-          'и БЖУ, исключайте',
-          'аллергены и нелюбимые',
-          'продукты, собирайте',
-          'вкусный ланч-бокс на работу',
+          'Точный расчёт КБЖУ, соберём',
+          'вкусный ланч на работу',
+          'с заботой о вашем здоровье',
         ],
         icon: 'listDetails',
       },

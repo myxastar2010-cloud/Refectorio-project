@@ -596,14 +596,9 @@
   white-space: nowrap;
 }
 
-/* «Выйти» reads a little larger than «О проекте» in the same pill (stage 3, 4.16); the door is Tabler's IconDoorExit. */
+/* «Выйти» reads a little larger than «О проекте» in the same pill (stage 3, 4.16); no icon (the team, 22.10). */
 .pill-label--exit {
   font-size: 1.15em;
-}
-
-.pill-exit-icon {
-  width: 1.1em;
-  height: 1.1em;
 }
 
 /* «Загружаем тест…» while the quiz chunk is on its way (app/QuizBoundary.tsx). */

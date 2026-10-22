@@ -104,9 +104,9 @@
   --type-card-title-weight: 600;
   --type-card-title-tracking: -0.0157em;
 
-  --type-card-text-size: 19;
+  --type-card-text-size: 17.5; /* the team's screenshot (22.10): three lines beside the icon */
   --type-card-text-weight: 500; /* lighter than the card title (600): it is the subtitle */
-  --type-card-text-leading: 24;
+  --type-card-text-leading: 22.5;
   --type-card-text-tracking: -0.022em;
 
   --type-about-title-size: 61.3;
@@ -186,17 +186,19 @@
   --hero-about-border: 2;
   --hero-pricing-w: 150; /* «Цены»: the «О проекте» pill, as wide as its shorter label needs */
   --hero-pills-gap: 16;
-  /* 22.10 (D-052): the team's longer texts — the title, the lead and the button sit 16 higher than on the mockup,
-     the cards are taller and 8 lower, so the text block and the cards keep air between them on laptops. */
-  --hero-title-baseline: 262.5;
-  --hero-lead-baseline: 502;
-  --hero-cta-y: 579;
+  /* 22.10 (D-052): a title of two lines and a lead of three (the team's screenshot); the lead and the button follow
+     the title at the mockup's distances. */
+  --hero-title-lines: 2;
+  --hero-lead-lines: 3;
+  --hero-title-baseline: 278.5;
+  --hero-lead-baseline: 433.5; /* the title's last baseline + 70.5 */
+  --hero-cta-y: 539.5; /* the lead's last baseline + 48 */
   --hero-cta-w: 440;
   --hero-cta-h: 83;
   --hero-cta-gap: 5;
-  --hero-cards-y: 798; /* 1080 − card − the space under it */
-  --hero-card-h: 232; /* a title and up to five lines (mockup 161: a title and two) */
-  --hero-cards-bottom: 50; /* space under the cards (mockup 86: the row sits lower, D-029, D-052) */
+  --hero-cards-y: 844;
+  --hero-card-h: 178; /* mockup 161: a little more room around a title and up to three lines */
+  --hero-cards-bottom: 58; /* space under the cards (mockup 86: the row sits a little lower, D-029) */
   --hero-card-pad-x: 44; /* text origin of title and text (ink + side bearing) */
   --hero-card-title-leading: 36;
   --hero-card-text-gap: 12; /* title line box → text: baselines 38 apart (mockup 32) */

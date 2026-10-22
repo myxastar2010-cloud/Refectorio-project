@@ -28,11 +28,10 @@ describe('site content', () => {
     expect(all).toContain('Ясинский Алексей');
   });
 
-  it('has a 3-line heading, as the composition of part 1 expects', () => {
-    expect(site.hero.titleLines).toHaveLength(3);
-    expect(site.hero.titleLines.join(' ')).toBe(
-      'Максимум результата, минимум усилий и никаких диет',
-    );
+  it('has a 2-line heading and a 3-line lead, as the composition of part 1 expects', () => {
+    expect(site.hero.titleLines).toHaveLength(2);
+    expect(site.hero.leadLines).toHaveLength(3);
+    expect(site.hero.titleLines.join(' ')).toBe('Максимум результата, минимум усилий');
   });
 
   it('shows the two plans of the mockups, a month and a year of Premium', () => {

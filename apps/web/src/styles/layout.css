@@ -496,7 +496,11 @@
   .hero-lead {
     --baseline: calc(
       var(--hero-lead-baseline) +
-        (2 * var(--type-hero-title-leading) + var(--type-hero-lead-size)) * (var(--boost) - 1)
+        (
+          (var(--hero-title-lines) - 1) * var(--type-hero-title-leading) +
+            var(--type-hero-lead-size)
+        ) *
+        (var(--boost) - 1)
     );
     --size: calc(var(--type-hero-lead-size) * var(--boost));
     --leading: calc(var(--type-hero-lead-leading) * var(--boost));
@@ -506,7 +510,8 @@
     --y: calc(
       var(--hero-cta-y) +
         (
-          2 * var(--type-hero-title-leading) + var(--type-hero-lead-size) +
+          (var(--hero-title-lines) - 1) * var(--type-hero-title-leading) +
+            var(--type-hero-lead-size) + (var(--hero-lead-lines) - 1) *
             var(--type-hero-lead-leading)
         ) *
         (var(--boost) - 1)
