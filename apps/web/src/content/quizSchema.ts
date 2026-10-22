@@ -193,7 +193,11 @@ export const quizContentSchema = z.object({
     insulinQuestion: text,
     insulinOptions: z.object({ yes: text, no: text, unknown: text }),
     trimesterQuestion: text,
-    trimesters: z.object({ trimester1: text, trimester2: text, trimester3: text }),
+    trimesters: z.object({
+      trimester1: z.object({ label: text, detail: text }),
+      trimester2: z.object({ label: text, detail: text }),
+      trimester3: z.object({ label: text, detail: text }),
+    }),
     lactationQuestion: text,
     lactationPeriods: z.object({ months0to6: text, months7to12: text }),
     notes: z.object({

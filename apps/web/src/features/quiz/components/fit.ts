@@ -78,11 +78,14 @@ export function fitScreen(screen: HTMLElement): FitResult {
     return frame.offsetHeight;
   };
   screen.removeAttribute('data-compact');
+  screen.removeAttribute('data-overflow');
   let result = solveFit(measure, available);
   if (!result.fits) {
     screen.setAttribute('data-compact', '');
     result = solveFit(measure, available);
   }
+  // Even compact at the floors it is taller than the window: the last resort, it scrolls inside (quiz.css, D-050).
+  if (!result.fits) screen.setAttribute('data-overflow', '');
   screen.style.setProperty('--fit', result.fit.toFixed(2));
   frame.style.minHeight = previousMin;
   screen.removeAttribute('data-fit-measure');

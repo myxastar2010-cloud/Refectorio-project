@@ -494,6 +494,19 @@
   }
 }
 
+/* The last resort (D-050): a step that is taller than the window even in its compact layout at the floors — only the
+   health step with several follow-up questions, notes and custom items on a phone on its side — scrolls inside, without
+   a scrollbar. Every other step and state fits (e2e «no scroll» matrix). */
+.quiz-screen[data-overflow] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.quiz-screen[data-overflow]::-webkit-scrollbar {
+  display: none;
+}
+
 /* Measuring the fit (components/fit.ts): the step as it usually grows once shown — «Далее», a note, the «+» panel,
    a text field at its tallest. Only while measuring, never painted; rarer growth (follow-up questions, many custom
    chips) is fitted again the moment it comes. */
@@ -516,7 +529,7 @@
 }
 
 .quiz-screen[data-fit-measure] .quiz-textarea-field {
-  height: var(--q-textarea-max) !important;
+  height: var(--q-field-max) !important;
 }
 
 .quiz-frame {
@@ -581,7 +594,8 @@
 }
 
 .quiz-note {
-  max-width: min(100%, calc(720 * var(--q)));
+  /* Never narrower than ~20 words' worth at a small fit: a narrow note only grows taller. */
+  max-width: min(100%, max(20em, calc(720 * var(--q))));
   margin-top: calc(18 * var(--q));
   font-size: var(--q-note);
   line-height: 1.35;
@@ -670,6 +684,24 @@
   padding-inline: calc(18 * var(--q));
 }
 
+/* «1 триместр» over «1–13 недель»: three answers in one row instead of three rows. */
+.quiz-screen[data-compact] .quiz-segment-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: 3px;
+  line-height: 1.1;
+}
+
+.quiz-screen[data-compact] .quiz-segment-detail {
+  font-size: max(11px, 0.72em);
+  font-weight: 500;
+}
+
+.quiz-screen[data-compact] .quiz-segment-bracket {
+  display: none;
+}
+
 .quiz-screen[data-compact] .quiz-chip,
 .quiz-screen[data-compact] .quiz-chips.is-compact .quiz-chip {
   min-height: 40px;
@@ -685,6 +717,8 @@
 }
 
 .quiz-screen[data-compact] .quiz-note {
+  /* The whole width of its column: fewer, longer lines. */
+  max-width: 100%;
   margin-top: calc(8 * var(--q));
 }
 
@@ -761,7 +795,24 @@
   }
 
   .quiz-screen[data-compact] .quiz-frame--chips .quiz-chips-below {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 12px;
     margin-top: 0;
+  }
+
+  /* One item per line, except «Готово» and the privacy label: they share the last one (a line less on a low screen). */
+  .quiz-screen[data-compact] .quiz-frame--chips .quiz-chips-below > * {
+    flex: 0 0 100%;
+  }
+
+  .quiz-screen[data-compact]
+    .quiz-frame--chips
+    .quiz-chips-below
+    > :is(.quiz-continue, .quiz-privacy) {
+    flex: 0 0 auto;
+    margin-top: calc(10 * var(--q));
   }
 
   .quiz-screen[data-compact] .quiz-frame--chips .quiz-followup:first-child,
@@ -1626,18 +1677,32 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+/* The field grows with its text up to the panel's tallest size, then scrolls inside — the one inner scroll the quiz
+   allows (4.11): no scrollbar, the clipped edge fades out (data-clipped, TextStep). */
 .quiz-textarea-field {
+  --q-field-max: calc(var(--q-textarea-max) - 2 * var(--q-textarea-pad) - 1.4em);
   flex: 1;
   width: 100%;
   min-height: calc(var(--q-textarea-h) - 2 * var(--q-textarea-pad) - 1.6em);
+  max-height: var(--q-field-max);
   resize: none;
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
   background: transparent;
   font-size: var(--q-input);
   line-height: 1.4;
   font-weight: 600;
   color: var(--color-ink);
   outline: none;
+}
+
+.quiz-textarea-field::-webkit-scrollbar {
+  display: none;
+}
+
+.quiz-textarea-field[data-clipped] {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 1.6em), transparent);
 }
 
 .quiz-counter {

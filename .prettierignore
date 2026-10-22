@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-test/
 coverage/
 package-lock.json
 apps/web/src/assets/generated/

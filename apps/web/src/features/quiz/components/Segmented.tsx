@@ -4,10 +4,36 @@ import { useWave } from '../../../motion/useWave';
 import { WaveLayer } from '../../../motion/WaveHover';
 import { popChip } from './choice';
 
-type Item<T extends string> = { readonly value: T; readonly label: string };
+/** `detail` follows the label in brackets; the compact layout (4.11) puts it on a second, smaller line instead. */
+type Item<T extends string> = {
+  readonly value: T;
+  readonly label: string;
+  readonly detail?: string;
+};
+
+function SegmentText({
+  label,
+  detail,
+}: {
+  readonly label: string;
+  readonly detail: string | undefined;
+}) {
+  if (!detail) return label;
+  return (
+    <span className="quiz-segment-text">
+      {label}{' '}
+      <span className="quiz-segment-detail">
+        <span className="quiz-segment-bracket">(</span>
+        {detail}
+        <span className="quiz-segment-bracket">)</span>
+      </span>
+    </span>
+  );
+}
 
 function Segment({
   label,
+  detail,
   selected,
   tabIndex,
   calm,
@@ -16,6 +42,7 @@ function Segment({
   buttonRef,
 }: {
   readonly label: string;
+  readonly detail: string | undefined;
   readonly selected: boolean;
   readonly tabIndex: number;
   readonly calm: boolean;
@@ -45,9 +72,11 @@ function Segment({
       onKeyDown={onKeyDown}
       {...handlers}
     >
-      <span className="wave-content">{label}</span>
+      <span className="wave-content">
+        <SegmentText label={label} detail={detail} />
+      </span>
       <WaveLayer clipPath={clipPath} className="wave-layer--ink">
-        {label}
+        <SegmentText label={label} detail={detail} />
       </WaveLayer>
     </button>
   );
@@ -101,6 +130,7 @@ export function Segmented<T extends string>({
           <Segment
             key={item.value}
             label={item.label}
+            detail={item.detail}
             selected={item.value === selected}
             tabIndex={index === focusIndex ? 0 : -1}
             calm={calm}

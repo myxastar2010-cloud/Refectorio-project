@@ -175,10 +175,11 @@ export const quiz = {
     insulinQuestion: 'Получаете инсулин?',
     insulinOptions: { yes: 'Да', no: 'Нет', unknown: 'Не знаю' },
     trimesterQuestion: 'Срок беременности',
+    /** The weeks follow the name in brackets; small screens put them under it (4.11). */
     trimesters: {
-      trimester1: '1 триместр (1–13 недель)',
-      trimester2: '2 триместр (14–27 недель)',
-      trimester3: '3 триместр (с 28 недели)',
+      trimester1: { label: '1 триместр', detail: '1–13 недель' },
+      trimester2: { label: '2 триместр', detail: '14–27 недель' },
+      trimester3: { label: '3 триместр', detail: 'с 28 недели' },
     },
     lactationQuestion: 'Сколько месяцев ребёнку?',
     lactationPeriods: { months0to6: 'До 6 месяцев', months7to12: '7–12 месяцев' },

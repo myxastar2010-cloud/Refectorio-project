@@ -351,7 +351,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
             label={quiz.health.trimesterQuestion}
             items={(['trimester1', 'trimester2', 'trimester3'] as const).map((value) => ({
               value,
-              label: quiz.health.trimesters[value],
+              ...quiz.health.trimesters[value],
             }))}
             selected={a.trimester}
             calm={calm}
