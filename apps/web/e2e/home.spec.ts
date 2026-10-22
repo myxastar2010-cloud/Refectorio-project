@@ -167,9 +167,9 @@ test.describe('team dialog', () => {
     await settled(page, 'about');
   });
 
-  const more = (page: Page) => page.getByRole('button', { name: /Ещё о команде/ });
+  const more = (page: Page) => page.getByRole('button', { name: /Подробнее о команде/ });
 
-  test('opens, traps focus, closes with Esc and returns focus to «Ещё»', async ({ page }) => {
+  test('opens, traps focus, closes with Esc and returns focus to «Подробнее»', async ({ page }) => {
     await more(page).click();
     const dialog = page.getByRole('dialog', { name: /Modern Manifesto/ });
     await expect(dialog).toBeVisible();
@@ -300,7 +300,7 @@ test.describe('quality', () => {
     const errors = collectErrors(page);
     await page.goto('./?seed=1');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Форма мечты начинается с тарелки',
+      'Максимум результата, минимум усилий',
     );
     const faces = await page.evaluate(async () => {
       const loaded = await document.fonts.load('700 16px "Open Runde"', 'Питаться Refectorio');
@@ -343,7 +343,7 @@ test.describe('quality', () => {
     expect(await check()).toEqual([]);
     await page.keyboard.press('ArrowDown');
     await settled(page, 'about');
-    await page.getByRole('button', { name: /Ещё о команде/ }).click();
+    await page.getByRole('button', { name: /Подробнее о команде/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     expect(await check()).toEqual([]);
   });
@@ -355,83 +355,152 @@ test.describe('quality', () => {
     await page.keyboard.press('ArrowDown');
     await settled(page, 'about');
     expect(await seriousViolations(page)).toEqual([]);
-    await page.getByRole('button', { name: /Ещё о команде/ }).click();
+    await page.getByRole('button', { name: /Подробнее о команде/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     expect(await seriousViolations(page)).toEqual([]);
   });
 
-  test('accessibility: the plans card has no serious violations', async ({ page }) => {
+  test('accessibility: «Цены» and its unfolded Premium have no serious violations', async ({
+    page,
+  }) => {
     await page.goto('./?seed=1&freeze=1');
     await settled(page, 'hero');
-    await page.getByRole('button', { name: 'Цены' }).click();
-    await expect(page.getByRole('dialog', { name: 'Выберите свой темп' })).toBeVisible();
+    await page.getByRole('button', { name: 'Цены', exact: true }).click();
+    await settled(page, 'pricing');
+    expect(await seriousViolations(page)).toEqual([]);
+    await page.getByRole('button', { name: 'Все возможности Premium' }).click();
+    await expect(page.getByRole('button', { name: 'Свернуть возможности Premium' })).toBeFocused();
     expect(await seriousViolations(page)).toEqual([]);
   });
 });
 
 test.describe('«Цены»', () => {
-  const pricing = (page: Page) => page.getByRole('button', { name: 'Цены' });
-  const card = (page: Page) => page.getByRole('dialog', { name: 'Выберите свой темп' });
+  const pricing = (page: Page) => page.getByRole('button', { name: 'Цены', exact: true });
+  const scenePricing = (page: Page) => page.getByRole('region', { name: 'Цены', exact: true });
+  const pictures = (page: Page) =>
+    page
+      .locator('.plan-surface > picture > img')
+      .evaluateAll((images) => images.map((image) => (image as HTMLImageElement).currentSrc));
 
-  test('the plans grow out of «Цены», blur the page, and close back with focus on «Цены»', async ({
+  /** Part 1, then «Цены» by its button. */
+  const openPricing = async (page: Page) => {
+    await page.goto('./?seed=1');
+    await settled(page, 'hero');
+    await pricing(page).click();
+    await settled(page, 'pricing');
+  };
+
+  test('comes in like part 2 by «Цены»: the plans, a month and a year; × returns focus to «Цены»', async ({
     page,
   }) => {
     const errors = collectErrors(page);
-    await page.goto('./?seed=1');
-    await settled(page, 'hero');
-    await pricing(page).click();
-    await expect(card(page)).toBeVisible();
-    for (const plan of ['Бесплатно', 'Premium', 'Для компаний']) {
-      await expect(card(page).getByRole('heading', { name: plan })).toBeVisible();
+    await openPricing(page);
+    await expect(page).toHaveURL(/#pricing$/);
+    await expect(page.getByRole('heading', { name: 'Цены', level: 2 })).toBeFocused();
+    await expect(
+      scenePricing(page).getByRole('heading', { name: 'Выбирай свой темп' }),
+    ).toBeVisible();
+    for (const plan of ['Бесплатно', 'Premium']) {
+      await expect(scenePricing(page).getByRole('heading', { name: plan })).toBeVisible();
     }
-    await expect(card(page)).toContainText('299 ₽');
-    await expect(card(page)).toContainText('1 990 ₽ в год');
-    await expect(card(page)).toContainText('150 ₽');
-    // The page behind blurs (the heading carries the filter while the card is open).
-    await expect
-      .poll(() =>
-        page.evaluate(() => {
-          const title = document.querySelector('.hero-title');
-          return title ? getComputedStyle(title).filter : null;
-        }),
-      )
-      .toContain('blur');
-    // Keys and the wheel do not change the scene while the card is open.
-    await page.mouse.wheel(0, 120);
-    await expect(scene(page)).toHaveAttribute('data-scene', 'hero');
-    await page.keyboard.press('Escape');
-    await expect(card(page)).toHaveCount(0);
+    const shows = (text: string) =>
+      expect(scenePricing(page).getByText(text, { exact: true })).toBeVisible();
+    await shows('299 ₽');
+    await shows('в месяц');
+    await page.getByRole('radio', { name: /Год/ }).click();
+    await expect(page.getByRole('radio', { name: /Год/ })).toBeChecked();
+    await shows('1990 ₽');
+    await shows('в год');
+    await shows('0 ₽');
+    await shows('навсегда');
+
+    // × returns to part 1 with focus on «Цены».
+    await scenePricing(page).getByRole('button', { name: 'Закрыть цены' }).click();
+    await settled(page, 'hero');
     await expect(pricing(page)).toBeFocused();
-    await expect
-      .poll(() =>
-        page.evaluate(() => {
-          const title = document.querySelector('.hero-title');
-          return title ? getComputedStyle(title).filter : null;
-        }),
-      )
-      .toBe('none');
     expect(errors).toEqual([]);
   });
 
-  test('a paid plan says there is no payment yet; «Начать бесплатно» opens the quiz', async ({
+  test('a scroll down stays in «Цены» (it is not part 3), a scroll up leaves it', async ({
     page,
   }) => {
-    await page.goto('./?seed=1');
+    await openPricing(page);
+    await page.mouse.move(960, 540);
+    const changes = await countSceneChanges(page);
+    await page.keyboard.press('ArrowDown');
+    await page.mouse.wheel(0, -33);
+    await settled(page, 'hero');
+    expect(await changes()).toBe(1);
+  });
+
+  test('Escape leaves «Цены»; Back and Forward go out of it and into it again', async ({
+    page,
+  }) => {
+    await openPricing(page);
+    await page.keyboard.press('Escape');
     await settled(page, 'hero');
     await pricing(page).click();
-    await card(page).getByRole('button', { name: 'Оформить подписку' }).click();
-    await expect(
-      page.getByRole('status').getByText('Это проект, тут пока нет оплаты'),
-    ).toBeVisible();
-    await card(page).getByRole('button', { name: 'Подключить компанию' }).click();
-    await expect(
-      page.getByRole('status').getByText('Это проект, тут пока нет оплаты'),
-    ).toBeVisible();
-    await card(page).getByRole('button', { name: 'Начать бесплатно' }).click();
-    await expect(card(page)).toHaveCount(0);
-    await expect(scene(page)).toHaveAttribute('data-scene', 'quiz');
-    // In the quiz the «Цены» pill steps aside.
-    await expect(pricing(page)).toHaveCount(0);
+    await settled(page, 'pricing');
+    await page.goBack();
+    await settled(page, 'hero');
+    await page.goForward();
+    await settled(page, 'pricing');
+  });
+
+  test('a plan says there is no payment yet; «Ещё...» unfolds Premium, Escape folds it first', async ({
+    page,
+  }) => {
+    await openPricing(page);
+    for (const plan of ['Бесплатно', 'Premium']) {
+      await page.getByRole('button', { name: `Выбрать тариф «${plan}»` }).click();
+      await expect(
+        page.getByRole('status').getByText('Это проект, тут пока нет оплаты'),
+      ).toBeVisible();
+    }
+
+    const more = page.getByRole('button', { name: 'Все возможности Premium' });
+    await expect(more).toHaveAttribute('aria-expanded', 'false');
+    await expect(scenePricing(page).getByText('Сканер штрихкодов')).toBeHidden();
+    await more.click();
+    await expect(more).toHaveAttribute('aria-expanded', 'true');
+    await expect(scenePricing(page).getByText('Сканер штрихкодов')).toBeVisible();
+    // The unfolded card is not a plan to choose.
+    await expect(page.getByRole('button', { name: 'Выбрать тариф «Premium»' })).toHaveCount(0);
+
+    await page.keyboard.press('Escape');
+    await expect(scenePricing(page).getByText('Сканер штрихкодов')).toBeHidden();
+    await expect(more).toBeFocused();
+    await expect(scene(page)).toHaveAttribute('data-scene', 'pricing');
+    await page.keyboard.press('Escape');
+    await settled(page, 'hero');
+  });
+
+  test('every visit shows another pair of card pictures; a direct visit has them too', async ({
+    page,
+  }) => {
+    await openPricing(page);
+    const first = await pictures(page);
+    expect(first.filter(Boolean)).toHaveLength(2);
+    await page.keyboard.press('Escape');
+    await settled(page, 'hero');
+    await pricing(page).click();
+    await settled(page, 'pricing');
+    await expect.poll(() => pictures(page)).not.toEqual(first);
+    const second = await pictures(page);
+    expect(second[0]).not.toBe(first[0]);
+    expect(second[1]).not.toBe(first[1]);
+
+    await page.goto('./?seed=1#pricing');
+    await settled(page, 'pricing');
+    await expect
+      .poll(() =>
+        page
+          .locator('.plan-surface > picture > img')
+          .evaluateAll((images) =>
+            images.every((image) => (image as HTMLImageElement).naturalWidth > 0),
+          ),
+      )
+      .toBe(true);
   });
 
   test('the project card: the apple logo, and its links say «Мы работаем над этим»', async ({

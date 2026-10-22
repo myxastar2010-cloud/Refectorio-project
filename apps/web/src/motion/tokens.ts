@@ -84,6 +84,40 @@ export const SCENE = {
   aboutCardsOut: { durationMs: 340, fadeMs: 260 },
 } as const;
 
+/**
+ * «Цены» (#pricing): reached only by its button, left by its × or a scroll up. It comes and goes exactly like part 2
+ * (SCENE.heroOut, aboutTitleIn, aboutCardsIn: the frame, then the two plans in cascade); the rest is its own.
+ */
+export const PRICING = {
+  /** The frame and the two plan cards come into focus in this order (aboutCardVariants). */
+  cards: 3,
+  /** «Месяц» ⇄ «Год»: the black pill slides under the labels. */
+  switchSpring: { type: 'spring', visualDuration: 0.36, bounce: 0.16 },
+  /** A new price: the old one leaves upwards into a blur, the new one rises out of one. */
+  price: { durationMs: 300, risePx: 12, blurPx: 6 },
+  /**
+   * Hover ring a little off the card: it draws itself from the top centre both ways round while easing out of the
+   * card's edge, and fades back quickly.
+   */
+  ring: { drawMs: 560, growMs: 460, fromScale: 0.975, outMs: 200 },
+  /**
+   * «Ещё...»: the card's own text dissolves upwards, the fully blurred picture cross-fades in, then the rest of the
+   * list rises line by line; closing is the mirror, faster.
+   */
+  more: {
+    pictureMs: 520,
+    outMs: 220,
+    inDelayMs: 150,
+    inMs: 440,
+    staggerMs: 32,
+    risePx: 14,
+    blurPx: 6,
+    backMs: 320,
+  },
+  /** The «Цены» button opens the scene once the chunk is here; it waits at most this long for the card pictures. */
+  pictureWaitMs: 450,
+} as const;
+
 export const DIALOG = {
   /** The text comes in once the card is this far open (by its shape, see useCornerMorph onReveal). */
   contentRevealAt: 0.7,
@@ -219,8 +253,10 @@ export const QUIZ = {
   /** A chip toggles with a micro-bounce from this scale. */
   chipPressScale: 0.94,
   chipSpring: { type: 'spring', visualDuration: 0.2, bounce: 0.35 },
-  /** Progress fill. */
+  /** Progress fill: a spring with a tiny settle. */
   progressSpring: { type: 'spring', visualDuration: 0.55, bounce: 0.12 },
+  /** …and a light band that runs along the fill once when it grows (starts as the fill begins to move). */
+  progressSheen: { durationMs: 750, delayMs: 60 },
   /** «Далее» / «Готово» rise in when the answer is complete. */
   continueIn: { durationMs: 360, risePx: 14 },
   /** «+» → add panel and row → picker panel (transform-only shape morph). */

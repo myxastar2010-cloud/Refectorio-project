@@ -17,6 +17,7 @@
   --q-header-h: calc(126 * var(--q));
   --q-progress-w: calc(var(--quiz-progress-w) * var(--q));
   --q-progress-h: calc(var(--quiz-progress-h) * var(--q));
+  --q-progress-inset: max(2px, calc(var(--quiz-progress-inset) * var(--q)));
   --q-progress-y: calc(var(--quiz-progress-y) * var(--q));
   --q-back: max(44px, calc(var(--quiz-back-size) * var(--q)));
   --q-back-gap: calc(var(--quiz-back-gap) * var(--q));
@@ -143,7 +144,8 @@
     --q-gutter: 16px;
     --q-header-h: calc(72px + env(safe-area-inset-top));
     --q-progress-w: auto;
-    --q-progress-h: 14px;
+    --q-progress-h: 19px;
+    --q-progress-inset: 2px;
     --q-progress-y: calc(env(safe-area-inset-top) + 27px);
     --q-back: 44px;
     --q-back-gap: 12px;
@@ -271,12 +273,63 @@
   box-shadow: inset 0 0 0 var(--q-outline) var(--color-accent);
 }
 
+/* The fill floats inside the outlined track (stage 3, 4.14): a rail clips it with its own rounded ends. */
+.quiz-progress-rail {
+  position: absolute;
+  inset: var(--q-progress-inset);
+  overflow: hidden;
+  border-radius: inherit;
+  /* The rounded clip of a moving layer (Safari otherwise draws square ends while it moves). */
+  isolation: isolate;
+}
+
 .quiz-progress-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  /* A soft light along the top edge: the fill reads as a pill, not a flat stripe. */
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 0.28), rgb(255 255 255 / 0) 60%),
+    var(--color-accent);
+  will-change: transform;
+}
+
+/* A narrow light band that runs along the fill once when it grows (QuizHeader animates its transform). */
+.quiz-progress-sheen {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 18%;
+  background: linear-gradient(
+    100deg,
+    rgb(255 255 255 / 0) 0%,
+    rgb(255 255 255 / 0.5) 50%,
+    rgb(255 255 255 / 0) 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The finale: once the fill is complete the gap closes — the bar becomes one red pill, exactly what the hand-off
+   (finale/Handoff.tsx) draws next. */
+.quiz-progress-solid {
   position: absolute;
   inset: 0;
   border-radius: inherit;
   background-color: var(--color-accent);
-  will-change: transform;
+  opacity: 0;
+}
+
+.quiz-progress[data-finale] .quiz-progress-solid {
+  animation: quiz-bar-solid var(--quiz-fade-ms) var(--ease-out-soft) var(--finale-fill-ms) forwards;
+}
+
+@keyframes quiz-bar-solid {
+  to {
+    opacity: 1;
+  }
 }
 
 /* The finale: after the fill a highlight sweeps once across the full bar (ТЗ §12.1). */
@@ -2376,6 +2429,10 @@
   .quiz-progress-shimmer,
   .quiz-shimmer {
     display: none;
+  }
+
+  .quiz-progress[data-finale] .quiz-progress-solid {
+    animation-delay: 0ms;
   }
 
   .quiz-core-css {

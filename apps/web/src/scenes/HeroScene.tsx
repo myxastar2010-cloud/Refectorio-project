@@ -1,6 +1,5 @@
 import {
-  IconCirclePlusFilled,
-  IconPencilFilled,
+  IconListDetails,
   IconSchoolFilled,
   IconShieldCheckFilled,
   IconSparklesFilled,
@@ -21,7 +20,7 @@ import { Lines } from '../components/Lines';
 const FEATURE_ICONS: Record<FeatureIcon, Icon> = {
   school: IconSchoolFilled,
   sparkles: IconSparklesFilled,
-  pencil: IconPencilFilled,
+  listDetails: IconListDetails, // the team's own pick (22.10): an outline icon among the filled ones
   shieldCheck: IconShieldCheckFilled,
 };
 
@@ -116,11 +115,9 @@ export function HeroScene({
           >
             <span className="wave-content">
               <span>{site.hero.cta.label}</span>
-              <IconCirclePlusFilled aria-hidden className="cta-icon" />
             </span>
             <WaveLayer clipPath={ctaClip} className="wave-layer--ink">
               <span>{site.hero.cta.label}</span>
-              <IconCirclePlusFilled aria-hidden className="cta-icon" />
             </WaveLayer>
           </m.a>
         </TiltGlare>

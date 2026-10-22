@@ -21,8 +21,6 @@ type Props = {
   readonly scene: Scene;
   readonly params: TestParams;
   readonly teamOpen: boolean;
-  /** The plans card is open over part 1: the food cross-fades to its pre-blurred copies, like in part 2. */
-  readonly pricingOpen: boolean;
 };
 
 declare global {
@@ -84,26 +82,30 @@ function toPlane(point: Attractor, scene: Scene): Attractor {
 }
 
 const speedOf = (scene: Scene) =>
-  scene === 'about' ? SCENE.food.speedFactor : scene === 'quiz' ? QUIZ.foodSpeed : 1;
+  scene === 'about' || scene === 'pricing'
+    ? SCENE.food.speedFactor
+    : scene === 'quiz'
+      ? QUIZ.foodSpeed
+      : 1;
 
 /**
- * React wrapper of the food engine (ТЗ 6.7). The camera layer recedes in part 2 exactly as in Figma
+ * React wrapper of the food engine (ТЗ 6.7). The camera layer recedes in part 2 and «Цены» exactly as in Figma
  * (scale 0.8874 about a point below the frame), the sharp sprites cross-fade into pre-blurred ones.
  */
-export function FoodFieldLayer({ scene, params, teamOpen, pricingOpen }: Props) {
+export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
   const sharpRef = useRef<HTMLDivElement>(null);
   const blurRef = useRef<HTMLDivElement>(null);
   const fieldRef = useRef<FoodField | null>(null);
   const layerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef(scene);
-  const teamOpenRef = useRef(teamOpen || pricingOpen);
+  const teamOpenRef = useRef(teamOpen);
   const calm = useCalmMotion();
-  // Part 2 and the quiz look at the food from the same pulled-back camera, blurred (ТЗ §7.9).
+  // Part 2, «Цены» and the quiz look at the food from the same pulled-back camera, blurred (ТЗ §7.9).
   const about = scene !== 'hero';
 
   useEffect(() => {
     sceneRef.current = scene;
-    teamOpenRef.current = teamOpen || pricingOpen;
+    teamOpenRef.current = teamOpen;
     const field = fieldRef.current;
     if (!field) return;
     field.pauseProbe();
@@ -111,23 +113,7 @@ export function FoodFieldLayer({ scene, params, teamOpen, pricingOpen }: Props) 
     field.setAvoidStrength(scene === 'quiz' ? QUIZ.foodAvoidStrength : 1);
     field.setObstacles(scene === 'quiz' ? [quizColumn()] : about ? [] : obstacles());
     if (about) field.ensureBlur();
-  }, [scene, teamOpen, pricingOpen, about]);
-
-  // Under the plans card both planes move (the sharp one fades out item by item), then only the blurred one; back the
-  // same way.
-  const veiled = pricingOpen && !about;
-  useEffect(() => {
-    const field = fieldRef.current;
-    if (!field || about) return undefined;
-    if (veiled) field.ensureBlur();
-    field.setVisiblePlanes(true, true);
-    const settle = window.setTimeout(() => {
-      field.setVisiblePlanes(!veiled, veiled);
-    }, PLANE_SETTLE_MS);
-    return () => {
-      window.clearTimeout(settle);
-    };
-  }, [veiled, about]);
+  }, [scene, teamOpen, about]);
 
   // Both planes move during the cross-fade, then only the one that is seen. The wider wrap of part 2 starts at once
   // and ends only when the camera is back (then the margins are off screen again).
@@ -240,13 +226,7 @@ export function FoodFieldLayer({ scene, params, teamOpen, pricingOpen }: Props) 
   // The sharp and the pre-blurred food cross-fade item by item (CSS transitions in components.css): a whole plane
   // fading would make the GPU draw two full-screen layers on every frame of the scene change.
   return (
-    <div
-      ref={layerRef}
-      className="food-layer"
-      aria-hidden
-      data-scene={scene}
-      data-veiled={veiled || undefined}
-    >
+    <div ref={layerRef} className="food-layer" aria-hidden data-scene={scene}>
       <m.div
         className="food-camera"
         initial={false}
