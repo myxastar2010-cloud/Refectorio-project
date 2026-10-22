@@ -16,6 +16,7 @@ import { historyDepth, initialQuizState, progressOf, quizReducer } from './flow/
 import { loadDraft, saveDraft } from './flow/persistence';
 import { safetyOf } from './flow/safety';
 import { firstIncompleteStep, questionNumber, TOTAL_SLOTS } from './flow/steps';
+import { testState } from './flow/testStates';
 import type { QuizState } from './flow/types';
 import { QuizContext, readQuizParams, type QuizApi } from './quizContext';
 import { useQuizHistory } from './useQuizHistory';
@@ -35,6 +36,10 @@ const randomSeed = () => Math.floor(Math.random() * 1e9);
  * first unanswered step. ?seed always starts a fresh, reproducible game.
  */
 function startState(seed: number | null): { state: QuizState; resumed: boolean } {
+  if (__TEST_HOOKS__ && quizParams.step) {
+    const test = testState(quizParams.step, quizParams.state, seed ?? 1);
+    if (test) return { state: test, resumed: false };
+  }
   const draft = loadDraft();
   if (draft && seed === null) {
     const incomplete = firstIncompleteStep(draft.answers);

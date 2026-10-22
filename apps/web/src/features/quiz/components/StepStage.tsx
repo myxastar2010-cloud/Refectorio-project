@@ -1,5 +1,14 @@
 import { AnimatePresence, m, useIsPresent } from 'motion/react';
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { whenIdle } from '../../../lib/idle';
 import { QUIZ } from '../../../motion/tokens';
 import { historyDepth } from '../flow/machine';
@@ -14,6 +23,7 @@ import { RowsStep } from '../steps/RowsStep';
 import { TextStep } from '../steps/TextStep';
 import { YesNoStep } from '../steps/YesNoStep';
 import { TasteStep } from '../tinder/TasteStep';
+import { fitScreen, overflows } from './fit';
 import { StepMotionContext, type PresenceInfo, type StepMotion } from './stepMotion';
 
 /**
@@ -81,12 +91,43 @@ function ScreenBody({ screen }: { readonly screen: Screen }): ReactNode {
   }
 }
 
-/** One screen: its own scroll container; while leaving it is inert and hidden from assistive technology. */
+/**
+ * The fit of a screen (4.11, components/fit.ts): measured before the step is painted, so it enters at its final
+ * scale; if the step grows beyond what was reserved (a long note, many custom chips), fitted again at once — never
+ * tweened. A new window size fits it afresh, except while a text field has the focus (a phone keyboard).
+ */
+function useStepFit(ref: RefObject<HTMLDivElement | null>, present: boolean) {
+  useLayoutEffect(() => {
+    const screen = ref.current;
+    if (screen) fitScreen(screen);
+  }, [ref]);
+  useEffect(() => {
+    const screen = ref.current;
+    const frame = screen?.firstElementChild;
+    if (!screen || !(frame instanceof HTMLElement) || !present) return undefined;
+    const observer = new ResizeObserver(() => {
+      if (overflows(screen)) fitScreen(screen);
+    });
+    observer.observe(frame);
+    const onResize = () => {
+      if (document.activeElement?.matches('input, textarea, [contenteditable="true"]')) return;
+      fitScreen(screen);
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', onResize);
+    };
+  }, [ref, present]);
+}
+
+/** One screen: fitted to the window (it never scrolls); while leaving it is inert and hidden from assistive technology. */
 function ScreenView({ screen, motion }: { readonly screen: Screen; readonly motion: StepMotion }) {
   const present = useIsPresent();
   const ref = useRef<HTMLDivElement>(null);
+  useStepFit(ref, present);
 
-  // A scrolled step slides under the header: the header gets a frosted band then (like the landing's).
+  // A scrolled step (only in a window too small to fit, quiz.css) slides under the header: a frosted band then.
   useEffect(() => {
     const element = ref.current;
     if (!element || !present) return undefined;
