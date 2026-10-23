@@ -12,6 +12,7 @@ import {
 import { DURATION } from '../../../motion/tokens';
 import { AddPanel } from '../components/AddPanel';
 import { AddChip, Chip, CustomChip } from '../components/Chip';
+import { HealthCrossCheck } from '../components/HealthCrossCheck';
 import { ContinueButton } from '../components/PillButton';
 import { PrivacyLabel } from '../components/PrivacyLabel';
 import { Segmented } from '../components/Segmented';
@@ -19,7 +20,15 @@ import { StepFrame } from '../components/StepFrame';
 import { useEnterToContinue } from '../components/useEnterToContinue';
 import { useLayoutFollow } from '../components/useLayoutFollow';
 import { matchAllergenChips } from '../flow/allergenSynonyms';
-import { activeHealthChips, visibleHealthChips } from '../flow/safety';
+import { matchHealthChips } from '../flow/healthSynonyms';
+import {
+  activeHealthChips,
+  eligibleHealthChips,
+  healthSubjectOf,
+  KIDNEY_HINT_FROM_AGE,
+  SHOWN_HEALTH_CHIPS,
+  visibleHealthChips,
+} from '../flow/safety';
 import { stepDef } from '../flow/steps';
 import type { InsulinAnswer, LactationPeriod, Trimester } from '../flow/types';
 import { fill, useQuiz } from '../quizContext';
@@ -44,6 +53,8 @@ const isExtra = (id: AllergenChipId) => !ALLERGEN_BASE.includes(id);
 
 /** Health chips with a short note once selected (what the menu will take into account). */
 const NOTED = ['hypertension', 'hypothyroidism', 'insulinResistance', 'warfarin', 'maoi'] as const;
+/** Ticked from a typed text, these end in «refused»: the note says how to undo a wrong tick (review D.6). */
+const UNDO_NOTED: readonly HealthChipId[] = ['kidneyDisease', 'pku'];
 
 /**
  * The designs have four and seven chips; with all the conditions and allergens of §10 the cloud gets a smaller chip,
@@ -56,7 +67,7 @@ const sameText = (a: string, b: string) =>
 const chipKey = (id: string) => `chip:${id}`;
 const customKey = (item: string) => `custom:${item.trim().toLocaleLowerCase('ru')}`;
 
-type Added = { key: string | null; matched: string[] };
+type Added = { key: string | null; matched: string[]; checked: string[] };
 
 /** «Какое состояние вашего здоровья?» and «Укажите свою аллергию» (ТЗ §8.5, §10): chips with «+». */
 export function ChipsStep({ step }: { readonly step: Step }) {
@@ -74,6 +85,10 @@ export function ChipsStep({ step }: { readonly step: Step }) {
   const [shownExtras, setShownExtras] = useState<readonly AllergenChipId[]>(() =>
     a.allergenChips.filter(isExtra),
   );
+  // The same for the health conditions without a chip of their own (4.13): a saved one is shown, ticked.
+  const [shownHidden, setShownHidden] = useState<readonly HealthChipId[]>(() =>
+    a.healthChips.filter((chip) => !SHOWN_HEALTH_CHIPS.includes(chip)),
+  );
   const cloudRef = useRef<HTMLDivElement>(null);
   const addRef = useRef<HTMLButtonElement>(null);
   const removeRefs = useRef(new Map<string, HTMLButtonElement>());
@@ -81,8 +96,10 @@ export function ChipsStep({ step }: { readonly step: Step }) {
   const focusAfter = useRef<'add' | 'last' | null>(null);
   const y = useLayoutFollow(belowRef, calm);
 
+  const eligible = eligibleHealthChips(a);
+  const subject = healthSubjectOf(a);
   const ids: readonly string[] = health
-    ? visibleHealthChips(a)
+    ? [...visibleHealthChips(a), ...shownHidden.filter((chip) => eligible.includes(chip))]
     : [...ALLERGEN_BASE, ...shownExtras];
   const selected: readonly string[] = health ? a.healthChips : a.allergenChips;
   const custom = health ? a.healthCustom : a.allergenCustom;
@@ -121,17 +138,45 @@ export function ChipsStep({ step }: { readonly step: Step }) {
     }
   };
 
+  /** Surfaces conditions without a chip of their own (they stay shown for this visit, ticked or not). */
+  const surface = (chips: readonly HealthChipId[]) => {
+    const fresh = chips.filter(
+      (chip) => !SHOWN_HEALTH_CHIPS.includes(chip) && !shownHidden.includes(chip),
+    );
+    if (fresh.length > 0) setShownHidden([...shownHidden, ...fresh]);
+  };
+
+  /**
+   * Typed health text (4.13): verbatim as an item, plus the chips its words name — ticked when sure, shown unticked
+   * when the text puts them in doubt (a negation, somebody else, a false friend). Only chips this person may have
+   * by age and sex («беременна» typed by a man stays text).
+   */
   const addHealth = (text: string): Added => {
-    const chip = visibleHealthChips(a).find((id) => sameText(quiz.health.chips[id], text));
-    if (chip) {
-      if (!a.healthChips.includes(chip)) patch({ healthChips: [...a.healthChips, chip] });
-      return { key: chipKey(chip), matched: [] };
+    const exact = eligible.find((id) => sameText(quiz.health.chips[id], text));
+    if (exact) {
+      surface([exact]);
+      if (!a.healthChips.includes(exact)) patch({ healthChips: [...a.healthChips, exact] });
+      return { key: chipKey(exact), matched: [], checked: [] };
     }
+    const found = matchHealthChips(text, subject).filter((match) => eligible.includes(match.chip));
+    const ticked = found.filter((match) => match.confident).map((match) => match.chip);
+    const unsure = found.filter((match) => !match.confident).map((match) => match.chip);
+    surface([...ticked, ...unsure]);
     const existing = a.healthCustom.find((item) => sameText(item, text));
-    if (existing) return { key: customKey(existing), matched: [] };
-    if (!canAdd) return { key: null, matched: [] };
-    patch({ healthCustom: [...a.healthCustom, text] });
-    return { key: customKey(text), matched: [] };
+    const list = existing || !canAdd ? a.healthCustom : [...a.healthCustom, text];
+    patch({ healthChips: [...new Set([...a.healthChips, ...ticked])], healthCustom: list });
+    const key = existing
+      ? customKey(existing)
+      : canAdd
+        ? customKey(text)
+        : ticked[0]
+          ? chipKey(ticked[0])
+          : null;
+    return {
+      key,
+      matched: ticked.map((chip) => quiz.health.chips[chip]),
+      checked: unsure.map((chip) => quiz.health.chips[chip]),
+    };
   };
 
   /** Typed allergy text: verbatim as an item for stage 3, plus the chips its words name (ТЗ §8.5). */
@@ -143,7 +188,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
     const chips = [...new Set([...a.allergenChips, ...found])];
     if (exact) {
       patch({ allergenChips: chips });
-      return { key: chipKey(exact), matched: [] };
+      return { key: chipKey(exact), matched: [], checked: [] };
     }
     const existing = a.allergenCustom.find((item) => sameText(item, text));
     const list = existing || !canAdd ? a.allergenCustom : [...a.allergenCustom, text];
@@ -155,17 +200,29 @@ export function ChipsStep({ step }: { readonly step: Step }) {
         : found[0]
           ? chipKey(found[0])
           : null;
-    return { key, matched: found.map((id) => quiz.allergy.chips[id]) };
+    return { key, matched: found.map((id) => quiz.allergy.chips[id]), checked: [] };
   };
 
   const submit = (text: string): HTMLElement | null => {
-    const out: Added = { key: null, matched: [] };
+    const out: Added = { key: null, matched: [], checked: [] };
     // The new chip must exist before the panel measures where to collapse.
     flushSync(() => {
       Object.assign(out, health ? addHealth(text) : addAllergen(text));
     });
-    const note =
-      out.matched.length > 0 ? fill(quiz.allergy.matched, { chips: out.matched.join(', ') }) : null;
+    const notes = [
+      out.matched.length > 0
+        ? fill(health ? quiz.health.matched : quiz.allergy.matched, {
+            chips: out.matched.join(', '),
+          })
+        : null,
+      out.checked.length > 0
+        ? fill(quiz.health.matchedCheck, { chips: out.checked.join(', ') })
+        : null,
+      health && UNDO_NOTED.some((chip) => out.matched.includes(quiz.health.chips[chip]))
+        ? quiz.health.matchedUndo
+        : null,
+    ].filter((line): line is string => line !== null);
+    const note = notes.length > 0 ? notes.join('. ') : null;
     setMatchedNote(note);
     if (out.key) announce(note ?? fill(quiz.common.added, { item: text }));
     return out.key
@@ -200,6 +257,37 @@ export function ChipsStep({ step }: { readonly step: Step }) {
   const severeShown =
     !health && (a.allergenChips.some((id) => id !== 'lactose') || custom.length > 0);
   const title = health ? quiz.health.conditionsTitle : quiz.allergy.allergensTitle;
+  // Under the health chips (review-health-synonyms.md B.4, 1 and 5): the hidden conditions are typed through «+» — in
+  // one short line once a chip is chosen (its questions need the room); with diabetes or hypertension from 50 — a word
+  // about the kidneys instead. Gone once something is typed.
+  const kidneyHint =
+    (active.includes('diabetes') || active.includes('hypertension')) &&
+    (a.ageYears ?? 0) >= KIDNEY_HINT_FROM_AGE &&
+    !active.includes('kidneyDisease');
+  const examples =
+    subject === 'child'
+      ? quiz.health.hintExamples.child
+      : eligible.includes('lactation')
+        ? quiz.health.hintExamples.women
+        : quiz.health.hintExamples.adult;
+  const hint = !health
+    ? null
+    : kidneyHint
+      ? quiz.health.kidneyHint
+      : custom.length > 0 || matchedNote
+        ? null
+        : active.length > 0
+          ? quiz.health.hintMore
+          : fill(quiz.health.hint, { examples });
+  // Aspartame among the allergies: maybe phenylketonuria (its own words too — «фенилаланин», «E951»).
+  const aspartame =
+    !health &&
+    eligible.includes('pku') &&
+    !activeHealthChips(a).includes('pku') &&
+    (a.allergenChips.includes('aspartame') ||
+      cleanItems(a.allergenCustom).some((item) =>
+        matchHealthChips(item, subject).some((match) => match.chip === 'pku'),
+      ));
 
   return (
     <StepFrame
@@ -236,6 +324,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
               key={item}
               dataKey={customKey(item)}
               label={item}
+              calm={calm}
               onRemove={() => {
                 remove(item);
               }}
@@ -280,6 +369,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
       </div>
 
       <m.div ref={belowRef} className="quiz-chips-below" style={{ y }}>
+        {hint ? <p className="quiz-note">{hint}</p> : null}
         {matchedNote ? <p className="quiz-note">{matchedNote}</p> : null}
         {health && teen ? <p className="quiz-note">{quiz.notices.teenHealth}</p> : null}
         {active.includes('diabetes') ? (
@@ -303,7 +393,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
             label={quiz.health.trimesterQuestion}
             items={(['trimester1', 'trimester2', 'trimester3'] as const).map((value) => ({
               value,
-              label: quiz.health.trimesters[value],
+              ...quiz.health.trimesters[value],
             }))}
             selected={a.trimester}
             calm={calm}
@@ -334,9 +424,16 @@ export function ChipsStep({ step }: { readonly step: Step }) {
               </p>
             ))
           : null}
+        {!health ? (
+          <HealthCrossCheck
+            chips={aspartame ? ['pku'] : []}
+            text={quiz.allergy.aspartameNote}
+            button={quiz.allergy.aspartameButton}
+          />
+        ) : null}
         {severeShown ? (
           <div className="quiz-severe">
-            <label className="quiz-check focus-ring-within">
+            <label className="quiz-check">
               <input
                 type="checkbox"
                 checked={a.severeTraces}

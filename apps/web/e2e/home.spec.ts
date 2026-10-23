@@ -358,6 +358,11 @@ test.describe('quality', () => {
     await page.getByRole('button', { name: /Подробнее о команде/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     expect(await seriousViolations(page)).toEqual([]);
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toBeHidden();
+    await page.getByRole('button', { name: /Подробнее о проекте/ }).click();
+    await expect(page.getByRole('dialog', { name: 'Refectorio' })).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
   });
 
   test('accessibility: «Цены» and its unfolded Premium have no serious violations', async ({
@@ -502,18 +507,64 @@ test.describe('«Цены»', () => {
       )
       .toBe(true);
   });
+});
 
-  test('the project card: the apple logo, and its links say «Мы работаем над этим»', async ({
+test.describe('project card', () => {
+  test('the project card (4.19): «Подробнее» opens its details; the links say «Мы работаем над этим»', async ({
     page,
   }) => {
     await page.goto('./?seed=1#about');
     await settled(page, 'about');
     await expect(page.getByRole('img', { name: 'Логотип Refectorio — яблоко' })).toBeVisible();
-    for (const label of ['Исходный код', 'Документация']) {
-      await page.getByRole('button', { name: label }).click();
+    // The links moved from the about card into the details.
+    await expect(page.getByRole('button', { name: 'Исходный код' })).toHaveCount(0);
+    const more = page.getByRole('button', { name: 'Подробнее о проекте Refectorio' });
+    await more.click();
+    const dialog = page.getByRole('dialog', { name: 'Refectorio' });
+    await expect(dialog).toBeVisible();
+    const close = page.getByRole('button', { name: 'Закрыть подробности о проекте' });
+    await expect(close).toBeFocused();
+    await expect(dialog.getByRole('paragraph')).not.toHaveCount(0);
+    // The text fits the card: nothing scrolls inside it.
+    expect(
+      await dialog
+        .locator('.team-dialog-content')
+        .evaluate((content) => content.scrollHeight <= content.clientHeight + 1),
+    ).toBe(true);
+    // Tab stays inside the card: from ✕ round to the first link and back.
+    await page.keyboard.press('Tab');
+    await expect(dialog.getByRole('button', { name: 'Исходный код' })).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(close).toBeFocused();
+    for (const label of ['Исходный код', 'Документация', 'Авторы фотографий']) {
+      await dialog.getByRole('button', { name: label }).click();
       await expect(page.getByRole('status').getByText('Мы работаем над этим')).toBeVisible();
     }
     // Nothing opened in a new tab.
     expect(page.context().pages()).toHaveLength(1);
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(more).toBeFocused();
+    // The apple is back on its icon once the card has landed.
+    await expect(page.locator('.project-tile .project-tile-icon')).toBeVisible();
+    await expect(page.locator('.page')).not.toHaveAttribute('data-card-open');
+  });
+
+  test('the project card closes with ✕ and with a click outside; scenes do not switch while open', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=1#about');
+    await settled(page, 'about');
+    const more = page.getByRole('button', { name: 'Подробнее о проекте Refectorio' });
+    await more.click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.keyboard.press('ArrowUp');
+    await expect(scene(page)).toHaveAttribute('data-scene', 'about');
+    await page.getByRole('button', { name: 'Закрыть подробности о проекте' }).click();
+    await expect(page.getByRole('dialog')).toBeHidden();
+    await more.click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.mouse.click(20, 20);
+    await expect(page.getByRole('dialog')).toBeHidden();
   });
 });

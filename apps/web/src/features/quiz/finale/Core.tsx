@@ -33,16 +33,22 @@ export function Core({ grown, pulse, dotPx, sizePx, calm, paused }: Props) {
   useEffect(() => {
     if (!wanted) return undefined;
     let cancelled = false;
+    // Read through a function: after the await the cleanup may have run (TypeScript would narrow a plain read away).
+    const isCancelled = () => cancelled;
     void import('./coreGl')
-      .then(({ createCoreRenderer }) => {
+      .then(async ({ createCoreRenderer }) => {
         const canvas = canvasRef.current;
         if (cancelled || !canvas) return;
-        const created = createCoreRenderer(canvas, {
+        const created = await createCoreRenderer(canvas, {
           dprMax: FINALE.dprMax,
           onLost: () => {
             setMode('css');
           },
         });
+        if (isCancelled()) {
+          created?.dispose();
+          return;
+        }
         renderer.current = created;
         setMode(created ? 'gl' : 'css');
       })

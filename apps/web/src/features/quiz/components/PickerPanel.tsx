@@ -1,10 +1,11 @@
 import { IconX } from '@tabler/icons-react';
-import { AnimatePresence, m } from 'motion/react';
-import { useRef, useState, type ReactNode, type RefObject } from 'react';
+import { AnimatePresence, animate, m, usePresence } from 'motion/react';
+import clsx from 'clsx';
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { quiz } from '../../../content/quiz.ru';
 import { useCalmMotion } from '../../../motion/hooks';
-import { DURATION, QUIZ } from '../../../motion/tokens';
+import { DURATION } from '../../../motion/tokens';
 import { PillButton } from './PillButton';
 import { useModal } from './useModal';
 import { useShapeMorph } from './useShapeMorph';
@@ -27,15 +28,20 @@ type Props = {
 
 const PHONE = '(max-width: 47.99rem)';
 
-/** The desktop panel: grows out of its row (useShapeMorph) and fades away on cancel or «Готово». */
+/**
+ * The panel grows out of its row (useShapeMorph) and returns into it on ×, Esc, a click outside or «Готово» (4.6) —
+ * on desktop into a panel, on phones into the bottom sheet. Reduced motion: a short fade.
+ */
 function MorphingPanel({
   anchor,
   calm,
+  sheet,
   children,
   ...dialog
 }: {
   readonly anchor: HTMLElement | null;
   readonly calm: boolean;
+  readonly sheet: boolean;
   readonly children: ReactNode;
   readonly role: string;
   readonly 'aria-modal': 'true';
@@ -44,27 +50,37 @@ function MorphingPanel({
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const { panelRef, ...attributes } = dialog;
-  useShapeMorph({ panelRef, contentRef, anchor, calm });
+  const { close } = useShapeMorph({ panelRef, contentRef, anchor, calm });
+  const [isPresent, safeToRemove] = usePresence();
+
+  useEffect(() => {
+    if (isPresent) return;
+    const panel = panelRef.current;
+    if (!panel) {
+      safeToRemove();
+      return;
+    }
+    if (calm || !anchor) {
+      void animate(panel, { opacity: 0 }, { duration: DURATION.fade }).then(safeToRemove);
+      return;
+    }
+    void close().then(safeToRemove);
+  }, [isPresent, safeToRemove, calm, anchor, close, panelRef]);
 
   return (
-    <m.div
+    <div
       ref={panelRef}
-      className="quiz-picker"
+      className={clsx('quiz-picker', sheet && 'quiz-picker--sheet')}
       {...attributes}
-      exit={
-        calm || !anchor
-          ? { opacity: 0, transition: { duration: DURATION.fade } }
-          : { opacity: 0, transition: { duration: DURATION.micro } }
-      }
     >
       <div ref={contentRef} className="quiz-picker-content">
         {children}
       </div>
-    </m.div>
+    </div>
   );
 }
 
-/** The picker panel of a row (ТЗ §8.3): desktop — grows out of the row; phones — a bottom sheet. */
+/** The picker panel of a row (ТЗ §8.3): grows out of the row — on desktop into a panel, on phones into a sheet. */
 export function PickerPanel({
   open,
   anchor,
@@ -88,7 +104,7 @@ export function PickerPanel({
         </h3>
         <button
           type="button"
-          className="quiz-close focus-ring"
+          className="quiz-close"
           aria-label={quiz.common.close}
           onClick={onCancel}
         >
@@ -118,41 +134,17 @@ export function PickerPanel({
             onClick={onCancel}
             aria-hidden
           />
-          {phone ? (
-            <m.div
-              ref={panelRef}
-              className="quiz-picker quiz-picker--sheet"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
-              initial={calm ? { opacity: 0 } : { transform: 'translateY(100%)' }}
-              animate={{
-                opacity: 1,
-                transform: 'translateY(0%)',
-                transition: calm
-                  ? { duration: DURATION.fade }
-                  : { type: 'spring', ...QUIZ.panelSpring },
-              }}
-              exit={
-                calm
-                  ? { opacity: 0, transition: { duration: DURATION.fade } }
-                  : { transform: 'translateY(100%)', transition: { duration: DURATION.micro } }
-              }
-            >
-              {body}
-            </m.div>
-          ) : (
-            <MorphingPanel
-              anchor={anchor}
-              calm={calm}
-              panelRef={panelRef}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
-            >
-              {body}
-            </MorphingPanel>
-          )}
+          <MorphingPanel
+            anchor={anchor}
+            calm={calm}
+            sheet={phone}
+            panelRef={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+          >
+            {body}
+          </MorphingPanel>
         </div>
       ) : null}
     </AnimatePresence>,

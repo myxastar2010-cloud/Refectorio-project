@@ -1,5 +1,14 @@
 import { AnimatePresence, m, useIsPresent } from 'motion/react';
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { whenIdle } from '../../../lib/idle';
 import { QUIZ } from '../../../motion/tokens';
 import { historyDepth } from '../flow/machine';
@@ -14,6 +23,7 @@ import { RowsStep } from '../steps/RowsStep';
 import { TextStep } from '../steps/TextStep';
 import { YesNoStep } from '../steps/YesNoStep';
 import { TasteStep } from '../tinder/TasteStep';
+import { fitScreen, overflows } from './fit';
 import { StepMotionContext, type PresenceInfo, type StepMotion } from './stepMotion';
 
 /**
@@ -81,12 +91,75 @@ function ScreenBody({ screen }: { readonly screen: Screen }): ReactNode {
   }
 }
 
-/** One screen: its own scroll container; while leaving it is inert and hidden from assistive technology. */
+/**
+ * The fit of a screen (4.11, components/fit.ts): measured before the step is painted, so it enters at its final
+ * scale; if the step grows beyond what was reserved (a long note, many custom chips), fitted again at once — never
+ * tweened. A new window size fits it afresh, except while a text field has the focus (a phone keyboard).
+ */
+function useStepFit(ref: RefObject<HTMLDivElement | null>, present: boolean) {
+  useLayoutEffect(() => {
+    const screen = ref.current;
+    if (screen) fitScreen(screen);
+  }, [ref]);
+  useEffect(() => {
+    const screen = ref.current;
+    const frame = screen?.firstElementChild;
+    if (!screen || !(frame instanceof HTMLElement) || !present) return undefined;
+    // Re-fitted in the next frame, not inside the observer's callback (that would resize what it observes: a loop).
+    let frameId = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        if (overflows(screen)) fitScreen(screen);
+      });
+    });
+    observer.observe(frame);
+    const onResize = () => {
+      if (document.activeElement?.matches('input, textarea, [contenteditable="true"]')) return;
+      fitScreen(screen);
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      cancelAnimationFrame(frameId);
+      observer.disconnect();
+      window.removeEventListener('resize', onResize);
+    };
+  }, [ref, present]);
+}
+
+/**
+ * A step enters once the icons and photos in it are decoded (4.5: nothing pops in after the blur-in), at most
+ * QUIZ.imagesWaitMs — they were decoded ahead while the previous step was shown, so usually at once.
+ */
+function useImagesReady(ref: RefObject<HTMLDivElement | null>) {
+  const [ready, setReady] = useState(false);
+  useLayoutEffect(() => {
+    const screen = ref.current;
+    if (!screen) return undefined;
+    let live = true;
+    const pending = [...screen.querySelectorAll('img')].filter(
+      (image) => !(image.complete && image.naturalWidth > 0),
+    );
+    const decoded = Promise.all(pending.map((image) => image.decode().catch(() => undefined)));
+    const waited = new Promise((resolve) => window.setTimeout(resolve, QUIZ.imagesWaitMs));
+    void Promise.race([decoded, waited]).then(() => {
+      if (live) setReady(true);
+    });
+    return () => {
+      live = false;
+    };
+  }, [ref]);
+  return ready;
+}
+
+/** One screen: fitted to the window (it never scrolls); while leaving it is inert and hidden from assistive technology. */
 function ScreenView({ screen, motion }: { readonly screen: Screen; readonly motion: StepMotion }) {
   const present = useIsPresent();
   const ref = useRef<HTMLDivElement>(null);
+  useStepFit(ref, present);
+  const ready = useImagesReady(ref);
 
-  // A scrolled step slides under the header: the header gets a frosted band then (like the landing's).
+  // A scrolled step (only in a window too small to fit, quiz.css) slides under the header: a frosted band then.
   useEffect(() => {
     const element = ref.current;
     if (!element || !present) return undefined;
@@ -107,8 +180,9 @@ function ScreenView({ screen, motion }: { readonly screen: Screen; readonly moti
         ref={ref}
         className="quiz-screen"
         data-screen={screen}
+        data-entering={ready || undefined}
         initial="enter"
-        animate="center"
+        animate={ready ? 'center' : 'enter'}
         exit="exit"
         inert={!present}
         aria-hidden={!present || undefined}

@@ -66,6 +66,8 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
   const [honest, setHonest] = useState(false);
   const [revealAt, setRevealAt] = useState<Point | null>(null);
   const [dotPx, setDotPx] = useState(24);
+  // A health text the menu cannot follow: the honest line says so too (review-health-synonyms.md B.4, 3).
+  const unmatchedHealth = safety.decision.reasons.includes('OTHER_CHRONIC');
 
   useEffect(() => {
     focusQuietly(titleRef.current);
@@ -126,7 +128,11 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
         : window.setTimeout(() => {
             setHonest(true);
             // The line and its two buttons appear: screen readers hear the line too (WCAG 4.1.3).
-            announce(quiz.finale.honest);
+            announce(
+              unmatchedHealth
+                ? `${quiz.finale.honest} ${quiz.finale.unmatchedHealth}`
+                : quiz.finale.honest,
+            );
           }, FINALE.honestAfterMs),
     ];
     if (params.revealDemo) {
@@ -139,7 +145,7 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
     return () => {
       for (const timer of timers) window.clearTimeout(timer);
     };
-  }, [params.demo, params.revealDemo, center, announce]);
+  }, [params.demo, params.revealDemo, center, announce, unmatchedHealth]);
 
   // The food spirals into the core while it is shown (ТЗ §12.2).
   useLayoutEffect(() => {
@@ -198,10 +204,13 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
             <p className="quiz-finale-honest">
               {result ? quiz.finale.honest : quiz.finale.notSaved}
             </p>
+            {result && unmatchedHealth ? (
+              <p className="quiz-finale-honest">{quiz.finale.unmatchedHealth}</p>
+            ) : null}
             {/* The generation never ends in stage 2: a way to start over and to the privacy sheet (delete answers). */}
             <div className="quiz-finale-actions">
               <PrivacyLabel />
-              <button type="button" className="quiz-finale-again focus-ring" onClick={restart}>
+              <button type="button" className="quiz-finale-again" onClick={restart}>
                 {quiz.finale.again}
               </button>
             </div>

@@ -2,7 +2,11 @@
  * The quiz (stage 2) — loaded with the quiz chunk only. Geometry comes from the team's 1920×1080 mockups
  * (--quiz-* tokens in tokens.css, mockup px). One mockup px is --q: on the desktop frame the landing's --s times its
  * --boost; on tablets a scale of its own; phones get explicit sizes (the mockups are desktop only, ТЗ §7.10). Every
- * size below goes through the semantic --q-* variables set on .quiz, so the breakpoints only redefine those.
+ * size below goes through the semantic --q-* variables, so the breakpoints only redefine those.
+ * Stage 3 (4.11): no step ever scrolls. Each screen has its own --fit (≤ 1, set by components/fit.ts before the step
+ * enters): the step's unit is --q-unit × --fit, so type, gaps, icons and controls shrink together (never a transform,
+ * hit areas stay right) down to their floors. The header keeps --q-unit. The --q-* variables are declared on .quiz (the
+ * header) and again on .quiz-screen (the steps), where --q carries the fit.
  * Animations: transform and opacity only (blur on step changes is set by Motion and removed afterwards).
  */
 
@@ -10,21 +14,32 @@
 
 .quiz {
   /* Tablets and touch laptops: the mockup scaled to the window, never below ≈ 0.62 (touch targets stay ≥ 44 px). */
-  --q: max(0.62px, min(100vw / 1180, 100svh / 1000));
+  --q-unit: max(0.62px, min(100vw / 1180, 100svh / 1000));
+  --q: var(--q-unit);
+}
+
+/* The steps' unit carries the fit of their screen. */
+.quiz-screen {
+  --q: calc(var(--q-unit) * var(--fit, 1));
+}
+
+.quiz,
+.quiz-screen {
   --q-outline: max(1.5px, calc(2 * var(--q)));
-  --q-gutter: max(16px, calc(32 * var(--q)));
+  --q-gutter: max(16px, calc(32 * var(--q-unit)));
 
-  --q-header-h: calc(126 * var(--q));
-  --q-progress-w: calc(var(--quiz-progress-w) * var(--q));
-  --q-progress-h: calc(var(--quiz-progress-h) * var(--q));
-  --q-progress-inset: max(2px, calc(var(--quiz-progress-inset) * var(--q)));
-  --q-progress-y: calc(var(--quiz-progress-y) * var(--q));
-  --q-back: max(44px, calc(var(--quiz-back-size) * var(--q)));
-  --q-back-gap: calc(var(--quiz-back-gap) * var(--q));
+  /* The header and the zone under it do not shrink with a step. */
+  --q-header-h: calc(126 * var(--q-unit));
+  --q-progress-w: calc(var(--quiz-progress-w) * var(--q-unit));
+  --q-progress-h: calc(var(--quiz-progress-h) * var(--q-unit));
+  --q-progress-inset: max(2px, calc(var(--quiz-progress-inset) * var(--q-unit)));
+  --q-progress-y: calc(var(--quiz-progress-y) * var(--q-unit));
+  --q-back: max(44px, calc(var(--quiz-back-size) * var(--q-unit)));
+  --q-back-gap: calc(var(--quiz-back-gap) * var(--q-unit));
 
-  --q-top: calc(var(--quiz-icon-y) * var(--q));
+  --q-top: calc(var(--quiz-icon-y) * var(--q-unit));
   --q-icon: calc(var(--quiz-icon-box) * var(--q));
-  --q-title: calc(var(--type-quiz-title-size) * var(--q));
+  --q-title: max(20px, calc(var(--type-quiz-title-size) * var(--q)));
   --q-title-leading: calc(var(--type-quiz-title-leading) * var(--q));
   --q-title-gap: calc(var(--quiz-title-gap) * var(--q));
   --q-content-gap: calc(var(--quiz-content-gap) * var(--q));
@@ -33,15 +48,15 @@
   --q-bottom: calc(var(--quiz-step-bottom) * var(--q));
   --q-privacy: max(14px, calc(var(--type-quiz-privacy-size) * var(--q)));
 
-  --q-option: calc(var(--type-quiz-option-size) * var(--q));
+  --q-option: max(15px, calc(var(--type-quiz-option-size) * var(--q)));
   --q-desc: max(14px, calc(var(--type-quiz-desc-size) * var(--q)));
   --q-desc-leading: calc(var(--type-quiz-desc-leading) / var(--type-quiz-desc-size));
   --q-pill-h: max(48px, calc(var(--quiz-pill-h) * var(--q)));
   --q-pill-gap: calc(var(--quiz-pill-gap) * var(--q));
-  --q-pill-w-options: calc(var(--quiz-pill-w-options) * var(--q));
-  --q-pill-w-wide: calc(var(--quiz-pill-w-wide) * var(--q));
-  --q-pill-w-widest: calc(var(--quiz-pill-w-widest) * var(--q));
-  --q-pill-w-short: calc(var(--quiz-pill-w-short) * var(--q));
+  --q-pill-w-options: calc(var(--quiz-pill-w-options) * var(--q-unit));
+  --q-pill-w-wide: calc(var(--quiz-pill-w-wide) * var(--q-unit));
+  --q-pill-w-widest: calc(var(--quiz-pill-w-widest) * var(--q-unit));
+  --q-pill-w-short: calc(var(--quiz-pill-w-short) * var(--q-unit));
   --q-pill-h-short: max(48px, calc(var(--quiz-pill-h-short) * var(--q)));
   --q-pill-gap-short: calc(var(--quiz-pill-gap-short) * var(--q));
   --q-pill-h-desc: max(56px, calc(var(--quiz-pill-h-desc) * var(--q)));
@@ -49,49 +64,49 @@
   --q-pill-pad-x: calc(var(--quiz-pill-pad-x) * var(--q));
   --q-option-icon: calc(var(--quiz-option-icon) * var(--q));
   --q-option-icon-gap: calc(var(--quiz-option-icon-gap) * var(--q));
-  --q-tag: max(12px, calc(18 * var(--q)));
+  --q-tag: max(11px, calc(18 * var(--q)));
 
-  --q-yesno: calc(var(--type-quiz-yesno-size) * var(--q));
+  --q-yesno: max(16px, calc(var(--type-quiz-yesno-size) * var(--q)));
   --q-yesno-h: max(52px, calc(var(--quiz-yesno-h) * var(--q)));
   --q-yesno-gap: calc(var(--quiz-yesno-gap) * var(--q));
   --q-radio: calc(var(--quiz-radio) * var(--q));
   --q-radio-gap: calc(var(--quiz-radio-gap) * var(--q));
 
-  --q-row-w: calc(var(--quiz-pill-w-rows) * var(--q));
+  --q-row-w: calc(var(--quiz-pill-w-rows) * var(--q-unit));
   --q-row-pad-x: calc(var(--quiz-row-pad-x) * var(--q));
   --q-value: max(15px, calc(var(--type-quiz-value-size) * var(--q)));
   --q-chevron: calc(var(--quiz-chevron) * var(--q));
 
-  --q-chip: calc(var(--type-quiz-chip-size) * var(--q));
+  --q-chip: max(14px, calc(var(--type-quiz-chip-size) * var(--q)));
   --q-chip-h: max(44px, calc(var(--quiz-chip-h) * var(--q)));
   --q-chip-pad-x: calc(var(--quiz-chip-pad-x) * var(--q));
   --q-chip-gap: calc(var(--quiz-chip-gap) * var(--q));
-  --q-chip-compact: calc(var(--type-quiz-chip-size) * 0.75 * var(--q));
+  --q-chip-compact: max(13px, calc(var(--type-quiz-chip-size) * 0.75 * var(--q)));
   --q-chip-h-compact: max(44px, calc(var(--quiz-chip-h) * 0.78 * var(--q)));
-  --q-chips-w: calc(1180 * var(--q));
+  --q-chips-w: calc(1180 * var(--q-unit));
   --q-add-w: max(56px, calc(var(--quiz-add-w) * var(--q)));
 
-  --q-panel-w: calc(var(--quiz-panel-w) * var(--q));
+  --q-panel-w: calc(var(--quiz-panel-w) * var(--q-unit));
   --q-panel-h: calc(var(--quiz-panel-h) * var(--q));
   --q-panel-radius: calc(var(--quiz-panel-radius) * var(--q));
-  --q-panel-title: calc(var(--type-quiz-panel-title-size) * var(--q));
+  --q-panel-title: max(18px, calc(var(--type-quiz-panel-title-size) * var(--q)));
   --q-close: max(44px, calc(var(--quiz-panel-close) * var(--q)));
-  --q-input-w: calc(var(--quiz-input-w) * var(--q));
+  --q-input-w: calc(var(--quiz-input-w) * var(--q-unit));
   --q-input-h: max(48px, calc(var(--quiz-input-h) * var(--q)));
   --q-input: max(16px, calc(var(--type-quiz-input-size) * var(--q)));
-  --q-done-w: calc(var(--quiz-done-w) * var(--q));
+  --q-done-w: calc(var(--quiz-done-w) * var(--q-unit));
   --q-done-h: max(44px, calc(var(--quiz-done-h) * var(--q)));
   --q-done-gap: calc(var(--quiz-done-gap) * var(--q));
   --q-button: max(16px, calc(var(--type-quiz-button-size) * var(--q)));
 
-  --q-textarea-w: calc(var(--quiz-textarea-w) * var(--q));
+  --q-textarea-w: calc(var(--quiz-textarea-w) * var(--q-unit));
   --q-textarea-h: calc(var(--quiz-textarea-h) * var(--q));
   --q-textarea-radius: calc(var(--quiz-textarea-radius) * var(--q));
   --q-textarea-pad: calc(var(--quiz-textarea-pad) * var(--q));
 
   --q-note: max(14px, calc(22 * var(--q)));
-  --q-notice-w: calc(var(--quiz-notice-w) * var(--q));
-  --q-picker-w: max(300px, calc(var(--quiz-picker-w) * var(--q)));
+  --q-notice-w: calc(var(--quiz-notice-w) * var(--q-unit));
+  --q-picker-w: max(300px, calc(var(--quiz-picker-w) * var(--q-unit)));
   --q-wheel-row: max(40px, calc(var(--quiz-picker-row) * var(--q)));
   --q-wheel-font: max(22px, calc(34 * var(--q)));
 
@@ -102,29 +117,49 @@
   --q-card-radius: calc(var(--q-card-w) * var(--quiz-card-radius) / var(--quiz-card-w));
   --q-dish: max(18px, calc(var(--type-quiz-dish-size) * var(--q)));
   --q-dish-y: calc(var(--quiz-card-name-y) * var(--q));
-  --q-game-title-y: calc(var(--quiz-game-title-y) * var(--q));
+  --q-game-title-y: calc(var(--quiz-game-title-y) * var(--q-unit));
   --q-game-button: max(56px, calc(var(--quiz-game-button) * var(--q)));
   --q-game-skip-w: max(132px, calc(var(--quiz-game-skip-w) * var(--q)));
   --q-game-gap: calc(var(--quiz-game-gap) * var(--q));
   --q-game-buttons-gap: calc(var(--quiz-game-buttons-gap) * var(--q));
+  /* What a step may still grow by once it is shown (the fit reserves it, components/fit.ts): a note and a follow-up
+     question under chips, the «+» panel, a text field at its tallest. */
+  --q-reserve-note: calc(64 * var(--q));
+  --q-textarea-max: calc(var(--q-textarea-h) * 1.5);
+  --q-panel-reserve: var(--q-panel-h);
+}
 
-  position: absolute;
+/* The quiz is one full-viewport scene that clips what leaves it (a card flying off the bottom passes «under the
+   site»); nothing in it scrolls (4.4, 4.11). */
+.quiz {
+  position: fixed;
   inset: 0;
+  overflow: clip;
   color: var(--color-ink);
+}
+
+/* While the quiz is open (4.4): a swipe down on a card never pulls the page (no pull-to-refresh, no bounce). */
+html:has(.page[data-scene='quiz']),
+html:has(.page[data-scene='quiz']) body {
+  overscroll-behavior: none;
 }
 
 /* Portrait tablets: the window is narrow and tall. A larger unit fills it better, and «Вернуться» with the bar get a
    row of their own under the logo and «Выйти» (on one row they ran into «Refectorio»). */
 @media (min-width: 48rem) and (orientation: portrait) {
   .quiz {
-    --q: max(0.62px, min(100vw / 1000, 100svh / 1000));
+    --q-unit: max(0.62px, min(100vw / 1000, 100svh / 1000));
+  }
+
+  .quiz,
+  .quiz-screen {
     --q-tablet-row: 56px;
-    --q-header-h: calc(126 * var(--q) + var(--q-tablet-row));
-    --q-progress-y: calc(var(--quiz-progress-y) * var(--q) + var(--q-tablet-row));
-    --q-top: calc(var(--quiz-icon-y) * var(--q) + var(--q-tablet-row));
-    --q-game-title-y: calc(var(--quiz-game-title-y) * var(--q) + var(--q-tablet-row));
+    --q-header-h: calc(126 * var(--q-unit) + var(--q-tablet-row));
+    --q-progress-y: calc(var(--quiz-progress-y) * var(--q-unit) + var(--q-tablet-row));
+    --q-top: calc(var(--quiz-icon-y) * var(--q-unit) + var(--q-tablet-row));
+    --q-game-title-y: calc(var(--quiz-game-title-y) * var(--q-unit) + var(--q-tablet-row));
     /* The longest health chip stays on one line at 768–1000 px. */
-    --q-chip-compact: calc(var(--type-quiz-chip-size) * 0.66 * var(--q));
+    --q-chip-compact: max(13px, calc(var(--type-quiz-chip-size) * 0.66 * var(--q)));
   }
 }
 
@@ -133,14 +168,19 @@
    minimum sizes below. */
 @media (min-width: 80rem) and (hover: hover) {
   .quiz {
-    --q: var(--s);
+    --q-unit: var(--s);
+  }
+
+  .quiz,
+  .quiz-screen {
     --q-gutter: calc(var(--hero-side));
   }
 }
 
 /* Phones: the mockups are desktop only — the same language at phone sizes (ТЗ §7.10). */
 @media (max-width: 47.99rem) {
-  .quiz {
+  .quiz,
+  .quiz-screen {
     --q-gutter: 16px;
     --q-header-h: calc(72px + env(safe-area-inset-top));
     --q-progress-w: auto;
@@ -150,87 +190,91 @@
     --q-back: 44px;
     --q-back-gap: 12px;
     --q-top: calc(env(safe-area-inset-top) + 84px);
-    --q-icon: 68px;
-    --q-title: clamp(26px, 7.4vw, 32px);
+    --q-icon: calc(68px * var(--fit, 1));
+    --q-title: max(20px, calc(clamp(26px, 7.4vw, 32px) * var(--fit, 1)));
     --q-title-leading: 1.18em;
-    --q-title-gap: 6px;
-    --q-content-gap: 24px;
-    --q-content-gap-dense: 18px;
-    --q-privacy-gap: 18px;
-    --q-bottom: calc(28px + env(safe-area-inset-bottom));
-    --q-privacy: 14px;
-    --q-option: 18px;
-    --q-desc: 14px;
-    --q-pill-h: 56px;
-    --q-pill-gap: 10px;
+    --q-title-gap: calc(6px * var(--fit, 1));
+    --q-content-gap: calc(24px * var(--fit, 1));
+    --q-content-gap-dense: calc(18px * var(--fit, 1));
+    --q-privacy-gap: calc(18px * var(--fit, 1));
+    --q-bottom: calc(28px * var(--fit, 1) + env(safe-area-inset-bottom));
+    --q-panel-reserve: calc(232px * var(--fit, 1));
+    --q-privacy: max(13px, calc(14px * var(--fit, 1)));
+    --q-option: max(15px, calc(18px * var(--fit, 1)));
+    --q-desc: max(13px, calc(14px * var(--fit, 1)));
+    --q-pill-h: max(44px, calc(56px * var(--fit, 1)));
+    --q-pill-gap: calc(10px * var(--fit, 1));
     --q-pill-w-options: 100%;
     --q-pill-w-wide: 100%;
     --q-pill-w-widest: 100%;
     --q-pill-w-short: 100%;
-    --q-pill-h-short: 52px;
-    --q-pill-gap-short: 10px;
-    --q-pill-h-desc: 72px;
-    --q-pill-gap-desc: 10px;
-    --q-pill-pad-x: 18px;
-    --q-option-icon: 34px;
-    --q-option-icon-gap: 12px;
-    --q-tag: 12px;
-    --q-yesno: 22px;
-    --q-yesno-h: 60px;
-    --q-yesno-gap: 12px;
-    --q-radio: 26px;
-    --q-radio-gap: 16px;
+    --q-pill-h-short: max(44px, calc(52px * var(--fit, 1)));
+    --q-pill-gap-short: calc(10px * var(--fit, 1));
+    --q-pill-h-desc: max(52px, calc(72px * var(--fit, 1)));
+    --q-pill-gap-desc: calc(10px * var(--fit, 1));
+    --q-pill-pad-x: calc(18px * var(--fit, 1));
+    --q-option-icon: calc(34px * var(--fit, 1));
+    --q-option-icon-gap: calc(12px * var(--fit, 1));
+    --q-tag: max(11px, calc(12px * var(--fit, 1)));
+    --q-yesno: max(16px, calc(22px * var(--fit, 1)));
+    --q-yesno-h: max(44px, calc(60px * var(--fit, 1)));
+    --q-yesno-gap: calc(12px * var(--fit, 1));
+    --q-radio: max(20px, calc(26px * var(--fit, 1)));
+    --q-radio-gap: calc(16px * var(--fit, 1));
     --q-row-w: 100%;
-    --q-row-pad-x: 20px;
-    --q-value: 16px;
-    --q-chevron: 18px;
-    --q-chip: 16px;
-    --q-chip-h: 44px;
-    --q-chip-pad-x: 16px;
-    --q-chip-gap: 8px;
-    --q-chip-compact: 15px;
-    --q-chip-h-compact: 44px;
+    --q-row-pad-x: calc(20px * var(--fit, 1));
+    --q-value: max(13px, calc(16px * var(--fit, 1)));
+    --q-chevron: calc(18px * var(--fit, 1));
+    --q-chip: max(13px, calc(16px * var(--fit, 1)));
+    --q-chip-h: max(44px, calc(44px * var(--fit, 1)));
+    --q-chip-pad-x: calc(16px * var(--fit, 1));
+    --q-chip-gap: calc(8px * var(--fit, 1));
+    --q-chip-compact: max(13px, calc(15px * var(--fit, 1)));
+    --q-chip-h-compact: max(44px, calc(44px * var(--fit, 1)));
     --q-chips-w: 100%;
-    --q-add-w: 56px;
+    --q-add-w: max(48px, calc(56px * var(--fit, 1)));
     --q-panel-w: 100%;
     --q-panel-h: auto;
-    --q-panel-radius: 36px;
-    --q-panel-title: 20px;
-    --q-close: 44px;
+    --q-panel-radius: calc(36px * var(--fit, 1));
+    --q-panel-title: max(18px, calc(20px * var(--fit, 1)));
+    --q-close: max(44px, calc(44px * var(--fit, 1)));
     --q-input-w: 100%;
-    --q-input-h: 48px;
+    --q-input-h: max(44px, calc(48px * var(--fit, 1)));
     --q-input: 16px;
     --q-done-w: auto;
-    --q-done-h: 48px;
-    --q-done-gap: 14px;
+    --q-done-h: max(44px, calc(48px * var(--fit, 1)));
+    --q-done-gap: calc(14px * var(--fit, 1));
     --q-button: 16px;
     --q-textarea-w: 100%;
-    --q-textarea-h: 200px;
-    --q-textarea-radius: 36px;
-    --q-textarea-pad: 22px;
-    --q-note: 14px;
+    --q-textarea-h: calc(200px * var(--fit, 1));
+    --q-textarea-radius: calc(36px * var(--fit, 1));
+    --q-textarea-pad: calc(22px * var(--fit, 1));
+    --q-note: max(13px, calc(14px * var(--fit, 1)));
     --q-notice-w: 100%;
     --q-picker-w: 100%;
     --q-wheel-row: 42px;
     --q-wheel-font: 24px;
-    --q-card-w: min(88vw, calc(0.76 * 62svh));
+    --q-card-w: calc(min(88vw, calc(0.76 * 62svh)) * var(--fit, 1));
+    --q-reserve-note: calc(48px * var(--fit, 1));
+    --q-textarea-max: calc(var(--q-textarea-h) * 1.4);
     --q-card-h: calc(var(--q-card-w) * var(--quiz-card-h) / var(--quiz-card-w));
-    --q-dish: 20px;
-    --q-dish-y: 28px;
+    --q-dish: max(15px, calc(20px * var(--fit, 1)));
+    --q-dish-y: calc(28px * var(--fit, 1));
     --q-game-title-y: calc(env(safe-area-inset-top) + 72px);
-    --q-game-button: 60px;
-    --q-game-skip-w: 136px;
-    --q-game-gap: 20px;
-    --q-game-buttons-gap: 16px;
+    --q-game-button: max(44px, calc(60px * var(--fit, 1)));
+    --q-game-skip-w: max(112px, calc(136px * var(--fit, 1)));
+    --q-game-gap: calc(20px * var(--fit, 1));
+    --q-game-buttons-gap: calc(16px * var(--fit, 1));
   }
 }
 
 /* Landscape phones and very low windows: the steps scroll as usual, only their icon and title get smaller; the game
    keeps its card and its buttons on one screen — the card on the left, the buttons on the right. */
 @media (orientation: landscape) and (max-height: 31.25rem) and (min-width: 37.5rem) {
-  .quiz {
-    --q-icon: 48px;
-    --q-title: 24px;
+  .quiz,
+  .quiz-screen {
+    --q-icon: calc(48px * var(--fit, 1));
+    --q-title: max(18px, calc(24px * var(--fit, 1)));
     --q-title-leading: 1.18em;
     /* Right under «Вернуться», which sits centred on the progress bar. */
     --q-game-title-y: calc(
@@ -432,16 +476,66 @@
   z-index: var(--z-scene);
 }
 
-/* Each screen scrolls on its own (D-021); both screens of a change are stacked. */
+/* Both screens of a change are stacked. A screen never scrolls (4.11, replaces D-021): components/fit.ts scales the
+   step to the window instead — its heights and type; the widths keep --q-unit, since narrower pills would only wrap
+   into more lines. */
 .quiz-screen {
   position: absolute;
   inset: 0;
-  overflow-x: hidden;
+  overflow: clip;
+}
+
+/* The one exception (WCAG 1.4.10 / 1.4.4): a window this small — e.g. a browser zoomed to 400 % — may scroll the step,
+   with a hidden scrollbar; the fit never shrinks text below its floors to fight a zoom. */
+@media (max-height: 299.98px), (max-width: 319.98px) {
+  .quiz-screen {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    scroll-padding-top: calc(var(--q-header-h) + 8px);
+  }
+
+  .quiz-screen::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* The last resort (D-050): a step that is taller than the window even in its compact layout at the floors — only the
+   health step with several follow-up questions, notes and custom items on a phone on its side — scrolls inside, without
+   a scrollbar. Every other step and state fits (e2e «no scroll» matrix). */
+.quiz-screen[data-overflow] {
   overflow-y: auto;
-  /* A focused element scrolled into view stays below the header (WCAG 2.4.11). */
-  scroll-padding-top: calc(var(--q-header-h) + 8px);
   overscroll-behavior: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+}
+
+.quiz-screen[data-overflow]::-webkit-scrollbar {
+  display: none;
+}
+
+/* Measuring the fit (components/fit.ts): the step as it usually grows once shown — «Далее», a note, the «+» panel,
+   a text field at its tallest. Only while measuring, never painted; rarer growth (follow-up questions, many custom
+   chips) is fitted again the moment it comes. */
+.quiz-screen[data-fit-measure] .quiz-continue:empty {
+  display: block;
+  height: var(--q-done-h);
+}
+
+.quiz-screen[data-fit-measure] .quiz-footer:has(> .quiz-continue:empty) {
+  margin-top: var(--q-privacy-gap);
+}
+
+.quiz-screen[data-fit-measure] .quiz-chips-area {
+  min-height: var(--q-panel-reserve);
+}
+
+.quiz-screen[data-fit-measure]:not([data-compact]) .quiz-frame--rows .quiz-answers,
+.quiz-screen[data-fit-measure]:not([data-compact]) .quiz-frame--taste .quiz-game-controls {
+  margin-bottom: var(--q-reserve-note);
+}
+
+.quiz-screen[data-fit-measure] .quiz-textarea-field {
+  height: var(--q-field-max) !important;
 }
 
 .quiz-frame {
@@ -506,7 +600,8 @@
 }
 
 .quiz-note {
-  max-width: min(100%, calc(720 * var(--q)));
+  /* Never narrower than ~20 words' worth at a small fit: a narrow note only grows taller. */
+  max-width: min(100%, max(20em, calc(720 * var(--q))));
   margin-top: calc(18 * var(--q));
   font-size: var(--q-note);
   line-height: 1.35;
@@ -518,6 +613,19 @@
 .quiz-note--warn {
   color: var(--color-accent-deep);
   font-weight: 600;
+}
+
+/* A condition met outside the health question (HealthCrossCheck): the question, and «Отметить» under it. */
+.quiz-cross-check {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(10 * var(--q));
+  max-width: 100%;
+}
+
+.quiz-cross-check > .quiz-note {
+  text-align: center;
 }
 
 /* ── Privacy label (ТЗ §7.5): quiet text, the accent wave on hover ──────────────────────── */
@@ -542,6 +650,202 @@
 .wave-layer--accent-fill {
   background-color: var(--color-accent-deep);
   color: var(--color-on-accent);
+}
+
+/* ── Compact layout (4.11): a step that does not fit even at the smallest fit (fit.ts sets data-compact) ────────── */
+
+.quiz-screen[data-compact] .quiz-icon {
+  height: calc(var(--q-icon) * 0.55) !important;
+  margin-top: 0 !important;
+}
+
+.quiz-screen[data-compact] .quiz-title {
+  margin-top: calc(var(--q-title-gap) * 0.5);
+}
+
+.quiz-screen[data-compact] .quiz-answers {
+  margin-top: calc(var(--q-content-gap) * 0.6) !important;
+}
+
+/* Options: a little lower (40 px is the compact layout's touch floor, recorded in design-system.md §10.5). */
+.quiz-screen[data-compact] .quiz-option {
+  min-height: max(40px, calc(var(--q-pill-h) * 0.8));
+  padding-block: calc(4 * var(--q));
+}
+
+.quiz-screen[data-compact] .quiz-option--wide,
+.quiz-screen[data-compact] .quiz-option--widest {
+  min-height: max(44px, calc(var(--q-pill-h-desc) * 0.78));
+}
+
+.quiz-screen[data-compact] .quiz-option--short {
+  min-height: max(40px, calc(var(--q-pill-h-short) * 0.8));
+}
+
+.quiz-screen[data-compact] .quiz-choices,
+.quiz-screen[data-compact] .quiz-choices--short,
+.quiz-screen[data-compact] .quiz-choices--wide,
+.quiz-screen[data-compact] .quiz-choices--widest {
+  gap: max(6px, calc(var(--q-pill-gap) * 0.6));
+}
+
+/* Follow-up questions under the chips: the question and its answers on one line. */
+.quiz-screen[data-compact] .quiz-followup {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 12px;
+  margin-top: calc(10 * var(--q));
+}
+
+.quiz-screen[data-compact] .quiz-segment {
+  min-height: 40px;
+  padding-inline: calc(18 * var(--q));
+}
+
+/* «1 триместр» over «1–13 недель»: three answers in one row instead of three rows. */
+.quiz-screen[data-compact] .quiz-segment-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: 3px;
+  line-height: 1.1;
+}
+
+.quiz-screen[data-compact] .quiz-segment-detail {
+  font-size: max(11px, 0.72em);
+  font-weight: 500;
+}
+
+.quiz-screen[data-compact] .quiz-segment-bracket {
+  display: none;
+}
+
+.quiz-screen[data-compact] .quiz-chip,
+.quiz-screen[data-compact] .quiz-chips.is-compact .quiz-chip {
+  min-height: 40px;
+  padding-block: 2px;
+}
+
+.quiz-screen[data-compact] .quiz-row {
+  min-height: max(40px, calc(var(--q-pill-h) * 0.8));
+}
+
+.quiz-screen[data-compact] .quiz-followup-label {
+  font-size: max(14px, calc(24 * var(--q)));
+}
+
+.quiz-screen[data-compact] .quiz-note {
+  /* The whole width of its column: fewer, longer lines. */
+  max-width: 100%;
+  margin-top: calc(8 * var(--q));
+}
+
+.quiz-screen[data-compact] .quiz-rows {
+  gap: calc(16 * var(--q));
+}
+
+/* Low landscape windows: the question on the left, its answers on the right — one screen, never a scroll. */
+@media (orientation: landscape) and (max-height: 37.5rem) {
+  .quiz-screen[data-compact] .quiz-frame {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-rows: auto auto 1fr;
+    column-gap: max(20px, 3vw);
+    align-items: start;
+    align-content: start;
+  }
+
+  .quiz-screen[data-compact] .quiz-icon {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .quiz-screen[data-compact] .quiz-title {
+    grid-column: 1;
+    grid-row: 2;
+    max-width: 100%;
+  }
+
+  .quiz-screen[data-compact] .quiz-answers {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    margin-top: 0 !important;
+  }
+
+  .quiz-screen[data-compact] .quiz-footer {
+    grid-column: 2;
+    grid-row: 4;
+  }
+
+  .quiz-screen[data-compact] .quiz-privacy {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  /* The title's mockup line breaks do not apply to a narrow left column. */
+  .quiz-screen[data-compact] .quiz-title-line {
+    display: inline;
+  }
+
+  /* Chips: the question across the top, the chips on the left, what follows them on the right. */
+  .quiz-screen[data-compact] .quiz-frame--chips {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quiz-screen[data-compact] .quiz-frame--chips .quiz-icon {
+    display: none;
+  }
+
+  .quiz-screen[data-compact] .quiz-frame--chips .quiz-title {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+  }
+
+  .quiz-screen[data-compact] .quiz-frame--chips .quiz-answers {
+    grid-column: 1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: max(16px, 2.5vw);
+    align-items: start;
+    margin-top: calc(var(--q-content-gap) * 0.4) !important;
+  }
+
+  .quiz-screen[data-compact] .quiz-frame--chips .quiz-chips-below {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 12px;
+    margin-top: 0;
+  }
+
+  /* One item per line, except «Готово» and the privacy label: they share the last one (a line less on a low screen). */
+  .quiz-screen[data-compact] .quiz-frame--chips .quiz-chips-below > * {
+    flex: 0 0 100%;
+  }
+
+  .quiz-screen[data-compact]
+    .quiz-frame--chips
+    .quiz-chips-below
+    > :is(.quiz-continue, .quiz-privacy) {
+    flex: 0 0 auto;
+    margin-top: calc(10 * var(--q));
+  }
+
+  .quiz-screen[data-compact] .quiz-frame--chips .quiz-followup:first-child,
+  .quiz-screen[data-compact] .quiz-frame--chips .quiz-chips-below > :first-child {
+    margin-top: 0;
+  }
+
+  /* The answers fill their column: wider pills wrap fewer lines. */
+  .quiz-screen[data-compact]
+    .quiz-answers
+    :is(.quiz-option, .quiz-row, .quiz-textarea, .quiz-chips) {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* ── Pill buttons («Далее», «Готово», notices) ─────────────────────────────────────────── */
@@ -983,20 +1287,24 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.quiz-picker--sheet > .quiz-picker-head,
-.quiz-picker--sheet > .quiz-picker-hint,
-.quiz-picker--sheet > .quiz-picker-control,
-.quiz-picker--sheet > .quiz-picker-done,
-.quiz-picker--sheet > .quiz-sex {
+.quiz-picker--sheet .quiz-picker-content > .quiz-picker-head,
+.quiz-picker--sheet .quiz-picker-content > .quiz-picker-hint,
+.quiz-picker--sheet .quiz-picker-content > .quiz-picker-control,
+.quiz-picker--sheet .quiz-picker-content > .quiz-picker-done,
+.quiz-picker--sheet .quiz-picker-content > .quiz-sex {
   margin-inline: auto;
 }
 
 .quiz-picker--sheet {
+  padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+}
+
+.quiz-picker--sheet > .quiz-picker-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+  padding: 0;
 }
 
 .quiz-sex {
@@ -1112,15 +1420,19 @@
 
 /* Landscape phones: the sheet fits the low screen — smaller rows, and the drum shows as many as there is room for. */
 @media (orientation: landscape) and (max-height: 31.25rem) and (min-width: 37.5rem) {
-  .quiz {
+  .quiz,
+  .quiz-screen {
     --q-wheel-row: 32px;
     --q-wheel-font: 20px;
   }
 
   .quiz-picker--sheet {
-    gap: 8px;
     padding-top: 12px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .quiz-picker--sheet > .quiz-picker-content {
+    gap: 8px;
   }
 
   .quiz-wheel {
@@ -1386,23 +1698,32 @@
   text-align: left;
 }
 
-.quiz-textarea:has(:focus-visible) {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
-}
-
+/* The field grows with its text up to the panel's tallest size, then scrolls inside — the one inner scroll the quiz
+   allows (4.11): no scrollbar, the clipped edge fades out (data-clipped, TextStep). */
 .quiz-textarea-field {
+  --q-field-max: calc(var(--q-textarea-max) - 2 * var(--q-textarea-pad) - 1.4em);
   flex: 1;
   width: 100%;
   min-height: calc(var(--q-textarea-h) - 2 * var(--q-textarea-pad) - 1.6em);
+  max-height: var(--q-field-max);
   resize: none;
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
   background: transparent;
   font-size: var(--q-input);
   line-height: 1.4;
   font-weight: 600;
   color: var(--color-ink);
   outline: none;
+}
+
+.quiz-textarea-field::-webkit-scrollbar {
+  display: none;
+}
+
+.quiz-textarea-field[data-clipped] {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 1.6em), transparent);
 }
 
 .quiz-counter {
@@ -1772,7 +2093,10 @@
   pointer-events: none;
 }
 
+/* Above the cards (4.4): a card swiped or skipped down passes under the buttons and leaves at the window's edge. */
 .quiz-game-controls {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;

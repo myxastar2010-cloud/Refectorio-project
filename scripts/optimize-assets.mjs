@@ -93,7 +93,11 @@ async function alphaMask(file) {
 
 async function buildFood() {
   const dir = path.join(SRC, 'food');
-  const files = (await readdir(dir)).filter((name) => name.endsWith('.png')).sort();
+  // By number, not by name: «food-10» must come after «food-9» (the field starts with the first nine).
+  const number = (name) => Number(/^food-(\d+)-/.exec(name)?.[1] ?? Number.NaN);
+  const files = (await readdir(dir))
+    .filter((name) => name.endsWith('.png'))
+    .sort((a, b) => number(a) - number(b));
   const items = [];
   for (const name of files) {
     const match = /^food-(\d+)-([a-z-]+)\.png$/.exec(name);

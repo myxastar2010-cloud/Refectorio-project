@@ -321,7 +321,7 @@ export function WheelPicker({
     <div className="quiz-wheel-wrap">
       <div
         ref={rootRef}
-        className="quiz-wheel focus-ring"
+        className="quiz-wheel"
         data-autofocus
         role="spinbutton"
         tabIndex={0}

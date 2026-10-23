@@ -109,9 +109,13 @@ function base(): string {
   return value.endsWith('/') ? value : `${value}/`;
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   base: base(),
-  define: { __PHOTO_HOSTING__: JSON.stringify(PHOTO_HOSTING) },
+  define: {
+    __PHOTO_HOSTING__: JSON.stringify(PHOTO_HOSTING),
+    // The quiz's ?step= hook lives only in test builds (playwright.config.ts builds with --mode test).
+    __TEST_HOOKS__: JSON.stringify(mode === 'test'),
+  },
   resolve: {
     alias: hotlinked
       ? {
@@ -139,4 +143,4 @@ export default defineConfig({
   },
   server: { port: 5173, strictPort: true },
   preview: { port: 4173, strictPort: true },
-});
+}));

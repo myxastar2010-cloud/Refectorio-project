@@ -1,6 +1,7 @@
 import {
   activityFromLifestyle,
   AGE_LIMITS,
+  cleanItems,
   evaluateGuardrails,
   validateQuestionnaire,
   type AllergenCode,
@@ -16,14 +17,18 @@ import {
   type AllergenChipId,
   type HealthChipId,
 } from '../../../content/quizSchema';
+import { SHOWN_HEALTH_CHIPS } from './healthChips';
+import { matchHealthChips, type HealthSubject } from './healthSynonyms';
 import { FOOD_STYLE_DIET, type Answers } from './types';
+
+export { SHOWN_HEALTH_CHIPS } from './healthChips';
 
 /**
  * Safety rules on partial answers (ТЗ §8.7): guardrails re-run after each relevant answer. Until a value is known a
  * neutral stand-in is used that triggers no rule (BMI 22, moderate activity), so nothing is restricted too early.
  */
 
-/** Women of these ages see the pregnancy and breastfeeding chips (research/stage-2-mappings.md §3.4). */
+/** Women of these ages may choose pregnancy and breastfeeding (research/stage-2-mappings.md §3.4). */
 export const REPRODUCTIVE_AGE = { min: 14, max: 55 } as const;
 /** Children 1–13 (family mode): only the conditions that really occur in children (§3.5). */
 const CHILD_HEALTH_CHIPS: readonly HealthChipId[] = [
@@ -34,7 +39,18 @@ const CHILD_HEALTH_CHIPS: readonly HealthChipId[] = [
 ];
 const NEUTRAL_BMI = 22;
 
-export function visibleHealthChips(answers: Answers): HealthChipId[] {
+/**
+ * From this age, with diabetes or hypertension (the main causes of chronic kidney disease), the health step reminds
+ * to write about the kidneys if a doctor spoke of them (review-health-synonyms.md B.4, 5).
+ */
+export const KIDNEY_HINT_FROM_AGE = 50;
+
+/** Who the typed health texts are about: in family mode (1–13) the parent writes about the child. */
+export const healthSubjectOf = (answers: Answers): HealthSubject =>
+  (answers.ageYears ?? 30) < AGE_LIMITS.childUnderYears ? 'child' : 'self';
+
+/** Conditions this person may have by age and sex (a man cannot be pregnant; children see child conditions). */
+export function eligibleHealthChips(answers: Answers): HealthChipId[] {
   const age = answers.ageYears ?? 30;
   const reproductive =
     answers.sex === 'female' && age >= REPRODUCTIVE_AGE.min && age <= REPRODUCTIVE_AGE.max;
@@ -45,11 +61,29 @@ export function visibleHealthChips(answers: Answers): HealthChipId[] {
   });
 }
 
-/** Health chips that are active now (the parent said «Да» and the chip is visible). */
+/** The chips shown from the start: the design's, among the eligible ones. */
+export function visibleHealthChips(answers: Answers): HealthChipId[] {
+  return eligibleHealthChips(answers).filter((chip) => SHOWN_HEALTH_CHIPS.includes(chip));
+}
+
+/** Health chips that are active now: the parent said «Да» and the chip is eligible (shown or found through «+»). */
 export function activeHealthChips(answers: Answers): HealthChipId[] {
   if (answers.health !== 'yes') return [];
-  const visible = new Set(visibleHealthChips(answers));
-  return answers.healthChips.filter((chip) => visible.has(chip));
+  const eligible = new Set(eligibleHealthChips(answers));
+  return answers.healthChips.filter((chip) => eligible.has(chip));
+}
+
+/**
+ * The «+» health texts none of the active chips stands for: kept verbatim, but the menu cannot follow them — the
+ * finale says so honestly and a doctor is advised (review-health-synonyms.md B.4, points 3 and 4).
+ */
+export function unmatchedHealthTexts(answers: Answers): string[] {
+  if (answers.health !== 'yes') return [];
+  const active = activeHealthChips(answers);
+  const subject = healthSubjectOf(answers);
+  return cleanItems(answers.healthCustom).filter(
+    (text) => !matchHealthChips(text, subject).some((match) => active.includes(match.chip)),
+  );
 }
 
 const DIRECT_FLAGS: Partial<Record<HealthChipId, HealthFlag>> = {
@@ -72,6 +106,7 @@ export function healthFlags(answers: Answers): HealthFlag[] {
     if (chip === 'diabetes')
       flags.push(answers.insulin === 'no' ? 'diabetesType2' : 'diabetesInsulin');
   }
+  if (unmatchedHealthTexts(answers).length > 0) flags.push('otherChronic');
   return flags;
 }
 

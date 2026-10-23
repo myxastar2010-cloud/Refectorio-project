@@ -79,7 +79,6 @@ export async function seriousViolations(page: Page) {
   const { violations } = await new AxeBuilder({ page })
     .exclude('.feature-text')
     .exclude('.info-lead')
-    .exclude('.info-link')
     .analyze();
   return violations
     .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')

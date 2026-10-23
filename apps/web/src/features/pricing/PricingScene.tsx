@@ -2,7 +2,7 @@ import '../../styles/pricing.css';
 
 import { IconX } from '@tabler/icons-react';
 import { m } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import type { BillingPeriod, PlanId } from '../../content/schema';
 import { site } from '../../content/site.ru';
 import { focusQuietly } from '../../lib/quietFocus';
@@ -28,7 +28,14 @@ type Props = {
  * is reached only by the «Цены» button and left by its × or a scroll up (useSceneInput). Escape closes Premium's
  * «Ещё...» first, then the scene.
  */
-export function PricingScene({ phase, instant, pictures, onClose, onChoose }: Props) {
+/* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
+export const PricingScene = memo(function PricingScene({
+  phase,
+  instant,
+  pictures,
+  onClose,
+  onChoose,
+}: Props) {
   const calm = useCalmMotion();
   const hidden = phase === 'hidden';
   const text = site.pricing;
@@ -77,7 +84,7 @@ export function PricingScene({ phase, instant, pictures, onClose, onChoose }: Pr
       <m.h2
         ref={titleRef}
         id="pricing-title"
-        className="pricing-title focus-ring"
+        className="pricing-title"
         tabIndex={-1}
         variants={aboutTitleVariants(calm)}
         {...initial}
@@ -106,7 +113,7 @@ export function PricingScene({ phase, instant, pictures, onClose, onChoose }: Pr
         </m.div>
         <m.button
           type="button"
-          className="pricing-close focus-ring"
+          className="pricing-close"
           aria-label={text.close}
           variants={aboutCardVariants(0, PRICING.cards, calm)}
           {...initial}
@@ -143,4 +150,4 @@ export function PricingScene({ phase, instant, pictures, onClose, onChoose }: Pr
       </div>
     </section>
   );
-}
+});

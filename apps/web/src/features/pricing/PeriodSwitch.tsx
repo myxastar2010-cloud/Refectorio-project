@@ -1,5 +1,5 @@
 import { useRef, type KeyboardEvent } from 'react';
-import { BILLING_PERIODS, type BillingPeriod } from '../../content/schema';
+import { BILLING_PERIODS, type BillingPeriod } from '../../content/constants';
 import { site } from '../../content/site.ru';
 
 type Props = {
@@ -53,7 +53,7 @@ export function PeriodSwitch({ period, onChange }: Props) {
           role="radio"
           aria-checked={period === id}
           tabIndex={period === id ? 0 : -1}
-          className="period-option focus-ring"
+          className="period-option"
           onClick={() => {
             onChange(id);
           }}

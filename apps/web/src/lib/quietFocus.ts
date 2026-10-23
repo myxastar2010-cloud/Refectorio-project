@@ -9,15 +9,27 @@ const QUIET = 'data-quiet-focus';
 let lastInputWasKeyboard = false;
 let listening = false;
 
+/** Keys that move the focus: from them on the page is used from the keyboard (<html data-modality>, 4.7). */
+const NAVIGATION = /^(Tab|Arrow(Up|Down|Left|Right)|Home|End|PageUp|PageDown)$/;
+
+function setModality(modality: 'keyboard' | 'pointer') {
+  document.documentElement.dataset.modality = modality;
+}
+
+/** True when the person moves around with the keyboard (keyboard focus states show only then). */
+export const keyboardModality = () => document.documentElement.dataset.modality === 'keyboard';
+
 function listen() {
   if (listening) return;
   listening = true;
-  const keyboard = () => {
+  const keyboard = (event: KeyboardEvent) => {
     lastInputWasKeyboard = true;
+    if (NAVIGATION.test(event.key)) setModality('keyboard');
     for (const element of document.querySelectorAll(`[${QUIET}]`)) element.removeAttribute(QUIET);
   };
   const pointer = () => {
     lastInputWasKeyboard = false;
+    setModality('pointer');
   };
   window.addEventListener('keydown', keyboard, true);
   window.addEventListener('pointerdown', pointer, true);
@@ -25,7 +37,7 @@ function listen() {
   window.addEventListener('touchstart', pointer, { capture: true, passive: true });
 }
 
-/** Moves focus without scrolling; after a non-keyboard input the element shows no focus ring. */
+/** Moves focus without scrolling; after a non-keyboard input the element shows no keyboard focus state. */
 export function focusQuietly(element: HTMLElement | null | undefined) {
   listen();
   if (!element) return;

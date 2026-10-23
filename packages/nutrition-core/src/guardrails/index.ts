@@ -39,6 +39,7 @@ export const REASON_CODES = [
   'HYPERTENSION',
   'HYPOTHYROIDISM',
   'INSULIN_RESISTANCE',
+  'OTHER_CHRONIC',
 ] as const;
 export type ReasonCode = (typeof REASON_CODES)[number];
 
@@ -249,6 +250,10 @@ function healthEffects(q: Questionnaire): Effect[] {
       reason: 'INSULIN_RESISTANCE',
       dishRules: ['limitAddedSugar'],
     });
+  }
+  // A condition in the person's own words: the menu is not restricted (we cannot know how), the doctor decides.
+  if (has('otherChronic')) {
+    effects.push({ status: 'requiresDoctor', reason: 'OTHER_CHRONIC', refer: ['gp'] });
   }
   const edCommon = {
     status: 'limited' as const,

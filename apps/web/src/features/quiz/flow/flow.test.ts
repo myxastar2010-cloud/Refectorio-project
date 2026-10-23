@@ -12,7 +12,14 @@ import {
   saveResult,
 } from './persistence';
 import { buildResult } from './result';
-import { allergenItems, healthFlags, ketoAllowed, safetyOf, visibleHealthChips } from './safety';
+import {
+  allergenItems,
+  eligibleHealthChips,
+  healthFlags,
+  ketoAllowed,
+  safetyOf,
+  visibleHealthChips,
+} from './safety';
 import type { Answers, QuizState } from './types';
 
 const NOW = '2026-10-09T10:00:00.000Z';
@@ -20,11 +27,24 @@ const base = initialQuizState(3, NOW).answers;
 const with_ = (p: Partial<Answers>): Answers => ({ ...base, ...p });
 
 describe('safety on partial answers', () => {
-  it('pregnancy and breastfeeding chips only for women 14–55; children see four chips', () => {
-    expect(visibleHealthChips(with_({ sex: 'female', ageYears: 30 }))).toContain('pregnancy');
+  it('the design shows five chips (pregnancy for women 14–55); the others are reachable by age and sex', () => {
+    expect(visibleHealthChips(with_({ sex: 'female', ageYears: 30 }))).toEqual([
+      'diabetes',
+      'hypertension',
+      'hypothyroidism',
+      'insulinResistance',
+      'pregnancy',
+    ]);
     expect(visibleHealthChips(with_({ sex: 'female', ageYears: 56 }))).not.toContain('pregnancy');
-    expect(visibleHealthChips(with_({ sex: 'male', ageYears: 30 }))).not.toContain('lactation');
+    expect(visibleHealthChips(with_({ sex: 'male', ageYears: 30 }))).not.toContain('pregnancy');
+    expect(eligibleHealthChips(with_({ sex: 'male', ageYears: 30 }))).not.toContain('lactation');
+    expect(eligibleHealthChips(with_({ sex: 'female', ageYears: 30 }))).toContain('lactation');
+    // Children 1–13 see only the child conditions; kidney disease and PKU now through «+» (their flags stay).
     expect(visibleHealthChips(with_({ sex: 'female', ageYears: 9 }))).toEqual([
+      'diabetes',
+      'hypothyroidism',
+    ]);
+    expect(eligibleHealthChips(with_({ sex: 'female', ageYears: 9 }))).toEqual([
       'diabetes',
       'hypothyroidism',
       'kidneyDisease',

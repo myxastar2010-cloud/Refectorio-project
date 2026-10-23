@@ -69,6 +69,22 @@ export function ProgressBar({
   const shown = useMotionValue(Math.max(CAP_SHARE, value));
   const transform = useTransform(shown, (v) => `translateX(${((v - 1) * 100).toFixed(3)}%)`);
   const sheenRef = useRef<HTMLSpanElement>(null);
+  // The band's and the rail's widths, kept by a ResizeObserver: read after a commit, they forced a layout in every
+  // answer of the game (performance audit, F4).
+  const sizes = useRef({ band: 0, width: 0 });
+  useEffect(() => {
+    const sheen = sheenRef.current;
+    const fill = sheen?.parentElement;
+    if (!sheen || !fill) return undefined;
+    const observer = new ResizeObserver(() => {
+      sizes.current = { band: sheen.offsetWidth, width: fill.offsetWidth };
+    });
+    observer.observe(sheen);
+    observer.observe(fill);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
   const previous = useRef(value);
   useEffect(() => {
     const target = Math.max(CAP_SHARE, value);
@@ -81,8 +97,7 @@ export function ProgressBar({
     let run: Animation | null = null;
     if (grew && !calm && !finale && sheen) {
       // From the rail's start to the fill's new end, in the fill's own coordinates (it is moved left by 1 − value).
-      const band = sheen.offsetWidth;
-      const width = sheen.parentElement?.offsetWidth ?? 0;
+      const { band, width } = sizes.current;
       const from = (1 - target) * width - band;
       const to = width;
       run = sheen.animate(
@@ -146,7 +161,7 @@ export function QuizHeader({
       <m.button
         ref={setHost}
         type="button"
-        className="quiz-back wave-host focus-ring"
+        className="quiz-back wave-host"
         aria-label={quiz.common.back}
         title={quiz.common.back}
         data-hidden={!canGoBack || undefined}

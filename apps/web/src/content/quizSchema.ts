@@ -26,6 +26,7 @@ export const NOTICE_IDS = [
   'teenHealth',
   'diabetesGoal',
   'ketoConfirm',
+  'otherChronic',
 ] as const;
 export type NoticeId = (typeof NOTICE_IDS)[number];
 
@@ -188,10 +189,29 @@ export const quizContentSchema = z.object({
     chips: chipMap(HEALTH_CHIP_IDS),
     addTitle: text,
     addPlaceholder: text,
+    matched: template('chips'),
+    matchedCheck: template('chips'),
+    /** After «Отметили: …» when the chip leads to «refused» (kidney disease, PKU): a parser may be wrong. */
+    matchedUndo: text,
+    /** Under the chips: the hidden conditions are typed through «+» (review-health-synonyms.md B.4, 1). */
+    hint: template('examples'),
+    hintExamples: z.object({ adult: text, women: text, child: text }),
+    /** The hint once a chip is chosen (its questions and notes need the room). */
+    hintMore: text,
+    /** Instead of the hint: diabetes or hypertension, 50 and older — the main causes of kidney disease (B.4, 5). */
+    kidneyHint: text,
+    /** A risky condition written in another step (the notes, the dislikes): offered as a chip (B.4, 5). */
+    crossCheck: template('chips'),
+    crossCheckButton: text,
+    crossChecked: template('chips'),
     insulinQuestion: text,
     insulinOptions: z.object({ yes: text, no: text, unknown: text }),
     trimesterQuestion: text,
-    trimesters: z.object({ trimester1: text, trimester2: text, trimester3: text }),
+    trimesters: z.object({
+      trimester1: z.object({ label: text, detail: text }),
+      trimester2: z.object({ label: text, detail: text }),
+      trimester3: z.object({ label: text, detail: text }),
+    }),
     lactationQuestion: text,
     lactationPeriods: z.object({ months0to6: text, months7to12: text }),
     notes: z.object({
@@ -210,6 +230,9 @@ export const quizContentSchema = z.object({
     addPlaceholder: text,
     severe: text,
     matched: template('chips'),
+    /** Aspartame avoided: maybe phenylketonuria, which has no chip of its own (B.4, 5). */
+    aspartameNote: text,
+    aspartameButton: text,
   }),
   dislikes: z.object({
     title: text,
@@ -254,6 +277,8 @@ export const quizContentSchema = z.object({
     captions: z.array(z.object({ text, icon: z.string().min(1) })).min(6),
     captionsCalm: z.object({ replace: text, with: text }),
     honest: text,
+    /** Under the honest line: a health text the menu cannot follow (B.4, 3). */
+    unmatchedHealth: text,
     notSaved: text,
     again: text,
     generatingLabel: text,

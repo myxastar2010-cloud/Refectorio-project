@@ -118,7 +118,7 @@ function Row({
         buttonRef(node);
       }}
       type="button"
-      className="quiz-row wave-host focus-ring"
+      className="quiz-row wave-host"
       aria-haspopup="dialog"
       onClick={(event) => {
         const element = event.currentTarget;
@@ -307,7 +307,7 @@ export function RowsStep({ step }: { readonly step: Step }) {
       {step === 'body' && child ? (
         <div className="quiz-family">
           <p className="quiz-note">{toddler ? quiz.notices.toddler : quiz.notices.childFamily}</p>
-          <label className="quiz-check focus-ring-within">
+          <label className="quiz-check">
             <input
               type="checkbox"
               checked={a.familyConfirmed}
@@ -392,7 +392,7 @@ export function RowsStep({ step }: { readonly step: Step }) {
               aria-checked={a.sex === sex}
               tabIndex={(a.sex ? a.sex === sex : index === 0) ? 0 : -1}
               data-autofocus={(a.sex ? a.sex === sex : index === 0) || undefined}
-              className={clsx('quiz-sex-option focus-ring', a.sex === sex && 'is-selected')}
+              className={clsx('quiz-sex-option', a.sex === sex && 'is-selected')}
               onClick={() => {
                 commit('sex', sex);
               }}

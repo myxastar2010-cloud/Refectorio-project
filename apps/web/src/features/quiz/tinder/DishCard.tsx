@@ -131,12 +131,25 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
     };
   }, [x, y, scale, opacity, calm]);
 
+  // The card's size, kept by a ResizeObserver: read on every move, it forced a layout per frame (audit, F8).
+  const size = useRef({ width: 0, height: 0 });
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return undefined;
+    const observer = new ResizeObserver(() => {
+      size.current = { width: card.offsetWidth, height: card.offsetHeight };
+    });
+    observer.observe(card);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   // The buttons swell as the card moves towards them.
   const report = () => {
-    const card = cardRef.current;
-    if (!card || !isPresent) return;
-    const width = card.offsetWidth * TINDER.commitShare;
-    const height = card.offsetHeight * TINDER.commitDownShare;
+    if (!isPresent || size.current.width === 0) return;
+    const width = size.current.width * TINDER.commitShare;
+    const height = size.current.height * TINDER.commitDownShare;
     const dx = x.get();
     const dy = y.get();
     onMove({

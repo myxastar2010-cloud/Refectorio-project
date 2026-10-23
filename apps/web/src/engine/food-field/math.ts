@@ -189,6 +189,18 @@ export function scatter(
  * Sprite assignment: an even mix of all sprites where neighbours (closer than `neighbourDistance`) differ.
  * Greedy: each point takes the least-used sprite not used by its already-assigned neighbours.
  */
+/**
+ * The sprite an item takes when it wraps around off screen (where nobody sees the change): one of the least-used ones,
+ * when its own is used more — so repeats go first, and with fewer items than sprites (a phone has 8 of 15) the field
+ * slowly shows them all. −1: it keeps its own (every sprite is used as often).
+ */
+export function rebalanceSprite(random: Random, usage: readonly number[], current: number): number {
+  const least = Math.min(...usage);
+  if ((usage[current] ?? 0) <= least) return -1;
+  const pool = [...usage.keys()].filter((index) => usage[index] === least);
+  return pool[random.int(pool.length)] ?? -1;
+}
+
 export function assignSprites(
   random: Random,
   points: readonly Vec[],

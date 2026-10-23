@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { PLAN_IDS } from './constants';
+
+export { BILLING_PERIODS, PLAN_IDS, type BillingPeriod, type PlanId } from './constants';
 
 const text = z.string().trim().min(1);
 /** Lines as in the mockup: rendered with explicit breaks on desktop, joined on small screens. */
@@ -7,11 +10,8 @@ const lines = z.array(text).min(1);
 const featureIcon = z.enum(['school', 'sparkles', 'listDetails', 'shieldCheck']);
 const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamCard']);
 
-/** A link of the project card: not working yet — a press says «Мы работаем над этим». */
+/** A link of the project details card: not working yet — a press says «Мы работаем над этим» (D-051). */
 const link = z.object({ label: text });
-
-export const PLAN_IDS = ['free', 'premium'] as const;
-export const BILLING_PERIODS = ['month', 'year'] as const;
 
 /** A price for each billing period: the amount and the words after it («навсегда», «в месяц»). */
 const price = z.object({ amount: text, per: text });
@@ -63,7 +63,8 @@ export const siteContentSchema = z.object({
       leadLines: lines,
       /** The project logo is the site's apple (Tabler) on a white tile. */
       logoAlt: text,
-      links: z.array(link).length(2),
+      more: text,
+      moreLabel: text,
     }),
   }),
   /** The landing's part of the quiz: the header pill turns into «Выйти ×» while the quiz chunk loads. */
@@ -74,6 +75,15 @@ export const siteContentSchema = z.object({
     leadLines: lines,
     membersLabel: text,
     members: z.array(z.array(text).min(1)).length(2),
+    close: text,
+  }),
+  /** «Подробнее» of the project card (stage 3, 4.19): what the site is, how it works, and its materials. */
+  projectDialog: z.object({
+    title: text,
+    paragraphs: z.array(text).min(2).max(3),
+    teamLine: text,
+    linksLabel: text,
+    links: z.array(link).length(3),
     close: text,
   }),
   /**
@@ -103,6 +113,4 @@ export const siteContentSchema = z.object({
 
 export type SiteContent = z.infer<typeof siteContentSchema>;
 export type FeatureIcon = z.infer<typeof featureIcon>;
-export type PlanId = (typeof PLAN_IDS)[number];
-export type BillingPeriod = (typeof BILLING_PERIODS)[number];
 export type ImageKey = z.infer<typeof imageKey>;

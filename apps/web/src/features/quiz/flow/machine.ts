@@ -94,6 +94,17 @@ type Reconciled = {
   readonly notices: readonly NoticeId[];
 };
 
+/**
+ * Where the health notices may come: the health step, and the later steps that can tick a health chip too (an
+ * allergy to aspartame, a condition written in the dislikes or the notes — review-health-synonyms.md B.4, 5).
+ */
+const HEALTH_NOTICE_STEPS: readonly StepId[] = [
+  'healthConditions',
+  'allergens',
+  'dislikesText',
+  'notes',
+];
+
 /** Safety rules on the current answers: safe switches plus the notices that explain them (each notice once). */
 export function reconcile(state: QuizState, step: StepId): Reconciled {
   let answers = state.answers;
@@ -156,7 +167,7 @@ export function reconcile(state: QuizState, step: StepId): Reconciled {
   if (step === 'goalSetup' || step === 'goal') {
     if (decision.reasons.includes('OLDER_ADULT_CAUTION')) queue('olderAdult');
   }
-  if (step === 'healthConditions' && answers.health === 'yes') {
+  if (HEALTH_NOTICE_STEPS.includes(step) && answers.health === 'yes') {
     const chips = activeHealthChips(answers);
     if (decision.status === 'refused') {
       queue(
@@ -165,6 +176,7 @@ export function reconcile(state: QuizState, step: StepId): Reconciled {
     }
     if (chips.includes('eatingDisorder')) queue('eatingDisorder');
     if (chips.includes('pregnancy') || chips.includes('lactation')) queue('pregnancyLactation');
+    if (decision.reasons.includes('OTHER_CHRONIC')) queue('otherChronic');
   }
   return { answers, adjustments: [...adjustments], notices };
 }

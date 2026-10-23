@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FocusEvent, type PointerEvent } from 
 import { Lines } from '../../components/Lines';
 import type { BillingPeriod, SiteContent } from '../../content/schema';
 import { site } from '../../content/site.ru';
-import { focusQuietly } from '../../lib/quietFocus';
+import { focusQuietly, keyboardModality } from '../../lib/quietFocus';
 import { useCalmMotion } from '../../motion/hooks';
 import { PRICING } from '../../motion/tokens';
 import { aboutCardVariants, type Phase } from '../../scenes/choreography';
@@ -130,7 +130,7 @@ export function PlanCard({ plan, index, phase, instant, period, picture, onChoos
     if (event.pointerType !== 'touch') setHovered(inside);
   };
   const focus = (event: FocusEvent<HTMLButtonElement>) => {
-    setFocused(event.currentTarget.matches(':focus-visible'));
+    setFocused(keyboardModality() && event.currentTarget.matches(':focus-visible'));
   };
 
   return (
@@ -200,7 +200,7 @@ export function PlanCard({ plan, index, phase, instant, period, picture, onChoos
           <button
             ref={moreRef}
             type="button"
-            className="plan-more focus-ring-inverse"
+            className="plan-more"
             aria-label={site.pricing.more.open}
             aria-expanded={open}
             aria-controls="plan-premium-more"
@@ -225,7 +225,7 @@ export function PlanCard({ plan, index, phase, instant, period, picture, onChoos
           <m.button
             ref={lessRef}
             type="button"
-            className="plan-less focus-ring-inverse"
+            className="plan-less"
             aria-label={site.pricing.more.close}
             variants={lessButtonVariants(calm)}
             onClick={() => {

@@ -23,7 +23,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run build && npm run preview',
+    // A test build (--mode test, dist-test): the same site plus the ?step= hook (features/quiz/flow/testStates.ts).
+    command: 'npm run build:test && npm run preview:test',
     url: `http://localhost:${PORT}/`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

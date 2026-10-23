@@ -1,5 +1,5 @@
 import { m } from 'motion/react';
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import type { Scene } from '../../app/useScene';
 import { foodSprites } from '../../lib/assets';
 import type { TestParams } from '../../lib/params';
@@ -13,6 +13,9 @@ import { whenIdle } from '../../lib/idle';
 const RESIZE_DEBOUNCE_MS = 200;
 /** The pre-blurred copies are fetched and decoded once the page is idle (at the latest after this). */
 const BLUR_PRELOAD_MS = 1500;
+/** The field starts with the mockups' nine foods; the six of stage 3 (§8) join once the page has settled. */
+const FIRST_FOODS = 9;
+const LATE_FOODS_AFTER_MS = 4000;
 /** After the cross-fade between the sharp and the blurred food only one plane is moved. */
 const PLANE_SETTLE_MS = SCENE.food.blurCrossfadeEndMs + 150;
 const NOT_FOOD = '[data-opaque], button, a, input, textarea, select, [role="dialog"]';
@@ -20,7 +23,8 @@ const NOT_FOOD = '[data-opaque], button, a, input, textarea, select, [role="dial
 type Props = {
   readonly scene: Scene;
   readonly params: TestParams;
-  readonly teamOpen: boolean;
+  /** An expanded card of part 2 is open (the team's or the project's). */
+  readonly cardOpen: boolean;
 };
 
 declare global {
@@ -92,28 +96,36 @@ const speedOf = (scene: Scene) =>
  * React wrapper of the food engine (ТЗ 6.7). The camera layer recedes in part 2 and «Цены» exactly as in Figma
  * (scale 0.8874 about a point below the frame), the sharp sprites cross-fade into pre-blurred ones.
  */
-export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
+/* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
+export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, cardOpen }: Props) {
   const sharpRef = useRef<HTMLDivElement>(null);
   const blurRef = useRef<HTMLDivElement>(null);
   const fieldRef = useRef<FoodField | null>(null);
   const layerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef(scene);
-  const teamOpenRef = useRef(teamOpen);
+  const cardOpenRef = useRef(cardOpen);
+  /**
+   * Part 1's text boxes, measured at rest (load, fonts, resize): coming back to part 1 its titles are still moving in,
+   * and measuring them then cost a forced layout in the click (performance audit, F3) and gave shifted boxes.
+   */
+  const heroRectsRef = useRef<Rect[] | null>(null);
   const calm = useCalmMotion();
   // Part 2, «Цены» and the quiz look at the food from the same pulled-back camera, blurred (ТЗ §7.9).
   const about = scene !== 'hero';
 
   useEffect(() => {
     sceneRef.current = scene;
-    teamOpenRef.current = teamOpen;
+    cardOpenRef.current = cardOpen;
     const field = fieldRef.current;
     if (!field) return;
     field.pauseProbe();
     field.setSpeedFactor(speedOf(scene));
     field.setAvoidStrength(scene === 'quiz' ? QUIZ.foodAvoidStrength : 1);
-    field.setObstacles(scene === 'quiz' ? [quizColumn()] : about ? [] : obstacles());
+    field.setObstacles(
+      scene === 'quiz' ? [quizColumn()] : about ? [] : (heroRectsRef.current ?? obstacles()),
+    );
     if (about) field.ensureBlur();
-  }, [scene, teamOpen, about]);
+  }, [scene, cardOpen, about]);
 
   // Both planes move during the cross-fade, then only the one that is seen. The wider wrap of part 2 starts at once
   // and ends only when the camera is back (then the margins are off screen again).
@@ -142,6 +154,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     if (!sharpPlane || !blurPlane) return;
     const field = createFoodField({
       sprites: foodSprites,
+      initialSprites: FIRST_FOODS,
       sharpPlane,
       blurPlane,
       seed: params.seed ?? Math.floor(Math.random() * 1e9),
@@ -157,7 +170,16 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     fieldRef.current = field;
     const startScene = sceneRef.current;
     const receded = startScene !== 'hero';
-    field.setObstacles(startScene === 'quiz' ? [quizColumn()] : receded ? [] : obstacles());
+    /** The obstacles of a scene; part 1's are measured now and kept, a window changed elsewhere forgets them. */
+    const obstaclesOf = (current: Scene): Rect[] => {
+      if (current === 'hero') {
+        heroRectsRef.current = obstacles();
+        return heroRectsRef.current;
+      }
+      heroRectsRef.current = null;
+      return current === 'quiz' ? [quizColumn()] : [];
+    };
+    field.setObstacles(obstaclesOf(startScene));
     field.setSpeedFactor(speedOf(startScene));
     field.setAvoidStrength(startScene === 'quiz' ? QUIZ.foodAvoidStrength : 1);
     field.start();
@@ -175,23 +197,27 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     const onResize = () => {
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(() => {
-        const current = sceneRef.current;
-        field.setObstacles(
-          current === 'hero' ? obstacles() : current === 'quiz' ? [quizColumn()] : [],
-        );
+        field.setObstacles(obstaclesOf(sceneRef.current));
         field.resize();
       }, RESIZE_DEBOUNCE_MS);
     };
     // Text boxes change once the web font arrives.
     void document.fonts.ready.then(() => {
-      const current = sceneRef.current;
-      field.setObstacles(
-        current === 'hero' ? obstacles() : current === 'quiz' ? [quizColumn()] : [],
-      );
+      field.setObstacles(obstaclesOf(sceneRef.current));
     });
     const cancelPreload = whenIdle(() => {
       field.ensureBlur();
     }, BLUR_PRELOAD_MS);
+    // Test modes keep the first nine: their layouts and snapshots are fixed.
+    const fixedLayout = params.seed !== null || params.freeze || params.designPose;
+    let cancelLate = (): void => undefined;
+    const lateTimer = fixedLayout
+      ? 0
+      : window.setTimeout(() => {
+          cancelLate = whenIdle(() => {
+            void field.addSprites();
+          }, LATE_FOODS_AFTER_MS);
+        }, LATE_FOODS_AFTER_MS);
     // The quiz finale's core pulls the food in (ТЗ §12.2).
     const offAttractor = onFoodAttractor((attractor) => {
       field.setAttractor(attractor ? toPlane(attractor, sceneRef.current) : null);
@@ -200,7 +226,7 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
     });
 
     const onPointerDown = (event: PointerEvent) => {
-      if (sceneRef.current !== 'hero' || teamOpenRef.current || event.button !== 0) return;
+      if (sceneRef.current !== 'hero' || cardOpenRef.current || event.button !== 0) return;
       if ((event.target as Element | null)?.closest(NOT_FOOD)) return;
       const index = field.hitTest(event.clientX, event.clientY);
       if (index >= 0) field.bounce(index);
@@ -212,6 +238,8 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('pointerdown', onPointerDown);
       window.clearTimeout(resizeTimer);
+      window.clearTimeout(lateTimer);
+      cancelLate();
       cancelPreload();
       offAttractor();
       field.stop();
@@ -238,4 +266,4 @@ export function FoodFieldLayer({ scene, params, teamOpen }: Props) {
       </m.div>
     </div>
   );
-}
+});

@@ -73,7 +73,7 @@ export function OptionPill(props: Props) {
       aria-disabled={disabled || undefined}
       tabIndex={tabIndex}
       className={clsx(
-        'quiz-option wave-host focus-ring',
+        'quiz-option wave-host',
         `quiz-option--${variant}`,
         selected && 'is-selected',
         disabled && 'is-disabled',

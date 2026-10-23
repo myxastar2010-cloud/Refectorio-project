@@ -39,20 +39,18 @@
   white-space: nowrap;
 }
 
-.focus-ring:focus-visible,
-.focus-ring-within:has(:focus-visible) {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
-}
-
-.focus-ring-inverse:focus-visible {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color-inverse);
-  outline-offset: var(--focus-ring-offset);
-}
-
-/* Focus moved by the page after a mouse, touchpad or touch input (lib/quietFocus.ts): no keyboard ring. */
-[data-quiet-focus]:focus-visible {
+/*
+ * Focus (stage 3, 4.7): no outline or ring anywhere — the team finds them ugly. Keyboard focus shows each control's own
+ * state instead (WCAG 2.4.7): the hover wave grows from the centre (motion/useWave), and the controls without a wave
+ * get theirs in components.css («Keyboard focus»). <html data-modality> says what the person uses (lib/quietFocus).
+ */
+:focus,
+:focus-visible {
   outline: none;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .line {
@@ -333,27 +331,6 @@
     font-size: calc(var(--type-more-label-size) * var(--s));
     --outline-w: calc(var(--about-more-border) * var(--s));
   }
-
-  .info-links {
-    --dy: 0px;
-    --y: var(--about-links-y);
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: calc(var(--about-links-gap) * var(--s));
-    height: calc(var(--about-link-circle) * var(--s));
-  }
-
-  .info-link {
-    gap: calc(var(--about-link-gap) * var(--s));
-    font-size: max(var(--type-min-body), calc(var(--type-link-size) * var(--s)));
-  }
-
-  .info-link-circle {
-    width: calc(var(--about-link-circle) * var(--s));
-    height: calc(var(--about-link-circle) * var(--s));
-  }
 }
 
 /* ── Typography roles (all sizes) ───────────────────────────────────────────────────────── */
@@ -425,11 +402,6 @@
 .info-more {
   font-weight: var(--type-more-label-weight);
   letter-spacing: var(--type-more-label-tracking);
-}
-
-.info-link {
-  font-weight: var(--type-link-weight);
-  letter-spacing: var(--type-link-tracking);
 }
 
 /*
@@ -588,21 +560,5 @@
         var(--s)
     );
     font-size: calc(var(--type-more-label-size) * var(--boost-soft) * var(--s));
-  }
-
-  .info-link {
-    font-size: max(
-      var(--type-min-body),
-      calc(var(--type-link-size) * var(--boost-soft) * var(--s))
-    );
-  }
-
-  .info-link-circle {
-    width: calc(var(--about-link-circle) * var(--boost-soft) * var(--s));
-    height: calc(var(--about-link-circle) * var(--boost-soft) * var(--s));
-  }
-
-  .info-links {
-    height: calc(var(--about-link-circle) * var(--boost-soft) * var(--s));
   }
 }

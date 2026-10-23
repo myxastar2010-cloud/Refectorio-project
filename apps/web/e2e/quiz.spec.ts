@@ -44,6 +44,23 @@ async function throughGoal(
   await onScreen(page, 'foodStyle');
 }
 
+/** Types a condition into the «+» panel of the health chips and waits for the panel to close. */
+async function addHealth(page: Page, text: string) {
+  await page.getByRole('button', { name: 'Добавить другое' }).click();
+  await page.getByRole('textbox', { name: 'Добавить условие' }).fill(text);
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.quiz-add')).toHaveCount(0);
+}
+
+/** The game, «О вас», the goal, the food steps and «Да»: the health chips of a 35-year-old woman. */
+async function toHealthChips(page: Page) {
+  await openQuiz(page);
+  await throughGoal(page);
+  await choose(page, /Сбалансированное питание/, 'macroProfile');
+  await choose(page, /Рекомендуется/, 'health');
+  await choose(page, 'Да', 'healthConditions');
+}
+
 /** Waits for the finite animations only (the finale's shimmer and core pulse never end). */
 async function axeSerious(page: Page) {
   // Panels morph on motion values (not in document.getAnimations()), and a notice may not have started its fade yet
@@ -139,6 +156,85 @@ test.describe('entering and leaving', () => {
 });
 
 test.describe('the dish game', () => {
+  test('a card leaving any way moves nothing else: no scroll, the title and the buttons stay (4.4)', async ({
+    page,
+  }) => {
+    // Seven exits, 40 sampled frames each: slow in WebKit.
+    test.slow();
+    await openQuiz(page);
+    // The step has finished coming in (its blocks rise in): only then may nothing move.
+    await page.waitForFunction(() =>
+      document
+        .getAnimations()
+        .every(
+          (animation) =>
+            animation.playState !== 'running' ||
+            animation.effect?.getTiming().iterations === Infinity,
+        ),
+    );
+    // Samples 40 frames: every scroll offset on the page, scrollable boxes in the quiz, the title and the buttons.
+    const watch = () =>
+      page.evaluate(
+        () =>
+          new Promise<string[]>((resolve) => {
+            const box = (selector: string) =>
+              document.querySelector(selector)?.getBoundingClientRect().toJSON() as
+                DOMRect | undefined;
+            const title = box('#quiz-step-title');
+            const buttons = box('.quiz-game-controls');
+            const moved = (a: DOMRect | undefined, b: DOMRect | undefined) =>
+              !a || !b || Math.abs(a.x - b.x) > 0.5 || Math.abs(a.y - b.y) > 0.5;
+            const problems = new Set<string>();
+            let frames = 0;
+            const tick = () => {
+              if (window.scrollY !== 0) problems.add('the page scrolled');
+              for (const node of document.querySelectorAll<HTMLElement>('*')) {
+                if (node.scrollTop !== 0 || node.scrollLeft !== 0)
+                  problems.add(`scrolled: ${node.className}`);
+              }
+              for (const node of document.querySelectorAll<HTMLElement>('.quiz, .quiz *')) {
+                const style = getComputedStyle(node);
+                if (
+                  /auto|scroll/.test(style.overflowY) &&
+                  node.scrollHeight > node.clientHeight + 1
+                ) {
+                  problems.add(`scrollable: ${node.className}`);
+                }
+              }
+              if (moved(box('#quiz-step-title'), title)) problems.add('the title moved');
+              if (moved(box('.quiz-game-controls'), buttons)) problems.add('the buttons moved');
+              frames += 1;
+              if (frames < 40) requestAnimationFrame(tick);
+              else resolve([...problems]);
+            };
+            requestAnimationFrame(tick);
+          }),
+      );
+    const drag = async (dx: number, dy: number) => {
+      const card = await page.locator('.quiz-card:not([aria-hidden])').boundingBox();
+      if (!card) throw new Error('no card');
+      const x = card.x + card.width / 2;
+      const y = card.y + card.height / 2;
+      await page.mouse.move(x, y);
+      const watching = watch();
+      await page.mouse.down();
+      await page.mouse.move(x + dx * card.width, y + dy * card.height, { steps: 10 });
+      await page.mouse.up();
+      return watching;
+    };
+    expect(await drag(0.9, 0)).toEqual([]);
+    expect(await drag(-0.9, 0)).toEqual([]);
+    expect(await drag(0, 0.9)).toEqual([]);
+    for (const key of ['s', 'd', 'a']) {
+      const watching = watch();
+      await page.keyboard.press(key);
+      expect(await watching).toEqual([]);
+    }
+    const watching = watch();
+    await page.getByRole('button', { name: 'Пропустить', exact: true }).click();
+    expect(await watching).toEqual([]);
+  });
+
   test('keys answer, skips do not count, ten decisive answers move on', async ({ page }) => {
     await openQuiz(page);
     const first = await currentDish(page).textContent();
@@ -192,6 +288,41 @@ test.describe('the dish game', () => {
 });
 
 test.describe('the whole path', () => {
+  test('every step starts to enter with its icons decoded, inside its animated blocks (4.5)', async ({
+    page,
+  }) => {
+    // Ten cards and six steps: slow in WebKit, like the other whole-path tests.
+    test.slow();
+    // At the moment a step begins to enter (data-entering), every image in it must be decoded and inside an animated
+    // block — the icon wrapper, a block or a card — so it blurs in with the rest instead of popping in later.
+    await page.addInitScript(() => {
+      const late: string[] = [];
+      (window as Window & { __lateImages?: string[] }).__lateImages = late;
+      new MutationObserver((records) => {
+        for (const record of records) {
+          const screen = record.target as HTMLElement;
+          if (record.attributeName !== 'data-entering' || !screen.hasAttribute('data-entering'))
+            continue;
+          for (const image of screen.querySelectorAll('img')) {
+            const name = `${screen.dataset.screen ?? '?'}: ${image.currentSrc.split('/').pop() ?? ''}`;
+            if (!image.complete || image.naturalWidth === 0) late.push(`not decoded — ${name}`);
+            if (!image.closest('.quiz-icon, .quiz-block, .quiz-card'))
+              late.push(`outside — ${name}`);
+          }
+        }
+      }).observe(document, { attributes: true, subtree: true, attributeFilter: ['data-entering'] });
+    });
+    await openQuiz(page);
+    await throughGoal(page);
+    await choose(page, /Сбалансированное питание/, 'macroProfile');
+    await choose(page, /Рекомендуется/, 'health');
+    await choose(page, 'Нет', 'allergy');
+    const late = await page.evaluate(
+      () => (window as Window & { __lateImages?: string[] }).__lateImages ?? [],
+    );
+    expect(late).toEqual([]);
+  });
+
   test('to the finale: rows, options, chips with «+», text; the answers are saved', async ({
     page,
   }) => {
@@ -421,6 +552,135 @@ test.describe('safety', () => {
   });
 });
 
+test.describe("health chips: the design's five, the rest through «+» (4.13)", () => {
+  test('pregnancy by its chip or by a word; breastfeeding, warfarin and MAOI found in the text, with their questions and notes', async ({
+    page,
+  }) => {
+    test.slow();
+    await toHealthChips(page);
+    const chips = page.getByRole('group', { name: /Какое состояние/ });
+    for (const name of ['Диабет', 'Гипертония', 'Гипотиреоз', 'Беременность']) {
+      await expect(chips.getByRole('button', { name, exact: true })).toBeVisible();
+    }
+    await expect(chips.getByRole('button', { name: 'Кормление грудью' })).toHaveCount(0);
+    await expect(page.getByRole('textbox')).toHaveCount(0);
+
+    // A word ticks the visible chip it names, and the text is kept.
+    await addHealth(page, 'беременна');
+    await expect(chips.getByRole('button', { name: 'Беременность', pressed: true })).toBeVisible();
+    await expect(page.getByRole('radiogroup', { name: 'Срок беременности' })).toBeVisible();
+    await chips.getByRole('button', { name: 'Беременность', exact: true }).click();
+
+    await addHealth(page, 'кормлю грудью');
+    await expect(
+      chips.getByRole('button', { name: 'Кормление грудью', pressed: true }),
+    ).toBeVisible();
+    await expect(
+      page.locator('.quiz-note', { hasText: 'Отметили: Кормление грудью' }),
+    ).toBeVisible();
+    await expect(page.getByRole('radiogroup', { name: 'Сколько месяцев ребёнку?' })).toBeVisible();
+
+    await addHealth(page, 'пью варфарин и ИМАО');
+    await expect(
+      chips.getByRole('button', { name: 'Принимаю варфарин', pressed: true }),
+    ).toBeVisible();
+    await expect(
+      chips.getByRole('button', { name: 'Принимаю ингибиторы МАО', pressed: true }),
+    ).toBeVisible();
+    await expect(page.locator('.quiz-note', { hasText: 'витамин K' })).toBeVisible();
+    await expect(page.locator('.quiz-note', { hasText: 'тирамина' })).toBeVisible();
+
+    // Somebody else's condition: the chip is offered unticked, the person decides.
+    await addHealth(page, 'мама на диализе');
+    await expect(
+      chips.getByRole('button', { name: 'Хроническая болезнь почек', pressed: false }),
+    ).toBeVisible();
+    await expect(
+      page.locator('.quiz-note', { hasText: 'Если это про вас, отметьте' }),
+    ).toBeVisible();
+
+    const saved = (await draft(page))?.answers;
+    expect(saved?.healthChips).toEqual(['lactation', 'warfarin', 'maoi']);
+    expect(saved?.healthCustom).toEqual([
+      'беременна',
+      'кормлю грудью',
+      'пью варфарин и ИМАО',
+      'мама на диализе',
+    ]);
+  });
+
+  test('«ФКУ» and «почки» typed in «+»: the doctor notice, as with their chips before', async ({
+    page,
+  }) => {
+    test.slow();
+    await toHealthChips(page);
+    await addHealth(page, 'ФКУ');
+    await expect(page.getByRole('button', { name: 'Фенилкетонурия', pressed: true })).toBeVisible();
+    await addHealth(page, 'почки');
+    await expect(
+      page.getByRole('button', { name: 'Хроническая болезнь почек', pressed: true }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await expect(page.getByRole('alertdialog')).toContainText('вместе с врачом');
+  });
+
+  test('a hint under the chips; a text the menu cannot follow is kept, and the notice says so', async ({
+    page,
+  }) => {
+    test.slow();
+    await toHealthChips(page);
+    const hint = page.locator('.quiz-note', { hasText: 'Не нашли своё?' });
+    await expect(hint).toContainText('фенилкетонурия');
+    await expect(hint).toContainText('кормление грудью');
+    await addHealth(page, 'мигрень');
+    await expect(hint).toHaveCount(0);
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await expect(page.getByRole('alertdialog')).toContainText('не учитывает её автоматически');
+  });
+
+  test('a risky condition written in the notes or aspartame among the allergies: one press ticks it', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=1&step=notes#quiz');
+    await inQuiz(page);
+    await page.getByRole('textbox').fill('Хожу на диализ два раза в неделю');
+    await expect(page.locator('.quiz-cross-check')).toContainText('Хроническая болезнь почек');
+    await page.getByRole('button', { name: 'Отметить' }).click();
+    await expect(
+      page.locator('.quiz-note', { hasText: 'Отметили в вопросе о здоровье' }),
+    ).toBeFocused();
+    const saved = (await draft(page))?.answers;
+    expect(saved?.health).toBe('yes');
+    expect(saved?.healthChips).toEqual(['kidneyDisease']);
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await expect(page.getByRole('alertdialog')).toContainText('вместе с врачом');
+
+    await page.goto('./?seed=1&step=allergens&state=empty#quiz');
+    await inQuiz(page);
+    await page.getByRole('button', { name: 'Добавить другое' }).click();
+    await page.getByRole('textbox', { name: 'Добавить аллергию' }).fill('аспартам');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.quiz-cross-check')).toContainText('фенилкетонурии');
+    await expect(page.getByRole('button', { name: 'Отметить фенилкетонурию' })).toBeVisible();
+  });
+
+  test('«РПП» typed in «+»: the calm notice with the helplines', async ({ page }) => {
+    test.slow();
+    await toHealthChips(page);
+    await addHealth(page, 'РПП');
+    await expect(
+      page.getByRole('button', {
+        name: 'Расстройство пищевого поведения (сейчас или в прошлом)',
+        pressed: true,
+      }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Готово' }).click();
+    const notice = page.getByRole('alertdialog');
+    await expect(notice).toContainText('меньше цифр');
+    await expect(notice).toContainText('112');
+  });
+});
+
 test.describe('the privacy sheet', () => {
   test('grows out of its label, blurs the step behind, and returns focus to the label', async ({
     page,
@@ -523,9 +783,8 @@ test.describe('quality', () => {
     await page.getByRole('button', { name: 'Добавить другое' }).click();
     expect(await axeSerious(page)).toEqual([]);
     await page.keyboard.press('Escape');
-    await page
-      .getByRole('button', { name: 'Расстройство пищевого поведения (сейчас или в прошлом)' })
-      .click();
+    // The eating-disorder chip is reached through «+» now (4.13).
+    await addHealth(page, 'РПП');
     await page.getByRole('button', { name: 'Готово' }).click();
     await expect(page.getByRole('alertdialog')).toBeVisible();
     expect(await axeSerious(page)).toEqual([]);

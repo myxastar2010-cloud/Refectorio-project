@@ -10,7 +10,10 @@
     "dev": "vite",
     "prebuild": "node ../../scripts/photos/materialize.mjs",
     "build": "vite build",
+    "prebuild:test": "node ../../scripts/photos/materialize.mjs",
+    "build:test": "vite build --mode test --outDir dist-test",
     "preview": "vite preview --port 4173 --strictPort",
+    "preview:test": "vite preview --port 4173 --strictPort --outDir dist-test",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "test:e2e": "playwright test"
   },

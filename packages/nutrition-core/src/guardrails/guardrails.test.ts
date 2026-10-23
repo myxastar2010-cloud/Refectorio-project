@@ -125,6 +125,17 @@ describe('guardrails: health', () => {
     expect(screen.reasons).toEqual(['ED_SCREEN_POSITIVE']);
   });
 
+  it('a condition in the person own words: a doctor, nothing restricted', () => {
+    const d = evaluateGuardrails(q({ health: ['otherChronic'], goal: 'lose' }));
+    expect(d.status).toBe('requiresDoctor');
+    expect(d.reasons).toEqual(['OTHER_CHRONIC']);
+    expect(d.referToDoctor).toEqual(['gp']);
+    expect(d.allowedGoals).toEqual(['maintain', 'lose', 'gain', 'habits']);
+    expect(d.energyDeficitAllowed).toBe(true);
+    expect(d.forbiddenRegimes).toEqual([]);
+    expect(d.dishRules).toEqual([]);
+  });
+
   it('hypertension, hypothyroidism and insulin resistance restrict nothing but carry food rules', () => {
     const d = evaluateGuardrails(
       q({ health: ['hypertension', 'hypothyroidism', 'insulinResistance'], goal: 'lose' }),

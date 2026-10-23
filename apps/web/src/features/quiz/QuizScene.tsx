@@ -3,7 +3,7 @@ import '../../styles/quiz.css';
 
 import type { TasteDecision } from '@refectorio/contracts';
 import { m } from 'motion/react';
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { quiz } from '../../content/quiz.ru';
 import type { TestParams } from '../../lib/params';
 import { useCalmMotion } from '../../motion/hooks';
@@ -16,6 +16,7 @@ import { historyDepth, initialQuizState, progressOf, quizReducer } from './flow/
 import { loadDraft, saveDraft } from './flow/persistence';
 import { safetyOf } from './flow/safety';
 import { firstIncompleteStep, questionNumber, TOTAL_SLOTS } from './flow/steps';
+import { testState } from './flow/testStates';
 import type { QuizState } from './flow/types';
 import { QuizContext, readQuizParams, type QuizApi } from './quizContext';
 import { useQuizHistory } from './useQuizHistory';
@@ -35,6 +36,10 @@ const randomSeed = () => Math.floor(Math.random() * 1e9);
  * first unanswered step. ?seed always starts a fresh, reproducible game.
  */
 function startState(seed: number | null): { state: QuizState; resumed: boolean } {
+  if (__TEST_HOOKS__ && quizParams.step) {
+    const test = testState(quizParams.step, quizParams.state, seed ?? 1);
+    if (test) return { state: test, resumed: false };
+  }
   const draft = loadDraft();
   if (draft && seed === null) {
     const incomplete = firstIncompleteStep(draft.answers);
@@ -62,7 +67,7 @@ export function QuizScene({ instant, onExit, params }: Props) {
     initial.resumed && initial.state.screen !== 'finale',
   );
   const [privacyOpener, setPrivacyOpener] = useState<HTMLElement | null | false>(false);
-  const [announcement, setAnnouncement] = useState('');
+  const liveRef = useRef<HTMLParagraphElement>(null);
   // The finale's hand-off: from then on the header's bar is drawn by the finale (reset when leaving the finale).
   const [barDetached, setBarDetached] = useState(false);
   if (barDetached && state.screen !== 'finale') setBarDetached(false);
@@ -81,11 +86,14 @@ export function QuizScene({ instant, onExit, params }: Props) {
     onLeave: onExit,
   });
 
+  // Written into the live region itself: as state it re-rendered the whole quiz twice for every answer of the game
+  // (stage-3 performance audit, F4). Cleared first, so the same text is announced again.
   const announce = useCallback((text: string) => {
-    // Re-announce the same text: clear first.
-    setAnnouncement('');
+    const live = liveRef.current;
+    if (!live) return;
+    live.textContent = '';
     window.requestAnimationFrame(() => {
-      setAnnouncement(text);
+      live.textContent = text;
     });
   }, []);
 
@@ -174,9 +182,7 @@ export function QuizScene({ instant, onExit, params }: Props) {
             setShowResume(false);
           }}
         />
-        <p className="visually-hidden" role="status" aria-live="polite">
-          {announcement}
-        </p>
+        <p ref={liveRef} className="visually-hidden" role="status" aria-live="polite" />
       </m.section>
     </QuizContext.Provider>
   );

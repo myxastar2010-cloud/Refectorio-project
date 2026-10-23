@@ -17,7 +17,7 @@ export default defineConfig({
       nodePackage('taste-core'),
       {
         // The build flag of vite.config.ts (ADR 0011): unit tests see the default build.
-        define: { __PHOTO_HOSTING__: JSON.stringify('self') },
+        define: { __PHOTO_HOSTING__: JSON.stringify('self'), __TEST_HOOKS__: 'true' },
         test: {
           name: 'web',
           root: './apps/web',

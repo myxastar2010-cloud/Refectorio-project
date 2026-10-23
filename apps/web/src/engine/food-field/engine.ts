@@ -10,6 +10,7 @@ import {
   FRESH_PROBE,
   maskHit,
   probeFrame,
+  rebalanceSprite,
   repulsion,
   scatter,
   stepSpring,
@@ -64,6 +65,11 @@ export type Device = 'desktop' | 'tablet' | 'phone';
 
 export type FieldOptions = {
   readonly sprites: readonly FoodSprite[];
+  /**
+   * How many of `sprites` the field starts with; the rest come with addSprites() once the page has settled (stage 3,
+   * §8: the six new foods never compete with the first paint). All of them when omitted.
+   */
+  readonly initialSprites?: number;
   readonly sharpPlane: HTMLElement;
   readonly blurPlane: HTMLElement;
   readonly seed: number;
@@ -143,6 +149,7 @@ function makeImage(src: FoodSprite['sharp'], sizePx: number, className: string):
  */
 export function createFoodField(options: FieldOptions) {
   const { sprites, sharpPlane, blurPlane } = options;
+  let available = sprites.slice(0, options.initialSprites ?? sprites.length);
   let random: Random = createRandom(options.seed);
   let items: Item[] = [];
   let obstacles: Rect[] = [];
@@ -189,12 +196,18 @@ export function createFoodField(options: FieldOptions) {
     if (blurMounted) mountBlur(item);
   }
 
+  /** The pre-blurred copy of an item's sprite, larger by its transparent padding. */
+  function blurImage(item: Item): HTMLElement {
+    const outer = item.size * (1 + 2 * item.sprite.blurPadRatio);
+    const blur = makeImage(item.sprite.blurred, outer, 'food-item food-item--blur');
+    blur.style.width = `${outer}px`;
+    blur.style.height = `${outer}px`;
+    return blur;
+  }
+
   function mountBlur(item: Item) {
     if (item.blur) return;
-    const outer = item.size * (1 + 2 * item.sprite.blurPadRatio);
-    item.blur = makeImage(item.sprite.blurred, outer, 'food-item food-item--blur');
-    item.blur.style.width = `${outer}px`;
-    item.blur.style.height = `${outer}px`;
+    item.blur = blurImage(item);
     blurPlane.append(item.blur);
     render(item);
   }
@@ -234,9 +247,9 @@ export function createFoodField(options: FieldOptions) {
         bottom: r.bottom + base / 2,
       }));
       const points = scatter(random, count, width, height, minDistance, avoid);
-      const assigned = assignSprites(random, points, sprites.length, minDistance * 1.6);
+      const assigned = assignSprites(random, points, available.length, minDistance * 1.6);
       items = points.flatMap((point, index) => {
-        const sprite = sprites[assigned[index] ?? 0];
+        const sprite = available[assigned[index] ?? 0];
         if (!sprite) return [];
         const size = base * (1 + random.range(-FIELD.sizeJitter, FIELD.sizeJitter));
         return [createItem(sprite, point.x, point.y, size, random.range(-25, 25))];
@@ -245,6 +258,29 @@ export function createFoodField(options: FieldOptions) {
     items.forEach(mountItem);
     applyQuality();
     items.forEach(render);
+  }
+
+  /** An item that has just wrapped around (fully off screen) may take a less-used sprite (math.ts rebalanceSprite). */
+  function rebalance(item: Item) {
+    if (available.length === 0) return;
+    const usage = available.map(
+      (sprite) => items.filter((other) => other.sprite === sprite).length,
+    );
+    const next = available[rebalanceSprite(random, usage, available.indexOf(item.sprite))];
+    if (!next) return;
+    item.sprite = next;
+    const sharp = makeImage(next.sharp, item.size, 'food-item');
+    sharp.style.width = `${item.size}px`;
+    sharp.style.height = `${item.size}px`;
+    sharp.style.display = item.sharp.style.display;
+    item.sharp.replaceWith(sharp);
+    item.sharp = sharp;
+    if (item.blur) {
+      const blur = blurImage(item);
+      blur.style.display = item.blur.style.display;
+      item.blur.replaceWith(blur);
+      item.blur = blur;
+    }
   }
 
   function createItem(sprite: FoodSprite, x: number, y: number, size: number, angle: number): Item {
@@ -359,6 +395,7 @@ export function createFoodField(options: FieldOptions) {
         Math.SQRT2 *
         Math.max(1, item.bounce.value);
       const wrapped = wrap(item, radius, area);
+      if (wrapped.x !== item.x || wrapped.y !== item.y) rebalance(item);
       item.x = wrapped.x;
       item.y = wrapped.y;
       let opacity = 1;
@@ -474,6 +511,19 @@ export function createFoodField(options: FieldOptions) {
     /** A scene change or the team card has just started: not a moment to judge the device by. */
     pauseProbe() {
       pauseProbe(FIELD.fpsPauseMs);
+    },
+    /** The later sprites (§8): decoded first, then items take them as they wrap around off screen. */
+    async addSprites() {
+      const late = sprites.slice(available.length);
+      if (late.length === 0) return;
+      const size = sizeFor(options.device());
+      await Promise.all(
+        late.map((sprite) => {
+          const image = makeImage(sprite.sharp, size, 'food-item').querySelector('img');
+          return image ? image.decode().catch(() => undefined) : Promise.resolve();
+        }),
+      );
+      available = [...sprites];
     },
     /** Pre-blurred copies are created lazily — only before the first visit to part 2. */
     ensureBlur() {

@@ -268,8 +268,7 @@
     line-height: 1.35;
   }
 
-  .info-more,
-  .info-links {
+  .info-more {
     grid-area: action;
     justify-self: center;
     margin-top: 16px;
@@ -280,24 +279,6 @@
     padding: 0 26px;
     font-size: 19px;
     font-weight: 700;
-  }
-
-  .info-links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 4px 24px;
-  }
-
-  .info-link {
-    min-height: var(--touch-target-min);
-    gap: 8px;
-    font-size: 16px;
-  }
-
-  .info-link-circle {
-    width: 28px;
-    height: 28px;
   }
 }
 
@@ -589,17 +570,8 @@
     font-size: 14px;
   }
 
-  .info-more,
-  .info-links {
+  .info-more {
     margin-top: 12px;
-  }
-
-  .info-links {
-    gap: 4px 16px;
-  }
-
-  .info-link {
-    font-size: 15px;
   }
 }
 
@@ -662,6 +634,82 @@
     right: calc(var(--pw) * 0.085);
     width: var(--touch-target-min);
     height: var(--touch-target-min);
+  }
+}
+
+/* Phones: the project card is as wide as the team card, its height its text's; the title and the ✕ on top. */
+@media (max-width: 47.99rem) {
+  .project-dialog {
+    --dialog-box-w: calc(100vw - 32px);
+    min-height: 0;
+    max-height: calc(100svh - 32px);
+    border-radius: calc(var(--dialog-box-w) * 0.12);
+  }
+
+  .project-dialog .team-dialog-content {
+    padding: 30px 24px 26px;
+  }
+
+  .project-dialog-title {
+    padding-right: 52px;
+    font-size: calc(var(--dialog-box-w) * 0.094);
+    line-height: 1.08;
+  }
+
+  .project-dialog-text {
+    gap: 10px;
+    margin-top: 16px;
+    max-width: none;
+  }
+
+  .project-dialog-text p {
+    font-size: 15px;
+    line-height: 1.42;
+  }
+
+  .project-dialog-team {
+    padding-top: 18px;
+    font-size: 13px;
+  }
+
+  .project-dialog-links {
+    gap: 0 20px;
+    padding-top: 6px;
+  }
+
+  .soon-link {
+    gap: 8px;
+    font-size: 15px;
+  }
+
+  .soon-link-circle {
+    width: 26px;
+    height: 26px;
+  }
+
+  .project-dialog .dialog-close-slot {
+    top: 20px;
+    right: 20px;
+  }
+}
+
+/* Low landscape windows (phones turned sideways): the card takes the window's width, so its text keeps to few lines. */
+@media (min-width: 48rem) and (max-height: 30rem) {
+  .project-dialog {
+    --dialog-box-w: calc(100vw - 64px);
+  }
+
+  .project-dialog-text {
+    max-width: none;
+  }
+
+  .project-dialog .team-dialog-content {
+    padding-top: 24px;
+    padding-bottom: 12px;
+  }
+
+  .project-dialog .dialog-close-slot {
+    top: 16px;
   }
 }
 
