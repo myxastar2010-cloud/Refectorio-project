@@ -1274,20 +1274,24 @@ html:has(.page[data-scene='quiz']) body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.quiz-picker--sheet > .quiz-picker-head,
-.quiz-picker--sheet > .quiz-picker-hint,
-.quiz-picker--sheet > .quiz-picker-control,
-.quiz-picker--sheet > .quiz-picker-done,
-.quiz-picker--sheet > .quiz-sex {
+.quiz-picker--sheet .quiz-picker-content > .quiz-picker-head,
+.quiz-picker--sheet .quiz-picker-content > .quiz-picker-hint,
+.quiz-picker--sheet .quiz-picker-content > .quiz-picker-control,
+.quiz-picker--sheet .quiz-picker-content > .quiz-picker-done,
+.quiz-picker--sheet .quiz-picker-content > .quiz-sex {
   margin-inline: auto;
 }
 
 .quiz-picker--sheet {
+  padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+}
+
+.quiz-picker--sheet > .quiz-picker-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+  padding: 0;
 }
 
 .quiz-sex {
@@ -1410,9 +1414,12 @@ html:has(.page[data-scene='quiz']) body {
   }
 
   .quiz-picker--sheet {
-    gap: 8px;
     padding-top: 12px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .quiz-picker--sheet > .quiz-picker-content {
+    gap: 8px;
   }
 
   .quiz-wheel {

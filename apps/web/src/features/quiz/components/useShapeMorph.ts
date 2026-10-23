@@ -2,13 +2,20 @@ import { animate, useMotionValue, useMotionValueEvent } from 'motion/react';
 import { useCallback, useLayoutEffect, useRef, type RefObject } from 'react';
 import { QUIZ } from '../../../motion/tokens';
 
-type Box = { left: number; top: number; width: number; height: number; radius: number };
+/** Corner radii: top-left, top-right, bottom-right, bottom-left (a phone's sheet has square bottom corners). */
+type Radii = readonly [number, number, number, number];
+type Box = { left: number; top: number; width: number; height: number; radii: Radii };
 
-const radiusOf = (element: Element, height: number) =>
-  Math.min(
-    height / 2,
-    Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) || height / 2,
-  );
+const radiiOf = (element: Element, height: number): Radii => {
+  const style = getComputedStyle(element);
+  const corner = (value: string) => Math.min(height / 2, Number.parseFloat(value) || 0);
+  return [
+    corner(style.borderTopLeftRadius),
+    corner(style.borderTopRightRadius),
+    corner(style.borderBottomRightRadius),
+    corner(style.borderBottomLeftRadius),
+  ];
+};
 
 const boxOf = (element: Element): Box => {
   const r = element.getBoundingClientRect();
@@ -17,7 +24,7 @@ const boxOf = (element: Element): Box => {
     top: r.top,
     width: r.width,
     height: r.height,
-    radius: radiusOf(element, r.height),
+    radii: radiiOf(element, r.height),
   };
 };
 
@@ -55,8 +62,11 @@ export function useShapeMorph({
       const pair = boxes.current;
       if (!panel || !content) return;
       onFrameRef.current?.(pair ? p : 1);
-      if (!pair) {
+      // At rest the panel is its own CSS shape again (no transform, its own corners).
+      if (!pair || p >= 1) {
         panel.style.transform = '';
+        panel.style.borderRadius = '';
+        content.style.transform = '';
         content.style.opacity = '1';
         return;
       }
@@ -65,10 +75,12 @@ export function useShapeMorph({
       const sy = lerp(pair.from.height / pair.to.height, 1);
       const tx = lerp(pair.from.left - pair.to.left, 0);
       const ty = lerp(pair.from.top - pair.to.top, 0);
-      const radius = lerp(pair.from.radius, pair.to.radius);
+      const radii = pair.from.radii.map((from, corner) => lerp(from, pair.to.radii[corner] ?? 0));
+      const horizontal = radii.map((radius) => `${(radius / sx).toFixed(2)}px`).join(' ');
+      const vertical = radii.map((radius) => `${(radius / sy).toFixed(2)}px`).join(' ');
       panel.style.transformOrigin = '0 0';
       panel.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px) scale(${sx.toFixed(4)}, ${sy.toFixed(4)})`;
-      panel.style.borderRadius = `${(radius / sx).toFixed(2)}px / ${(radius / sy).toFixed(2)}px`;
+      panel.style.borderRadius = `${horizontal} / ${vertical}`;
       content.style.transformOrigin = '0 0';
       content.style.transform = `scale(${(1 / sx).toFixed(4)}, ${(1 / sy).toFixed(4)})`;
       const shown = Math.max(0, (p - QUIZ.panelContentAt) / (1 - QUIZ.panelContentAt));
