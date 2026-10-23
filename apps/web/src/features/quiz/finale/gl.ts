@@ -43,6 +43,59 @@ export function link(
   return program;
 }
 
+/**
+ * Links a program without blocking the page (stage-3 performance audit, F2): reading a compile or link status makes the
+ * browser wait for the GPU driver (125–199 ms on the team's laptop), so with KHR_parallel_shader_compile the program
+ * compiles in the background and is polled once a frame; without the extension it is linked as before.
+ */
+export function linkInBackground(
+  gl: WebGL2RenderingContext,
+  vertex: string,
+  fragment: string,
+): Promise<WebGLProgram | null> {
+  const parallel = gl.getExtension('KHR_parallel_shader_compile') as {
+    readonly COMPLETION_STATUS_KHR: number;
+  } | null;
+  if (!parallel) return Promise.resolve(link(gl, vertex, fragment));
+  const program = gl.createProgram();
+  const shaders = [
+    [gl.VERTEX_SHADER, vertex],
+    [gl.FRAGMENT_SHADER, fragment],
+  ] as const;
+  for (const [type, source] of shaders) {
+    const shader = gl.createShader(type);
+    if (!shader) {
+      gl.deleteProgram(program);
+      return Promise.resolve(null);
+    }
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    gl.attachShader(program, shader);
+    gl.deleteShader(shader);
+  }
+  gl.linkProgram(program);
+  return new Promise((resolve) => {
+    const poll = () => {
+      if (gl.isContextLost()) {
+        resolve(null);
+        return;
+      }
+      if (!gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)) {
+        requestAnimationFrame(poll);
+        return;
+      }
+      if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        resolve(program);
+        return;
+      }
+      if (import.meta.env.DEV) console.warn(gl.getProgramInfoLog(program));
+      gl.deleteProgram(program);
+      resolve(null);
+    };
+    requestAnimationFrame(poll);
+  });
+}
+
 /** One triangle that covers the viewport; the vertex shader passes clip-space xy on as `vUv` (−1…1). */
 export const FULLSCREEN_VERTEX = `#version 300 es
 in vec2 aPos;

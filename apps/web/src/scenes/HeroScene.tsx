@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   IconListDetails,
   IconSchoolFilled,
@@ -39,7 +40,8 @@ type Props = {
  * Part 1: heading, lead, «Создать меню» and the four feature cards (ТЗ 6.2; the cards are not shown on phones);
  * the header is SiteHeader.
  */
-export function HeroScene({
+/* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
+export const HeroScene = memo(function HeroScene({
   phase,
   instant,
   scrollerRef,
@@ -147,4 +149,4 @@ export function HeroScene({
       </ul>
     </section>
   );
-}
+});

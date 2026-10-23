@@ -1,6 +1,6 @@
 import { IconApple, IconArrowUpRight, IconChevronUp } from '@tabler/icons-react';
 import { m, type MotionStyle } from 'motion/react';
-import { useEffect, useRef, type Ref } from 'react';
+import { memo, useEffect, useRef, type Ref } from 'react';
 import { site } from '../content/site.ru';
 import { TeamTile } from '../features/team-dialog/TeamTile';
 import { preloadTeamPicture } from '../features/team-dialog/preload';
@@ -32,7 +32,8 @@ type Props = {
 };
 
 /** Part 2 «О проекте»: the title (a button back to the start) and the team and project cards (ТЗ 6.3). */
-export function AboutScene({
+/* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
+export const AboutScene = memo(function AboutScene({
   phase,
   instant,
   titleRef,
@@ -171,7 +172,7 @@ export function AboutScene({
       </m.article>
     </section>
   );
-}
+});
 
 type SoonLinkProps = {
   readonly label: string;

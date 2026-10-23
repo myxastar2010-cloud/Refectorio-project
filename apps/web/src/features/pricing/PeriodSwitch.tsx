@@ -1,5 +1,5 @@
 import { useRef, type KeyboardEvent } from 'react';
-import { BILLING_PERIODS, type BillingPeriod } from '../../content/schema';
+import { BILLING_PERIODS, type BillingPeriod } from '../../content/constants';
 import { site } from '../../content/site.ru';
 
 type Props = {

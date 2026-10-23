@@ -174,15 +174,24 @@ export function TasteStep() {
     if (undone) announce(fill(quiz.taste.live.undo, { dish: undone }));
   }, [undone, announce]);
 
-  // Lookahead: the card after each possible answer is fetched and decoded while this one is shown.
+  // Lookahead: the card after each possible answer is fetched and decoded while this one is shown — one per idle
+  // period (all three at once made one long task while the next card flew in: performance audit, F4).
   useEffect(() => {
     if (!current) return undefined;
-    return whenIdle(() => {
-      for (const answer of TASTE_ANSWERS) {
-        const upcoming = session.peek(answer);
-        if (upcoming) preloadPhoto(upcoming.id);
-      }
-    }, TINDER.lookaheadIdleMs);
+    let cancel: () => void = () => undefined;
+    let index = 0;
+    const lookAhead = () => {
+      const answer = TASTE_ANSWERS[index];
+      index += 1;
+      if (!answer) return;
+      const upcoming = session.peek(answer);
+      if (upcoming) preloadPhoto(upcoming.id);
+      cancel = whenIdle(lookAhead, TINDER.lookaheadIdleMs);
+    };
+    cancel = whenIdle(lookAhead, TINDER.lookaheadIdleMs);
+    return () => {
+      cancel();
+    };
   }, [session, current]);
 
   // The tenth decisive answer: «Запомнили…» (when the posterior is confident), then the quiz moves on by itself.

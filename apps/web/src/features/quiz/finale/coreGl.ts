@@ -1,4 +1,4 @@
-import { FULLSCREEN_VERTEX, fullscreenTriangle, link } from './gl';
+import { FULLSCREEN_VERTEX, fullscreenTriangle, linkInBackground } from './gl';
 
 /**
  * The finale's core (ТЗ §12.2), «incredibly dynamic, complex, unusual»: a liquid metaball in a small WebGL2 canvas.
@@ -138,10 +138,11 @@ export type CoreRenderer = {
 /** Seconds since the last pulse when there was none (no ripple). */
 const NO_PULSE = 1000;
 
-export function createCoreRenderer(
+/** Resolves once the core's program is ready (compiled in the background, gl.ts); null without WebGL2. */
+export async function createCoreRenderer(
   canvas: HTMLCanvasElement,
   options: { readonly dprMax: number; readonly onLost: () => void },
-): CoreRenderer | null {
+): Promise<CoreRenderer | null> {
   const gl = canvas.getContext('webgl2', {
     alpha: true,
     premultipliedAlpha: true,
@@ -151,7 +152,7 @@ export function createCoreRenderer(
     powerPreference: 'low-power',
   });
   if (!gl) return null;
-  const program = link(gl, FULLSCREEN_VERTEX, FRAGMENT);
+  const program = await linkInBackground(gl, FULLSCREEN_VERTEX, FRAGMENT);
   if (!program) return null;
   const { vao, buffer } = fullscreenTriangle(gl, program);
   const uniform = (name: string) => gl.getUniformLocation(program, name);

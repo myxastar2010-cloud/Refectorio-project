@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { PLAN_IDS } from './constants';
+
+export { BILLING_PERIODS, PLAN_IDS, type BillingPeriod, type PlanId } from './constants';
 
 const text = z.string().trim().min(1);
 /** Lines as in the mockup: rendered with explicit breaks on desktop, joined on small screens. */
@@ -9,9 +12,6 @@ const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamCard']);
 
 /** A link of the project card: not working yet — a press says «Мы работаем над этим». */
 const link = z.object({ label: text });
-
-export const PLAN_IDS = ['free', 'premium'] as const;
-export const BILLING_PERIODS = ['month', 'year'] as const;
 
 /** A price for each billing period: the amount and the words after it («навсегда», «в месяц»). */
 const price = z.object({ amount: text, per: text });
@@ -103,6 +103,4 @@ export const siteContentSchema = z.object({
 
 export type SiteContent = z.infer<typeof siteContentSchema>;
 export type FeatureIcon = z.infer<typeof featureIcon>;
-export type PlanId = (typeof PLAN_IDS)[number];
-export type BillingPeriod = (typeof BILLING_PERIODS)[number];
 export type ImageKey = z.infer<typeof imageKey>;

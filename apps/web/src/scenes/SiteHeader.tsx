@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { IconApple } from '@tabler/icons-react';
 import { m } from 'motion/react';
 import { site } from '../content/site.ru';
@@ -109,7 +110,8 @@ function PillLabel({ quiz, calm }: { readonly quiz: boolean; readonly calm: bool
  * Logo and «О проекте» (ТЗ 6.2). It belongs to part 1 and leaves with it, but lives outside <main>, so it stays
  * the page's banner landmark. In the quiz the logo stays and the pill exits the quiz.
  */
-export function SiteHeader({
+/* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
+export const SiteHeader = memo(function SiteHeader({
   phase,
   instant,
   scrolled,
@@ -170,4 +172,4 @@ export function SiteHeader({
       </m.button>
     </m.header>
   );
-}
+});

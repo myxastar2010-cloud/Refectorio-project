@@ -1,6 +1,6 @@
 import { IconX } from '@tabler/icons-react';
 import { AnimatePresence, m, usePresence, type MotionStyle } from 'motion/react';
-import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
+import { memo, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
 import { site } from '../../content/site.ru';
 import { focusQuietly } from '../../lib/quietFocus';
 import { useCalmMotion } from '../../motion/hooks';
@@ -27,7 +27,8 @@ const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1
  * Expanded team card (ТЗ 6.4): role="dialog", aria-modal, focus trap, Esc / ✕ / click outside close it.
  * The rest of the page is made inert by the App while the dialog is open.
  */
-export function TeamDialog({ open, onClose, tileRef, onLanded }: Props) {
+/* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
+export const TeamDialog = memo(function TeamDialog({ open, onClose, tileRef, onLanded }: Props) {
   return (
     <AnimatePresence>
       {open && (
@@ -35,7 +36,7 @@ export function TeamDialog({ open, onClose, tileRef, onLanded }: Props) {
       )}
     </AnimatePresence>
   );
-}
+});
 
 type BodyProps = Omit<Props, 'open'>;
 

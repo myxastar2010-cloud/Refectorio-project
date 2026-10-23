@@ -75,9 +75,8 @@ function Page() {
     setToast({ text, id: performance.now() });
   }, []);
   const [QuizScene, setQuizScene] = useState(lazyQuiz);
-  // Exposed as data-busy: e2e tests wait for the end of a transition by state, not by timeouts.
-  const [busy, setBusy] = useState(false);
   const lockedUntil = useRef(0);
+  const busyTimer = useRef(0);
   const aboutTitleRef = useRef<HTMLButtonElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -94,11 +93,14 @@ function Page() {
     [],
   );
 
+  // data-busy (e2e tests wait for the end of a transition by state) is written to the page itself: as React state it
+  // re-rendered the whole page only to drop the mark (stage-3 performance audit, F3).
   const lockFor = useCallback((lockMs: number) => {
     lockedUntil.current = performance.now() + lockMs;
-    setBusy(true);
-    window.setTimeout(() => {
-      setBusy(false);
+    pageRef.current?.setAttribute('data-busy', '');
+    window.clearTimeout(busyTimer.current);
+    busyTimer.current = window.setTimeout(() => {
+      pageRef.current?.removeAttribute('data-busy');
     }, lockMs);
   }, []);
 
@@ -165,10 +167,11 @@ function Page() {
       return undefined;
     }
     let cancel = noop;
+    // The two chunks in two idle periods: run in one, they made one long frame (performance audit, F6).
     const timer = window.setTimeout(() => {
       cancel = whenIdle(() => {
         prefetchQuiz();
-        prefetchPricing();
+        cancel = whenIdle(prefetchPricing, QUIZ.prefetchAfterMs);
       }, QUIZ.prefetchAfterMs);
     }, QUIZ.prefetchAfterMs);
     return () => {
@@ -187,10 +190,20 @@ function Page() {
     };
   }, [toast]);
 
-  const onCreateMenu = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    goScene('quiz');
-  };
+  // Stable handlers: the scenes are memoised and re-render only when their own props change (audit, F3).
+  const onCreateMenu = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      goScene('quiz');
+    },
+    [goScene],
+  );
+  const openAbout = useCallback(() => {
+    goScene('about');
+  }, [goScene]);
+  const toHero = useCallback(() => {
+    goScene('hero');
+  }, [goScene]);
 
   const setMoreRef = useCallback((node: HTMLButtonElement | null) => {
     moreRef.current = node;
@@ -207,10 +220,16 @@ function Page() {
     wasTeamOpen.current = teamOpen;
   }, [teamOpen]);
 
-  const openTeam = () => {
+  const openTeam = useCallback(() => {
     setTeamOut(true);
     setTeamOpen(true);
-  };
+  }, []);
+  const closeTeam = useCallback(() => {
+    setTeamOpen(false);
+  }, []);
+  const teamLanded = useCallback(() => {
+    setTeamOut(false);
+  }, []);
 
   /**
    * Chooses the next visit's pair of card pictures and loads them with the chunk (once per visit): from a hover on
@@ -230,6 +249,10 @@ function Page() {
     return visit;
   }, []);
 
+  const prefetchVisit = useCallback(() => {
+    void prepareVisit();
+  }, [prepareVisit]);
+
   const takeVisit = useCallback(
     () =>
       prepareVisit().then((pictures) => {
@@ -241,11 +264,14 @@ function Page() {
 
   // «Цены»: its scene opens once the chunk and this visit's pictures are here (at most PRICING.pictureWaitMs for them).
   const openingPricing = useRef(false);
-  const openPricing = () => {
+  const openPricing = useCallback(() => {
     if (locked() || openingPricing.current) return;
     openingPricing.current = true;
-    takeVisit()
-      .then(() => {
+    prepareVisit()
+      .then((pictures) => {
+        // The pictures and the scene in one commit: «Цены» renders once (audit, F3).
+        nextPricingVisit.current = null;
+        setPricingPictures(pictures);
         goScene('pricing');
       })
       .catch(() => {
@@ -255,7 +281,7 @@ function Page() {
       .finally(() => {
         openingPricing.current = false;
       });
-  };
+  }, [locked, prepareVisit, goScene, notify]);
 
   // A direct visit to #pricing (or Back / Forward to it) has no pictures yet: they come with the chunk.
   useEffect(() => {
@@ -265,10 +291,6 @@ function Page() {
       });
     }
   }, [scene, pricingPictures, takeVisit, notify]);
-
-  const closePricing = useCallback(() => {
-    goScene('hero');
-  }, [goScene]);
 
   // Nothing can be bought yet.
   const choosePlan = useCallback(() => {
@@ -283,28 +305,18 @@ function Page() {
 
   const inQuiz = scene === 'quiz';
   return (
-    <div
-      ref={pageRef}
-      className="page"
-      data-scene={scene}
-      data-team-open={teamOpen || undefined}
-      data-busy={busy || undefined}
-    >
+    <div ref={pageRef} className="page" data-scene={scene} data-team-open={teamOpen || undefined}>
       <FoodFieldLayer scene={scene} params={params} teamOpen={teamOpen} />
       <div className="stage" inert={teamOpen}>
         <SiteHeader
           phase={scene === 'hero' ? 'shown' : inQuiz ? 'quiz' : 'hidden'}
           instant={instant}
           scrolled={heroScrolled && scene === 'hero'}
-          onAbout={() => {
-            goScene('about');
-          }}
+          onAbout={openAbout}
           onExit={exitQuiz}
           pricingRef={setPricingRef}
           onPricing={openPricing}
-          onPricingPrefetch={() => {
-            void prepareVisit();
-          }}
+          onPricingPrefetch={prefetchVisit}
         />
         <main className="scenes" inert={inQuiz}>
           <HeroScene
@@ -320,9 +332,7 @@ function Page() {
               phase={scene === 'about' ? 'shown' : 'hidden'}
               instant={instant}
               titleRef={aboutTitleRef}
-              onBack={() => {
-                goScene('hero');
-              }}
+              onBack={toHero}
               teamOpen={teamOpen}
               teamOut={teamOut}
               tileRef={teamTileRef}
@@ -339,7 +349,7 @@ function Page() {
                     phase={scene === 'pricing' ? 'shown' : 'hidden'}
                     instant={instant}
                     pictures={pricingPictures}
-                    onClose={closePricing}
+                    onClose={toHero}
                     onChoose={choosePlan}
                   />
                 </Suspense>
@@ -357,16 +367,7 @@ function Page() {
           )}
         </AnimatePresence>
       </div>
-      <TeamDialog
-        open={teamOpen}
-        onClose={() => {
-          setTeamOpen(false);
-        }}
-        tileRef={teamTileRef}
-        onLanded={() => {
-          setTeamOut(false);
-        }}
-      />
+      <TeamDialog open={teamOpen} onClose={closeTeam} tileRef={teamTileRef} onLanded={teamLanded} />
       <Toast message={toast} />
     </div>
   );
