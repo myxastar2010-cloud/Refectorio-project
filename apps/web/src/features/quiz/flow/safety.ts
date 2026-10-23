@@ -1,6 +1,7 @@
 import {
   activityFromLifestyle,
   AGE_LIMITS,
+  cleanItems,
   evaluateGuardrails,
   validateQuestionnaire,
   type AllergenCode,
@@ -16,7 +17,11 @@ import {
   type AllergenChipId,
   type HealthChipId,
 } from '../../../content/quizSchema';
+import { SHOWN_HEALTH_CHIPS } from './healthChips';
+import { matchHealthChips, type HealthSubject } from './healthSynonyms';
 import { FOOD_STYLE_DIET, type Answers } from './types';
+
+export { SHOWN_HEALTH_CHIPS } from './healthChips';
 
 /**
  * Safety rules on partial answers (ТЗ §8.7): guardrails re-run after each relevant answer. Until a value is known a
@@ -32,18 +37,17 @@ const CHILD_HEALTH_CHIPS: readonly HealthChipId[] = [
   'pku',
   'hypothyroidism',
 ];
-/**
- * The chips the design shows (stage 3, 4.13). The other conditions keep their ids and every rule, and appear as chips
- * only when the «+» text names them (flow/healthSynonyms.ts), like the extra allergens.
- */
-export const SHOWN_HEALTH_CHIPS: readonly HealthChipId[] = [
-  'diabetes',
-  'hypertension',
-  'hypothyroidism',
-  'insulinResistance',
-  'pregnancy',
-];
 const NEUTRAL_BMI = 22;
+
+/**
+ * From this age, with diabetes or hypertension (the main causes of chronic kidney disease), the health step reminds
+ * to write about the kidneys if a doctor spoke of them (review-health-synonyms.md B.4, 5).
+ */
+export const KIDNEY_HINT_FROM_AGE = 50;
+
+/** Who the typed health texts are about: in family mode (1–13) the parent writes about the child. */
+export const healthSubjectOf = (answers: Answers): HealthSubject =>
+  (answers.ageYears ?? 30) < AGE_LIMITS.childUnderYears ? 'child' : 'self';
 
 /** Conditions this person may have by age and sex (a man cannot be pregnant; children see child conditions). */
 export function eligibleHealthChips(answers: Answers): HealthChipId[] {
@@ -69,6 +73,19 @@ export function activeHealthChips(answers: Answers): HealthChipId[] {
   return answers.healthChips.filter((chip) => eligible.has(chip));
 }
 
+/**
+ * The «+» health texts none of the active chips stands for: kept verbatim, but the menu cannot follow them — the
+ * finale says so honestly and a doctor is advised (review-health-synonyms.md B.4, points 3 and 4).
+ */
+export function unmatchedHealthTexts(answers: Answers): string[] {
+  if (answers.health !== 'yes') return [];
+  const active = activeHealthChips(answers);
+  const subject = healthSubjectOf(answers);
+  return cleanItems(answers.healthCustom).filter(
+    (text) => !matchHealthChips(text, subject).some((match) => active.includes(match.chip)),
+  );
+}
+
 const DIRECT_FLAGS: Partial<Record<HealthChipId, HealthFlag>> = {
   hypertension: 'hypertension',
   hypothyroidism: 'hypothyroidism',
@@ -89,6 +106,7 @@ export function healthFlags(answers: Answers): HealthFlag[] {
     if (chip === 'diabetes')
       flags.push(answers.insulin === 'no' ? 'diabetesType2' : 'diabetesInsulin');
   }
+  if (unmatchedHealthTexts(answers).length > 0) flags.push('otherChronic');
   return flags;
 }
 

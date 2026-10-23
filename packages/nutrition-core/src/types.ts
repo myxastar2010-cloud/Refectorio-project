@@ -31,6 +31,11 @@ export const HEALTH_FLAGS = [
   'hypertension',
   'hypothyroidism',
   'insulinResistance',
+  /**
+   * A condition the person wrote in their own words that matches no flag (the quiz keeps the text): the menu cannot
+   * follow it, so a doctor should look at it (stage 3; reports/stage-3/review-health-synonyms.md B.4).
+   */
+  'otherChronic',
 ] as const;
 export type HealthFlag = (typeof HEALTH_FLAGS)[number];
 

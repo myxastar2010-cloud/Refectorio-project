@@ -12,6 +12,7 @@ import {
 import { DURATION } from '../../../motion/tokens';
 import { AddPanel } from '../components/AddPanel';
 import { AddChip, Chip, CustomChip } from '../components/Chip';
+import { HealthCrossCheck } from '../components/HealthCrossCheck';
 import { ContinueButton } from '../components/PillButton';
 import { PrivacyLabel } from '../components/PrivacyLabel';
 import { Segmented } from '../components/Segmented';
@@ -23,6 +24,8 @@ import { matchHealthChips } from '../flow/healthSynonyms';
 import {
   activeHealthChips,
   eligibleHealthChips,
+  healthSubjectOf,
+  KIDNEY_HINT_FROM_AGE,
   SHOWN_HEALTH_CHIPS,
   visibleHealthChips,
 } from '../flow/safety';
@@ -50,6 +53,8 @@ const isExtra = (id: AllergenChipId) => !ALLERGEN_BASE.includes(id);
 
 /** Health chips with a short note once selected (what the menu will take into account). */
 const NOTED = ['hypertension', 'hypothyroidism', 'insulinResistance', 'warfarin', 'maoi'] as const;
+/** Ticked from a typed text, these end in «refused»: the note says how to undo a wrong tick (review D.6). */
+const UNDO_NOTED: readonly HealthChipId[] = ['kidneyDisease', 'pku'];
 
 /**
  * The designs have four and seven chips; with all the conditions and allergens of §10 the cloud gets a smaller chip,
@@ -92,6 +97,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
   const y = useLayoutFollow(belowRef, calm);
 
   const eligible = eligibleHealthChips(a);
+  const subject = healthSubjectOf(a);
   const ids: readonly string[] = health
     ? [...visibleHealthChips(a), ...shownHidden.filter((chip) => eligible.includes(chip))]
     : [...ALLERGEN_BASE, ...shownExtras];
@@ -152,7 +158,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
       if (!a.healthChips.includes(exact)) patch({ healthChips: [...a.healthChips, exact] });
       return { key: chipKey(exact), matched: [], checked: [] };
     }
-    const found = matchHealthChips(text).filter((match) => eligible.includes(match.chip));
+    const found = matchHealthChips(text, subject).filter((match) => eligible.includes(match.chip));
     const ticked = found.filter((match) => match.confident).map((match) => match.chip);
     const unsure = found.filter((match) => !match.confident).map((match) => match.chip);
     surface([...ticked, ...unsure]);
@@ -212,6 +218,9 @@ export function ChipsStep({ step }: { readonly step: Step }) {
       out.checked.length > 0
         ? fill(quiz.health.matchedCheck, { chips: out.checked.join(', ') })
         : null,
+      health && UNDO_NOTED.some((chip) => out.matched.includes(quiz.health.chips[chip]))
+        ? quiz.health.matchedUndo
+        : null,
     ].filter((line): line is string => line !== null);
     const note = notes.length > 0 ? notes.join('. ') : null;
     setMatchedNote(note);
@@ -248,6 +257,37 @@ export function ChipsStep({ step }: { readonly step: Step }) {
   const severeShown =
     !health && (a.allergenChips.some((id) => id !== 'lactose') || custom.length > 0);
   const title = health ? quiz.health.conditionsTitle : quiz.allergy.allergensTitle;
+  // Under the health chips (review-health-synonyms.md B.4, 1 and 5): the hidden conditions are typed through «+» — in
+  // one short line once a chip is chosen (its questions need the room); with diabetes or hypertension from 50 — a word
+  // about the kidneys instead. Gone once something is typed.
+  const kidneyHint =
+    (active.includes('diabetes') || active.includes('hypertension')) &&
+    (a.ageYears ?? 0) >= KIDNEY_HINT_FROM_AGE &&
+    !active.includes('kidneyDisease');
+  const examples =
+    subject === 'child'
+      ? quiz.health.hintExamples.child
+      : eligible.includes('lactation')
+        ? quiz.health.hintExamples.women
+        : quiz.health.hintExamples.adult;
+  const hint = !health
+    ? null
+    : kidneyHint
+      ? quiz.health.kidneyHint
+      : custom.length > 0 || matchedNote
+        ? null
+        : active.length > 0
+          ? quiz.health.hintMore
+          : fill(quiz.health.hint, { examples });
+  // Aspartame among the allergies: maybe phenylketonuria (its own words too — «фенилаланин», «E951»).
+  const aspartame =
+    !health &&
+    eligible.includes('pku') &&
+    !activeHealthChips(a).includes('pku') &&
+    (a.allergenChips.includes('aspartame') ||
+      cleanItems(a.allergenCustom).some((item) =>
+        matchHealthChips(item, subject).some((match) => match.chip === 'pku'),
+      ));
 
   return (
     <StepFrame
@@ -329,6 +369,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
       </div>
 
       <m.div ref={belowRef} className="quiz-chips-below" style={{ y }}>
+        {hint ? <p className="quiz-note">{hint}</p> : null}
         {matchedNote ? <p className="quiz-note">{matchedNote}</p> : null}
         {health && teen ? <p className="quiz-note">{quiz.notices.teenHealth}</p> : null}
         {active.includes('diabetes') ? (
@@ -383,6 +424,13 @@ export function ChipsStep({ step }: { readonly step: Step }) {
               </p>
             ))
           : null}
+        {!health ? (
+          <HealthCrossCheck
+            chips={aspartame ? ['pku'] : []}
+            text={quiz.allergy.aspartameNote}
+            button={quiz.allergy.aspartameButton}
+          />
+        ) : null}
         {severeShown ? (
           <div className="quiz-severe">
             <label className="quiz-check">

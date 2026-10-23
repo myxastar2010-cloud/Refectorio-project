@@ -624,6 +624,46 @@ test.describe("health chips: the design's five, the rest through «+» (4.13)", 
     await expect(page.getByRole('alertdialog')).toContainText('вместе с врачом');
   });
 
+  test('a hint under the chips; a text the menu cannot follow is kept, and the notice says so', async ({
+    page,
+  }) => {
+    test.slow();
+    await toHealthChips(page);
+    const hint = page.locator('.quiz-note', { hasText: 'Не нашли своё?' });
+    await expect(hint).toContainText('фенилкетонурия');
+    await expect(hint).toContainText('кормление грудью');
+    await addHealth(page, 'мигрень');
+    await expect(hint).toHaveCount(0);
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await expect(page.getByRole('alertdialog')).toContainText('не учитывает её автоматически');
+  });
+
+  test('a risky condition written in the notes or aspartame among the allergies: one press ticks it', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=1&step=notes#quiz');
+    await inQuiz(page);
+    await page.getByRole('textbox').fill('Хожу на диализ два раза в неделю');
+    await expect(page.locator('.quiz-cross-check')).toContainText('Хроническая болезнь почек');
+    await page.getByRole('button', { name: 'Отметить' }).click();
+    await expect(
+      page.locator('.quiz-note', { hasText: 'Отметили в вопросе о здоровье' }),
+    ).toBeFocused();
+    const saved = (await draft(page))?.answers;
+    expect(saved?.health).toBe('yes');
+    expect(saved?.healthChips).toEqual(['kidneyDisease']);
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await expect(page.getByRole('alertdialog')).toContainText('вместе с врачом');
+
+    await page.goto('./?seed=1&step=allergens&state=empty#quiz');
+    await inQuiz(page);
+    await page.getByRole('button', { name: 'Добавить другое' }).click();
+    await page.getByRole('textbox', { name: 'Добавить аллергию' }).fill('аспартам');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.quiz-cross-check')).toContainText('фенилкетонурии');
+    await expect(page.getByRole('button', { name: 'Отметить фенилкетонурию' })).toBeVisible();
+  });
+
   test('«РПП» typed in «+»: the calm notice with the helplines', async ({ page }) => {
     test.slow();
     await toHealthChips(page);

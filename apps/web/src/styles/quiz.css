@@ -615,6 +615,19 @@ html:has(.page[data-scene='quiz']) body {
   font-weight: 600;
 }
 
+/* A condition met outside the health question (HealthCrossCheck): the question, and «Отметить» under it. */
+.quiz-cross-check {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(10 * var(--q));
+  max-width: 100%;
+}
+
+.quiz-cross-check > .quiz-note {
+  text-align: center;
+}
+
 /* ── Privacy label (ТЗ §7.5): quiet text, the accent wave on hover ──────────────────────── */
 
 .quiz-privacy-label {

@@ -1,10 +1,14 @@
 import { INPUT_LIMITS } from '@refectorio/nutrition-core';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useDeferredValue, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { quiz } from '../../../content/quiz.ru';
+import { HealthCrossCheck } from '../components/HealthCrossCheck';
 import { ContinueButton } from '../components/PillButton';
 import { StepFrame } from '../components/StepFrame';
 import { useEnterToContinue } from '../components/useEnterToContinue';
 import { useKeyboardSafe } from '../components/useKeyboardSafe';
+import { RISKY_HEALTH_CHIPS } from '../flow/healthChips';
+import { matchHealthChips } from '../flow/healthSynonyms';
+import { activeHealthChips, eligibleHealthChips, healthSubjectOf } from '../flow/safety';
 import { stepDef } from '../flow/steps';
 import { fill, useQuiz } from '../quizContext';
 
@@ -37,6 +41,17 @@ export function TextStep({ step }: { readonly step: Step }) {
   const complete = stepDef(step).complete(a);
   const fieldRef = useRef<HTMLTextAreaElement>(null);
   const [heard, setHeard] = useState<{ mark: number; left: number } | null>(null);
+  // A risky condition written here («диализ», «варфарин») is offered as a health chip (review-health-synonyms.md B.4,
+  // 5). Matched on the deferred text: typing never waits for it.
+  const typed = useDeferredValue(value);
+  const subject = healthSubjectOf(a);
+  const matches = useMemo(() => matchHealthChips(typed, subject), [typed, subject]);
+  const eligible = eligibleHealthChips(a);
+  const active = a.health === 'yes' ? activeHealthChips(a) : [];
+  const offered = matches
+    .filter((match) => match.confident && RISKY_HEALTH_CHIPS.includes(match.chip))
+    .map((match) => match.chip)
+    .filter((chip) => eligible.includes(chip) && !active.includes(chip));
 
   useEnterToContinue(complete, next);
   useKeyboardSafe(fieldRef);
@@ -89,6 +104,13 @@ export function TextStep({ step }: { readonly step: Step }) {
           {left <= max * COUNTER_FROM_SHARE ? fill(quiz.common.counter, { left }) : null}
         </span>
       </div>
+      <HealthCrossCheck
+        chips={offered}
+        text={fill(quiz.health.crossCheck, {
+          chips: offered.map((chip) => quiz.health.chips[chip]).join(', '),
+        })}
+        button={quiz.health.crossCheckButton}
+      />
       <p className="visually-hidden" aria-live="polite">
         {heard === null ? '' : fill(quiz.common.counter, { left: heard.left })}
       </p>
