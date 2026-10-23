@@ -175,6 +175,12 @@ export const site = {
       donut: 'пончик',
       'fried-egg': 'яичница',
       burger: 'бургер',
+      cheese: 'сыр',
+      corn: 'кукуруза',
+      cherries: 'вишня',
+      croissant: 'круассан',
+      jam: 'джем',
+      apple: 'яблоко',
     },
   },
 } as const satisfies SiteContent;

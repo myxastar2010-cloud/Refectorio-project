@@ -74,9 +74,9 @@
         "id": 2,
         "slug": "salad",
         "bounds": {
-          "x": 0.0273,
+          "x": 0.0215,
           "y": 0.1113,
-          "width": 0.9453,
+          "width": 0.957,
           "height": 0.7773
         },
         "mask": [
@@ -84,29 +84,29 @@
           "00000000",
           "00000000",
           "00000000",
-          "0007e000",
-          "007ffe00",
-          "03ffffc0",
+          "007ffc00",
+          "01ffff80",
           "07ffffe0",
+          "0ffffff0",
           "1ffffff8",
           "3ffffffc",
-          "3ffffffc",
           "7ffffffe",
           "7ffffffe",
           "7ffffffe",
           "7ffffffe",
           "7ffffffe",
           "7ffffffe",
-          "3ffffffc",
+          "7ffffffe",
+          "7ffffffe",
           "3ffffffc",
           "3ffffffc",
           "1ffffff8",
-          "0ffffff0",
+          "1ffffff8",
           "0ffffff0",
           "07ffffe0",
-          "03ffffc0",
+          "01ffff80",
           "00ffff00",
-          "003ffc00",
+          "007ffe00",
           "001ff800",
           "00000000",
           "00000000",
@@ -587,6 +587,396 @@
           "2x": {
             "avif": "food-9-burger-400-blur.avif",
             "webp": "food-9-burger-400-blur.webp"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "slug": "cheese",
+        "bounds": {
+          "x": 0.0469,
+          "y": 0.0469,
+          "width": 0.9082,
+          "height": 0.9063
+        },
+        "mask": [
+          "00000000",
+          "00000000",
+          "0001f800",
+          "0003fe00",
+          "0007ff80",
+          "000fffe0",
+          "001ffff0",
+          "003ffff8",
+          "007ffffc",
+          "00fffffc",
+          "03fffffc",
+          "07fffffc",
+          "0ffffffc",
+          "1ffffffc",
+          "3ffffffc",
+          "3ffffffc",
+          "3ffffffc",
+          "3ffffffc",
+          "3ffffffc",
+          "3ffffffc",
+          "3ffffffc",
+          "1ffffff8",
+          "1ffffff0",
+          "3fffffc0",
+          "3ffffe00",
+          "3ffff000",
+          "3fff0000",
+          "3ff80000",
+          "3fc00000",
+          "3e000000",
+          "00000000",
+          "00000000"
+        ],
+        "sharp": {
+          "1x": {
+            "avif": "food-10-cheese-200.avif",
+            "webp": "food-10-cheese-200.webp"
+          },
+          "2x": {
+            "avif": "food-10-cheese-400.avif",
+            "webp": "food-10-cheese-400.webp"
+          }
+        },
+        "blurred": {
+          "padRatio": 0.13,
+          "1x": {
+            "avif": "food-10-cheese-200-blur.avif",
+            "webp": "food-10-cheese-200-blur.webp"
+          },
+          "2x": {
+            "avif": "food-10-cheese-400-blur.avif",
+            "webp": "food-10-cheese-400-blur.webp"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "slug": "corn",
+        "bounds": {
+          "x": 0.1816,
+          "y": 0.0273,
+          "width": 0.6367,
+          "height": 0.9453
+        },
+        "mask": [
+          "00000000",
+          "00000f00",
+          "00001f80",
+          "00003fc0",
+          "00007fc0",
+          "0000ffc0",
+          "0001ffc0",
+          "0001ffc0",
+          "0003ffc0",
+          "0037ff80",
+          "003fff80",
+          "003fff80",
+          "007fff00",
+          "007fff00",
+          "007ffe00",
+          "00fffe00",
+          "00ffff80",
+          "00ffff80",
+          "01ffff00",
+          "01fffe00",
+          "03fffc00",
+          "03fff800",
+          "03fff800",
+          "03fff000",
+          "03ffe000",
+          "01ffe000",
+          "01ffc000",
+          "01ff8000",
+          "03ff0000",
+          "01f00000",
+          "00f00000",
+          "00000000"
+        ],
+        "sharp": {
+          "1x": {
+            "avif": "food-11-corn-200.avif",
+            "webp": "food-11-corn-200.webp"
+          },
+          "2x": {
+            "avif": "food-11-corn-400.avif",
+            "webp": "food-11-corn-400.webp"
+          }
+        },
+        "blurred": {
+          "padRatio": 0.13,
+          "1x": {
+            "avif": "food-11-corn-200-blur.avif",
+            "webp": "food-11-corn-200-blur.webp"
+          },
+          "2x": {
+            "avif": "food-11-corn-400-blur.avif",
+            "webp": "food-11-corn-400-blur.webp"
+          }
+        }
+      },
+      {
+        "id": 12,
+        "slug": "cherries",
+        "bounds": {
+          "x": 0.0664,
+          "y": 0.0371,
+          "width": 0.8672,
+          "height": 0.9258
+        },
+        "mask": [
+          "00000000",
+          "00000300",
+          "00000380",
+          "00000780",
+          "00001f00",
+          "00003200",
+          "0000c200",
+          "00018200",
+          "00030200",
+          "03e60200",
+          "07fc0200",
+          "0ffc0300",
+          "1ffe0300",
+          "1fff0300",
+          "3fff0300",
+          "3fff0300",
+          "3fff0300",
+          "3fff3f80",
+          "1fff7ff0",
+          "1ffffff8",
+          "0ffffff8",
+          "07f9fffc",
+          "03f1fffc",
+          "0001fffc",
+          "0001fffc",
+          "0001fff8",
+          "0000fff8",
+          "0000fff0",
+          "00007fe0",
+          "00003fc0",
+          "00000700",
+          "00000000"
+        ],
+        "sharp": {
+          "1x": {
+            "avif": "food-12-cherries-200.avif",
+            "webp": "food-12-cherries-200.webp"
+          },
+          "2x": {
+            "avif": "food-12-cherries-400.avif",
+            "webp": "food-12-cherries-400.webp"
+          }
+        },
+        "blurred": {
+          "padRatio": 0.13,
+          "1x": {
+            "avif": "food-12-cherries-200-blur.avif",
+            "webp": "food-12-cherries-200-blur.webp"
+          },
+          "2x": {
+            "avif": "food-12-cherries-400-blur.avif",
+            "webp": "food-12-cherries-400-blur.webp"
+          }
+        }
+      },
+      {
+        "id": 13,
+        "slug": "croissant",
+        "bounds": {
+          "x": 0.0352,
+          "y": 0.1465,
+          "width": 0.9297,
+          "height": 0.707
+        },
+        "mask": [
+          "00000000",
+          "00000000",
+          "00000000",
+          "00000000",
+          "00000000",
+          "000ffc00",
+          "003fff00",
+          "01ffffc0",
+          "07ffffe0",
+          "07fffff0",
+          "0ffffff0",
+          "1ffffff8",
+          "3ffffff8",
+          "3ffffffc",
+          "7ffffffc",
+          "7ffffffe",
+          "3c0ffffe",
+          "0003fffe",
+          "0000fffc",
+          "00001ffc",
+          "00000ffc",
+          "00000ffc",
+          "00000ff8",
+          "00000ff8",
+          "00001fe0",
+          "00001fc0",
+          "00001f00",
+          "00000000",
+          "00000000",
+          "00000000",
+          "00000000",
+          "00000000"
+        ],
+        "sharp": {
+          "1x": {
+            "avif": "food-13-croissant-200.avif",
+            "webp": "food-13-croissant-200.webp"
+          },
+          "2x": {
+            "avif": "food-13-croissant-400.avif",
+            "webp": "food-13-croissant-400.webp"
+          }
+        },
+        "blurred": {
+          "padRatio": 0.13,
+          "1x": {
+            "avif": "food-13-croissant-200-blur.avif",
+            "webp": "food-13-croissant-200-blur.webp"
+          },
+          "2x": {
+            "avif": "food-13-croissant-400-blur.avif",
+            "webp": "food-13-croissant-400-blur.webp"
+          }
+        }
+      },
+      {
+        "id": 14,
+        "slug": "jam",
+        "bounds": {
+          "x": 0.1914,
+          "y": 0.0352,
+          "width": 0.6172,
+          "height": 0.9297
+        },
+        "mask": [
+          "00000000",
+          "0007e000",
+          "007ffc00",
+          "00ffff00",
+          "01ffff80",
+          "01ffff80",
+          "01ffff80",
+          "01ffff80",
+          "01ffff00",
+          "01ffff80",
+          "01ffff80",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "03ffffc0",
+          "01ffff80",
+          "01ffff80",
+          "00ffff00",
+          "003ffc00",
+          "0007e000",
+          "00000000"
+        ],
+        "sharp": {
+          "1x": {
+            "avif": "food-14-jam-200.avif",
+            "webp": "food-14-jam-200.webp"
+          },
+          "2x": {
+            "avif": "food-14-jam-400.avif",
+            "webp": "food-14-jam-400.webp"
+          }
+        },
+        "blurred": {
+          "padRatio": 0.13,
+          "1x": {
+            "avif": "food-14-jam-200-blur.avif",
+            "webp": "food-14-jam-200-blur.webp"
+          },
+          "2x": {
+            "avif": "food-14-jam-400-blur.avif",
+            "webp": "food-14-jam-400-blur.webp"
+          }
+        }
+      },
+      {
+        "id": 15,
+        "slug": "apple",
+        "bounds": {
+          "x": 0.0684,
+          "y": 0.043,
+          "width": 0.8633,
+          "height": 0.9141
+        },
+        "mask": [
+          "00000000",
+          "000000c0",
+          "0000c3f0",
+          "0000eff8",
+          "00387ffc",
+          "00fffff8",
+          "03ffffe0",
+          "03ffff80",
+          "07fffe00",
+          "0fffff80",
+          "0fffffc0",
+          "1fffffe0",
+          "1fffffe0",
+          "1fffffe0",
+          "1ffffff0",
+          "3ffffff0",
+          "3ffffff0",
+          "3ffffff0",
+          "3fffffe0",
+          "3fffffe0",
+          "3fffffe0",
+          "1fffffc0",
+          "1fffffc0",
+          "1fffff80",
+          "1fffff80",
+          "0fffff00",
+          "07fffe00",
+          "01fff800",
+          "00fff000",
+          "007fc000",
+          "00060000",
+          "00000000"
+        ],
+        "sharp": {
+          "1x": {
+            "avif": "food-15-apple-200.avif",
+            "webp": "food-15-apple-200.webp"
+          },
+          "2x": {
+            "avif": "food-15-apple-400.avif",
+            "webp": "food-15-apple-400.webp"
+          }
+        },
+        "blurred": {
+          "padRatio": 0.13,
+          "1x": {
+            "avif": "food-15-apple-200-blur.avif",
+            "webp": "food-15-apple-200-blur.webp"
+          },
+          "2x": {
+            "avif": "food-15-apple-400-blur.avif",
+            "webp": "food-15-apple-400-blur.webp"
           }
         }
       }

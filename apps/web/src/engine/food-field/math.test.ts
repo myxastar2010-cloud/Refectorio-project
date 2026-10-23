@@ -11,6 +11,7 @@ import {
   FRESH_PROBE,
   maskHit,
   probeFrame,
+  rebalanceSprite,
   repulsion,
   scatter,
   stepSpring,
@@ -233,6 +234,31 @@ describe('the finale attractor', () => {
     for (let i = 0; i < 50; i += 1) {
       const p = edgePoint(random, area, 20);
       expect(p.x <= -20 || p.x >= 820 || p.y <= -20 || p.y >= 620).toBe(true);
+    }
+  });
+});
+
+describe('rebalanceSprite', () => {
+  const random = createRandom(7);
+
+  it('moves a repeated item onto a sprite that is not on the field', () => {
+    // Nine sprites on thirteen items, then six new ones arrive unused.
+    const usage = [2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0];
+    const next = rebalanceSprite(random, usage, 0);
+    expect(next).toBeGreaterThanOrEqual(9);
+    expect(usage[next]).toBe(0);
+  });
+
+  it('with fewer items than sprites, brings in the unused ones over time', () => {
+    const usage = [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0];
+    const next = rebalanceSprite(random, usage, 3);
+    expect(usage[next]).toBe(0);
+  });
+
+  it('keeps an item when every sprite is used as often', () => {
+    const usage = Array.from({ length: 15 }, () => 1);
+    for (let current = 0; current < 15; current += 1) {
+      expect(rebalanceSprite(random, usage, current)).toBe(-1);
     }
   });
 });
