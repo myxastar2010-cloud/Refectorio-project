@@ -1,11 +1,11 @@
 import { IconPlus, IconX } from '@tabler/icons-react';
 import clsx from 'clsx';
-import type { Ref } from 'react';
+import { useLayoutEffect, useRef, type Ref } from 'react';
 import { quiz } from '../../../content/quiz.ru';
 import { useWave } from '../../../motion/useWave';
 import { WaveLayer } from '../../../motion/WaveHover';
 import { fill } from '../quizContext';
-import { popChip } from './choice';
+import { arriveChip, popChip } from './choice';
 import { assignRef } from './refs';
 
 type ChipProps = {
@@ -17,12 +17,25 @@ type ChipProps = {
   readonly dataKey: string;
 };
 
+/** A chip mounted after its step began to enter blurs in (choice.ts arriveChip). */
+function useArrival<T extends HTMLElement>(calm: boolean) {
+  const ref = useRef<T | null>(null);
+  useLayoutEffect(() => {
+    if (ref.current) arriveChip(ref.current, calm);
+  }, [calm]);
+  return ref;
+}
+
 /** A multi-select chip (ТЗ §8.5): outline at rest, the ink wave on hover; selected — ink fill, white text. */
 export function Chip({ label, selected, calm, onToggle, dataKey }: ChipProps) {
   const { setHost, handlers, clipPath, act } = useWave<HTMLButtonElement>();
+  const arrivalRef = useArrival<HTMLButtonElement>(calm);
   return (
     <button
-      ref={setHost}
+      ref={(node) => {
+        setHost(node);
+        arrivalRef.current = node;
+      }}
       type="button"
       aria-pressed={selected}
       data-chip={dataKey}
@@ -48,16 +61,19 @@ export function Chip({ label, selected, calm, onToggle, dataKey }: ChipProps) {
 export function CustomChip({
   label,
   dataKey,
+  calm,
   onRemove,
   removeRef,
 }: {
   readonly label: string;
   readonly dataKey: string;
+  readonly calm: boolean;
   readonly onRemove: () => void;
   readonly removeRef?: Ref<HTMLButtonElement>;
 }) {
+  const arrivalRef = useArrival<HTMLSpanElement>(calm);
   return (
-    <span className="quiz-chip quiz-chip--custom is-selected" data-chip={dataKey}>
+    <span ref={arrivalRef} className="quiz-chip quiz-chip--custom is-selected" data-chip={dataKey}>
       <span className="quiz-chip-text">{label}</span>
       <button
         ref={(node) => {

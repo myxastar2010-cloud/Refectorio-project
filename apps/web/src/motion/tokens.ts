@@ -247,6 +247,8 @@ export const QUIZ = {
   /** Step transition «blur dissolve» (ТЗ §7.6; radii and curves of stage 1, D-030). */
   stepOut: { durationMs: 320, blurPx: 12, scale: 0.98 },
   stepIn: { delayMs: 170, durationMs: 500, blurPx: 10, risePx: 12, staggerMs: 50 },
+  /** A step enters once its icons and photos are decoded (4.5) — or after this, whichever is first. */
+  imagesWaitMs: 300,
   /** Single choice: the wave completes, a small bounce, then the step changes (≤ ≈ 450 ms). */
   choice: { bounceScale: 0.96, pressMs: 80, settleMs: 140 },
   choiceSpring: { type: 'spring', visualDuration: 0.22, bounce: 0.3 },

@@ -284,6 +284,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
               key={item}
               dataKey={customKey(item)}
               label={item}
+              calm={calm}
               onRemove={() => {
                 remove(item);
               }}

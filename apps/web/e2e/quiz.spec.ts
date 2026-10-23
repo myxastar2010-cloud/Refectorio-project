@@ -159,7 +159,19 @@ test.describe('the dish game', () => {
   test('a card leaving any way moves nothing else: no scroll, the title and the buttons stay (4.4)', async ({
     page,
   }) => {
+    // Seven exits, 40 sampled frames each: slow in WebKit.
+    test.slow();
     await openQuiz(page);
+    // The step has finished coming in (its blocks rise in): only then may nothing move.
+    await page.waitForFunction(() =>
+      document
+        .getAnimations()
+        .every(
+          (animation) =>
+            animation.playState !== 'running' ||
+            animation.effect?.getTiming().iterations === Infinity,
+        ),
+    );
     // Samples 40 frames: every scroll offset on the page, scrollable boxes in the quiz, the title and the buttons.
     const watch = () =>
       page.evaluate(
@@ -276,6 +288,41 @@ test.describe('the dish game', () => {
 });
 
 test.describe('the whole path', () => {
+  test('every step starts to enter with its icons decoded, inside its animated blocks (4.5)', async ({
+    page,
+  }) => {
+    // Ten cards and six steps: slow in WebKit, like the other whole-path tests.
+    test.slow();
+    // At the moment a step begins to enter (data-entering), every image in it must be decoded and inside an animated
+    // block — the icon wrapper, a block or a card — so it blurs in with the rest instead of popping in later.
+    await page.addInitScript(() => {
+      const late: string[] = [];
+      (window as Window & { __lateImages?: string[] }).__lateImages = late;
+      new MutationObserver((records) => {
+        for (const record of records) {
+          const screen = record.target as HTMLElement;
+          if (record.attributeName !== 'data-entering' || !screen.hasAttribute('data-entering'))
+            continue;
+          for (const image of screen.querySelectorAll('img')) {
+            const name = `${screen.dataset.screen ?? '?'}: ${image.currentSrc.split('/').pop() ?? ''}`;
+            if (!image.complete || image.naturalWidth === 0) late.push(`not decoded — ${name}`);
+            if (!image.closest('.quiz-icon, .quiz-block, .quiz-card'))
+              late.push(`outside — ${name}`);
+          }
+        }
+      }).observe(document, { attributes: true, subtree: true, attributeFilter: ['data-entering'] });
+    });
+    await openQuiz(page);
+    await throughGoal(page);
+    await choose(page, /Сбалансированное питание/, 'macroProfile');
+    await choose(page, /Рекомендуется/, 'health');
+    await choose(page, 'Нет', 'allergy');
+    const late = await page.evaluate(
+      () => (window as Window & { __lateImages?: string[] }).__lateImages ?? [],
+    );
+    expect(late).toEqual([]);
+  });
+
   test('to the finale: rows, options, chips with «+», text; the answers are saved', async ({
     page,
   }) => {

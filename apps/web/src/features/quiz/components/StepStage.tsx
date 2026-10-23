@@ -105,8 +105,13 @@ function useStepFit(ref: RefObject<HTMLDivElement | null>, present: boolean) {
     const screen = ref.current;
     const frame = screen?.firstElementChild;
     if (!screen || !(frame instanceof HTMLElement) || !present) return undefined;
+    // Re-fitted in the next frame, not inside the observer's callback (that would resize what it observes: a loop).
+    let frameId = 0;
     const observer = new ResizeObserver(() => {
-      if (overflows(screen)) fitScreen(screen);
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        if (overflows(screen)) fitScreen(screen);
+      });
     });
     observer.observe(frame);
     const onResize = () => {
@@ -115,10 +120,36 @@ function useStepFit(ref: RefObject<HTMLDivElement | null>, present: boolean) {
     };
     window.addEventListener('resize', onResize);
     return () => {
+      cancelAnimationFrame(frameId);
       observer.disconnect();
       window.removeEventListener('resize', onResize);
     };
   }, [ref, present]);
+}
+
+/**
+ * A step enters once the icons and photos in it are decoded (4.5: nothing pops in after the blur-in), at most
+ * QUIZ.imagesWaitMs — they were decoded ahead while the previous step was shown, so usually at once.
+ */
+function useImagesReady(ref: RefObject<HTMLDivElement | null>) {
+  const [ready, setReady] = useState(false);
+  useLayoutEffect(() => {
+    const screen = ref.current;
+    if (!screen) return undefined;
+    let live = true;
+    const pending = [...screen.querySelectorAll('img')].filter(
+      (image) => !(image.complete && image.naturalWidth > 0),
+    );
+    const decoded = Promise.all(pending.map((image) => image.decode().catch(() => undefined)));
+    const waited = new Promise((resolve) => window.setTimeout(resolve, QUIZ.imagesWaitMs));
+    void Promise.race([decoded, waited]).then(() => {
+      if (live) setReady(true);
+    });
+    return () => {
+      live = false;
+    };
+  }, [ref]);
+  return ready;
 }
 
 /** One screen: fitted to the window (it never scrolls); while leaving it is inert and hidden from assistive technology. */
@@ -126,6 +157,7 @@ function ScreenView({ screen, motion }: { readonly screen: Screen; readonly moti
   const present = useIsPresent();
   const ref = useRef<HTMLDivElement>(null);
   useStepFit(ref, present);
+  const ready = useImagesReady(ref);
 
   // A scrolled step (only in a window too small to fit, quiz.css) slides under the header: a frosted band then.
   useEffect(() => {
@@ -148,8 +180,9 @@ function ScreenView({ screen, motion }: { readonly screen: Screen; readonly moti
         ref={ref}
         className="quiz-screen"
         data-screen={screen}
+        data-entering={ready || undefined}
         initial="enter"
-        animate="center"
+        animate={ready ? 'center' : 'enter'}
         exit="exit"
         inert={!present}
         aria-hidden={!present || undefined}
