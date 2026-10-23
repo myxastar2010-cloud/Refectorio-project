@@ -156,6 +156,73 @@ test.describe('entering and leaving', () => {
 });
 
 test.describe('the dish game', () => {
+  test('a card leaving any way moves nothing else: no scroll, the title and the buttons stay (4.4)', async ({
+    page,
+  }) => {
+    await openQuiz(page);
+    // Samples 40 frames: every scroll offset on the page, scrollable boxes in the quiz, the title and the buttons.
+    const watch = () =>
+      page.evaluate(
+        () =>
+          new Promise<string[]>((resolve) => {
+            const box = (selector: string) =>
+              document.querySelector(selector)?.getBoundingClientRect().toJSON() as
+                DOMRect | undefined;
+            const title = box('#quiz-step-title');
+            const buttons = box('.quiz-game-controls');
+            const moved = (a: DOMRect | undefined, b: DOMRect | undefined) =>
+              !a || !b || Math.abs(a.x - b.x) > 0.5 || Math.abs(a.y - b.y) > 0.5;
+            const problems = new Set<string>();
+            let frames = 0;
+            const tick = () => {
+              if (window.scrollY !== 0) problems.add('the page scrolled');
+              for (const node of document.querySelectorAll<HTMLElement>('*')) {
+                if (node.scrollTop !== 0 || node.scrollLeft !== 0)
+                  problems.add(`scrolled: ${node.className}`);
+              }
+              for (const node of document.querySelectorAll<HTMLElement>('.quiz, .quiz *')) {
+                const style = getComputedStyle(node);
+                if (
+                  /auto|scroll/.test(style.overflowY) &&
+                  node.scrollHeight > node.clientHeight + 1
+                ) {
+                  problems.add(`scrollable: ${node.className}`);
+                }
+              }
+              if (moved(box('#quiz-step-title'), title)) problems.add('the title moved');
+              if (moved(box('.quiz-game-controls'), buttons)) problems.add('the buttons moved');
+              frames += 1;
+              if (frames < 40) requestAnimationFrame(tick);
+              else resolve([...problems]);
+            };
+            requestAnimationFrame(tick);
+          }),
+      );
+    const drag = async (dx: number, dy: number) => {
+      const card = await page.locator('.quiz-card:not([aria-hidden])').boundingBox();
+      if (!card) throw new Error('no card');
+      const x = card.x + card.width / 2;
+      const y = card.y + card.height / 2;
+      await page.mouse.move(x, y);
+      const watching = watch();
+      await page.mouse.down();
+      await page.mouse.move(x + dx * card.width, y + dy * card.height, { steps: 10 });
+      await page.mouse.up();
+      return watching;
+    };
+    expect(await drag(0.9, 0)).toEqual([]);
+    expect(await drag(-0.9, 0)).toEqual([]);
+    expect(await drag(0, 0.9)).toEqual([]);
+    for (const key of ['s', 'd', 'a']) {
+      const watching = watch();
+      await page.keyboard.press(key);
+      expect(await watching).toEqual([]);
+    }
+    const watching = watch();
+    await page.getByRole('button', { name: 'Пропустить', exact: true }).click();
+    expect(await watching).toEqual([]);
+  });
+
   test('keys answer, skips do not count, ten decisive answers move on', async ({ page }) => {
     await openQuiz(page);
     const first = await currentDish(page).textContent();

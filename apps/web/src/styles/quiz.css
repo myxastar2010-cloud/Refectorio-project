@@ -138,6 +138,12 @@
   color: var(--color-ink);
 }
 
+/* While the quiz is open (4.4): a swipe down on a card never pulls the page (no pull-to-refresh, no bounce). */
+html:has(.page[data-scene='quiz']),
+html:has(.page[data-scene='quiz']) body {
+  overscroll-behavior: none;
+}
+
 /* Portrait tablets: the window is narrow and tall. A larger unit fills it better, and «Вернуться» with the bar get a
    row of their own under the logo and «Выйти» (on one row they ran into «Refectorio»). */
 @media (min-width: 48rem) and (orientation: portrait) {
@@ -2072,7 +2078,10 @@
   pointer-events: none;
 }
 
+/* Above the cards (4.4): a card swiped or skipped down passes under the buttons and leaves at the window's edge. */
 .quiz-game-controls {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
