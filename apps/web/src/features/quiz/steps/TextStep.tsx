@@ -62,7 +62,7 @@ export function TextStep({ step }: { readonly step: Step }) {
       footer={<ContinueButton show={complete} label={quiz.common.done} onClick={next} />}
       className="quiz-frame--text"
     >
-      <div className="quiz-textarea focus-ring-within">
+      <div className="quiz-textarea">
         <textarea
           ref={fieldRef}
           className="quiz-textarea-field"

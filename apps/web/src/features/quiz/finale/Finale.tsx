@@ -201,7 +201,7 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
             {/* The generation never ends in stage 2: a way to start over and to the privacy sheet (delete answers). */}
             <div className="quiz-finale-actions">
               <PrivacyLabel />
-              <button type="button" className="quiz-finale-again focus-ring" onClick={restart}>
+              <button type="button" className="quiz-finale-again" onClick={restart}>
                 {quiz.finale.again}
               </button>
             </div>

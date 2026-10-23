@@ -61,7 +61,7 @@ function Segment({
       role="radio"
       aria-checked={selected}
       tabIndex={tabIndex}
-      className={clsx('quiz-segment wave-host focus-ring', selected && 'is-selected')}
+      className={clsx('quiz-segment wave-host', selected && 'is-selected')}
       onClick={(event) => {
         const element = event.currentTarget;
         act(event, () => {

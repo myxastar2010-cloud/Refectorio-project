@@ -77,7 +77,7 @@ export function PricingScene({ phase, instant, pictures, onClose, onChoose }: Pr
       <m.h2
         ref={titleRef}
         id="pricing-title"
-        className="pricing-title focus-ring"
+        className="pricing-title"
         tabIndex={-1}
         variants={aboutTitleVariants(calm)}
         {...initial}
@@ -106,7 +106,7 @@ export function PricingScene({ phase, instant, pictures, onClose, onChoose }: Pr
         </m.div>
         <m.button
           type="button"
-          className="pricing-close focus-ring"
+          className="pricing-close"
           aria-label={text.close}
           variants={aboutCardVariants(0, PRICING.cards, calm)}
           {...initial}

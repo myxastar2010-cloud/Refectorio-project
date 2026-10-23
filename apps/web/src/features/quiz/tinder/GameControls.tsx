@@ -42,7 +42,7 @@ function GameButton({
     <m.button
       ref={setHost}
       type="button"
-      className={clsx('quiz-game-button wave-host focus-ring', `quiz-game-button--${answer}`)}
+      className={clsx('quiz-game-button wave-host', `quiz-game-button--${answer}`)}
       style={{ scale }}
       aria-label={round ? label : undefined}
       title={round ? label : undefined}

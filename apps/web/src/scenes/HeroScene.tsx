@@ -95,7 +95,7 @@ export function HeroScene({
             ref={ctaRef}
             href={site.hero.cta.href}
             variants={heroFadeVariants(2, calm)}
-            className="cta wave-host focus-ring"
+            className="cta wave-host"
             onClick={(event) => {
               afterCtaWave(event, onCreateMenu);
             }}

@@ -88,7 +88,7 @@ export function PickerPanel({
         </h3>
         <button
           type="button"
-          className="quiz-close focus-ring"
+          className="quiz-close"
           aria-label={quiz.common.close}
           onClick={onCancel}
         >

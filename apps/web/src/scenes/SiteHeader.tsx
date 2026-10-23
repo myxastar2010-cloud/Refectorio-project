@@ -46,7 +46,7 @@ function PricingPill({
       type="button"
       variants={heroFadeVariants(0, calm)}
       animate={shown ? 'shown' : 'hidden'}
-      className="pricing-pill at box wave-host focus-ring"
+      className="pricing-pill at box wave-host"
       inert={!shown}
       aria-hidden={!shown || undefined}
       onClick={(event) => {
@@ -154,7 +154,7 @@ export function SiteHeader({
         ref={setHost}
         type="button"
         variants={heroFadeVariants(0, calm)}
-        className="about-pill at box wave-host focus-ring"
+        className="about-pill at box wave-host"
         aria-label={quiz ? site.quizShell.exitLabel : undefined}
         onClick={(event) => {
           act(event, quiz ? onExit : onAbout);

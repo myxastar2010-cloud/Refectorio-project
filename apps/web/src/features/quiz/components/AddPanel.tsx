@@ -102,7 +102,7 @@ export function AddPanel({
           </h3>
           <button
             type="button"
-            className="quiz-close focus-ring"
+            className="quiz-close"
             aria-label={quiz.common.close}
             onClick={() => {
               void finish(false);
@@ -113,7 +113,7 @@ export function AddPanel({
         </div>
         <input
           ref={inputRef}
-          className="quiz-add-input focus-ring"
+          className="quiz-add-input"
           type="text"
           value={text}
           maxLength={INPUT_LIMITS.customItemMaxLength}

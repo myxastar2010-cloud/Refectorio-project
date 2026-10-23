@@ -146,7 +146,7 @@ function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
                 close.setHost(node);
               }}
               type="button"
-              className="dialog-close wave-host focus-ring-inverse"
+              className="dialog-close wave-host"
               aria-label={teamDialog.close}
               onClick={(event) => {
                 close.act(event, onClose);

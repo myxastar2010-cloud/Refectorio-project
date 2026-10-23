@@ -246,9 +246,7 @@
   cursor: pointer;
 }
 
-.plan-choose:focus-visible {
-  outline: none; /* the hover ring shows the focus */
-}
+/* The hover ring shows the keyboard focus (PlanCard). */
 
 .plan-body,
 .plan-extra {

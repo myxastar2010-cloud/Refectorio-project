@@ -53,7 +53,7 @@ export function PeriodSwitch({ period, onChange }: Props) {
           role="radio"
           aria-checked={period === id}
           tabIndex={period === id ? 0 : -1}
-          className="period-option focus-ring"
+          className="period-option"
           onClick={() => {
             onChange(id);
           }}

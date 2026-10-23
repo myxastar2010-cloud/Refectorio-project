@@ -15,7 +15,7 @@ export function PrivacyLabel() {
     <button
       ref={setHost}
       type="button"
-      className="quiz-privacy-label wave-host focus-ring"
+      className="quiz-privacy-label wave-host"
       aria-haspopup="dialog"
       onClick={(event) => {
         const opener = event.currentTarget;

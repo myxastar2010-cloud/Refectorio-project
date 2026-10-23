@@ -189,7 +189,9 @@
 }
 
 .about-title-button:hover .about-chevron,
-.about-title-button:focus-visible:not([data-quiet-focus]) .about-chevron {
+html[data-modality='keyboard']
+  .about-title-button:focus-visible:not([data-quiet-focus])
+  .about-chevron {
   transform: translateY(-12%);
 }
 
@@ -599,6 +601,47 @@
 /* «Выйти» reads a little larger than «О проекте» in the same pill (stage 3, 4.16); no icon (the team, 22.10). */
 .pill-label--exit {
   font-size: 1.15em;
+}
+
+/* ── Keyboard focus (4.7): the controls without a wave show it in their own language, never with a ring ───── */
+
+/* Round outlined ✕ buttons: filled with ink, as when pressed. */
+html[data-modality='keyboard'] :is(.pricing-close, .quiz-close):focus-visible {
+  background-color: var(--color-ink);
+  color: var(--color-on-accent);
+  box-shadow: none;
+}
+
+/* White ✕ on a photo or on ink: the white circle with the dark mark. */
+html[data-modality='keyboard'] .plan-less:focus-visible {
+  background-color: var(--color-on-accent);
+  color: var(--color-plan-premium);
+}
+
+html[data-modality='keyboard'] .quiz-chip-remove:focus-visible {
+  background-color: var(--color-on-accent);
+  color: var(--color-ink);
+}
+
+/* The wheel: its selection band glows in the accent. */
+html[data-modality='keyboard'] .quiz-wheel:focus-visible .quiz-wheel-band {
+  background-color: rgb(230 57 70 / 0.12);
+  box-shadow: 0 0 22px rgb(230 57 70 / 0.35);
+}
+
+/* Text-like buttons and choices without a wave: their label is underlined, as a link would be. */
+html[data-modality='keyboard']
+  :is(
+    .plan-more,
+    .quiz-toast-action,
+    .quiz-finale-again,
+    .quiz-sex-option,
+    .period-option
+  ):focus-visible,
+html[data-modality='keyboard'] .quiz-check:has(:focus-visible) {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
 }
 
 /* «Загружаем тест…» while the quiz chunk is on its way (app/QuizBoundary.tsx). */

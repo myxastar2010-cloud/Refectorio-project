@@ -36,11 +36,7 @@ export function PillButton({
         assignRef(buttonRef, node);
       }}
       type="button"
-      className={clsx(
-        'quiz-pill-button wave-host focus-ring',
-        `quiz-pill-button--${tone}`,
-        className,
-      )}
+      className={clsx('quiz-pill-button wave-host', `quiz-pill-button--${tone}`, className)}
       disabled={disabled}
       aria-label={ariaLabel}
       onClick={(event) => {

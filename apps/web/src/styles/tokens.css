@@ -64,10 +64,6 @@
   /* ── Focus and touch ───────────────────────────────────────────────────────────────────── */
   --glass-blur: blur(14px) saturate(1.5);
 
-  --focus-ring-width: 3px;
-  --focus-ring-offset: 3px;
-  --focus-ring-color: var(--color-ink);
-  --focus-ring-color-inverse: var(--color-on-accent);
   --touch-target-min: 44px;
 
   /* ── Typography roles (Figma SF Pro Rounded → Open Runde; fitted to mockup line widths in Chromium with the real

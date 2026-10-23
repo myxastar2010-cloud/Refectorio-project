@@ -80,7 +80,7 @@ export function AboutScene({
         <button
           ref={titleRef}
           type="button"
-          className="about-title-button focus-ring"
+          className="about-title-button"
           aria-label={`${site.about.title}. ${site.about.backLabel}`}
           onClick={onBack}
         >
@@ -118,7 +118,7 @@ export function AboutScene({
               onMoreRef(node);
             }}
             type="button"
-            className="info-more at box wave-host focus-ring"
+            className="info-more at box wave-host"
             aria-label={team.moreLabel}
             aria-haspopup="dialog"
             aria-expanded={teamOpen}
@@ -196,7 +196,7 @@ function SoonLink({ label, onPress }: SoonLinkProps) {
     <button
       ref={setHost}
       type="button"
-      className="info-link wave-host focus-ring"
+      className="info-link wave-host"
       onClick={(event) => {
         act(event, onPress);
       }}

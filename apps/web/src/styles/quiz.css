@@ -1678,11 +1678,6 @@ html:has(.page[data-scene='quiz']) body {
   text-align: left;
 }
 
-.quiz-textarea:has(:focus-visible) {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
-}
-
 /* The field grows with its text up to the panel's tallest size, then scrolls inside — the one inner scroll the quiz
    allows (4.11): no scrollbar, the clipped edge fades out (data-clipped, TextStep). */
 .quiz-textarea-field {

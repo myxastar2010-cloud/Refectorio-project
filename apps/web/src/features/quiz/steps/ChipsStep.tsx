@@ -385,7 +385,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
           : null}
         {severeShown ? (
           <div className="quiz-severe">
-            <label className="quiz-check focus-ring-within">
+            <label className="quiz-check">
               <input
                 type="checkbox"
                 checked={a.severeTraces}

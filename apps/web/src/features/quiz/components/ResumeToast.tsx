@@ -52,7 +52,7 @@ export function ResumeToast({ show, number, onRestart, onDone }: Props) {
             exit={{ opacity: 0, transition: { duration: DURATION.micro } }}
           >
             <span>{fill(quiz.common.resumeToast, { n: number })}</span>
-            <button type="button" className="quiz-toast-action focus-ring" onClick={onRestart}>
+            <button type="button" className="quiz-toast-action" onClick={onRestart}>
               {quiz.common.startOver}
             </button>
           </m.div>

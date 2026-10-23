@@ -39,20 +39,18 @@
   white-space: nowrap;
 }
 
-.focus-ring:focus-visible,
-.focus-ring-within:has(:focus-visible) {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
-}
-
-.focus-ring-inverse:focus-visible {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color-inverse);
-  outline-offset: var(--focus-ring-offset);
-}
-
-/* Focus moved by the page after a mouse, touchpad or touch input (lib/quietFocus.ts): no keyboard ring. */
-[data-quiet-focus]:focus-visible {
+/*
+ * Focus (stage 3, 4.7): no outline or ring anywhere — the team finds them ugly. Keyboard focus shows each control's own
+ * state instead (WCAG 2.4.7): the hover wave grows from the centre (motion/useWave), and the controls without a wave
+ * get theirs in components.css («Keyboard focus»). <html data-modality> says what the person uses (lib/quietFocus).
+ */
+:focus,
+:focus-visible {
   outline: none;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .line {

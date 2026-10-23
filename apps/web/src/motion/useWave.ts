@@ -5,6 +5,7 @@ import {
   type AnimationPlaybackControlsWithThen,
 } from 'motion/react';
 import { useCallback, useMemo, useRef, type FocusEvent, type PointerEvent } from 'react';
+import { keyboardModality } from '../lib/quietFocus';
 import { useCalmMotion } from './hooks';
 import { DURATION, EASE_OUT_EXPO, WAVE } from './tokens';
 import { coverRadius, localPoint, waveDuration, type Point } from './wave';
@@ -153,7 +154,12 @@ export function useWave<T extends HTMLElement>() {
       onFocus(event: FocusEvent<T>) {
         // Focus moved by the page after a mouse or touch input is quiet (lib/quietFocus): no wave.
         const host = event.currentTarget;
-        if (!host.matches(':focus-visible') || host.hasAttribute('data-quiet-focus')) return;
+        if (
+          !keyboardModality() ||
+          !host.matches(':focus-visible') ||
+          host.hasAttribute('data-quiet-focus')
+        )
+          return;
         const s = size();
         if (s) grow({ x: s.box.width / 2, y: s.box.height / 2 }, DURATION.wave);
       },

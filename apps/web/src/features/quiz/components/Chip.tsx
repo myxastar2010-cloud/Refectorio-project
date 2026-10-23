@@ -39,7 +39,7 @@ export function Chip({ label, selected, calm, onToggle, dataKey }: ChipProps) {
       type="button"
       aria-pressed={selected}
       data-chip={dataKey}
-      className={clsx('quiz-chip wave-host focus-ring', selected && 'is-selected')}
+      className={clsx('quiz-chip wave-host', selected && 'is-selected')}
       onClick={(event) => {
         const element = event.currentTarget;
         act(event, () => {
@@ -80,7 +80,7 @@ export function CustomChip({
           assignRef(removeRef, node);
         }}
         type="button"
-        className="quiz-chip-remove focus-ring-inverse"
+        className="quiz-chip-remove"
         aria-label={fill(quiz.common.remove, { item: label })}
         onClick={onRemove}
       >
@@ -106,7 +106,7 @@ export function AddChip({
         assignRef(buttonRef, node);
       }}
       type="button"
-      className="quiz-chip quiz-chip--add wave-host focus-ring"
+      className="quiz-chip quiz-chip--add wave-host"
       aria-label={quiz.common.addOther}
       title={quiz.common.addOther}
       aria-expanded={false}

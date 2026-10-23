@@ -146,7 +146,7 @@ export function QuizHeader({
       <m.button
         ref={setHost}
         type="button"
-        className="quiz-back wave-host focus-ring"
+        className="quiz-back wave-host"
         aria-label={quiz.common.back}
         title={quiz.common.back}
         data-hidden={!canGoBack || undefined}
