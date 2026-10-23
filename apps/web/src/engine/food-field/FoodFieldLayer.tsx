@@ -23,7 +23,8 @@ const NOT_FOOD = '[data-opaque], button, a, input, textarea, select, [role="dial
 type Props = {
   readonly scene: Scene;
   readonly params: TestParams;
-  readonly teamOpen: boolean;
+  /** An expanded card of part 2 is open (the team's or the project's). */
+  readonly cardOpen: boolean;
 };
 
 declare global {
@@ -96,13 +97,13 @@ const speedOf = (scene: Scene) =>
  * (scale 0.8874 about a point below the frame), the sharp sprites cross-fade into pre-blurred ones.
  */
 /* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
-export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, teamOpen }: Props) {
+export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, cardOpen }: Props) {
   const sharpRef = useRef<HTMLDivElement>(null);
   const blurRef = useRef<HTMLDivElement>(null);
   const fieldRef = useRef<FoodField | null>(null);
   const layerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef(scene);
-  const teamOpenRef = useRef(teamOpen);
+  const cardOpenRef = useRef(cardOpen);
   /**
    * Part 1's text boxes, measured at rest (load, fonts, resize): coming back to part 1 its titles are still moving in,
    * and measuring them then cost a forced layout in the click (performance audit, F3) and gave shifted boxes.
@@ -114,7 +115,7 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, team
 
   useEffect(() => {
     sceneRef.current = scene;
-    teamOpenRef.current = teamOpen;
+    cardOpenRef.current = cardOpen;
     const field = fieldRef.current;
     if (!field) return;
     field.pauseProbe();
@@ -124,7 +125,7 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, team
       scene === 'quiz' ? [quizColumn()] : about ? [] : (heroRectsRef.current ?? obstacles()),
     );
     if (about) field.ensureBlur();
-  }, [scene, teamOpen, about]);
+  }, [scene, cardOpen, about]);
 
   // Both planes move during the cross-fade, then only the one that is seen. The wider wrap of part 2 starts at once
   // and ends only when the camera is back (then the margins are off screen again).
@@ -225,7 +226,7 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, team
     });
 
     const onPointerDown = (event: PointerEvent) => {
-      if (sceneRef.current !== 'hero' || teamOpenRef.current || event.button !== 0) return;
+      if (sceneRef.current !== 'hero' || cardOpenRef.current || event.button !== 0) return;
       if ((event.target as Element | null)?.closest(NOT_FOOD)) return;
       const index = field.hitTest(event.clientX, event.clientY);
       if (index >= 0) field.bounce(index);

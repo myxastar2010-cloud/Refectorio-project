@@ -1,16 +1,11 @@
-import { IconX } from '@tabler/icons-react';
-import { AnimatePresence, m, usePresence, type MotionStyle } from 'motion/react';
-import { memo, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
-import { site } from '../../content/site.ru';
-import { focusQuietly } from '../../lib/quietFocus';
-import { useCalmMotion } from '../../motion/hooks';
-import { revealMotion, useCornerMorph } from '../../motion/cornerMorph';
-import { DIALOG, DURATION } from '../../motion/tokens';
-import { useWave } from '../../motion/useWave';
-import { WaveLayer } from '../../motion/WaveHover';
-import { TeamDialogSurface } from './TeamSurface';
-import { NameFlip } from './NameFlip';
+import { AnimatePresence, m, type MotionStyle } from 'motion/react';
+import { memo, type RefObject } from 'react';
 import { Lines } from '../../components/Lines';
+import { site } from '../../content/site.ru';
+import { DIALOG } from '../../motion/tokens';
+import { CardDialog } from './CardDialog';
+import { NameFlip } from './NameFlip';
+import { TeamDialogSurface } from './TeamSurface';
 
 type Props = {
   readonly open: boolean;
@@ -21,147 +16,68 @@ type Props = {
   readonly onLanded: () => void;
 };
 
-const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
 /**
- * Expanded team card (ТЗ 6.4): role="dialog", aria-modal, focus trap, Esc / ✕ / click outside close it.
+ * Expanded team card (ТЗ 6.4): the shared CardDialog with the team's surface (the star) and its name, lead and members.
  * The rest of the page is made inert by the App while the dialog is open.
  */
 /* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
 export const TeamDialog = memo(function TeamDialog({ open, onClose, tileRef, onLanded }: Props) {
+  const { teamDialog } = site;
+  // The names fill the columns top to bottom: as many rows as the longest column.
+  const memberRows = Math.max(...teamDialog.members.map((column) => column.length));
   return (
     <AnimatePresence>
       {open && (
-        <DialogBody key="team-dialog" onClose={onClose} tileRef={tileRef} onLanded={onLanded} />
+        <CardDialog
+          key="team-dialog"
+          className="team-dialog"
+          labelledBy="team-dialog-title"
+          anchorRef={tileRef}
+          closeLabel={teamDialog.close}
+          closeTone="light"
+          closeIndex={3}
+          onClose={onClose}
+          onLanded={onLanded}
+          surface={(refs) => (
+            <TeamDialogSurface
+              surfaceRef={refs.surface}
+              pictureRef={refs.picture}
+              logoRef={refs.logo}
+            />
+          )}
+          picture={{
+            spec: DIALOG.picture,
+            dockedBelow: DIALOG.dockedBelow,
+            logoCrossfadeEnd: DIALOG.logoCrossfadeEnd,
+          }}
+        >
+          {(reveal) => (
+            <>
+              <m.h2 id="team-dialog-title" className="dialog-title" {...reveal(0)}>
+                <NameFlip
+                  lines={teamDialog.nameLines}
+                  translation={teamDialog.nameTranslationLines}
+                />
+              </m.h2>
+              <m.p className="dialog-lead" {...reveal(1)}>
+                <Lines lines={teamDialog.leadLines} />
+              </m.p>
+              <m.ul
+                className="dialog-members"
+                aria-label={teamDialog.membersLabel}
+                style={{ '--member-rows': memberRows } as MotionStyle}
+                {...reveal(2)}
+              >
+                {teamDialog.members.flat().map((name) => (
+                  <li key={name} className="dialog-member">
+                    {name}
+                  </li>
+                ))}
+              </m.ul>
+            </>
+          )}
+        </CardDialog>
       )}
     </AnimatePresence>
   );
 });
-
-type BodyProps = Omit<Props, 'open'>;
-
-function DialogBody({ onClose, tileRef, onLanded }: BodyProps) {
-  const [present, safeToRemove] = usePresence();
-  const calm = useCalmMotion();
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const surfaceRef = useRef<HTMLDivElement>(null);
-  const pictureRef = useRef<HTMLImageElement>(null);
-  const logoRef = useRef<HTMLImageElement>(null);
-  const close = useWave<HTMLButtonElement>();
-  const [revealed, setRevealed] = useState(false);
-  const { teamDialog } = site;
-  // The names fill the columns top to bottom: as many rows as the longest column.
-  const memberRows = Math.max(...teamDialog.members.map((column) => column.length));
-
-  useCornerMorph({
-    surface: surfaceRef,
-    anchor: tileRef,
-    picture: {
-      image: pictureRef,
-      logo: logoRef,
-      spec: DIALOG.picture,
-      dockedBelow: DIALOG.dockedBelow,
-      logoCrossfadeEnd: DIALOG.logoCrossfadeEnd,
-    },
-    present,
-    calm,
-    onReveal: () => {
-      setRevealed(true);
-    },
-    onLanded,
-    onDone: () => {
-      safeToRemove?.();
-    },
-  });
-
-  useEffect(() => {
-    focusQuietly(closeRef.current);
-  }, []);
-
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape') {
-      event.stopPropagation();
-      onClose();
-      return;
-    }
-    if (event.key !== 'Tab') return;
-    const focusable = [...(dialogRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])];
-    const first = focusable[0];
-    const last = focusable.at(-1);
-    if (!first || !last) return;
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  };
-
-  const content = (index: number) => revealMotion(index, revealed, calm);
-
-  return (
-    // While the card flies back, the dialog is already gone for keyboards and screen readers.
-    <div className="team-dialog-root" inert={!present}>
-      <m.div
-        className="team-scrim"
-        aria-hidden
-        onClick={onClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { duration: DURATION.scrim } }}
-        exit={{ opacity: 0, transition: { duration: DURATION.scrimOut } }}
-      />
-      <div
-        ref={dialogRef}
-        className="team-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="team-dialog-title"
-        onKeyDown={onKeyDown}
-      >
-        <TeamDialogSurface surfaceRef={surfaceRef} pictureRef={pictureRef} logoRef={logoRef} />
-        <div className="team-dialog-content">
-          <m.h2 id="team-dialog-title" className="dialog-title" {...content(0)}>
-            <NameFlip lines={teamDialog.nameLines} translation={teamDialog.nameTranslationLines} />
-          </m.h2>
-          <m.p className="dialog-lead" {...content(1)}>
-            <Lines lines={teamDialog.leadLines} />
-          </m.p>
-          <m.ul
-            className="dialog-members"
-            aria-label={teamDialog.membersLabel}
-            style={{ '--member-rows': memberRows } as MotionStyle}
-            {...content(2)}
-          >
-            {teamDialog.members.flat().map((name) => (
-              <li key={name} className="dialog-member">
-                {name}
-              </li>
-            ))}
-          </m.ul>
-          <m.div className="dialog-close-slot" {...content(3)}>
-            <button
-              ref={(node) => {
-                closeRef.current = node;
-                close.setHost(node);
-              }}
-              type="button"
-              className="dialog-close wave-host"
-              aria-label={teamDialog.close}
-              onClick={(event) => {
-                close.act(event, onClose);
-              }}
-              {...close.handlers}
-            >
-              <IconX aria-hidden className="dialog-close-icon" stroke={2} />
-              <WaveLayer clipPath={close.clipPath} className="wave-layer--light">
-                <IconX aria-hidden className="dialog-close-icon" stroke={2} />
-              </WaveLayer>
-            </button>
-          </m.div>
-        </div>
-      </div>
-    </div>
-  );
-}

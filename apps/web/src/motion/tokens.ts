@@ -121,6 +121,11 @@ export const PRICING = {
 export const DIALOG = {
   /** The text comes in once the card is this far open (by its shape, see useCornerMorph onReveal). */
   contentRevealAt: 0.7,
+  /**
+   * The project card grows leftwards from its icon on the right: its left edge, where the text starts, arrives last.
+   * Its text comes in later, so it never shows beyond the card.
+   */
+  projectRevealAt: 0.9,
   contentStaggerMs: 50,
   /** On closing the text goes first and fast: the card it lies on starts shrinking at once. */
   contentExitS: 0.12,

@@ -77,7 +77,8 @@ export const site = {
       nameLines: ['Refectorio'],
       leadLines: ['Ваша цель —', 'наше меню'],
       logoAlt: 'Логотип Refectorio — яблоко',
-      links: [{ label: 'Исходный код' }, { label: 'Документация' }],
+      more: 'Подробнее',
+      moreLabel: 'Подробнее о проекте Refectorio',
     },
   },
   quizShell: {
@@ -98,6 +99,20 @@ export const site = {
       ['Ясинский Алексей', 'Щербюк Анна'],
     ],
     close: 'Закрыть',
+  },
+  /** The project details card (stage 3, 4.19). Every sentence is true of the site as it is now. */
+  projectDialog: {
+    title: 'Refectorio',
+    paragraphs: [
+      'Сайт, который помогает поставить цель в питании — сбросить вес, набрать мышцы или удержать форму — и прийти к ней без жёстких диет.',
+      'Вы выбираете цель и проходите короткий тест: о себе, режиме дня и вкусах. По ответам мы собираем меню — генерацию сейчас дорабатываем.',
+      'Калории и БЖУ считаем по научным формулам, а не на глаз. Ответы теста хранятся только в вашем браузере.',
+    ],
+    // A no-break space: «#2107» never leaves «школа».
+    teamLine: 'Проект команды Modern Manifesto, школа #2107',
+    linksLabel: 'Материалы проекта',
+    links: [{ label: 'Исходный код' }, { label: 'Документация' }, { label: 'Авторы фотографий' }],
+    close: 'Закрыть подробности о проекте',
   },
   pricing: {
     title: 'Цены',

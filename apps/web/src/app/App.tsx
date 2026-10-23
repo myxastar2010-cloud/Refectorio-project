@@ -1,9 +1,19 @@
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation } from 'motion/react';
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react';
 import { Toast, type ToastMessage } from '../components/Toast';
 import { site } from '../content/site.ru';
 import { FoodFieldLayer } from '../engine/food-field/FoodFieldLayer';
 import { loadQuiz } from '../features/quiz/loadQuiz';
+import { ProjectDialog } from '../features/team-dialog/ProjectDialog';
 import { TeamDialog } from '../features/team-dialog/TeamDialog';
 import { whenIdle } from '../lib/idle';
 import { readTestParams } from '../lib/params';
@@ -21,6 +31,9 @@ import { useScene, type Scene } from './useScene';
 const TOAST_MS = 3200;
 const params = readTestParams(window.location.search);
 const noop = (): void => undefined;
+
+/** The expanded cards of part 2: the team's and the project's (stage 3, 4.19). */
+type ExpandedCard = 'team' | 'project';
 
 /** «Цены»: a chunk of its own (with its card pictures), fetched on hover, focus, touch or idle. */
 const loadPricing = () => import('../features/pricing');
@@ -59,10 +72,13 @@ export function App() {
 function Page() {
   const { scene, instant, go, leaveQuiz } = useScene();
   const calm = useCalmMotion();
-  const [teamOpen, setTeamOpen] = useState(false);
-  // From the click on «Ещё» until the closed card has landed back on its icon.
+  const [openCard, setOpenCard] = useState<ExpandedCard | null>(null);
+  // From the click on «Подробнее» until the closed card has landed back on its icon (each card on its own: one may
+  // still be landing while the other opens).
   const [teamOut, setTeamOut] = useState(false);
+  const [projectOut, setProjectOut] = useState(false);
   const teamTileRef = useRef<HTMLDivElement>(null);
+  const projectTileRef = useRef<HTMLDivElement>(null);
   // «Цены»: the scene is mounted from its first visit on (it must be there, hidden, to come in like part 2).
   const [pricingMounted, setPricingMounted] = useState(false);
   const [pricingPictures, setPricingPictures] = useState<PlanPictures | null>(null);
@@ -78,18 +94,20 @@ function Page() {
   const lockedUntil = useRef(0);
   const busyTimer = useRef(0);
   const aboutTitleRef = useRef<HTMLButtonElement>(null);
-  const moreRef = useRef<HTMLButtonElement>(null);
+  const teamMoreRef = useRef<HTMLButtonElement>(null);
+  const projectMoreRef = useRef<HTMLButtonElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const [heroScrolled, setHeroScrolled] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
-  const teamOpenRef = useRef(teamOpen);
+  const cardOpen = openCard !== null;
+  const cardOpenRef = useRef(cardOpen);
   useEffect(() => {
-    teamOpenRef.current = teamOpen;
-  }, [teamOpen]);
+    cardOpenRef.current = cardOpen;
+  }, [cardOpen]);
 
   const locked = useCallback(
-    () => performance.now() < lockedUntil.current || teamOpenRef.current,
+    () => performance.now() < lockedUntil.current || cardOpenRef.current,
     [],
   );
 
@@ -205,31 +223,60 @@ function Page() {
     goScene('hero');
   }, [goScene]);
 
-  const setMoreRef = useCallback((node: HTMLButtonElement | null) => {
-    moreRef.current = node;
+  const setTeamMoreRef = useCallback((node: HTMLButtonElement | null) => {
+    teamMoreRef.current = node;
+  }, []);
+  const setProjectMoreRef = useCallback((node: HTMLButtonElement | null) => {
+    projectMoreRef.current = node;
   }, []);
   const setPricingRef = useCallback((node: HTMLButtonElement | null) => {
     pricingRef.current = node;
   }, []);
 
-  // Closing the team card returns focus to «Ещё» at once: the page is interactive again right away,
+  // Closing a card returns focus to its «Подробнее» at once: the page is interactive again right away,
   // while the card's shape still settles back into the tile.
-  const wasTeamOpen = useRef(teamOpen);
+  const wasOpen = useRef(openCard);
   useEffect(() => {
-    if (wasTeamOpen.current && !teamOpen) focusQuietly(moreRef.current);
-    wasTeamOpen.current = teamOpen;
-  }, [teamOpen]);
+    if (wasOpen.current && !openCard) {
+      focusQuietly((wasOpen.current === 'team' ? teamMoreRef : projectMoreRef).current);
+    }
+    wasOpen.current = openCard;
+  }, [openCard]);
 
-  const openTeam = useCallback(() => {
-    setTeamOut(true);
-    setTeamOpen(true);
-  }, []);
-  const closeTeam = useCallback(() => {
-    setTeamOpen(false);
+  const closeCard = useCallback(() => {
+    setOpenCard(null);
   }, []);
   const teamLanded = useCallback(() => {
     setTeamOut(false);
   }, []);
+  const projectLanded = useCallback(() => {
+    setProjectOut(false);
+  }, []);
+  // Stable props of the memoised about scene: a new object every render would re-render it each time (audit, F3).
+  const teamCard = useMemo(
+    () => ({
+      open: openCard === 'team',
+      out: teamOut,
+      onOpen: () => {
+        setTeamOut(true);
+        setOpenCard('team');
+      },
+      onMoreButton: setTeamMoreRef,
+    }),
+    [openCard, teamOut, setTeamMoreRef],
+  );
+  const projectCard = useMemo(
+    () => ({
+      open: openCard === 'project',
+      out: projectOut,
+      onOpen: () => {
+        setProjectOut(true);
+        setOpenCard('project');
+      },
+      onMoreButton: setProjectMoreRef,
+    }),
+    [openCard, projectOut, setProjectMoreRef],
+  );
 
   /**
    * Chooses the next visit's pair of card pictures and loads them with the chunk (once per visit): from a hover on
@@ -305,9 +352,9 @@ function Page() {
 
   const inQuiz = scene === 'quiz';
   return (
-    <div ref={pageRef} className="page" data-scene={scene} data-team-open={teamOpen || undefined}>
-      <FoodFieldLayer scene={scene} params={params} teamOpen={teamOpen} />
-      <div className="stage" inert={teamOpen}>
+    <div ref={pageRef} className="page" data-scene={scene} data-card-open={cardOpen || undefined}>
+      <FoodFieldLayer scene={scene} params={params} cardOpen={cardOpen} />
+      <div className="stage" inert={cardOpen}>
         <SiteHeader
           phase={scene === 'hero' ? 'shown' : inQuiz ? 'quiz' : 'hidden'}
           instant={instant}
@@ -333,12 +380,10 @@ function Page() {
               instant={instant}
               titleRef={aboutTitleRef}
               onBack={toHero}
-              teamOpen={teamOpen}
-              teamOut={teamOut}
-              tileRef={teamTileRef}
-              onOpenTeam={openTeam}
-              onMoreRef={setMoreRef}
-              onNotify={notify}
+              team={teamCard}
+              project={projectCard}
+              teamTileRef={teamTileRef}
+              projectTileRef={projectTileRef}
             />
           </div>
           <div className="pricing-scroller" ref={pricingScrollRef} inert={scene !== 'pricing'}>
@@ -367,7 +412,19 @@ function Page() {
           )}
         </AnimatePresence>
       </div>
-      <TeamDialog open={teamOpen} onClose={closeTeam} tileRef={teamTileRef} onLanded={teamLanded} />
+      <TeamDialog
+        open={openCard === 'team'}
+        onClose={closeCard}
+        tileRef={teamTileRef}
+        onLanded={teamLanded}
+      />
+      <ProjectDialog
+        open={openCard === 'project'}
+        onClose={closeCard}
+        tileRef={projectTileRef}
+        onLanded={projectLanded}
+        onNotify={notify}
+      />
       <Toast message={toast} />
     </div>
   );

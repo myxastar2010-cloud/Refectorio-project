@@ -1,6 +1,6 @@
-import { IconApple, IconArrowUpRight, IconChevronUp } from '@tabler/icons-react';
+import { IconApple, IconChevronUp } from '@tabler/icons-react';
 import { m, type MotionStyle } from 'motion/react';
-import { memo, useEffect, useRef, type Ref } from 'react';
+import { memo, useEffect, useRef, type Ref, type RefObject } from 'react';
 import { site } from '../content/site.ru';
 import { TeamTile } from '../features/team-dialog/TeamTile';
 import { preloadTeamPicture } from '../features/team-dialog/preload';
@@ -20,15 +20,20 @@ type Props = {
   readonly instant: boolean;
   readonly titleRef: Ref<HTMLButtonElement>;
   readonly onBack: () => void;
-  readonly teamOpen: boolean;
-  /** The team card is out of its icon (open or flying): the icon is empty and the card does not tilt. */
-  readonly teamOut: boolean;
-  readonly tileRef: Ref<HTMLDivElement>;
-  readonly onOpenTeam: () => void;
-  /** Receives the «Ещё» button so focus can return to it after the dialog closes. */
-  readonly onMoreRef: (node: HTMLButtonElement | null) => void;
-  /** A short message (the project links do not work yet). */
-  readonly onNotify: (message: string) => void;
+  readonly team: CardProps;
+  readonly project: CardProps;
+  readonly teamTileRef: Ref<HTMLDivElement>;
+  readonly projectTileRef: Ref<HTMLDivElement>;
+};
+
+/** The expanded card of one about card (the team's, the project's). */
+type CardProps = {
+  readonly open: boolean;
+  /** The card is out of its icon (open or flying): the icon is empty and the card does not tilt. */
+  readonly out: boolean;
+  readonly onOpen: () => void;
+  /** Receives the «Подробнее» button so focus can return to it after the card closes. */
+  readonly onMoreButton: (node: HTMLButtonElement | null) => void;
 };
 
 /** Part 2 «О проекте»: the title (a button back to the start) and the team and project cards (ТЗ 6.3). */
@@ -38,25 +43,17 @@ export const AboutScene = memo(function AboutScene({
   instant,
   titleRef,
   onBack,
-  teamOpen,
-  teamOut,
-  tileRef,
-  onOpenTeam,
-  onMoreRef,
-  onNotify,
+  team,
+  project,
+  teamTileRef,
+  projectTileRef,
 }: Props) {
   const calm = useCalmMotion();
   const hidden = phase === 'hidden';
   const teamTilt = useRef<TiltHandle>(null);
-  const more = useWave<HTMLButtonElement>();
-  const { team, project } = site.about;
+  const projectTilt = useRef<TiltHandle>(null);
+  const { team: teamText, project: projectText } = site.about;
   const initial = instant ? ({ initial: false } as const) : {};
-
-  const openTeam = () => {
-    // The card must be flat before the icon is measured for the corner morph (ТЗ 6.4).
-    teamTilt.current?.reset();
-    onOpenTeam();
-  };
 
   // The card picture is not on the first screen: fetch it once part 2 is shown, before the first opening.
   useEffect(() => {
@@ -92,7 +89,7 @@ export const AboutScene = memo(function AboutScene({
 
       <m.article
         className="info-card info-card--team at box"
-        style={{ '--i': 0, '--name-lines': team.nameLines.length } as MotionStyle}
+        style={{ '--i': 0, '--name-lines': teamText.nameLines.length } as MotionStyle}
         aria-labelledby="team-card-name"
         data-opaque
         variants={aboutCardVariants(0, ABOUT_CARDS, calm)}
@@ -103,109 +100,106 @@ export const AboutScene = memo(function AboutScene({
           ref={teamTilt}
           maxDeg={TILT.infoCardMaxDeg}
           className="info-surface"
-          disabled={teamOut}
+          disabled={team.out}
         >
-          <p className="info-label at text-at">{team.label}</p>
-          <TeamTile ref={tileRef} hidden={teamOut} />
+          <p className="info-label at text-at">{teamText.label}</p>
+          <TeamTile ref={teamTileRef} hidden={team.out} />
           <h3 id="team-card-name" className="info-name at text-at">
-            <Lines lines={team.nameLines} />
+            <Lines lines={teamText.nameLines} />
           </h3>
           <p className="info-lead at text-at">
-            <Lines lines={team.leadLines} />
+            <Lines lines={teamText.leadLines} />
           </p>
-          <button
-            ref={(node) => {
-              more.setHost(node);
-              onMoreRef(node);
-            }}
-            type="button"
-            className="info-more at box wave-host"
-            aria-label={team.moreLabel}
-            aria-haspopup="dialog"
-            aria-expanded={teamOpen}
-            onClick={(event) => {
-              more.act(event, openTeam);
-            }}
-            {...more.handlers}
-          >
-            <span className="wave-content">{team.more}</span>
-            <WaveLayer clipPath={more.clipPath} className="wave-layer--ink wave-layer--outline">
-              {team.more}
-            </WaveLayer>
-          </button>
+          <MoreButton
+            label={teamText.more}
+            ariaLabel={teamText.moreLabel}
+            card={team}
+            tilt={teamTilt}
+          />
         </TiltGlare>
       </m.article>
 
       <m.article
         className="info-card at box"
-        style={{ '--i': 1, '--name-lines': project.nameLines.length } as MotionStyle}
+        style={{ '--i': 1, '--name-lines': projectText.nameLines.length } as MotionStyle}
         aria-labelledby="project-card-name"
         data-opaque
         variants={aboutCardVariants(1, ABOUT_CARDS, calm)}
         {...initial}
         animate={phase}
       >
-        <TiltGlare maxDeg={TILT.infoCardMaxDeg} className="info-surface">
-          <p className="info-label at text-at">{project.label}</p>
-          <div className="info-tile at box project-tile" role="img" aria-label={project.logoAlt}>
-            <IconApple aria-hidden className="project-tile-icon" stroke={2} />
+        <TiltGlare
+          ref={projectTilt}
+          maxDeg={TILT.infoCardMaxDeg}
+          className="info-surface"
+          disabled={project.out}
+        >
+          <p className="info-label at text-at">{projectText.label}</p>
+          <div
+            ref={projectTileRef}
+            className="info-tile at box project-tile"
+            role="img"
+            aria-label={projectText.logoAlt}
+          >
+            <IconApple
+              aria-hidden
+              className="project-tile-icon"
+              stroke={2}
+              style={project.out ? { visibility: 'hidden' } : undefined}
+            />
           </div>
           <h3 id="project-card-name" className="info-name at text-at">
-            <Lines lines={project.nameLines} />
+            <Lines lines={projectText.nameLines} />
           </h3>
           <p className="info-lead at text-at">
-            <Lines lines={project.leadLines} />
+            <Lines lines={projectText.leadLines} />
           </p>
-          <ul className="info-links at">
-            {project.links.map((link) => (
-              <li key={link.label}>
-                <SoonLink
-                  label={link.label}
-                  onPress={() => {
-                    onNotify(site.notices.workingOnIt);
-                  }}
-                />
-              </li>
-            ))}
-          </ul>
+          <MoreButton
+            label={projectText.more}
+            ariaLabel={projectText.moreLabel}
+            card={project}
+            tilt={projectTilt}
+          />
         </TiltGlare>
       </m.article>
     </section>
   );
 });
 
-type SoonLinkProps = {
+type MoreButtonProps = {
   readonly label: string;
-  readonly onPress: () => void;
+  readonly ariaLabel: string;
+  readonly card: CardProps;
+  readonly tilt: RefObject<TiltHandle | null>;
 };
 
-/**
- * A project link with a round arrow. The source code and the documentation are not public yet: a press says «Мы
- * работаем над этим» (a button — it goes nowhere). The wave works as on every control.
- */
-function SoonLink({ label, onPress }: SoonLinkProps) {
-  const { setHost, handlers, clipPath, act } = useWave<HTMLButtonElement>();
-  const content = (tone: 'base' | 'wave') => (
-    <>
-      <span>{label}</span>
-      <span className={`info-link-circle info-link-circle--${tone}`}>
-        <IconArrowUpRight aria-hidden className="info-link-arrow" stroke={2.5} />
-      </span>
-    </>
-  );
+/** «Подробнее» of an about card: opens its expanded card. */
+function MoreButton({ label, ariaLabel, card, tilt }: MoreButtonProps) {
+  const more = useWave<HTMLButtonElement>();
+  const open = () => {
+    // The card must be flat before the icon is measured for the corner morph (ТЗ 6.4).
+    tilt.current?.reset();
+    card.onOpen();
+  };
   return (
     <button
-      ref={setHost}
-      type="button"
-      className="info-link wave-host"
-      onClick={(event) => {
-        act(event, onPress);
+      ref={(node) => {
+        more.setHost(node);
+        card.onMoreButton(node);
       }}
-      {...handlers}
+      type="button"
+      className="info-more at box wave-host"
+      aria-label={ariaLabel}
+      aria-haspopup="dialog"
+      aria-expanded={card.open}
+      onClick={(event) => {
+        more.act(event, open);
+      }}
+      {...more.handlers}
     >
-      <span className="wave-content info-link-content">{content('base')}</span>
-      <WaveLayer clipPath={clipPath} className="wave-layer--accent info-link-content">
-        {content('wave')}
+      <span className="wave-content">{label}</span>
+      <WaveLayer clipPath={more.clipPath} className="wave-layer--ink wave-layer--outline">
+        {label}
       </WaveLayer>
     </button>
   );

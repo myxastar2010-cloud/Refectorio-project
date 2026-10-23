@@ -227,10 +227,6 @@
   --about-more-w: 172; /* «Подробнее» (the mockup's «Ещё» was 113): the same pill, wide enough for the word */
   --about-more-h: 62;
   --about-more-border: 2;
-  --about-links-y: 374;
-  --about-link-circle: 34;
-  --about-link-gap: 11; /* text ink → circle */
-  --about-links-gap: 44; /* between the two links */
 
   /* ── «Цены» (the team's mockups «цены дизайн», 1920×1080; mockup px, measured in the JPEGs) ─────────────── */
   /* Tall windows show the whole mockup frame (1920×1080 — exactly the mockup); lower ones only the composition, the
@@ -287,6 +283,22 @@
   --dialog-close-top: 107;
   --dialog-close-right: 112;
   --dialog-max-fraction: 0.92; /* tablets: never more than 92% of the viewport */
+  /* The project details card (stage 3, 4.19; no mockup): the team card's box, corners, title and ✕, white like its
+     icon. Its height grows with its text where a window is low (never past the window). */
+  --project-pad-top: 118;
+  --project-pad-bottom: 104;
+  --project-title-gap: 26; /* title → first paragraph */
+  --project-text-w: 1010; /* ≈ 75 characters a line */
+  --type-project-text-size: 27;
+  --type-project-text-leading: 37;
+  --type-project-text-tracking: -0.012em;
+  --project-paragraph-gap: 14;
+  --project-team-gap: 30;
+  --type-project-team-size: 22.8;
+  --project-links-gap: 8; /* team line → links (each link is 44 px tall: its own air) */
+  --project-link-circle: 34;
+  --project-link-gap: 11; /* text ink → circle */
+  --project-links-between: 44;
   /* The page under the open card blurs once the card is well on its way (its first frames come first). */
   --team-open-blur: 4px;
   --team-open-blur-delay: 0.22s;

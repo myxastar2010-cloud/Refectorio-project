@@ -62,6 +62,42 @@ test('the team card is the tall phone card, centred on the screen', async ({ pag
   expect(await seriousViolations(page)).toEqual([]);
 });
 
+test('the project card fits a phone: its text and links inside the card, nothing scrolls', async ({
+  page,
+}) => {
+  await page.goto('./?seed=1#about');
+  await settled(page, 'about');
+  await page.getByRole('button', { name: /Подробнее о проекте/ }).click();
+  const dialog = page.locator('.project-dialog');
+  await expect(dialog).toBeVisible();
+  // The card has landed in its place (its shape at rest).
+  await expect
+    .poll(() => dialog.locator('.project-surface').evaluate((surface) => surface.style.transform))
+    .toBe('');
+  const box = await dialog.boundingBox();
+  const viewport = page.viewportSize() ?? { width: 390, height: 844 };
+  expect(box).not.toBeNull();
+  if (!box) return;
+  expect(box.width).toBeCloseTo(viewport.width - 32, 0);
+  expect(box.y).toBeGreaterThan(0);
+  expect(box.y + box.height).toBeLessThan(viewport.height);
+  expect(
+    await dialog
+      .locator('.team-dialog-content')
+      .evaluate((content) => content.scrollHeight <= content.clientHeight + 1),
+  ).toBe(true);
+  const links = await dialog
+    .locator('.soon-link')
+    .evaluateAll((items) => items.map((item) => item.getBoundingClientRect().toJSON() as DOMRect));
+  expect(links).toHaveLength(3);
+  for (const link of links) {
+    expect(link.left).toBeGreaterThanOrEqual(box.x);
+    expect(link.right).toBeLessThanOrEqual(box.x + box.width);
+    expect(link.bottom).toBeLessThanOrEqual(box.y + box.height);
+  }
+  expect(await seriousViolations(page)).toEqual([]);
+});
+
 for (const hash of ['', '#about']) {
   test(`no serious accessibility violations on a phone${hash ? ' in part 2' : ' in part 1'}`, async ({
     page,

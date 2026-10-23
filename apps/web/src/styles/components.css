@@ -274,51 +274,7 @@ html[data-modality='keyboard']
   will-change: transform, opacity;
 }
 
-.info-links {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.info-link {
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-on-accent);
-  text-decoration: none;
-}
-
-.info-link[aria-disabled='true'] {
-  cursor: default;
-}
-
-.info-link-content {
-  gap: inherit;
-}
-
-.info-link-circle {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.info-link-circle--base {
-  background-color: var(--color-on-accent);
-  color: var(--color-accent);
-}
-
-.info-link-circle--wave {
-  background-color: var(--color-ink);
-  color: var(--color-on-accent);
-}
-
-.info-link-arrow {
-  width: 62%;
-  height: 62%;
-}
-
-/* ── Team dialog (ТЗ 6.4) ────────────────────────────────────────────────────────────────── */
+/* ── Expanded cards: the team's (ТЗ 6.4) and the project's (stage 3, 4.19) ───────────────────── */
 
 .team-dialog-root {
   position: fixed;
@@ -348,13 +304,13 @@ html[data-modality='keyboard']
   transition: filter var(--motion-scrim, 350ms) var(--ease-out-expo);
 }
 
-.page[data-team-open] .info-surface,
-.page[data-team-open] .about-title-button {
+.page[data-card-open] .info-surface,
+.page[data-card-open] .about-title-button {
   filter: blur(var(--team-open-blur));
   transition-delay: var(--team-open-blur-delay);
 }
 
-.team-dialog {
+.card-dialog {
   --dialog-box-w: calc(var(--dialog-w) * var(--sd));
   --dialog-box-h: calc(var(--dialog-h) * var(--sd));
   position: absolute;
@@ -364,6 +320,9 @@ html[data-modality='keyboard']
   height: var(--dialog-box-h);
   /* Not drawn here: the card surface inherits it, and the corner morph reads it. */
   border-radius: calc(var(--radius-dialog) * var(--sd));
+}
+
+.team-dialog {
   color: var(--color-on-accent);
 }
 
@@ -465,6 +424,144 @@ html[data-modality='keyboard']
 }
 
 .dialog-close-icon {
+  width: 62%;
+  height: 62%;
+}
+
+/* The ✕ on a white card. */
+.dialog-close--ink {
+  box-shadow: inset 0 0 0 max(1.5px, calc(2 * var(--sd))) var(--color-ink);
+  color: var(--color-ink);
+}
+
+/*
+ * The project card: the team card's box, but its height is its text's — at least the team card's, never more than the
+ * window (then its text scrolls, without a scrollbar). Centred by the margins.
+ */
+.project-dialog {
+  top: 0;
+  bottom: 0;
+  height: fit-content;
+  min-height: var(--dialog-box-h);
+  max-height: calc(100svh - 24px);
+  margin-block: auto;
+  color: var(--color-ink);
+}
+
+.project-surface {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: var(--color-on-accent);
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.project-dialog .team-dialog-content {
+  position: relative;
+  inset: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: inherit;
+  max-height: inherit;
+  padding: calc(var(--project-pad-top) * var(--sd)) calc(var(--dialog-pad-x) * var(--sd))
+    calc(var(--project-pad-bottom) * var(--sd));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.project-dialog-title {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: calc(var(--type-dialog-title-size) * var(--sd));
+  line-height: calc(var(--type-dialog-title-leading) * var(--sd));
+  font-weight: var(--type-dialog-title-weight);
+  letter-spacing: var(--type-dialog-title-tracking);
+}
+
+.project-dialog-text {
+  display: grid;
+  gap: calc(var(--project-paragraph-gap) * var(--sd));
+  max-width: calc(var(--project-text-w) * var(--sd));
+  margin-top: calc(var(--project-title-gap) * var(--sd));
+}
+
+.project-dialog-text p {
+  margin: 0;
+  font-size: max(var(--type-min-body), calc(var(--type-project-text-size) * var(--sd)));
+  line-height: max(1.37em, calc(var(--type-project-text-leading) * var(--sd)));
+  letter-spacing: var(--type-project-text-tracking);
+}
+
+/* The team line and the links stand on the bottom of the card. */
+.project-dialog-team {
+  margin: auto 0 0;
+  padding-top: calc(var(--project-team-gap) * var(--sd));
+  color: var(--color-ink-muted);
+  font-size: max(13px, calc(var(--type-project-team-size) * var(--sd)));
+  line-height: 1.3;
+}
+
+.project-dialog-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 calc(var(--project-links-between) * var(--sd));
+  margin: 0;
+  padding: calc(var(--project-links-gap) * var(--sd)) 0 0;
+  list-style: none;
+}
+
+/* The icon's apple over the icon while the card leaves it and lands back (ProjectDialog). */
+.project-docked-apple {
+  position: fixed;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/* A link that goes nowhere yet (SoonLink): ink label, red circle; the wave turns the label red, the circle black. */
+.soon-link {
+  display: inline-flex;
+  min-height: var(--touch-target-min);
+  align-items: center;
+  gap: calc(var(--project-link-gap) * var(--sd));
+  color: var(--color-ink);
+  font-size: max(var(--type-min-body), calc(var(--type-link-size) * var(--sd)));
+  font-weight: var(--type-link-weight);
+  letter-spacing: var(--type-link-tracking);
+}
+
+.soon-link-content {
+  gap: inherit;
+}
+
+.soon-link .wave-layer--light {
+  /* The deeper red: small text on white needs 4.5:1 (the accent has 4.17:1). */
+  color: var(--color-accent-deep);
+}
+
+.soon-link-circle {
+  display: inline-flex;
+  flex: none;
+  width: max(24px, calc(var(--project-link-circle) * var(--sd)));
+  height: max(24px, calc(var(--project-link-circle) * var(--sd)));
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--color-on-accent);
+}
+
+.soon-link-circle--base {
+  background-color: var(--color-accent);
+}
+
+.soon-link-circle--wave {
+  background-color: var(--color-ink);
+}
+
+.soon-link-arrow {
   width: 62%;
   height: 62%;
 }

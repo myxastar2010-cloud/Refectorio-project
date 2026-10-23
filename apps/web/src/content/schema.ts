@@ -10,7 +10,7 @@ const lines = z.array(text).min(1);
 const featureIcon = z.enum(['school', 'sparkles', 'listDetails', 'shieldCheck']);
 const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamCard']);
 
-/** A link of the project card: not working yet — a press says «Мы работаем над этим». */
+/** A link of the project details card: not working yet — a press says «Мы работаем над этим» (D-051). */
 const link = z.object({ label: text });
 
 /** A price for each billing period: the amount and the words after it («навсегда», «в месяц»). */
@@ -63,7 +63,8 @@ export const siteContentSchema = z.object({
       leadLines: lines,
       /** The project logo is the site's apple (Tabler) on a white tile. */
       logoAlt: text,
-      links: z.array(link).length(2),
+      more: text,
+      moreLabel: text,
     }),
   }),
   /** The landing's part of the quiz: the header pill turns into «Выйти ×» while the quiz chunk loads. */
@@ -74,6 +75,15 @@ export const siteContentSchema = z.object({
     leadLines: lines,
     membersLabel: text,
     members: z.array(z.array(text).min(1)).length(2),
+    close: text,
+  }),
+  /** «Подробнее» of the project card (stage 3, 4.19): what the site is, how it works, and its materials. */
+  projectDialog: z.object({
+    title: text,
+    paragraphs: z.array(text).min(2).max(3),
+    teamLine: text,
+    linksLabel: text,
+    links: z.array(link).length(3),
     close: text,
   }),
   /**
