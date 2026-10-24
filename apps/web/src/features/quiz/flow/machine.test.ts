@@ -57,10 +57,13 @@ describe('steps', () => {
       'activity',
       'strength',
       'lifestyle',
+      'extraGoals',
       'notes',
     ]);
     expect(questionNumber('body')).toBe(2);
-    expect(questionNumber('notes')).toBe(11);
+    // Stage 3 (§6): the new question is the 11th, the notes the 12th.
+    expect(questionNumber('extraGoals')).toBe(11);
+    expect(questionNumber('notes')).toBe(12);
   });
 
   it('«Нет» skips the sub-steps, «Да» shows them', () => {
@@ -318,7 +321,7 @@ describe('machine', () => {
 });
 
 describe('progress', () => {
-  it('slots of 11, sub-steps at +½, the game by decisive answers, 100 % only in the finale', () => {
+  it('slots of 12, sub-steps at +½, the game by decisive answers, 100 % only in the finale', () => {
     const base = initialQuizState(1, NOW);
     expect(progressOf(base)).toBe(0);
     expect(
@@ -326,10 +329,11 @@ describe('progress', () => {
         screen: 'taste',
         answers: { ...base.answers, tasteDecisions: tenDecisions.slice(0, 5) },
       }),
-    ).toBeCloseTo(0.5 / 11, 10);
-    expect(progressOf({ screen: 'body', answers: base.answers })).toBeCloseTo(1 / 11, 10);
-    expect(progressOf({ screen: 'goalSetup', answers: base.answers })).toBeCloseTo(2.5 / 11, 10);
-    expect(progressOf({ screen: 'notes', answers: base.answers })).toBeCloseTo(10 / 11, 10);
+    ).toBeCloseTo(0.5 / 12, 10);
+    expect(progressOf({ screen: 'body', answers: base.answers })).toBeCloseTo(1 / 12, 10);
+    expect(progressOf({ screen: 'goalSetup', answers: base.answers })).toBeCloseTo(2.5 / 12, 10);
+    expect(progressOf({ screen: 'extraGoals', answers: base.answers })).toBeCloseTo(10 / 12, 10);
+    expect(progressOf({ screen: 'notes', answers: base.answers })).toBeCloseTo(11 / 12, 10);
     expect(progressOf({ screen: 'adjustments', answers: base.answers })).toBeLessThan(1);
     expect(progressOf({ screen: 'finale', answers: base.answers })).toBe(1);
   });

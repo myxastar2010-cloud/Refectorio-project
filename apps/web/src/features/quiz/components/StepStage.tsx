@@ -18,6 +18,7 @@ import { useQuiz } from '../quizContext';
 import { preloadQuizIcons, type QuizIconName } from '../quizIcons';
 import { AdjustmentsScreen } from '../steps/AdjustmentsScreen';
 import { ChipsStep } from '../steps/ChipsStep';
+import { ExtraGoalsStep } from '../steps/ExtraGoalsStep';
 import { OptionsStep } from '../steps/OptionsStep';
 import { RowsStep } from '../steps/RowsStep';
 import { TextStep } from '../steps/TextStep';
@@ -54,6 +55,13 @@ const OPTION_ICONS: Partial<Record<Screen, QuizIconName[]>> = {
     'o-life-moving',
     'o-life-labour',
   ],
+  extraGoals: [
+    'o-extra-clothes',
+    'o-extra-health',
+    'o-extra-fitness',
+    'o-extra-energy',
+    'o-extra-sleep',
+  ],
 };
 
 function ScreenBody({ screen }: { readonly screen: Screen }): ReactNode {
@@ -77,6 +85,8 @@ function ScreenBody({ screen }: { readonly screen: Screen }): ReactNode {
     case 'healthConditions':
     case 'allergens':
       return <ChipsStep step={screen} />;
+    case 'extraGoals':
+      return <ExtraGoalsStep />;
     case 'dislikesText':
     case 'notes':
       return <TextStep step={screen} />;

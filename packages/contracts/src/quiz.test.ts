@@ -94,6 +94,19 @@ describe('QuizAnswersV1', () => {
     expect('notes' in input).toBe(false);
   });
 
+  it('extra goals (stage 3, §6): optional — stage-2 results stay valid; passed to nutrition-core as they are', () => {
+    // A stage-2 result has no extraGoals at all.
+    expect(issues(adult())).toEqual([]);
+    expect('extraGoals' in toQuestionnaireInput(adult())).toBe(false);
+    const skipped = adult({ extraGoals: [] });
+    expect(issues(skipped)).toEqual([]);
+    const chosen = adult({ extraGoals: ['energy', 'sleep'] });
+    expect(issues(chosen)).toEqual([]);
+    const input = validateQuestionnaire(toQuestionnaireInput(chosen));
+    expect(input.ok && input.value.extraGoals).toEqual(['energy', 'sleep']);
+    expect(issues({ ...chosen, extraGoals: ['sixPack'] })).toEqual(['extraGoals.0']);
+  });
+
   it('rejects pregnancy or lactation for sex male', () => {
     const answers = adult();
     expect(

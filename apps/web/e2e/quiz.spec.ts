@@ -61,6 +61,12 @@ async function toHealthChips(page: Page) {
   await choose(page, 'Да', 'healthConditions');
 }
 
+/** «Помимо вашей основной цели…» (§6): «Пропустить» goes on with none. */
+async function skipExtraGoals(page: Page) {
+  await page.getByRole('button', { name: 'Пропустить', exact: true }).click();
+  await onScreen(page, 'notes');
+}
+
 /** Waits for the finite animations only (the finale's shimmer and core pulse never end). */
 async function axeSerious(page: Page) {
   // Panels morph on motion values (not in document.getAnimations()), and a notice may not have started its fade yet
@@ -248,7 +254,7 @@ test.describe('the dish game', () => {
     await onScreen(page, 'taste');
     await playDishes(page, TEN_DECISIVE.slice(9));
     await onScreen(page, 'body', 'О вас');
-    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'Вопрос 2 из 11');
+    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'Вопрос 2 из 12');
   });
 
   test('Back undoes the last answer — also from «О вас», where the last card comes back', async ({
@@ -349,7 +355,14 @@ test.describe('the whole path', () => {
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
-    await choose(page, 'В основном сидя', 'notes');
+    await choose(page, 'В основном сидя', 'extraGoals');
+    // Several answers (§6): «Готово» rises in with the first one.
+    await expect(page.getByRole('button', { name: 'Готово' })).toHaveCount(0);
+    await page.getByRole('checkbox', { name: 'Увеличить запас сил' }).click();
+    await page.getByRole('checkbox', { name: 'Лучше спать' }).click();
+    await expect(page.getByRole('checkbox', { name: 'Лучше спать' })).toBeChecked();
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await onScreen(page, 'notes');
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
     await expect(page.locator('.quiz-caption-item')).toContainText('Анализируем ответы', {
@@ -360,12 +373,14 @@ test.describe('the whole path', () => {
     const saved = JSON.parse(result ?? '{}') as Record<string, unknown> & {
       allergies: { items: { code: string }[]; custom: string[] };
       dislikesText: string;
+      extraGoals: string[];
       taste: { decisions: unknown[] };
     };
     expect(saved.version).toBe(1);
     expect(saved.allergies.items.map((item) => item.code)).toEqual(['CRUSTACEAN']);
     expect(saved.allergies.custom).toEqual(['креветки']);
     expect(saved.dislikesText).toBe('Оливки и печень');
+    expect(saved.extraGoals).toEqual(['energy', 'sleep']);
     expect(saved.taste.decisions).toHaveLength(10);
     // «Вернуться» is hidden in the finale; «Выйти» works.
     await expect(page.getByRole('button', { name: 'Вернуться', exact: true })).toBeHidden();
@@ -385,7 +400,8 @@ test.describe('the whole path', () => {
     await choose(page, 'Нет', 'dislikes');
     await choose(page, 'Нет', 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
-    await choose(page, 'В основном сидя', 'notes');
+    await choose(page, 'В основном сидя', 'extraGoals');
+    await skipExtraGoals(page);
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
     await expect(page.getByText('Ответы (проверенный JSON)')).toBeVisible();
@@ -404,7 +420,8 @@ test.describe('the whole path', () => {
     await choose(page, 'Нет', 'dislikes');
     await choose(page, 'Нет', 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
-    await choose(page, 'В основном сидя', 'notes');
+    await choose(page, 'В основном сидя', 'extraGoals');
+    await skipExtraGoals(page);
     // The honest line comes after 40 s: the page clock jumps over them. A jump, not runFor: running 45 s of animation
     // frames one by one took WebKit most of the test's budget (a timeout under load in the stage-3 baseline).
     await page.clock.install();
@@ -505,7 +522,8 @@ test.describe('safety', () => {
     await choose(page, 'Нет', 'dislikes');
     await choose(page, 'Нет', 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
-    await choose(page, 'В основном сидя', 'notes');
+    await choose(page, 'В основном сидя', 'extraGoals');
+    await skipExtraGoals(page);
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale', 'Персональное меню — вместе с врачом');
     await page.getByRole('button', { name: 'Изменить ответы' }).click();
@@ -678,6 +696,25 @@ test.describe("health chips: the design's five, the rest through «+» (4.13)", 
     const notice = page.getByRole('alertdialog');
     await expect(notice).toContainText('меньше цифр');
     await expect(notice).toContainText('112');
+  });
+});
+
+test.describe('«Помимо вашей основной цели…» (§6)', () => {
+  test('a teenager sees no body-image answer; «Пропустить» stores none and goes on', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=1&step=extraGoals&state=teen#quiz');
+    await inQuiz(page);
+    const answers = page.getByRole('group', { name: /Помимо вашей основной цели/ });
+    await expect(answers.getByRole('checkbox')).toHaveCount(4);
+    await expect(answers.getByRole('checkbox', { name: /одежда/ })).toHaveCount(0);
+    // Digits toggle the n-th answer; the check fills.
+    await page.keyboard.press('2');
+    await expect(answers.getByRole('checkbox').nth(1)).toBeChecked();
+    await page.keyboard.press('2');
+    await expect(answers.getByRole('checkbox').nth(1)).not.toBeChecked();
+    await skipExtraGoals(page);
+    expect((await draft(page))?.answers.extraGoals).toEqual([]);
   });
 });
 

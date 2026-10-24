@@ -2,10 +2,12 @@ import {
   activityFromLifestyle,
   AGE_LIMITS,
   cleanItems,
+  EXTRA_GOALS,
   evaluateGuardrails,
   validateQuestionnaire,
   type AllergenCode,
   type AllergenLevel,
+  type ExtraGoal,
   type GuardrailDecision,
   type HealthFlag,
   type Lactation,
@@ -84,6 +86,17 @@ export function unmatchedHealthTexts(answers: Answers): string[] {
   return cleanItems(answers.healthCustom).filter(
     (text) => !matchHealthChips(text, subject).some((match) => active.includes(match.chip)),
   );
+}
+
+/**
+ * The answers of «Помимо вашей основной цели…» this person may see (§6): no «Чтобы моя одежда лучше сидела» — a body-
+ * image focus — under 18 or with an eating disorder (R08; reconcile drops it if that comes later).
+ */
+export function extraGoalOptions(answers: Answers): ExtraGoal[] {
+  const bodyImage =
+    (answers.ageYears ?? 30) >= AGE_LIMITS.minorUnderYears &&
+    !activeHealthChips(answers).includes('eatingDisorder');
+  return EXTRA_GOALS.filter((goal) => goal !== 'clothesFit' || bodyImage);
 }
 
 const DIRECT_FLAGS: Partial<Record<HealthChipId, HealthFlag>> = {

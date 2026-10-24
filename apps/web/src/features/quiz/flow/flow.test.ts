@@ -1,7 +1,7 @@
 import { quizAnswersV1Schema, type TasteProfileV1 } from '@refectorio/contracts';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { matchAllergenChips } from './allergenSynonyms';
-import { initialQuizState } from './machine';
+import { initialQuizState, reconcile } from './machine';
 import {
   deleteAll,
   DRAFT_KEY,
@@ -15,11 +15,13 @@ import { buildResult } from './result';
 import {
   allergenItems,
   eligibleHealthChips,
+  extraGoalOptions,
   healthFlags,
   ketoAllowed,
   safetyOf,
   visibleHealthChips,
 } from './safety';
+import { firstIncompleteStep, nextStepId } from './steps';
 import type { Answers, QuizState } from './types';
 
 const NOW = '2026-10-09T10:00:00.000Z';
@@ -274,10 +276,88 @@ describe('result', () => {
     expect(result?.activity.strengthTraining).toBe(false);
   });
 
+  it('extra goals (§6): chosen, skipped ([]) or never asked (family mode: absent)', () => {
+    expect(
+      buildResult(complete({ extraGoals: ['energy', 'sleep'] }), taste, NOW)?.extraGoals,
+    ).toEqual(['energy', 'sleep']);
+    expect(buildResult(complete({ extraGoals: [] }), taste, NOW)?.extraGoals).toEqual([]);
+    const stage2 = buildResult(complete(), taste, NOW);
+    expect(stage2 && 'extraGoals' in stage2).toBe(false);
+    // A body-image answer never reaches the result of someone who may not see it.
+    expect(
+      buildResult(
+        complete({ ageYears: 16, goal: 'maintain', extraGoals: ['clothesFit', 'sleep'] }),
+        taste,
+        NOW,
+      )?.extraGoals,
+    ).toEqual(['sleep']);
+  });
+
   it('returns null while something required is missing', () => {
     const state = complete();
     const { lifestyle, ...rest } = state.answers;
     expect(lifestyle).toBe('mostlySitting');
     expect(buildResult({ ...state, answers: rest }, taste, NOW)).toBeNull();
+  });
+});
+
+describe('«Помимо вашей основной цели…» (stage 3, §6)', () => {
+  const adult = with_({ sex: 'female', ageYears: 30, heightCm: 165 });
+
+  it('is second to last, and not asked in family mode', () => {
+    expect(nextStepId('lifestyle', adult)).toBe('extraGoals');
+    expect(nextStepId('extraGoals', adult)).toBe('notes');
+    expect(nextStepId('lifestyle', { ...adult, ageYears: 9, familyConfirmed: true })).toBe('notes');
+  });
+
+  it('no «одежда лучше сидела» under 18 or with an eating disorder (R08)', () => {
+    expect(extraGoalOptions(adult)).toEqual([
+      'clothesFit',
+      'overallHealth',
+      'fitness',
+      'energy',
+      'sleep',
+    ]);
+    expect(extraGoalOptions({ ...adult, ageYears: 16 })).not.toContain('clothesFit');
+    expect(
+      extraGoalOptions({ ...adult, health: 'yes', healthChips: ['eatingDisorder'] }),
+    ).not.toContain('clothesFit');
+  });
+
+  it('an eating disorder added later («Вернуться») drops the answer quietly', () => {
+    const state: QuizState = {
+      ...initialQuizState(3, NOW),
+      screen: 'healthConditions',
+      answers: {
+        ...adult,
+        health: 'yes',
+        healthChips: ['eatingDisorder'],
+        extraGoals: ['clothesFit', 'energy'],
+      },
+    };
+    expect(reconcile(state, 'healthConditions').answers.extraGoals).toEqual(['energy']);
+  });
+
+  it('a stage-2 draft resumes at the new question by its id; a skip counts as an answer', () => {
+    const stage2: Answers = with_({
+      tasteDecisions: Array.from({ length: 10 }, (_, i) => ({
+        dishId: `d_dish_${i}`,
+        answer: 'like' as const,
+      })),
+      sex: 'female',
+      ageYears: 30,
+      heightCm: 165,
+      weightKg: 70,
+      goal: 'maintain',
+      foodStyle: 'omnivore',
+      macroProfile: 'recommended',
+      health: 'no',
+      allergy: 'no',
+      dislikes: 'no',
+      exercise: 'none',
+      lifestyle: 'mostlySitting',
+    });
+    expect(firstIncompleteStep(stage2)).toBe('extraGoals');
+    expect(firstIncompleteStep({ ...stage2, extraGoals: [] })).toBeNull();
   });
 });

@@ -5,7 +5,15 @@ import {
   type TasteProfileV1,
 } from '@refectorio/contracts';
 import { activityFromLifestyle, cleanItems } from '@refectorio/nutrition-core';
-import { allergenItems, healthFlags, lactationOf, pregnancyOf, safetyOf } from './safety';
+import {
+  allergenItems,
+  extraGoalOptions,
+  healthFlags,
+  lactationOf,
+  pregnancyOf,
+  safetyOf,
+} from './safety';
+import { isShown, stepDef } from './steps';
 import { FOOD_STYLE_DIET, type QuizState } from './types';
 
 /**
@@ -46,6 +54,11 @@ export function buildResult(
       : {};
   const dislikesText = a.dislikes === 'yes' ? a.dislikesText.trim() : '';
   const notes = a.notes.trim();
+  // Asked only outside family mode; what the person may no longer see (reconcile) never reaches the result.
+  const extraGoals =
+    isShown(stepDef('extraGoals'), a) && a.extraGoals
+      ? a.extraGoals.filter((goal) => extraGoalOptions(a).includes(goal))
+      : undefined;
   const candidate: QuizAnswersV1 = {
     version: QUIZ_ANSWERS_VERSION,
     createdAt: state.startedAt,
@@ -80,6 +93,7 @@ export function buildResult(
       group: activity.group,
     },
     ...(notes ? { notes } : {}),
+    ...(extraGoals ? { extraGoals } : {}),
     guardrails: decision,
     adjustments: [...state.adjustments],
   };

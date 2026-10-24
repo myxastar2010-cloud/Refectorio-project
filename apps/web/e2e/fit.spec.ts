@@ -24,6 +24,7 @@ const STATES: Readonly<Record<string, readonly string[]>> = {
   activity: [''],
   strength: [''],
   lifestyle: [''],
+  extraGoals: ['empty', 'chosen', 'teen'],
   notes: ['empty', 'long'],
   adjustments: [''],
   finale: [''],

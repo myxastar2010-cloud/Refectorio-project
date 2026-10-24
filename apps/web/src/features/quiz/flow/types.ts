@@ -5,7 +5,12 @@ import type {
   SafetyAdjustment,
   TasteDecision,
 } from '@refectorio/contracts';
-import type { ExerciseFrequency, Lifestyle, MacroProfile } from '@refectorio/nutrition-core';
+import type {
+  ExerciseFrequency,
+  ExtraGoal,
+  Lifestyle,
+  MacroProfile,
+} from '@refectorio/nutrition-core';
 import type { AllergenChipId, HealthChipId, NoticeId } from '../../../content/quizSchema';
 
 export type YesNo = 'yes' | 'no';
@@ -56,6 +61,8 @@ export type Answers = {
   readonly exercise?: ExerciseFrequency;
   readonly strength?: YesNo;
   readonly lifestyle?: Lifestyle;
+  /** «Помимо вашей основной цели…» (stage 3, §6): undefined — not answered yet; [] — skipped. */
+  readonly extraGoals?: readonly ExtraGoal[];
   readonly notes: string;
 };
 
@@ -91,6 +98,7 @@ export const STEP_IDS = [
   'activity',
   'strength',
   'lifestyle',
+  'extraGoals',
   'notes',
 ] as const;
 export type StepId = (typeof STEP_IDS)[number];

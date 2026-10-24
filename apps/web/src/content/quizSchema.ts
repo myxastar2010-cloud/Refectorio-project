@@ -254,6 +254,18 @@ export const quizContentSchema = z.object({
       physicalLabour: text,
     }),
   }),
+  /** «Помимо вашей основной цели…» (stage 3, §6): several answers, or «Пропустить». */
+  extraGoals: z.object({
+    title: text,
+    options: z.object({
+      clothesFit: text,
+      overallHealth: text,
+      fitness: text,
+      energy: text,
+      sleep: text,
+    }),
+    skip: text,
+  }),
   notes: z.object({ title: text, placeholder: text }),
   notices: z.object(
     Object.fromEntries(NOTICE_IDS.map((id) => [id, text])) as Record<NoticeId, typeof text>,

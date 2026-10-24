@@ -6,7 +6,7 @@ import {
 } from '@refectorio/contracts';
 import { AGE_LIMITS, targetWeightBoundsKg, type ReasonCode } from '@refectorio/nutrition-core';
 import type { NoticeId } from '../../../content/quizSchema';
-import { activeHealthChips, ketoAllowed, safetyOf } from './safety';
+import { activeHealthChips, extraGoalOptions, ketoAllowed, safetyOf } from './safety';
 import { nextStepId, stepDef, TOTAL_SLOTS } from './steps';
 import { emptyAnswers, type Answers, type QuizState, type Screen, type StepId } from './types';
 
@@ -147,6 +147,13 @@ export function reconcile(state: QuizState, step: StepId): Reconciled {
     answers = { ...answers, goal: 'maintain' };
     adjustments.add('goalToMaintain');
     queue('noValidTarget');
+  }
+
+  // «Чтобы моя одежда лучше сидела» chosen, then an eating disorder or an age under 18 came: it is dropped quietly.
+  if (answers.extraGoals) {
+    const allowed = extraGoalOptions(answers);
+    const kept = answers.extraGoals.filter((goal) => allowed.includes(goal));
+    if (kept.length !== answers.extraGoals.length) answers = { ...answers, extraGoals: kept };
   }
 
   // A target left over from another goal, a corrected height or age: the target row asks again.

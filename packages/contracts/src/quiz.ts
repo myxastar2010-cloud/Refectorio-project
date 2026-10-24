@@ -4,6 +4,7 @@ import {
   ALLERGEN_LEVELS,
   DISH_RULES,
   EXERCISE_FREQUENCIES,
+  EXTRA_GOALS,
   GOALS,
   GUARDRAIL_STATUSES,
   HEALTH_FLAGS,
@@ -112,6 +113,11 @@ export const quizAnswersV1Schema = z
       group: z.enum(ACTIVITY_GROUPS),
     }),
     notes: z.string().max(INPUT_LIMITS.notesMaxLength).optional(),
+    /**
+     * Stage 3 (§6): absent in stage-2 results, for a question never reached and in family mode; [] — skipped. An
+     * optional field: version 1 stays valid (D-055).
+     */
+    extraGoals: z.array(z.enum(EXTRA_GOALS)).optional(),
     guardrails: guardrailSnapshotSchema,
     adjustments: z.array(z.enum(SAFETY_ADJUSTMENTS)),
   })
@@ -154,7 +160,7 @@ export type QuestionnaireAnswers = Pick<
   QuizAnswersV1,
   'body' | 'goal' | 'diet' | 'macroProfile' | 'health' | 'allergies' | 'activity'
 > &
-  Partial<Pick<QuizAnswersV1, 'dislikesText' | 'notes'>>;
+  Partial<Pick<QuizAnswersV1, 'dislikesText' | 'notes' | 'extraGoals'>>;
 
 /** Quiz answers → nutrition-core questionnaire (then validateQuestionnaire → guardrails → norms). */
 export function toQuestionnaireInput(answers: QuestionnaireAnswers): QuestionnaireInput {
@@ -178,5 +184,6 @@ export function toQuestionnaireInput(answers: QuestionnaireAnswers): Questionnai
     allergensOther: allergies.custom,
     ...(answers.dislikesText ? { dislikesOther: answers.dislikesText } : {}),
     ...(answers.notes ? { notes: answers.notes } : {}),
+    ...(answers.extraGoals ? { extraGoals: answers.extraGoals } : {}),
   };
 }
