@@ -377,11 +377,11 @@ export const quiz = {
     captions: [
       { text: 'Анализируем ответы', icon: 'listSearch' },
       { text: 'Считаем калории и БЖУ', icon: 'calculator' },
+      { text: 'Ищем подходящие блюда', icon: 'worldSearch' },
       { text: 'Составляем рацион', icon: 'calendar' },
-      { text: 'Выбираем блюда', icon: 'toolsKitchen' },
-      { text: 'Пишем рецепты', icon: 'chefHat' },
       { text: 'Чертим таблицу', icon: 'table' },
       { text: 'Собираем список покупок', icon: 'shoppingCart' },
+      { text: 'Пишем рецепты', icon: 'chefHat' },
       { text: 'Последние штрихи', icon: 'sparkles' },
     ],
     captionsCalm: { replace: 'Считаем калории и БЖУ', with: 'Подбираем баланс' },
@@ -400,7 +400,7 @@ export const quiz = {
       change: 'Изменить ответы',
       home: 'На главную',
     },
-    revealPlaceholder: 'Меню появится в задании 3',
+    revealPlaceholder: 'Меню появится на следующем этапе',
     debugTitle: 'Ответы (проверенный JSON)',
   },
 } satisfies QuizContent;

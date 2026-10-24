@@ -244,7 +244,8 @@ export function StepStage({ instant }: { readonly instant: boolean }) {
     if (!nearTheEnd) return undefined;
     return whenIdle(() => {
       void loadFinale();
-      void import('../finale/coreGl');
+      void import('../finale/story/story');
+      void import('../finale/story/story-data.json');
     }, QUIZ.finalePrefetchIdleMs);
   }, [nearTheEnd]);
 

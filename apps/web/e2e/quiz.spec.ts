@@ -555,6 +555,53 @@ test.describe('the whole path', () => {
   });
 });
 
+test.describe('the generation story (stage 3, §7)', () => {
+  const inked = (page: Page) =>
+    page.locator('.quiz-story-canvas').evaluate((canvas: HTMLCanvasElement) => {
+      const data = canvas.getContext('2d')?.getImageData(0, 0, canvas.width, canvas.height).data;
+      let count = 0;
+      if (data) for (let i = 3; i < data.length; i += 16) if ((data[i] ?? 0) > 0) count += 1;
+      return count;
+    });
+
+  test('grows from the dot into drawings, its captions follow the scenes; the dots loop', async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await page.goto('./?seed=11&step=finale&demo#quiz');
+    const caption = page.locator('.quiz-caption-item');
+    await expect(caption).toContainText('Анализируем ответы', { timeout: 15_000 });
+    await expect.poll(() => inked(page)).toBeGreaterThan(200);
+    // The test hook starts at a later scene: the planet, then the endless dots.
+    await page.goto('./?seed=11&step=finale&demo&story=planet#quiz');
+    await expect(caption).toContainText('Ищем подходящие блюда', { timeout: 15_000 });
+    await page.goto('./?seed=11&step=finale&demo&story=dots#quiz');
+    await expect(caption).toContainText('Последние штрихи', { timeout: 15_000 });
+    await expect.poll(() => inked(page)).toBeGreaterThan(200);
+    expect(errors).toEqual([]);
+  });
+
+  test('reduced motion: still drawings cross-fade, the captions change with them', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.clock.install();
+    await page.goto('./?seed=11&step=finale&demo#quiz');
+    // The whole caption line: while one caption leaves, the next is already there.
+    const caption = page.locator('.quiz-finale-captions');
+    await expect(caption).toContainText('Анализируем ответы', { timeout: 15_000 });
+    await expect
+      .poll(
+        async () => {
+          await page.clock.runFor(1_000);
+          return caption.textContent();
+        },
+        { timeout: 30_000 },
+      )
+      .toContain('Ищем подходящие блюда');
+  });
+});
+
 test.describe('the wheel', () => {
   test('typed digits add up, and «Готово» keeps the typed value without Enter', async ({
     page,

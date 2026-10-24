@@ -2,11 +2,7 @@ import type { FoodSprite } from '../../lib/assets';
 import { DESIGN_POSE } from './designPose';
 import {
   assignSprites,
-  ATTRACT,
-  attractVelocity,
   createRandom,
-  dissolveOpacity,
-  edgePoint,
   FRESH_PROBE,
   maskHit,
   probeFrame,
@@ -16,7 +12,6 @@ import {
   stepSpring,
   toLocal,
   wrap,
-  type Attractor,
   type FpsProbe,
   type Random,
   type Rect,
@@ -90,8 +85,6 @@ export type FieldOptions = {
    */
   readonly visibleArea: (width: number, height: number) => Rect;
   readonly device: () => Device;
-  /** Opacity of the pre-blurred plane (CSS --food-about-opacity): the finale's dissolve multiplies it. */
-  readonly blurOpacity: number;
 };
 
 type Item = {
@@ -113,9 +106,6 @@ type Item = {
   sharp: HTMLElement;
   blur: HTMLElement | null;
   hidden: boolean;
-  /** Written opacity (the finale dissolves food in its core) and the fade-in after a respawn. */
-  opacity: number;
-  fade: number;
 };
 
 const sizesAttr = (px: number) => `${Math.round(px)}px`;
@@ -160,9 +150,6 @@ export function createFoodField(options: FieldOptions) {
   let speedFactor = 1;
   /** Strength of the soft avoidance of open text (the quiz uses a gentler push around its central column). */
   let avoidStrength = 1;
-  /** The finale's core (ТЗ §12.2) and how much of the motion it drives now (blended in and out). */
-  let attractor: Attractor | null = null;
-  let attractMix = 0;
   let raf = 0;
   let last = 0;
   let time = 0;
@@ -309,31 +296,7 @@ export function createFoodField(options: FieldOptions) {
       sharp,
       blur: null,
       hidden: false,
-      opacity: 1,
-      fade: 1,
     };
-  }
-
-  /**
-   * The finale's dissolve (it runs in the quiz, where the pre-blurred plane is the visible one). At 1 the inline value
-   * is removed and the CSS cross-fade owns the opacity again. Tiny steps are skipped; the ends always land exactly.
-   */
-  function setOpacity(item: Item, opacity: number) {
-    const end = opacity === 0 || opacity === 1;
-    if (opacity === item.opacity || (!end && Math.abs(opacity - item.opacity) < 0.004)) return;
-    item.opacity = opacity;
-    if (item.blur)
-      item.blur.style.opacity = opacity >= 1 ? '' : (options.blurOpacity * opacity).toFixed(3);
-  }
-
-  /** An item that has dissolved in the core comes back from the edge of the view, fading in. */
-  function respawn(item: Item, radius: number) {
-    const point = edgePoint(random, area, radius);
-    item.x = point.x;
-    item.y = point.y;
-    item.pushX = 0;
-    item.pushY = 0;
-    item.fade = 0;
   }
 
   function render(item: Item) {
@@ -349,11 +312,6 @@ export function createFoodField(options: FieldOptions) {
 
   function step(dt: number) {
     time += dt;
-    const target = attractor ? 1 : 0;
-    attractMix =
-      target > attractMix
-        ? Math.min(target, attractMix + dt / ATTRACT.blendS)
-        : Math.max(target, attractMix - dt / ATTRACT.blendS);
     const decayPush = Math.exp(-dt / FIELD.avoidDragS);
     const decayImpulse = Math.exp(-dt / FIELD.impulseDecayS);
     for (const item of items) {
@@ -377,15 +335,8 @@ export function createFoodField(options: FieldOptions) {
       item.pushY *= decayPush;
       item.impulseY *= decayImpulse;
       item.spinKick *= decayImpulse;
-      // Drawn into the finale's core, the food keeps only a little of its own wandering.
-      const own = 1 - 0.6 * attractMix;
-      item.x += (Math.cos(heading) * speed * own + item.pushX) * dt;
-      item.y += (Math.sin(heading) * speed * own + item.pushY + item.impulseY) * dt;
-      if (attractor && attractMix > 0) {
-        const pull = attractVelocity(item, attractor);
-        item.x += pull.x * attractMix * speedFactor * dt;
-        item.y += pull.y * attractMix * speedFactor * dt;
-      }
+      item.x += (Math.cos(heading) * speed + item.pushX) * dt;
+      item.y += (Math.sin(heading) * speed + item.pushY + item.impulseY) * dt;
       if (quality < 1) item.angle += (item.spin * speedFactor + item.spinKick) * dt;
       // Part 2 shows the pre-blurred copy, larger than the sprite (transparent padding for the blur): it must be off
       // screen too. Part 1 shows only the sprite — a wider margin there would just keep food off screen longer.
@@ -398,15 +349,6 @@ export function createFoodField(options: FieldOptions) {
       if (wrapped.x !== item.x || wrapped.y !== item.y) rebalance(item);
       item.x = wrapped.x;
       item.y = wrapped.y;
-      let opacity = 1;
-      if (attractor && attractMix > 0) {
-        const distance = Math.hypot(item.x - attractor.x, item.y - attractor.y);
-        const dissolve = dissolveOpacity(distance, attractor.radiusPx);
-        if (dissolve <= 0) respawn(item, radius);
-        else opacity = 1 - attractMix * (1 - dissolve);
-      }
-      item.fade = Math.min(1, item.fade + dt / ATTRACT.fadeInS);
-      setOpacity(item, item.fade < 1 ? opacity * item.fade : opacity);
       item.bounce = stepSpring(item.bounce, dt, FIELD.bounce.stiffness, FIELD.bounce.damping);
       render(item);
     }
@@ -503,10 +445,6 @@ export function createFoodField(options: FieldOptions) {
     },
     setAvoidStrength(factor: number) {
       avoidStrength = factor;
-    },
-    /** The finale's core pulls the food in (null: back to drifting; both blend over ATTRACT.blendS). */
-    setAttractor(next: Attractor | null) {
-      attractor = next;
     },
     /** A scene change or the team card has just started: not a moment to judge the device by. */
     pauseProbe() {

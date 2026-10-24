@@ -1,16 +1,7 @@
 import type { QuizAnswersV1 } from '@refectorio/contracts';
 import { AnimatePresence, m } from 'motion/react';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { quiz } from '../../../content/quiz.ru';
-import { setFoodAttractor } from '../../../engine/food-field/attractorChannel';
 import { focusQuietly } from '../../../lib/quietFocus';
 import { DURATION, EASE_OUT_SOFT, FINALE } from '../../../motion/tokens';
 import { PillButton } from '../components/PillButton';
@@ -21,13 +12,10 @@ import { buildResult } from '../flow/result';
 import { useQuiz } from '../quizContext';
 import { tasteProfileOf } from '../tinder/tasteSession';
 import { Captions } from './Captions';
-import { captionDurationMs, captionsFor } from './captionPlan';
-import { Core } from './Core';
+import { captionsFor } from './captionPlan';
 import { Handoff, type Box, type Point } from './Handoff';
 import { RevealWave } from './RevealWave';
-
-/** The core's body radius as a share of the canvas half-size (the food dissolves around it). */
-const CORE_BODY_SHARE = 0.3;
+import { Story } from './Story';
 
 /** `?debug=answers`: the validated JSON of the answers. */
 function DebugAnswers({ result }: { readonly result: QuizAnswersV1 | null }) {
@@ -39,17 +27,18 @@ function DebugAnswers({ result }: { readonly result: QuizAnswersV1 | null }) {
   );
 }
 
-/** The core's box: up to 520 CSS px, smaller on short or narrow screens. */
+/** The story's box (§7.1): min(520 px, 100vw − 32 px, 55svh). */
 function coreSize(): number {
   return Math.round(
-    Math.min(FINALE.canvasMaxPx, window.innerWidth * 0.86, window.innerHeight * 0.52),
+    Math.min(FINALE.canvasMaxPx, window.innerWidth - 32, window.innerHeight * 0.55),
   );
 }
 
 /**
- * «Готовим меню» (ТЗ §12): the bar fills to 100 % with a shimmer, detaches, becomes a red dot, glides to the centre and
- * grows into the core; captions change under it; the food spirals into it. Generation never ends in stage 2 — after
- * ≈ 40 s an honest line says so (hidden by `?demo`).
+ * «Готовим меню» (ТЗ §12, stage 3 §7): the bar fills to 100 % with a shimmer, detaches, becomes a red dot and glides to
+ * the centre, where it becomes the pencil's tip of the generation story; the captions follow its scenes. The food keeps
+ * drifting, blurred, as in the other steps. Generation never ends yet — after ≈ 40 s an honest line says so (hidden by
+ * `?demo`).
  */
 function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
   const { safety, calm, params, announce, detachBar, restart } = useQuiz();
@@ -78,10 +67,13 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
     return box ? { x: box.left + box.width / 2, y: box.top + box.height / 2 } : null;
   }, []);
 
-  // The bar has filled and shimmered: it detaches here (the header hides its own in the same render).
+  // The bar has filled and shimmered: it detaches here (the header hides its own in the same render). Once: detaching
+  // re-renders the quiz, and a second hand-off would send another dot across the story.
+  const handedOff = useRef(false);
   useEffect(() => {
-    if (calm) return undefined;
+    if (calm || handedOff.current) return undefined;
     const timer = window.setTimeout(() => {
+      handedOff.current = true;
       const bar = document.querySelector('.quiz-progress')?.getBoundingClientRect();
       const to = center();
       if (!bar || !to || bar.width === 0) {
@@ -100,25 +92,14 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
     };
   }, [calm, center, detachBar]);
 
-  // Captions: the first once the core grows, then one after another; the last one stays.
-  useEffect(() => {
-    if (!grown) return undefined;
-    let index = 0;
-    let timer = window.setTimeout(function show() {
+  // Captions follow the story's scenes; screen readers hear the first and the last.
+  const onCaption = useCallback(
+    (index: number) => {
       setCaptionIndex(index);
-      if (index === 0) announce(captions[0]?.text ?? '');
-      if (index === captions.length - 1) {
-        announce(captions[index]?.text ?? '');
-        return;
-      }
-      const wait = captionDurationMs(index);
-      index += 1;
-      timer = window.setTimeout(show, wait);
-    }, FINALE.firstCaptionMs);
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [grown, captions, announce]);
+      if (index === 0 || index === captions.length - 1) announce(captions[index]?.text ?? '');
+    },
+    [captions, announce],
+  );
 
   // The honest line and the reveal demo.
   useEffect(() => {
@@ -147,21 +128,6 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
     };
   }, [params.demo, params.revealDemo, center, announce, unmatchedHealth]);
 
-  // The food spirals into the core while it is shown (ТЗ §12.2).
-  useLayoutEffect(() => {
-    if (!grown || calm) return undefined;
-    const publish = () => {
-      const point = center();
-      if (point) setFoodAttractor({ ...point, radiusPx: (size / 2) * CORE_BODY_SHARE });
-    };
-    publish();
-    window.addEventListener('resize', publish);
-    return () => {
-      window.removeEventListener('resize', publish);
-      setFoodAttractor(null);
-    };
-  }, [grown, calm, center, size]);
-
   const onArrived = useCallback(() => {
     setGrown(true);
     setHandoff(null);
@@ -177,13 +143,15 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
         {quiz.finale.generatingLabel}
       </h2>
       <div ref={coreBoxRef} className="quiz-finale-core" data-shown={grown || undefined}>
-        <Core
-          grown={grown}
-          pulse={captionIndex + 1}
-          dotPx={dotPx}
+        <Story
+          started={grown}
           sizePx={size}
+          dotPx={dotPx}
           calm={calm}
           paused={honest}
+          seed={params.seed ?? 0}
+          onCaption={onCaption}
+          startAt={params.story}
         />
       </div>
       <div className="quiz-finale-captions">

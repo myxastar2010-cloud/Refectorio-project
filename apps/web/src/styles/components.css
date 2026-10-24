@@ -628,11 +628,6 @@ html[data-modality='keyboard']
   opacity: var(--food-about-opacity);
 }
 
-/* The quiz finale dissolves the food in its core frame by frame (engine.ts): no transition may lag behind. */
-.food-layer[data-attract] .food-item {
-  transition: none;
-}
-
 .food-item picture,
 .food-item img {
   display: block;

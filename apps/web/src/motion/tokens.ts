@@ -358,16 +358,42 @@ export const FINALE = {
   shimmerMs: 900,
   dotMs: 520,
   glideMs: 700,
-  /** The dot grows into the full core. */
-  introMs: 900,
-  /** The first caption appears once the core has begun to grow. */
-  firstCaptionMs: 350,
-  captionMinMs: 2200,
-  captionMaxMs: 3200,
   captionSpring: { type: 'spring', stiffness: 380, damping: 30, mass: 0.8 },
   honestAfterMs: 40_000,
   revealDemoAfterMs: 6000,
   revealMs: 1600,
   canvasMaxPx: 520,
   dprMax: 2,
+} as const;
+
+/**
+ * The generation story (stage 3, §7; ADR 0013): scene lengths, the transformation between drawings (a cloud of points
+ * on arcs) and the dots that loop forever. Seconds.
+ */
+export const STORY = {
+  scenes: { notebook: 5.0, planet: 3.8, crane: 4.6, robot: 3.6, pot: 3.4, dots: 6 },
+  morph: {
+    durationS: 1.5,
+    /** The old drawing fades out while its points appear on its strokes. */
+    fadeOutS: 0.32,
+    appearS: 0.16,
+    /** Points leave in a wave around the drawing, travel on arcs, then fade as they land. */
+    departS: 0.14,
+    sweepS: 0.36,
+    travelS: 0.82,
+    landS: 0.22,
+    /** The new drawing draws itself on as the points land. */
+    revealFromS: 0.62,
+    revealSweepS: 0.4,
+    revealS: 0.5,
+    /** How far an arc bends (share of the distance) and the trail behind a point (share of its way). */
+    bend: 0.32,
+    trail: 0.06,
+  },
+  dotR: 2.6,
+  /** Reduced motion: still drawings cross-fading. */
+  calmHoldS: 3,
+  calmFadeS: 0.4,
+  /** Halve the points when frames take this long on average (ms). */
+  slowFrameMs: 20,
 } as const;

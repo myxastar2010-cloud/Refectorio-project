@@ -2,12 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { SCENE } from '../../motion/tokens';
 import {
   assignSprites,
-  ATTRACT,
-  attractVelocity,
   cameraVisibleArea,
   createRandom,
-  dissolveOpacity,
-  edgePoint,
   FRESH_PROBE,
   maskHit,
   probeFrame,
@@ -206,35 +202,6 @@ describe('placement', () => {
           expect(sprites[i]).not.toBe(sprites[j]);
       });
     });
-  });
-});
-
-describe('the finale attractor', () => {
-  const core = { x: 500, y: 400, radiusPx: 60 };
-
-  it('pulls inward and swirls around the core, faster closer in', () => {
-    const far = attractVelocity({ x: 1300, y: 400 }, core);
-    expect(far.x).toBeLessThan(0);
-    const near = attractVelocity({ x: 600, y: 400 }, core);
-    expect(Math.abs(near.y)).toBeGreaterThan(Math.abs(far.y));
-    expect(attractVelocity({ x: 500, y: 400 }, core)).toEqual({ x: 0, y: 0 });
-  });
-
-  it('dissolves inside its ring and is gone at the edge of the core', () => {
-    expect(dissolveOpacity(core.radiusPx * ATTRACT.dissolveFrom + 1, core.radiusPx)).toBe(1);
-    expect(dissolveOpacity(core.radiusPx * ATTRACT.dissolveTo, core.radiusPx)).toBe(0);
-    const mid = dissolveOpacity(core.radiusPx * 1.5, core.radiusPx);
-    expect(mid).toBeGreaterThan(0);
-    expect(mid).toBeLessThan(1);
-  });
-
-  it('respawns just outside the area', () => {
-    const random = createRandom(5);
-    const area = { left: 0, top: 0, right: 800, bottom: 600 };
-    for (let i = 0; i < 50; i += 1) {
-      const p = edgePoint(random, area, 20);
-      expect(p.x <= -20 || p.x >= 820 || p.y <= -20 || p.y >= 620).toBe(true);
-    }
   });
 });
 

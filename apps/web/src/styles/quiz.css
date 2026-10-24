@@ -2595,68 +2595,20 @@ html:has(.page[data-scene='quiz']) body {
   place-items: center;
 }
 
-.quiz-core {
+.quiz-story {
   position: relative;
-  display: grid;
-  place-items: center;
   max-width: 100%;
 }
 
-.quiz-core-canvas {
+/* The generation story (§7): a Canvas 2D line drawing in the composition's box. */
+.quiz-story-canvas {
+  display: block;
   width: 100%;
   height: 100%;
-  opacity: 0;
-}
-
-/* The canvas shows from the moment the dot has arrived (the same colour and size at the switch). */
-.quiz-finale-core[data-shown] .quiz-core-canvas[data-ready] {
-  opacity: 1;
-}
-
-.quiz-core-css {
-  width: 48%;
-  height: 48%;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.45) 0%, transparent 32%),
-    radial-gradient(
-      circle at 50% 50%,
-      var(--color-accent) 0%,
-      var(--color-accent) 55%,
-      var(--color-coral) 100%
-    );
-  animation: quiz-core-pulse var(--finale-core-pulse-s) var(--ease-in-out) infinite alternate;
-}
-
-/* The honest line is up: everything that moved in the finale stands still (WCAG 2.2.2). */
-.quiz-core-css.is-paused {
-  animation-play-state: paused;
 }
 
 .quiz-finale[data-paused] .quiz-shimmer {
   display: none;
-}
-
-.quiz-core-css.is-calm {
-  animation: quiz-core-breathe var(--finale-core-breathe-s) var(--ease-in-out) infinite alternate;
-}
-
-@keyframes quiz-core-pulse {
-  from {
-    opacity: 0.88;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes quiz-core-breathe {
-  from {
-    opacity: 0.82;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .quiz-handoff {
@@ -2669,12 +2621,12 @@ html:has(.page[data-scene='quiz']) body {
   pointer-events: none;
 }
 
-/* The core's canvas keeps room for its satellites and ripple: the captions sit up into that empty lower band. */
+/* The drawings leave a band free at the bottom of their box: the captions sit up into it. */
 .quiz-finale-captions {
   display: flex;
   justify-content: center;
   min-height: calc(var(--quiz-caption-h) + 8px);
-  margin-top: calc(var(--core-size, 360px) * -0.14);
+  margin-top: calc(var(--core-size, 360px) * -0.07);
 }
 
 .quiz-caption {
@@ -3047,10 +2999,6 @@ html:has(.page[data-scene='quiz']) body {
 
   .quiz-progress[data-finale] .quiz-progress-solid {
     animation-delay: 0ms;
-  }
-
-  .quiz-core-css {
-    animation: none;
   }
 
   .quiz-card-photo,

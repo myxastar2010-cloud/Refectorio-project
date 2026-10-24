@@ -19,6 +19,8 @@ export type QuizParams = {
   /** Test builds only: ?step=<id>&state=<name> opens a step in a known sub-state (flow/testStates.ts). */
   readonly step: string | null;
   readonly state: string | null;
+  /** Test builds only: ?story=<scene> starts the generation story at that scene (finale/story/story.ts). */
+  readonly story: string | null;
 };
 
 export function readQuizParams(search: string): QuizParams {
@@ -32,6 +34,7 @@ export function readQuizParams(search: string): QuizParams {
     debugAnswers: params.get('debug') === 'answers',
     step: params.get('step'),
     state: params.get('state'),
+    story: params.get('story'),
   };
 }
 
