@@ -139,6 +139,7 @@ export const quizContentSchema = z.object({
       carbs: text,
       kcal: text,
       grams: text,
+      portionNote: text,
       lead: text,
       loading: text,
       cuisines: z.record(z.enum(CUISINES), text),

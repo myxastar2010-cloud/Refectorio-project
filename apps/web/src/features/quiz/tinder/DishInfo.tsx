@@ -23,7 +23,7 @@ const FIT_LEVELS = 8;
 function fitInfo(info: HTMLElement) {
   for (let level = 0; level < FIT_LEVELS; level += 1) {
     info.dataset.fit = String(level);
-    if (info.scrollHeight <= info.clientHeight + 1) return;
+    if (info.scrollHeight <= info.clientHeight) return;
   }
 }
 
@@ -132,6 +132,7 @@ export function DishInfo({ id, dish, open, calm, text, deemphasize, measured }: 
           </div>
         </dl>
       ) : null}
+      {numbers ? <p className="quiz-card-portion">{quiz.taste.info.portionNote}</p> : null}
       {cuisine ? <p className="quiz-card-cuisine">{cuisine}</p> : null}
       {text ? (
         <p className="quiz-card-text">

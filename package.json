@@ -41,7 +41,8 @@
     "photos:runtime": "node scripts/photos/runtime.mjs",
     "photos:materialize": "node scripts/photos/materialize.mjs",
     "sim": "npm run sim -w @refectorio/taste-core --",
-    "story": "node scripts/story/build.mjs"
+    "story": "node scripts/story/build.mjs",
+    "dish-data": "node scripts/dish-data/build.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

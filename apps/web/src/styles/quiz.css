@@ -30,10 +30,11 @@
 
   /* The header and the zone under it do not shrink with a step. */
   --q-header-h: calc(126 * var(--q-unit));
-  --q-progress-w: calc(var(--quiz-progress-w) * var(--q-unit));
-  --q-progress-h: calc(var(--quiz-progress-h) * var(--q-unit));
-  --q-progress-inset: max(2px, calc(var(--quiz-progress-inset) * var(--q-unit)));
-  --q-progress-y: calc(var(--quiz-progress-y) * var(--q-unit));
+  /* Whole pixels (an even height): on fractional ones the fill sat a pixel closer to one edge of its track. */
+  --q-progress-w: round(calc(var(--quiz-progress-w) * var(--q-unit)), 2px);
+  --q-progress-h: round(calc(var(--quiz-progress-h) * var(--q-unit)), 2px);
+  --q-progress-inset: max(2px, round(calc(var(--quiz-progress-inset) * var(--q-unit)), 1px));
+  --q-progress-y: round(calc(var(--quiz-progress-y) * var(--q-unit)), 1px);
   --q-back: max(44px, calc(var(--quiz-back-size) * var(--q-unit)));
   --q-back-gap: calc(var(--quiz-back-gap) * var(--q-unit));
 
@@ -148,14 +149,14 @@ html:has(.page[data-scene='quiz']) body {
    row of their own under the logo and «Выйти» (on one row they ran into «Refectorio»). */
 @media (min-width: 48rem) and (orientation: portrait) {
   .quiz {
-    --q-unit: max(0.62px, min(100vw / 1000, 100svh / 1000));
+    --q-unit: max(0.62px, min(100vw / 820, 100svh / 1150));
   }
 
   .quiz,
   .quiz-screen {
     --q-tablet-row: 56px;
     --q-header-h: calc(126 * var(--q-unit) + var(--q-tablet-row));
-    --q-progress-y: calc(var(--quiz-progress-y) * var(--q-unit) + var(--q-tablet-row));
+    --q-progress-y: round(calc(var(--quiz-progress-y) * var(--q-unit) + var(--q-tablet-row)), 1px);
     --q-top: calc(var(--quiz-icon-y) * var(--q-unit) + var(--q-tablet-row));
     --q-game-title-y: calc(var(--quiz-game-title-y) * var(--q-unit) + var(--q-tablet-row));
     /* The longest health chip stays on one line at 768–1000 px. */
@@ -1085,6 +1086,22 @@ html:has(.page[data-scene='quiz']) body {
    with the accent when chosen (the team's sketch). Under the wave the ring follows the white content. */
 .quiz-option--multi .quiz-option-text {
   flex: 1 1 auto;
+}
+
+/* Touch tablets on their side: five two-line pills in one column were fitted down to ≈ 0.6 — two columns keep them
+   at the size of the other steps (the fifth centred under the others). */
+@media (orientation: landscape) and (min-width: 60rem) and (pointer: coarse) {
+  .quiz-frame--extra-goals .quiz-choices--multi {
+    display: grid;
+    grid-template-columns: repeat(2, var(--q-pill-w-short));
+    justify-content: center;
+    gap: var(--q-pill-gap-short);
+  }
+
+  .quiz-frame--extra-goals .quiz-choices--multi > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
 }
 
 /* Two-line labels as in the sketch (48 px between lines at 37 px). */
@@ -2273,6 +2290,17 @@ html:has(.page[data-scene='quiz']) body {
   line-height: 1.2;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.quiz-card-portion {
+  margin-top: calc(8 * var(--cu));
+  font-size: max(10px, calc(13 * var(--cu) * var(--info-scale)));
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.quiz-card-info[data-fit='7'] .quiz-card-portion {
+  display: none;
 }
 
 .quiz-card-cuisine {

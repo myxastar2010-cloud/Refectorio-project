@@ -46,6 +46,15 @@ describe('the fit solver (4.11)', () => {
     }
   });
 
+  it('a height that grows again as the fit shrinks does not drop the step to the smallest fit', () => {
+    // The dish card takes the room the rest gives up: near the full size the step gets taller as the fit shrinks.
+    const measure = (fit: number) => (fit > 0.95 ? 826 + (1 - fit) * 400 : 400 + fit * 440);
+    const result = solveFit(measure, 820);
+    expect(result.fit).toBeGreaterThan(0.85);
+    expect(measure(result.fit)).toBeLessThanOrEqual(821);
+    expect(result.passes).toBeLessThanOrEqual(FIT.maxPasses);
+  });
+
   it('never goes below the minimum fit or above 1', () => {
     expect(roundFit(0.1)).toBe(FIT.min);
     expect(roundFit(1.4)).toBe(1);
