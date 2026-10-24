@@ -7,7 +7,6 @@ import {
   IDENTITY,
   mat,
   mix,
-  seededRandom,
   span,
   STROKE_WIDTHS,
   type Mat,
@@ -45,170 +44,141 @@ export const ownOrReveal = (look: Look, index: number, own: number) =>
 
 // ── 1. Notebook + pencil ─────────────────────────────────────────────────────────────────────────────────────────
 
-/** Writing speed (units/s) and the pencil's hops: between words, to the next line, to the tick. */
-const WRITE_SPEED = 190;
-const HOP_WORD_S = 0.1;
-const HOP_LINE_S = 0.24;
-const HOP_TICK_S = 0.2;
-const TICK_S = 0.3;
-/** The pencil grows from the hand-off dot, then moves to the first word. */
-const GROW_S = 0.55;
-const FIRST_HOP_AT = 0.82;
-const FIRST_HOP_S = 0.36;
-/** How high a hop lifts the tip (units) and the pencil's wobble while it writes. */
-const HOP_LIFT = 16;
-const WOBBLE_RAD = 0.045;
-const WOBBLE_HZ = 6.5;
-
-type Segment =
-  | { kind: 'write'; stroke: Stroke; index: number; start: number; end: number }
-  | {
-      kind: 'hop';
-      from: { x: number; y: number };
-      to: { x: number; y: number };
-      start: number;
-      end: number;
-      lift: number;
-    };
+/**
+ * The pencil's day (s): it grows from the hand-off dot, hops to the first line, writes three lines (each eased in and
+ * out, as a hand does), hops to the tick, then lifts away to rest. Hops are arcs; the pencil leans back as it travels.
+ */
+const NOTEBOOK = {
+  grow: { from: 0.02, s: 0.42 },
+  page: { from: 0.08, s: 0.66 },
+  rule: { from: 0.5, s: 0.36 },
+  rings: { from: 0.52, gap: 0.05, s: 0.24 },
+  firstHop: { from: 0.62, s: 0.34 },
+  lines: [
+    { from: 0.98, s: 0.48 },
+    { from: 1.68, s: 0.42 },
+    { from: 2.32, s: 0.46 },
+  ],
+  tick: { from: 3.02, s: 0.3 },
+  done: { from: 3.28, s: 0.34 },
+  rest: { from: 3.36, s: 0.44 },
+  durationS: 4.0,
+  hopLift: 18,
+  /** Where the pencil rests (its tip) when it is done. */
+  restAt: { x: 46, y: 104 },
+} as const;
 
 export function notebookScene(scene: SceneData, ctx0: SceneContext): SceneScript {
   const pencil = scene.parts.indexOf('pencil');
-  const words = scene.strokes
-    .map((stroke, index) => ({ stroke, index }))
-    .filter(({ stroke }) => stroke.key.startsWith('word-'));
-  const tickIndex = scene.strokes.findIndex((s) => s.key === 'tick');
-  const tick = scene.strokes[tickIndex];
-  const lineOf = (stroke: Stroke) => Math.round((stroke.xy[1] ?? 0) / 42);
+  const index = (key: string) => scene.strokes.findIndex((s) => s.key === key);
+  const texts = [0, 1, 2].map((i) => scene.strokes[index(`text-${String(i)}`)]);
+  const tick = scene.strokes[index('tick')];
+  const ends = (stroke: Stroke | undefined) =>
+    stroke ? { start: pointAlong(stroke, 0), end: pointAlong(stroke, stroke.length) } : null;
 
-  // The pencil's whole path: the first hop, the words with hops between them, the tick, the rest.
-  const segments: Segment[] = [];
-  let at = FIRST_HOP_AT;
-  let tip = { x: 0, y: 0 };
-  words.forEach(({ stroke, index }, i) => {
-    const start = pointAlong(stroke, 0);
-    const previous = words[i - 1]?.stroke;
-    const hopS =
-      i === 0
-        ? FIRST_HOP_S
-        : previous && lineOf(previous) !== lineOf(stroke)
-          ? HOP_LINE_S
-          : HOP_WORD_S;
-    segments.push({ kind: 'hop', from: tip, to: start, start: at, end: at + hopS, lift: HOP_LIFT });
-    at += hopS;
-    const writeS = stroke.length / WRITE_SPEED;
-    segments.push({ kind: 'write', stroke, index, start: at, end: at + writeS });
-    at += writeS;
-    tip = pointAlong(stroke, stroke.length);
-  });
-  if (tick) {
-    const start = pointAlong(tick, 0);
-    segments.push({
-      kind: 'hop',
-      from: tip,
-      to: start,
-      start: at,
-      end: at + HOP_TICK_S,
-      lift: HOP_LIFT,
-    });
-    at += HOP_TICK_S;
-    segments.push({ kind: 'write', stroke: tick, index: tickIndex, start: at, end: at + TICK_S });
-    at += TICK_S;
-    tip = pointAlong(tick, tick.length);
-  }
-  // Done: the pencil lifts off a little and rests.
-  const rest = { x: tip.x + 18, y: tip.y + 26 };
-  segments.push({ kind: 'hop', from: tip, to: rest, start: at, end: at + 0.42, lift: 10 });
-  const firstLine = words[0] ? lineOf(words[0].stroke) : 0;
-  const secondLineAt =
-    segments.find((s) => s.kind === 'write' && lineOf(s.stroke) !== firstLine)?.start ?? at / 2;
-  const durationS = Math.max(at + 0.42 + 0.25, 4.6);
-
-  const writing = new Map<number, { start: number; end: number }>();
-  for (const s of segments) if (s.kind === 'write') writing.set(s.index, s);
-
-  function tipAt(t: number): { x: number; y: number; lift: number; onPaper: boolean } {
-    if (t <= FIRST_HOP_AT) return { x: 0, y: 0, lift: 0, onPaper: false };
-    for (const s of segments) {
-      if (t > s.end) continue;
-      if (t < s.start) break;
-      const u = span(t, s.start, s.end - s.start);
-      if (s.kind === 'write') {
-        const p = pointAlong(s.stroke, s.stroke.length * u);
-        return { ...p, lift: 0, onPaper: true };
+  type Leg =
+    | {
+        kind: 'hop';
+        from: { x: number; y: number };
+        to: { x: number; y: number };
+        at: number;
+        s: number;
       }
+    | { kind: 'write'; stroke: Stroke; at: number; s: number };
+  const legs: Leg[] = [];
+  let tip = { x: 0, y: 0 };
+  let at: number = NOTEBOOK.firstHop.from;
+  const writes: { stroke: Stroke | undefined; timing: { from: number; s: number } }[] = [
+    ...texts.map((stroke, i) => ({ stroke, timing: NOTEBOOK.lines[i] ?? NOTEBOOK.lines[0] })),
+    { stroke: tick, timing: NOTEBOOK.tick },
+  ];
+  for (const { stroke, timing } of writes) {
+    const e = ends(stroke);
+    if (!stroke || !e) continue;
+    legs.push({ kind: 'hop', from: tip, to: e.start, at, s: timing.from - at });
+    legs.push({ kind: 'write', stroke, at: timing.from, s: timing.s });
+    tip = e.end;
+    at = timing.from + timing.s;
+  }
+  legs.push({
+    kind: 'hop',
+    from: tip,
+    to: NOTEBOOK.restAt,
+    at: NOTEBOOK.rest.from,
+    s: NOTEBOOK.rest.s,
+  });
+
+  function tipAt(t: number): { x: number; y: number; lift: number } {
+    if (t < NOTEBOOK.firstHop.from) return { x: 0, y: 0, lift: 0 };
+    for (const leg of legs) {
+      if (t > leg.at + leg.s) continue;
+      const u = span(t, leg.at, leg.s);
+      if (leg.kind === 'write')
+        return { ...pointAlong(leg.stroke, leg.stroke.length * easeInOut(u)), lift: 0 };
       const e = easeInOut(u);
-      const arc = Math.sin(Math.PI * u);
+      const arc = Math.sin(Math.PI * e);
       return {
-        x: mix(s.from.x, s.to.x, e),
-        y: mix(s.from.y, s.to.y, e) - s.lift * arc,
+        x: mix(leg.from.x, leg.to.x, e),
+        y: mix(leg.from.y, leg.to.y, e) - NOTEBOOK.hopLift * arc,
         lift: arc,
-        onPaper: false,
       };
     }
-    return { ...rest, lift: 0, onPaper: false };
+    return { ...NOTEBOOK.restAt, lift: 0 };
   }
-
   const pencilMatrix = (t: number): Mat => {
     const p = tipAt(t);
-    const wobble = p.onPaper ? WOBBLE_RAD * Math.sin(2 * Math.PI * WOBBLE_HZ * t) : 0;
-    // Lifted, the pencil comes a touch closer (bigger); it leans back as it travels.
-    return mat(p.x, p.y, wobble - 0.06 * p.lift, 1 + 0.05 * p.lift);
+    return mat(p.x, p.y, -0.1 * p.lift, 1 + 0.04 * p.lift);
   };
-  const notebookMatrix = (t: number): Mat =>
-    mat(0, 0, 0, mix(0.965, 1, easeOut(span(t, 0, 0.9))), -10, 0);
-
-  function own(stroke: Stroke, index: number, t: number): number {
-    const k = stroke.key;
-    if (k.startsWith('pencil')) {
-      // From the tip outwards: graphite, cone, then the body and its bands.
-      const order =
-        k === 'pencil-graphite'
-          ? 0
-          : k.startsWith('pencil-cone')
-            ? 1
-            : k === 'pencil-wood'
-              ? 1.5
-              : k === 'pencil-body'
-                ? 2
-                : 3;
-      return easeOut(span(t, 0.04 + order * 0.09, GROW_S * 0.7));
+  const timingOf = (key: string): { from: number; s: number } | null => {
+    if (key === 'page') return NOTEBOOK.page;
+    if (key === 'rule') return NOTEBOOK.rule;
+    if (key === 'tick') return NOTEBOOK.tick;
+    if (key === 'done') return NOTEBOOK.done;
+    if (key.startsWith('text-')) return NOTEBOOK.lines[Number(key.slice(5))] ?? null;
+    if (key.startsWith('ring-')) {
+      return {
+        from: NOTEBOOK.rings.from + Number(key.slice(5)) * NOTEBOOK.rings.gap,
+        s: NOTEBOOK.rings.s,
+      };
     }
-    const write = writing.get(index);
-    if (write) return span(t, write.start, write.end - write.start);
-    if (k === 'cover') return easeInOut(span(t, 0.1, 0.7));
-    if (k === 'margin') return easeOut(span(t, 0.55, 0.4));
-    if (k.startsWith('ring-')) return easeOut(span(t, 0.36 + Number(k.slice(5)) * 0.05, 0.3));
-    return 1;
+    return null;
+  };
+  function own(stroke: Stroke, t: number): number {
+    if (stroke.part === pencil) {
+      const order =
+        stroke.key === 'pencil-graphite' ? 0 : stroke.key.startsWith('pencil-cone') ? 1 : 2;
+      return easeOut(span(t, NOTEBOOK.grow.from + order * 0.08, NOTEBOOK.grow.s * 0.75));
+    }
+    const timing = timingOf(stroke.key);
+    if (!timing) return 1;
+    // The written lines follow the pencil exactly (the same easing as its tip).
+    const u = span(t, timing.from, timing.s);
+    return stroke.key.startsWith('text-') || stroke.key === 'tick' ? easeInOut(u) : easeOut(u);
   }
 
   return {
     id: 'notebook',
-    durationS,
-    // «Считаем калории и БЖУ» as the pencil starts the second line.
+    durationS: NOTEBOOK.durationS,
     cues: [
       [0, 0],
-      [secondLineAt, 1],
+      [NOTEBOOK.lines[1].from, 1],
     ],
-    partMatrix: (part, t) => (part === pencil ? pencilMatrix(t) : notebookMatrix(t)),
+    partMatrix: (part, t) => (part === pencil ? pencilMatrix(t) : IDENTITY),
     draw(ctx, t, look) {
       drawStrokes(
         ctx,
         scene,
         ctx0.palette,
-        (part) => (part === pencil ? pencilMatrix(t) : notebookMatrix(t)),
-        (stroke, index) => ({
-          progress: ownOrReveal(look, index, own(stroke, index, t)),
-          alpha: 1,
-        }),
+        (part) => (part === pencil ? pencilMatrix(t) : IDENTITY),
+        (stroke, i) => ({ progress: ownOrReveal(look, i, own(stroke, t)), alpha: 1 }),
         look.alpha,
       );
-      // The hand-off dot becomes the pencil's tip.
-      if (!look.reveal && t < 0.4) {
-        const r = mix(ctx0.dotR, 2.2, easeInOut(span(t, 0.02, 0.36)));
+      // The hand-off dot shrinks into the pencil's graphite.
+      if (!look.reveal && t < 0.36) {
         ctx.globalAlpha = look.alpha;
         ctx.fillStyle = ctx0.palette[ACCENT];
         ctx.beginPath();
-        ctx.arc(0, 0, r, 0, 2 * Math.PI);
+        ctx.arc(0, 0, mix(ctx0.dotR, 2.4, easeInOut(span(t, 0, 0.34))), 0, 2 * Math.PI);
         ctx.fill();
         ctx.globalAlpha = 1;
       }
@@ -216,54 +186,79 @@ export function notebookScene(scene: SceneData, ctx0: SceneContext): SceneScript
   };
 }
 
-// ── 2. Magnifier over a turning planet in a network ──────────────────────────────────────────────────────────────
-
-const PACKETS = 4;
+// ── 2. A magnifier over a turning planet with satellites ────────────────────────────────────────────────────────
 
 export function planetScene(scene: SceneData, ctx0: SceneContext, durationS: number): SceneScript {
-  const { planetR: R, meridians: M, lens, nodes } = ctx0.meta;
+  const { planetR: R, meridians: M, orbit, satellites, lens } = ctx0.meta;
   const magnifier = scene.parts.indexOf('magnifier');
   const meridianPart = scene.parts.indexOf('meridians');
-  const random = seededRandom(ctx0.seed + 2);
-  const packets = Array.from({ length: PACKETS }, () => {
-    const a = Math.floor(random() * nodes.length);
-    const b = (a + 1 + Math.floor(random() * 2)) % nodes.length;
-    return { a, b, phase: random(), speed: 0.45 + random() * 0.35 };
-  });
-  const pings = new Map<number, number>();
-
-  /** The lens glides across the planet and back (eased at both ends, so the scene loops into itself). */
-  const lensOffset = (t: number) => {
-    const s = easeInOut(clamp01(t / durationS));
-    return { x: 128 * Math.sin(Math.PI * s), y: 66 * Math.sin(2 * Math.PI * s) };
+  const nodeParts = Array.from({ length: satellites }, (_, i) =>
+    scene.parts.indexOf(`node-${String(i)}`),
+  );
+  const s = (t: number) => clamp01(t / durationS);
+  const orbitPoint = (angle: number) => {
+    const x = orbit.rx * Math.cos(angle);
+    const y = orbit.ry * Math.sin(angle);
+    const c = Math.cos(orbit.tilt);
+    const n = Math.sin(orbit.tilt);
+    return { x: x * c - y * n, y: x * n + y * c, behind: Math.sin(angle) < 0 };
+  };
+  // A third of a turn per scene: the satellites trade places, so the last frame equals the first.
+  const satelliteAngle = (i: number, t: number) =>
+    (2 * Math.PI * i) / satellites + Math.PI / 6 + ((2 * Math.PI) / satellites) * easeInOut(s(t));
+  /** The lens circles the globe once, slowing at both ends (its last frame equals its first). */
+  const lensCentre = (t: number) => {
+    const radius = Math.hypot(lens.x, lens.y);
+    const start = Math.atan2(lens.y, lens.x);
+    const a = start + 2 * Math.PI * easeInOut(s(t));
+    return { x: radius * Math.cos(a), y: radius * Math.sin(a) };
   };
   const magnifierMatrix = (t: number): Mat => {
-    const o = lensOffset(t);
-    const lean = 0.14 * Math.sin(2 * Math.PI * easeInOut(clamp01(t / durationS)));
-    return mat(o.x, o.y, lean, 1, lens.x, lens.y);
+    const c = lensCentre(t);
+    // A small zoom as it passes over the middle of the globe.
+    const zoom = 1 + 0.06 * Math.sin(Math.PI * s(t) * 2) ** 2;
+    return mat(c.x - lens.x, c.y - lens.y, 0, zoom, lens.x, lens.y);
+  };
+  const nodeMatrix = (i: number, t: number): Mat => {
+    const a = orbitPoint(satelliteAngle(i, 0));
+    const b = orbitPoint(satelliteAngle(i, t));
+    return mat(b.x - a.x, b.y - a.y);
+  };
+  const matrixOf = (part: number, t: number): Mat => {
+    if (part === magnifier) return magnifierMatrix(t);
+    const node = nodeParts.indexOf(part);
+    return node >= 0 ? nodeMatrix(node, t) : IDENTITY;
   };
   const longitude = (i: number, t: number) =>
-    ((22.5 + (i * 180) / M) * Math.PI) / 180 + (Math.PI / M) * clamp01(t / durationS);
+    Math.PI / 4 + (i * Math.PI) / M + (Math.PI / M) * easeInOut(s(t));
 
   return {
     id: 'planet',
     durationS,
     cues: [[0, 2]],
-    partMatrix: (part, t) => (part === magnifier ? magnifierMatrix(t) : IDENTITY),
+    partMatrix: matrixOf,
     draw(ctx, t, look) {
       const { palette } = ctx0;
-      const lensAt = (() => {
-        const o = lensOffset(t);
-        return { x: lens.x + o.x, y: lens.y + o.y };
-      })();
+      const c = lensCentre(t);
       drawStrokes(
         ctx,
         scene,
         palette,
-        (part) => (part === magnifier ? magnifierMatrix(t) : IDENTITY),
+        (part) => matrixOf(part, t),
         (stroke, index) => {
-          // The meridians turn: drawn below from the formula (their stored strokes are the first frame).
           if (stroke.part === meridianPart && !look.reveal) return null;
+          const node = nodeParts.indexOf(stroke.part);
+          if (node >= 0 && !look.reveal) {
+            const p = orbitPoint(satelliteAngle(node, t));
+            // Behind the globe, a satellite dims; under the lens it turns red.
+            const hidden = p.behind && Math.hypot(p.x, p.y) < R + 4;
+            const lit = clamp01((lens.r + 8 - Math.hypot(p.x - c.x, p.y - c.y)) / 16);
+            return {
+              progress: 1,
+              alpha: hidden ? 0.25 : 1,
+              ...(lit > 0.5 ? { color: ACCENT } : {}),
+            };
+          }
           return { progress: ownOrReveal(look, index, 1), alpha: 1 };
         },
         look.alpha,
@@ -285,51 +280,6 @@ export function planetScene(scene: SceneData, ctx0: SceneContext, durationS: num
         );
         ctx.stroke();
       }
-      // Packets run along the links like traffic.
-      ctx.fillStyle = palette[ACCENT];
-      for (const p of packets) {
-        const a = nodes[p.a];
-        const b = nodes[p.b];
-        if (!a || !b) continue;
-        const u = (p.phase + t * p.speed) % 1;
-        const fade = Math.sin(Math.PI * u);
-        ctx.globalAlpha = look.alpha * fade;
-        ctx.beginPath();
-        ctx.arc(mix(a[0], b[0], u), mix(a[1], b[1], u), 3.2, 0, 2 * Math.PI);
-        ctx.fill();
-      }
-      // Nodes under the lens light up red and send out a ring.
-      ctx.lineWidth = STROKE_WIDTHS[0];
-      nodes.forEach(([x, y], i) => {
-        const d = Math.hypot(x - lensAt.x, y - lensAt.y);
-        const lit = clamp01((lens.r + 14 - d) / 22);
-        if (lit > 0.5 && !pings.has(i)) pings.set(i, t);
-        if (lit > 0) {
-          ctx.globalAlpha = look.alpha * lit;
-          ctx.strokeStyle = palette[ACCENT];
-          ctx.beginPath();
-          ctx.arc(x, y, 7, 0, 2 * Math.PI);
-          ctx.stroke();
-          ctx.fillStyle = palette[ACCENT];
-          ctx.beginPath();
-          ctx.arc(x, y, 3 * lit, 0, 2 * Math.PI);
-          ctx.fill();
-        }
-        const pinged = pings.get(i);
-        if (pinged !== undefined) {
-          const u = (t - pinged) / 0.7;
-          if (u >= 1 || u < 0) pings.delete(i);
-          else {
-            ctx.globalAlpha = look.alpha * 0.55 * (1 - u);
-            ctx.strokeStyle = palette[ACCENT];
-            ctx.lineWidth = STROKE_WIDTHS[1];
-            ctx.beginPath();
-            ctx.arc(x, y, 8 + 18 * easeOut(u), 0, 2 * Math.PI);
-            ctx.stroke();
-            ctx.lineWidth = STROKE_WIDTHS[0];
-          }
-        }
-      });
       ctx.globalAlpha = 1;
     },
   };

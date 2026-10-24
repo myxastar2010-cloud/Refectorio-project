@@ -25,13 +25,22 @@ export type RawStory = {
   readonly version: number;
   readonly unit: number;
   readonly meta: {
+    readonly page: {
+      readonly x: number;
+      readonly y: number;
+      readonly w: number;
+      readonly h: number;
+    };
     readonly planetR: number;
     readonly meridians: number;
+    readonly orbit: { readonly rx: number; readonly ry: number; readonly tilt: number };
+    readonly satellites: number;
+    readonly nodeR: number;
     readonly lens: { readonly x: number; readonly y: number; readonly r: number };
-    readonly nodes: readonly (readonly [number, number])[];
     readonly crane: {
       readonly x: number;
       readonly top: number;
+      readonly trolleyFrom: number;
       readonly trolleyAt: number;
       readonly hookY: number;
       readonly slot: {

@@ -47,6 +47,12 @@ describe('the generation story timeline (stage 3, §7.4)', () => {
   it('the first pass of the real story lasts 20–28 s (§7.2)', () => {
     const { notebook, planet, crane, robot, pot } = STORY.scenes;
     const firstPass = notebook + planet + crane + robot + pot + 5 * STORY.morph.durationS;
+    // The transformation's beats fit inside it.
+    const m = STORY.morph;
+    expect(m.scatterFromS + m.scatterSweepS + m.scatterS + m.landS).toBeLessThanOrEqual(
+      m.durationS + 0.2,
+    );
+    expect(m.revealFromS + m.revealSweepS + m.revealS).toBeLessThanOrEqual(m.durationS + 1e-9);
     expect(firstPass).toBeGreaterThanOrEqual(20);
     expect(firstPass).toBeLessThanOrEqual(28);
   });
@@ -69,7 +75,11 @@ describe('transformations and loops', () => {
     const planet = decodeScene(planetRaw, raw.unit);
     const plan = planMorph({ scene: notebook, script: still }, { scene: planet, script: still });
     expect(plan.count).toBe(Math.min(notebook.cloudOut.count, planet.cloudIn.count));
-    expect(Math.max(...plan.delay)).toBeLessThanOrEqual(STORY.morph.sweepS);
+    // Every point has a ring slot, and the slots go once around the circle in order.
+    expect(plan.slot.length).toBe(plan.count);
+    expect(Math.min(...plan.slot)).toBeGreaterThan(-Math.PI);
+    expect(Math.max(...plan.slot)).toBeLessThan(Math.PI);
+    expect(Math.max(...plan.order)).toBeLessThan(1);
     // Half the points on a slow device.
     expect(
       planMorph({ scene: notebook, script: still }, { scene: planet, script: still }, 2).count,
@@ -79,8 +89,8 @@ describe('transformations and loops', () => {
   it('every drawing has its clouds; the scenes that loop end where they began', () => {
     for (const id of ['notebook', 'planet', 'crane', 'robot', 'pot']) {
       const scene = raw.scenes[id];
-      expect(scene?.in.c.length, id).toBe(240);
-      expect(scene?.out.c.length, id).toBe(240);
+      expect(scene?.in.c.length, id).toBe(180);
+      expect(scene?.out.c.length, id).toBe(180);
     }
     const dot = { lat: 0.3, lon: 1.2 };
     const start = projectDot(dot, 0, STORY.scenes.dots);

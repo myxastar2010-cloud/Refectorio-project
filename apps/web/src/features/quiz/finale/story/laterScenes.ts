@@ -1,6 +1,7 @@
 import type { Cloud, SceneData, Stroke } from './data';
-import { ACCENT, INK, MUTED } from './data';
+import { MUTED } from './data';
 import {
+  backOut,
   clamp01,
   drawStrokes,
   easeInOut,
@@ -8,30 +9,30 @@ import {
   IDENTITY,
   mat,
   matXY,
-  mix,
   mulMat,
   span,
+  STROKE_WIDTHS,
   type Mat,
 } from './draw';
 import { ownOrReveal, type SceneContext, type SceneScript } from './scenes';
 
 const partIndex = (scene: SceneData, name: string) => scene.parts.indexOf(name);
 
-// ── 3. A tower crane places a block into our interface ──────────────────────────────────────────────────────────
+// ── 3. A tower crane sets a block into our interface ─────────────────────────────────────────────────────────────
 
-/** Moments of the crane scene (s): the jib swings in, the trolley runs out, the load sways, lowers, snaps, the hook
- * goes back up and a table draws itself on the new card. */
-const SWING_S = 1.0;
-const TROLLEY = { from: 0.55, s: 0.95 };
-const LOWER = { from: 1.65, s: 1.0 };
-const SNAP_AT = LOWER.from + LOWER.s;
-const RAISE = { from: SNAP_AT + 0.25, s: 0.7 };
-const TABLE = { from: SNAP_AT + 0.35, s: 0.75 };
+/** The trolley runs out, the load swings behind and settles, lowers, lands with a squash; the hook goes back up and
+ * a table draws itself on the card next to the new block. */
+const CRANE = {
+  travel: { from: 0.25, s: 1.15 },
+  lower: { from: 1.55, s: 0.8 },
+  raise: { from: 2.6, s: 0.6 },
+  slingOff: { from: 2.38, s: 0.2 },
+  table: { from: 2.8, s: 0.55 },
+} as const;
 
 export function craneScene(scene: SceneData, ctx0: SceneContext, durationS: number): SceneScript {
-  const { x: mastX, top, trolleyAt, hookY, slot } = ctx0.meta.crane;
+  const { top, trolleyFrom, trolleyAt, hookY, slot } = ctx0.meta.crane;
   const parts = {
-    jib: partIndex(scene, 'jib'),
     trolley: partIndex(scene, 'trolley'),
     cable: partIndex(scene, 'cable'),
     load: partIndex(scene, 'load'),
@@ -39,68 +40,57 @@ export function craneScene(scene: SceneData, ctx0: SceneContext, durationS: numb
     slot: partIndex(scene, 'slot'),
     table: partIndex(scene, 'table'),
   };
-  const drop = slot.y - (hookY + 30);
-  const trolleyFrom = mastX - 40;
-
-  /** The jib turning towards us: foreshortened at first, a little overshoot as it stops (follow-through). */
-  const jibScale = (t: number) => {
-    const u = span(t, 0, SWING_S);
-    return mix(0.22, 1, easeOut(u)) + 0.025 * Math.sin(Math.PI * u) * (1 - u);
-  };
-  const trolleyX = (t: number) => {
-    const along = mix(trolleyFrom, trolleyAt, easeInOut(span(t, TROLLEY.from, TROLLEY.s)));
-    return mastX + (along - mastX) * jibScale(t);
-  };
-  /** The load lags behind the trolley and swings on after it stops, dying out. */
+  const landAt = CRANE.lower.from + CRANE.lower.s;
+  const drop = slot.y - (hookY + 24);
+  const pivotY = top + 10;
+  const trolleyX = (t: number) =>
+    trolleyFrom + (trolleyAt - trolleyFrom) * easeInOut(span(t, CRANE.travel.from, CRANE.travel.s));
+  /** The load trails the trolley while it runs, then swings on and dies out. */
   const sway = (t: number) => {
-    const run = span(t, TROLLEY.from, TROLLEY.s);
-    if (t < TROLLEY.from + TROLLEY.s) return 0.1 * Math.sin(Math.PI * run);
-    const after = t - (TROLLEY.from + TROLLEY.s);
-    return -0.13 * Math.exp(-after / 0.55) * Math.sin((2 * Math.PI * after) / 0.95);
+    const end = CRANE.travel.from + CRANE.travel.s;
+    if (t < end) return 0.09 * Math.sin(Math.PI * span(t, CRANE.travel.from, CRANE.travel.s));
+    const after = t - end;
+    return -0.07 * Math.exp(-after / 0.32) * Math.sin((2 * Math.PI * after) / 0.62);
   };
   const lowered = (t: number) =>
-    drop * easeInOut(span(t, LOWER.from, LOWER.s)) -
-    (drop + 26) * easeInOut(span(t, RAISE.from, RAISE.s));
+    drop * easeInOut(span(t, CRANE.lower.from, CRANE.lower.s)) -
+    (drop + 20) * easeInOut(span(t, CRANE.raise.from, CRANE.raise.s));
   const loadMatrix = (t: number): Mat => {
-    const dx = trolleyX(t) - trolleyAt;
-    return mulMat(
-      mat(dx, lowered(t)),
-      mat(0, 0, t < SNAP_AT ? sway(t) : 0, 1, trolleyAt, top + 10),
-    );
+    const dx = trolleyX(t) - trolleyFrom;
+    return mulMat(mat(dx, lowered(t)), mat(0, 0, t < landAt ? sway(t) : 0, 1, trolleyFrom, pivotY));
   };
   const blockMatrix = (t: number): Mat => {
-    if (t < SNAP_AT) return loadMatrix(t);
-    // In the slot: a squash on contact, then a damped settle.
-    const after = t - SNAP_AT;
-    const squash = 0.09 * Math.exp(-after / 0.12) * Math.cos((2 * Math.PI * after) / 0.28);
-    return matXY(0, drop, 1 + squash * 0.6, 1 - squash, trolleyAt, slot.y + slot.h);
+    if (t < landAt) return loadMatrix(t);
+    // In the slot: a squash on contact, a small rebound, settled.
+    const after = t - landAt;
+    const squash = 0.08 * Math.exp(-after / 0.1) * Math.cos((2 * Math.PI * after) / 0.26);
+    return mulMat(
+      mat(trolleyAt - trolleyFrom, drop),
+      matXY(0, 0, 1 + squash * 0.7, 1 - squash, trolleyFrom, hookY + 24 + slot.h),
+    );
   };
   const matrixOf = (part: number, t: number): Mat => {
-    if (part === parts.jib) return matXY(0, 0, jibScale(t), 1, mastX, 0);
-    if (part === parts.trolley || part === parts.cable) return mat(trolleyX(t) - trolleyAt, 0);
+    if (part === parts.trolley || part === parts.cable) return mat(trolleyX(t) - trolleyFrom, 0);
     if (part === parts.load) return loadMatrix(t);
     if (part === parts.block) return blockMatrix(t);
     return IDENTITY;
   };
-
-  function own(stroke: Stroke, index: number, t: number) {
-    if (stroke.part === parts.table) {
-      return easeOut(span(t, TABLE.from + (index % 3) * 0.12, TABLE.s));
-    }
+  const own = (stroke: Stroke, t: number) =>
+    stroke.part === parts.table
+      ? easeOut(span(t, CRANE.table.from + (stroke.key === 'table-col' ? 0.18 : 0), CRANE.table.s))
+      : 1;
+  const alphaOf = (stroke: Stroke, t: number) => {
+    if (stroke.part === parts.slot) return 1 - span(t, landAt - 0.2, 0.2);
+    if (stroke.key === 'sling') return 1 - span(t, CRANE.slingOff.from, CRANE.slingOff.s);
     return 1;
-  }
-  function alphaOf(stroke: Stroke, t: number) {
-    if (stroke.part === parts.slot) return 1 - span(t, SNAP_AT - 0.15, 0.2);
-    if (stroke.key === 'sling') return 1 - span(t, SNAP_AT + 0.05, 0.2);
-    return 1;
-  }
+  };
 
   return {
     id: 'crane',
     durationS,
     cues: [
       [0, 3],
-      [TABLE.from - 0.1, 4],
+      [CRANE.table.from - 0.1, 4],
     ],
     partMatrix: matrixOf,
     draw(ctx, t, look) {
@@ -109,26 +99,27 @@ export function craneScene(scene: SceneData, ctx0: SceneContext, durationS: numb
         scene,
         ctx0.palette,
         (part) => matrixOf(part, t),
-        (stroke, index) => {
+        (stroke, i) => {
           if (stroke.part === parts.cable && !look.reveal) return null;
           return {
-            progress: ownOrReveal(look, index, own(stroke, index, t)),
+            progress: ownOrReveal(look, i, own(stroke, t)),
             alpha: look.reveal ? 1 : alphaOf(stroke, t),
           };
         },
         look.alpha,
       );
       if (look.reveal) return;
-      // The cable from the trolley to the hook, at its current length and angle.
+      // The cable from the trolley down to the hook (its length changes).
       const m = loadMatrix(t);
-      const hookX = m[0] * trolleyAt + m[2] * hookY + m[4];
-      const hookYNow = m[1] * trolleyAt + m[3] * hookY + m[5];
       ctx.globalAlpha = look.alpha;
       ctx.strokeStyle = ctx0.palette[MUTED];
-      ctx.lineWidth = 4;
+      ctx.lineWidth = STROKE_WIDTHS[1];
       ctx.beginPath();
-      ctx.moveTo(trolleyX(t), top + 10);
-      ctx.lineTo(hookX, hookYNow);
+      ctx.moveTo(trolleyX(t), pivotY);
+      ctx.lineTo(
+        m[0] * trolleyFrom + m[2] * hookY + m[4],
+        m[1] * trolleyFrom + m[3] * hookY + m[5],
+      );
       ctx.stroke();
       ctx.globalAlpha = 1;
     },
@@ -137,9 +128,7 @@ export function craneScene(scene: SceneData, ctx0: SceneContext, durationS: numb
 
 // ── 4. A delivery robot on a road ────────────────────────────────────────────────────────────────────────────────
 
-const BUMP = { at: 1.55, s: 0.6 };
-const BOBS = 6;
-const DASH_PERIODS = 3;
+const ROBOT = { bump: { from: 1.3, s: 0.55 }, bobs: 5, periods: 3 } as const;
 
 export function robotScene(scene: SceneData, ctx0: SceneContext, durationS: number): SceneScript {
   const { wheels, dash } = ctx0.meta.robot;
@@ -147,36 +136,29 @@ export function robotScene(scene: SceneData, ctx0: SceneContext, durationS: numb
   const antenna = partIndex(scene, 'antenna');
   const dashes = partIndex(scene, 'dashes');
   const wheelParts = wheels.map((_, i) => partIndex(scene, `wheel-${String(i)}`));
-  const travel = DASH_PERIODS * dash.period;
-
-  const phase = (t: number) => clamp01(t / durationS);
+  const s = (t: number) => clamp01(t / durationS);
+  const shift = (t: number) => (ROBOT.periods * dash.period * s(t)) % dash.period;
   const bodyMatrix = (t: number): Mat => {
-    const bob = 2.2 * Math.sin(2 * Math.PI * BOBS * phase(t));
-    const u = span(t, BUMP.at, BUMP.s);
-    const bump = -8 * Math.sin(Math.PI * u);
-    // Over the bump the front lifts first, then the back: a pitch back, then forward.
-    const pitch = 0.05 * Math.sin(2 * Math.PI * u);
-    return mat(0, bob + bump, -pitch, 1, 0, 50);
+    const bob = 1.4 * Math.sin(2 * Math.PI * ROBOT.bobs * s(t));
+    const u = span(t, ROBOT.bump.from, ROBOT.bump.s);
+    // Over the bump the front lifts first, then the back.
+    return mat(0, bob - 7 * Math.sin(Math.PI * u), -0.045 * Math.sin(2 * Math.PI * u), 1, -10, 44);
   };
   const antennaMatrix = (t: number): Mat => {
-    // The antenna lags behind the body's bob (secondary motion).
     const lag =
-      0.06 * Math.sin(2 * Math.PI * BOBS * phase(t) - 0.9) +
-      0.12 * Math.sin(Math.PI * span(t, BUMP.at + 0.1, BUMP.s));
-    return mulMat(bodyMatrix(t), mat(0, 0, lag, 1, -70, -42));
-  };
-  const wheelMatrix = (i: number, t: number): Mat => {
-    const [x, y] = wheels[i] ?? [0, 0];
-    // Whole quarter turns over the scene: the spokes are back where they started.
-    return mat(0, 0, phase(t) * 6 * Math.PI, 1, x, y);
+      0.05 * Math.sin(2 * Math.PI * ROBOT.bobs * s(t) - 1) +
+      0.14 * Math.sin(Math.PI * span(t, ROBOT.bump.from + 0.08, ROBOT.bump.s + 0.2));
+    return mulMat(bodyMatrix(t), mat(0, 0, lag, 1, -60, -48));
   };
   const matrixOf = (part: number, t: number): Mat => {
     if (part === body) return bodyMatrix(t);
     if (part === antenna) return antennaMatrix(t);
-    if (part === dashes) return mat((-travel * phase(t)) % dash.period, 0);
+    if (part === dashes) return mat(-shift(t), 0);
     const wheel = wheelParts.indexOf(part);
-    if (wheel >= 0) return wheelMatrix(wheel, t);
-    return IDENTITY;
+    if (wheel < 0) return IDENTITY;
+    const [x, y] = wheels[wheel] ?? [0, 0];
+    // Whole half turns over the scene: the hubs are back where they started.
+    return mat(0, 0, ROBOT.periods * Math.PI * s(t), 1, x, y);
   };
 
   return {
@@ -185,19 +167,19 @@ export function robotScene(scene: SceneData, ctx0: SceneContext, durationS: numb
     cues: [[0, 5]],
     partMatrix: matrixOf,
     draw(ctx, t, look) {
-      // Lane marks stream past and fade at the road's ends.
       drawStrokes(
         ctx,
         scene,
         ctx0.palette,
         (part) => matrixOf(part, t),
-        (stroke, index) => {
+        (stroke, i) => {
           let alpha = 1;
           if (stroke.part === dashes && !look.reveal) {
-            const x = (stroke.xy[0] ?? 0) - ((travel * phase(t)) % dash.period);
-            alpha = clamp01((x - dash.from) / 40) * clamp01((dash.to - (x + dash.length)) / 40);
+            // Lane marks fade in and out at the road's ends.
+            const x = (stroke.xy[0] ?? 0) - shift(t);
+            alpha = clamp01((x - dash.from) / 36) * clamp01((dash.to - (x + dash.length)) / 36);
           }
-          return { progress: ownOrReveal(look, index, 1), alpha };
+          return { progress: ownOrReveal(look, i, 1), alpha };
         },
         look.alpha,
       );
@@ -207,35 +189,34 @@ export function robotScene(scene: SceneData, ctx0: SceneContext, durationS: numb
 
 // ── 5. A pot with steam ──────────────────────────────────────────────────────────────────────────────────────────
 
-const LID_LIFT = { from: 0.5, s: 1.1 };
+const POT = {
+  lid: { from: 0.45, s: 1.2 },
+  steam: { from: 0.6, gap: 0.24, s: 1.0, fade: 0.8 },
+} as const;
 
 export function potScene(scene: SceneData, ctx0: SceneContext, durationS: number): SceneScript {
   const lid = partIndex(scene, 'lid');
   const [px, py] = ctx0.meta.pot.lidPivot;
   const flames = [0, 1, 2].map((i) => partIndex(scene, `flame-${String(i)}`));
   const steam = partIndex(scene, 'steam');
-  const flameBase = scene.byKey.get('burner')?.xy[1] ?? 0;
+  const flameBase = (scene.byKey.get('burner')?.xy[1] ?? 0) - 6;
 
   const lidMatrix = (t: number): Mat => {
     // The steam pushes the lid up on its hinge; it rattles twice and settles.
-    const u = span(t, LID_LIFT.from, LID_LIFT.s);
-    const lift = Math.sin(Math.PI * u) * (0.11 + 0.035 * Math.sin(2 * Math.PI * 3 * u));
+    const u = span(t, POT.lid.from, POT.lid.s);
+    const lift = Math.sin(Math.PI * u) * (0.09 + 0.03 * Math.sin(2 * Math.PI * 3 * u));
     return mat(0, 0, -lift, 1, px, py);
   };
   const flameMatrix = (i: number, t: number): Mat => {
-    const x = [-44, 0, 44][i] ?? 0;
-    const flicker =
-      1 +
-      0.14 *
-        Math.sin(2 * Math.PI * (5.3 * t + i * 0.37)) *
-        Math.sin(Math.PI * clamp01(t / durationS) * 7);
-    return matXY(0, 0, 1 - (flicker - 1) * 0.4, flicker, x, flameBase - 4);
+    const x = [-40, 0, 40][i] ?? 0;
+    const k =
+      0.1 * Math.sin(2 * Math.PI * (4.6 * t + i * 0.33)) * Math.sin((Math.PI * t) / durationS);
+    return matXY(0, 0, 1 - k * 0.5, 1 + k, x, flameBase);
   };
   const matrixOf = (part: number, t: number): Mat => {
     if (part === lid) return lidMatrix(t);
     const flame = flames.indexOf(part);
-    if (flame >= 0) return flameMatrix(flame, t);
-    return IDENTITY;
+    return flame >= 0 ? flameMatrix(flame, t) : IDENTITY;
   };
 
   return {
@@ -249,15 +230,14 @@ export function potScene(scene: SceneData, ctx0: SceneContext, durationS: number
         scene,
         ctx0.palette,
         (part) => matrixOf(part, t),
-        (stroke, index) => {
-          if (stroke.part !== steam) return { progress: ownOrReveal(look, index, 1), alpha: 1 };
+        (stroke, i) => {
+          if (stroke.part !== steam) return { progress: ownOrReveal(look, i, 1), alpha: 1 };
           if (look.reveal) return null;
-          // Curls rise one after another (drawn on from the pot up) and thin out at the top.
-          const i = Number(stroke.key.slice(6));
-          const start = LID_LIFT.from + 0.2 + i * 0.22;
+          const n = Number(stroke.key.slice(6));
+          const start = POT.steam.from + n * POT.steam.gap;
           return {
-            progress: easeOut(span(t, start, 1.0)),
-            alpha: 1 - span(t, start + 0.9, 0.9),
+            progress: easeOut(span(t, start, POT.steam.s)),
+            alpha: 1 - span(t, start + POT.steam.s * 0.7, POT.steam.fade),
           };
         },
         look.alpha,
@@ -266,10 +246,11 @@ export function potScene(scene: SceneData, ctx0: SceneContext, durationS: number
   };
 }
 
-// ── 6. Dots (the reference video's character: a sphere of dots turning, crescent ↔ disc, a soft glow) ─────────────
+// ── 6. Dots — the character of the team's video: a sphere of white dots on a soft glow, turning ─────────────────
 
-const RINGS = 9;
-const SPHERE_R = 150;
+const RINGS = 11;
+const SPHERE_R = 118;
+const GLOW_R = 168;
 
 type Dot = { readonly lat: number; readonly lon: number };
 
@@ -277,13 +258,16 @@ function sphereDots(): Dot[] {
   const dots: Dot[] = [];
   for (let k = 0; k < RINGS; k += 1) {
     const lat = -Math.PI / 2 + (Math.PI * (k + 0.5)) / RINGS;
-    const n = Math.max(4, Math.round(30 * Math.cos(lat)));
-    for (let j = 0; j < n; j += 1) dots.push({ lat, lon: (2 * Math.PI * j) / n });
+    const n = Math.max(5, Math.round(28 * Math.cos(lat)));
+    for (let j = 0; j < n; j += 1) dots.push({ lat, lon: (2 * Math.PI * (j + (k % 2) * 0.5)) / n });
   }
   return dots;
 }
 
-/** A dot's place on screen and its depth (−1 back … 1 front) at time t of the loop. */
+/**
+ * A dot on screen at time t of the loop and its depth (−1 back … 1 front). The sphere spins about its axis while the
+ * axis tips from facing us (concentric rings — a disc) to lying across (a crescent of near dots) and back.
+ */
 export function projectDot(
   dot: Dot,
   t: number,
@@ -291,17 +275,18 @@ export function projectDot(
 ): { x: number; y: number; z: number } {
   const s = t / loopS;
   const lon = dot.lon + 2 * Math.PI * s;
-  // On the sphere around its own axis (z up), then the axis tips between facing us and lying across.
   const cx = Math.cos(dot.lat) * Math.cos(lon);
   const cy = Math.cos(dot.lat) * Math.sin(lon);
   const cz = Math.sin(dot.lat);
-  const tilt = 0.5 * Math.PI * (0.5 + 0.42 * Math.sin(2 * Math.PI * s));
-  const turn = 0.6 + 0.35 * Math.sin(2 * Math.PI * s + 1.1);
+  const tilt = 0.5 * Math.PI * (0.55 + 0.45 * Math.sin(2 * Math.PI * s));
+  const turn = 0.5 + 0.4 * Math.sin(2 * Math.PI * s + 1.2);
   const y1 = cy * Math.cos(tilt) - cz * Math.sin(tilt);
   const z1 = cy * Math.sin(tilt) + cz * Math.cos(tilt);
-  const x2 = cx * Math.cos(turn) - y1 * Math.sin(turn);
-  const y2 = cx * Math.sin(turn) + y1 * Math.cos(turn);
-  return { x: SPHERE_R * x2, y: SPHERE_R * y2, z: z1 };
+  return {
+    x: SPHERE_R * (cx * Math.cos(turn) - y1 * Math.sin(turn)),
+    y: SPHERE_R * (cx * Math.sin(turn) + y1 * Math.cos(turn)),
+    z: z1,
+  };
 }
 
 const smooth = (a: number, b: number, v: number) => {
@@ -313,16 +298,18 @@ export type DotsScene = { readonly scene: SceneData; readonly script: SceneScrip
 
 export function dotsScene(ctx0: SceneContext, loopS: number, calm: boolean): DotsScene {
   const dots = sphereDots();
-  // The cloud the last drawing flows into: the dots where they are when the loop starts.
   const xy = new Float32Array(2 * dots.length);
-  const color = new Uint8Array(dots.length);
   dots.forEach((dot, i) => {
     const p = projectDot(dot, 0, loopS);
     xy[2 * i] = p.x;
     xy[2 * i + 1] = p.y;
-    color[i] = p.z > 0.2 ? ACCENT : p.z > -0.3 ? INK : MUTED;
   });
-  const cloud: Cloud = { count: dots.length, xy, color, part: new Uint8Array(dots.length) };
+  const cloud: Cloud = {
+    count: dots.length,
+    xy,
+    color: new Uint8Array(dots.length),
+    part: new Uint8Array(dots.length),
+  };
   const scene: SceneData = {
     parts: ['dots'],
     strokes: [],
@@ -330,6 +317,44 @@ export function dotsScene(ctx0: SceneContext, loopS: number, calm: boolean): Dot
     cloudIn: cloud,
     cloudOut: cloud,
   };
+  const accent = ctx0.palette[2];
+  /** The accent at zero opacity: a gradient to plain «transparent» passes through grey (transparent black). */
+  const accentClear = (() => {
+    const hex = accent.replace('#', '');
+    const value = Number.parseInt(hex.length === 3 ? hex.replace(/(.)/g, '$1$1') : hex, 16);
+    return `rgb(${String((value >> 16) & 255)} ${String((value >> 8) & 255)} ${String(value & 255)} / 0)`;
+  })();
+
+  /** The glow: two soft blobs of the accent drifting slowly behind the near side of the sphere (gradients, no blur). */
+  function glow(ctx: CanvasRenderingContext2D, t: number, alpha: number) {
+    const s = t / loopS;
+    const front = projectDot({ lat: Math.PI / 2, lon: 0 }, t, loopS);
+    const blobs = [
+      {
+        x: front.x * 0.55 + 22 * Math.sin(2 * Math.PI * s),
+        y: front.y * 0.55 + 16 * Math.cos(2 * Math.PI * s),
+        r: GLOW_R,
+        a: 0.85,
+      },
+      {
+        x: -front.x * 0.45 + 30 * Math.cos(2 * Math.PI * s + 1),
+        y: -front.y * 0.45,
+        r: GLOW_R * 0.8,
+        a: 0.45,
+      },
+    ];
+    for (const b of blobs) {
+      const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+      g.addColorStop(0, accent);
+      g.addColorStop(0.45, accent);
+      g.addColorStop(1, accentClear);
+      ctx.globalAlpha = alpha * b.a * 0.55;
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  }
 
   const script: SceneScript = {
     id: 'dots',
@@ -337,31 +362,20 @@ export function dotsScene(ctx0: SceneContext, loopS: number, calm: boolean): Dot
     cues: [[0, 7]],
     partMatrix: () => IDENTITY,
     draw(ctx, t, look) {
-      const { palette } = ctx0;
       const formed = look.reveal ? (look.formed ?? 0) : 1;
       if (formed <= 0) return;
       const at = calm ? 0 : t;
-      // A soft glow behind, drifting with the turn (a gradient, not a blur).
-      const glow = projectDot({ lat: Math.PI / 2, lon: 0 }, at, loopS);
-      const gx = glow.x * 0.35;
-      const gy = glow.y * 0.35;
-      const gradient = ctx.createRadialGradient(gx, gy, 0, gx, gy, SPHERE_R * 1.35);
-      gradient.addColorStop(0, palette[ACCENT]);
-      gradient.addColorStop(1, 'transparent');
-      const breathe = calm ? 0.8 + 0.2 * Math.sin((2 * Math.PI * t) / loopS) : 1;
-      ctx.globalAlpha = 0.13 * formed * look.alpha * breathe;
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(gx, gy, SPHERE_R * 1.35, 0, 2 * Math.PI);
-      ctx.fill();
+      const breathe = calm ? 0.82 + 0.18 * Math.sin((2 * Math.PI * t) / loopS) : 1;
+      const alpha = formed * look.alpha * breathe;
+      glow(ctx, at, alpha);
+      ctx.fillStyle = '#ffffff';
       for (const dot of dots) {
         const p = projectDot(dot, at, loopS);
-        const near = smooth(-0.35, 1, p.z);
-        const r = 0.8 + 4.4 * near;
-        ctx.globalAlpha = (0.18 + 0.82 * near) * formed * look.alpha * breathe;
-        ctx.fillStyle = palette[p.z > 0.2 ? ACCENT : p.z > -0.3 ? INK : MUTED];
+        const near = smooth(-0.2, 1, p.z);
+        if (near <= 0.02) continue;
+        ctx.globalAlpha = alpha * (0.35 + 0.65 * near);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
+        ctx.arc(p.x, p.y, 0.9 + 3.9 * near * backOut(formed), 0, 2 * Math.PI);
         ctx.fill();
       }
       ctx.globalAlpha = 1;

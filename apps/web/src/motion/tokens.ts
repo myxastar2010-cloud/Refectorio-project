@@ -371,24 +371,27 @@ export const FINALE = {
  * on arcs) and the dots that loop forever. Seconds.
  */
 export const STORY = {
-  scenes: { notebook: 5.0, planet: 3.8, crane: 4.6, robot: 3.6, pot: 3.4, dots: 6 },
+  scenes: { notebook: 4.0, planet: 3.6, crane: 4.4, robot: 3.4, pot: 3.2, dots: 6 },
   morph: {
-    durationS: 1.5,
-    /** The old drawing fades out while its points appear on its strokes. */
-    fadeOutS: 0.32,
-    appearS: 0.16,
-    /** Points leave in a wave around the drawing, travel on arcs, then fade as they land. */
-    departS: 0.14,
-    sweepS: 0.36,
-    travelS: 0.82,
+    durationS: 1.7,
+    /** The old drawing fades while its points appear on its strokes. */
+    fadeOutS: 0.24,
+    appearS: 0.12,
+    /** The points gather into a ring (each to the slot of its angle), in a sweep around it. */
+    gatherFromS: 0.06,
+    gatherS: 0.5,
+    gatherSweepS: 0.16,
+    ringR: 104,
+    /** The ring turns while it is a ring (radians). */
+    ringTurn: Math.PI / 2.5,
+    /** …then opens into the new drawing's points (a slight overshoot), which fade as its lines draw on. */
+    scatterFromS: 0.82,
+    scatterS: 0.56,
+    scatterSweepS: 0.16,
     landS: 0.22,
-    /** The new drawing draws itself on as the points land. */
-    revealFromS: 0.62,
-    revealSweepS: 0.4,
-    revealS: 0.5,
-    /** How far an arc bends (share of the distance) and the trail behind a point (share of its way). */
-    bend: 0.32,
-    trail: 0.06,
+    revealFromS: 1.0,
+    revealSweepS: 0.3,
+    revealS: 0.4,
   },
   dotR: 2.6,
   /** Reduced motion: still drawings cross-fading. */

@@ -35,7 +35,7 @@ export function applyMat(m: Mat, x: number, y: number): [number, number] {
 }
 
 /** Stroke widths (units of the 512 box): the main line and the fine one — one family, rounded ends. */
-export const STROKE_WIDTHS = [6.5, 4] as const;
+export const STROKE_WIDTHS = [5.5, 3.5] as const;
 
 export type Palette = readonly [ink: string, muted: string, accent: string];
 
@@ -44,6 +44,11 @@ export const easeInOut = cubicBezier(...EASE_IN_OUT);
 export const easeOut = cubicBezier(...EASE_OUT_SOFT);
 export const easeOutExpo = cubicBezier(...EASE_OUT_EXPO);
 export const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+/** Ease out with a small overshoot (the points settle into the new drawing). */
+export const backOut = (t: number, overshoot = 1.15) => {
+  const u = t - 1;
+  return t >= 1 ? 1 : 1 + u * u * ((overshoot + 1) * u + overshoot);
+};
 /** Progress of `t` through [start, start + duration], clamped. */
 export const span = (t: number, start: number, duration: number) =>
   clamp01((t - start) / Math.max(1e-6, duration));

@@ -1,26 +1,27 @@
 import { STORY } from '../../../../motion/tokens';
 import type { Cloud, SceneData } from './data';
-import { applyMat, easeInOut, easeOut, span, type Mat, type Palette } from './draw';
+import { applyMat, backOut, easeInOut, easeOut, span, type Mat, type Palette } from './draw';
 import type { SceneScript } from './scenes';
 
 /**
- * A transformation (§7.1): the old drawing dissolves into points sampled along its strokes, the points flow on arcs
- * — in a wave around the drawing, all bending the same way — to points of the next drawing, which draws itself on as
- * they land. Pairs are made once: both clouds ordered by their angle around the centre, so the flow turns as one.
+ * A transformation (§7.1) in three beats: the old drawing dissolves into points along its strokes; the points gather
+ * into a ring — each to the slot of its angle around the centre, so the flow is radial and calm — the ring turns once
+ * (a breath between two scenes); then it opens into the points of the next drawing, which overshoot a hair and settle
+ * as its lines draw themselves on.
  */
 export type MorphPlan = {
   readonly count: number;
-  /** from x, y · control x, y · to x, y — per point. */
-  readonly path: Float32Array;
-  readonly delay: Float32Array;
-  readonly colorFrom: Uint8Array;
-  readonly colorTo: Uint8Array;
+  /** Where each point starts and lands. */
+  readonly from: Float32Array;
+  readonly to: Float32Array;
+  /** Its slot on the ring (angle) and its place in the sweeps (0…1). */
+  readonly slot: Float32Array;
+  readonly order: Float32Array;
 };
 
 function placed(cloud: Cloud, matrixOf: (part: number) => Mat, step: number) {
   const n = Math.floor(cloud.count / step);
   const xy = new Float32Array(2 * n);
-  const color = new Uint8Array(n);
   for (let k = 0; k < n; k += 1) {
     const i = k * step;
     const [x, y] = applyMat(
@@ -30,15 +31,13 @@ function placed(cloud: Cloud, matrixOf: (part: number) => Mat, step: number) {
     );
     xy[2 * k] = x;
     xy[2 * k + 1] = y;
-    color[k] = cloud.color[i] ?? 0;
   }
-  return { n, xy, color };
+  return { n, xy };
 }
 
 function byAngle(xy: Float32Array, n: number): number[] {
-  const order = Array.from({ length: n }, (_, i) => i);
   const angle = (i: number) => Math.atan2(xy[2 * i + 1] ?? 0, xy[2 * i] ?? 0);
-  return order.sort((a, b) => angle(a) - angle(b));
+  return Array.from({ length: n }, (_, i) => i).sort((a, b) => angle(a) - angle(b));
 }
 
 /** `step` 2 halves the points (the adaptive quality of slow devices). */
@@ -56,40 +55,24 @@ export function planMorph(
   const count = Math.min(a.n, b.n);
   const orderA = byAngle(a.xy, a.n);
   const orderB = byAngle(b.xy, b.n);
-  const path = new Float32Array(6 * count);
-  const delay = new Float32Array(count);
-  const colorFrom = new Uint8Array(count);
-  const colorTo = new Uint8Array(count);
+  const fromXY = new Float32Array(2 * count);
+  const toXY = new Float32Array(2 * count);
+  const slot = new Float32Array(count);
+  const order = new Float32Array(count);
+  // Both clouds are spread evenly over the same ring: the k-th point of each by angle shares the k-th slot.
+  const pick = (order: number[], n: number, k: number) => order[Math.floor((k * n) / count)] ?? 0;
   for (let k = 0; k < count; k += 1) {
-    const i = orderA[k] ?? 0;
-    const j = orderB[k] ?? 0;
-    const x0 = a.xy[2 * i] ?? 0;
-    const y0 = a.xy[2 * i + 1] ?? 0;
-    const x1 = b.xy[2 * j] ?? 0;
-    const y1 = b.xy[2 * j + 1] ?? 0;
-    // The control point: off the middle, always to the same side — every arc bends the same way.
-    const dx = x1 - x0;
-    const dy = y1 - y0;
-    path.set(
-      [
-        x0,
-        y0,
-        (x0 + x1) / 2 - dy * STORY.morph.bend,
-        (y0 + y1) / 2 + dx * STORY.morph.bend,
-        x1,
-        y1,
-      ],
-      6 * k,
-    );
-    delay[k] = (k / count) * STORY.morph.sweepS;
-    colorFrom[k] = a.color[i] ?? 0;
-    colorTo[k] = b.color[j] ?? 0;
+    const i = pick(orderA, a.n, k);
+    const j = pick(orderB, b.n, k);
+    fromXY[2 * k] = a.xy[2 * i] ?? 0;
+    fromXY[2 * k + 1] = a.xy[2 * i + 1] ?? 0;
+    toXY[2 * k] = b.xy[2 * j] ?? 0;
+    toXY[2 * k + 1] = b.xy[2 * j + 1] ?? 0;
+    slot[k] = -Math.PI + (2 * Math.PI * (k + 0.5)) / count;
+    order[k] = k / count;
   }
-  return { count, path, delay, colorFrom, colorTo };
+  return { count, from: fromXY, to: toXY, slot, order };
 }
-
-const quad = (a: number, c: number, b: number, u: number) =>
-  (1 - u) * (1 - u) * a + 2 * (1 - u) * u * c + u * u * b;
 
 /** The new drawing's strokes draw on in a sweep as the points land (index → 0…1). */
 export function revealOf(scene: SceneData, t: number): (index: number) => number {
@@ -102,6 +85,17 @@ export function revealOf(scene: SceneData, t: number): (index: number) => number
   };
 }
 
+/** The ring's turn so far and its breathing radius at `t`. */
+function ringAt(t: number) {
+  const m = STORY.morph;
+  const turn =
+    m.ringTurn * easeInOut(span(t, m.gatherFromS, m.scatterFromS + m.scatterS - m.gatherFromS));
+  const breathe = Math.sin(
+    Math.PI * span(t, m.gatherFromS + m.gatherS * 0.6, m.scatterFromS - m.gatherFromS),
+  );
+  return { turn, radius: m.ringR * (1 - 0.08 * breathe) };
+}
+
 export function drawMorph(
   ctx: CanvasRenderingContext2D,
   plan: MorphPlan,
@@ -111,7 +105,6 @@ export function drawMorph(
   palette: Palette,
 ): void {
   const m = STORY.morph;
-  // The old drawing gives way, the new one draws on.
   const fade = easeInOut(span(t, 0, m.fadeOutS));
   if (fade < 1) from.draw(ctx, from.durationS, { reveal: null, alpha: 1 - fade });
   to.script.draw(ctx, 0, {
@@ -119,32 +112,33 @@ export function drawMorph(
     alpha: 1,
     formed: easeOut(span(t, m.revealFromS, m.revealSweepS + m.revealS)),
   });
-  // The points: a short capsule from where a point was a moment ago — its trail, stretched by its speed.
+  const { turn, radius } = ringAt(t);
   const appear = easeOut(span(t, 0, m.appearS));
-  ctx.lineCap = 'round';
-  ctx.lineWidth = 2 * STORY.dotR;
+  ctx.fillStyle = palette[2];
   for (let k = 0; k < plan.count; k += 1) {
-    const start = m.departS + (plan.delay[k] ?? 0);
-    const u = easeInOut(span(t, start, m.travelS));
-    const back = easeInOut(span(t - m.trail * m.travelS, start, m.travelS));
-    const land = span(t, start + m.travelS, m.landS);
-    const alpha = appear * (1 - land);
+    const order = plan.order[k] ?? 0;
+    const angle = (plan.slot[k] ?? 0) + turn;
+    const rx = radius * Math.cos(angle);
+    const ry = radius * Math.sin(angle);
+    const gather = easeInOut(span(t, m.gatherFromS + order * m.gatherSweepS, m.gatherS));
+    const scatterStart = m.scatterFromS + order * m.scatterSweepS;
+    const scatter = backOut(span(t, scatterStart, m.scatterS));
+    const fx = plan.from[2 * k] ?? 0;
+    const fy = plan.from[2 * k + 1] ?? 0;
+    const tx = plan.to[2 * k] ?? 0;
+    const ty = plan.to[2 * k + 1] ?? 0;
+    const gx = fx + (rx - fx) * gather;
+    const gy = fy + (ry - fy) * gather;
+    const x = gx + (tx - gx) * scatter;
+    const y = gy + (ty - gy) * scatter;
+    const alpha = appear * (1 - span(t, scatterStart + m.scatterS * 0.75, m.landS));
     if (alpha <= 0) continue;
-    const o = 6 * k;
-    const p = plan.path;
+    // A touch smaller on the ring: the drawing's points condense, then open up again.
+    const r = STORY.dotR * (1 - 0.25 * gather * (1 - scatter));
     ctx.globalAlpha = alpha;
-    ctx.strokeStyle =
-      palette[u < 0.5 ? (plan.colorFrom[k] ?? 0) : (plan.colorTo[k] ?? 0)] ?? palette[0];
     ctx.beginPath();
-    ctx.moveTo(
-      quad(p[o] ?? 0, p[o + 2] ?? 0, p[o + 4] ?? 0, back),
-      quad(p[o + 1] ?? 0, p[o + 3] ?? 0, p[o + 5] ?? 0, back),
-    );
-    ctx.lineTo(
-      quad(p[o] ?? 0, p[o + 2] ?? 0, p[o + 4] ?? 0, u),
-      quad(p[o + 1] ?? 0, p[o + 3] ?? 0, p[o + 5] ?? 0, u),
-    );
-    ctx.stroke();
+    ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.fill();
   }
   ctx.globalAlpha = 1;
 }

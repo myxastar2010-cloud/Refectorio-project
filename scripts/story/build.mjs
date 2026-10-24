@@ -12,12 +12,19 @@ import {
   LENS_R,
   LID_PIVOT,
   MERIDIANS,
-  NODES,
+  NODE_R,
+  ORBIT,
+  outsideSafe,
+  PAGE,
   PLANET_R,
   POT,
+  SATELLITES,
   SCENES,
   SLOT,
+  TEXT_LINES,
+  TICK,
   TROLLEY_AT,
+  TROLLEY_FROM,
   WHEEL_R,
   WHEELS,
 } from './drawings.mjs';
@@ -37,7 +44,7 @@ export const OUT_FILE = path.join(
 );
 
 /** Points of a cloud (the runtime may halve them on a slow device). */
-export const CLOUD_POINTS = 240;
+export const CLOUD_POINTS = 180;
 export const UNIT = 8;
 const COLORS = ['ink', 'muted', 'accent'];
 const WIDTHS = ['main', 'fine'];
@@ -88,11 +95,22 @@ export function buildStory() {
     version: 1,
     unit: UNIT,
     meta: {
+      page: PAGE,
+      textLines: TEXT_LINES,
+      tick: TICK.map((p) => [p.x, p.y]),
       planetR: PLANET_R,
       meridians: MERIDIANS,
+      orbit: ORBIT,
+      satellites: SATELLITES,
+      nodeR: NODE_R,
       lens: { x: LENS_AT.x, y: LENS_AT.y, r: LENS_R },
-      nodes: NODES.map((n) => [n.x, n.y]),
-      crane: { ...CRANE, trolleyAt: TROLLEY_AT, hookY: HOOK_Y, slot: SLOT },
+      crane: {
+        ...CRANE,
+        trolleyFrom: TROLLEY_FROM,
+        trolleyAt: TROLLEY_AT,
+        hookY: HOOK_Y,
+        slot: SLOT,
+      },
       robot: { wheels: WHEELS.map((w) => [w.x, w.y]), wheelR: WHEEL_R, dash: DASH },
       pot: { ...POT, lidPivot: [LID_PIVOT.x, LID_PIVOT.y] },
     },
@@ -101,6 +119,8 @@ export function buildStory() {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const outside = outsideSafe();
+  if (outside.length > 0) throw new Error(`outside the safe area: ${outside.join(', ')}`);
   const data = buildStory();
   await writeFile(OUT_FILE, `${JSON.stringify(data)}\n`);
   const counts = Object.entries(data.scenes).map(
