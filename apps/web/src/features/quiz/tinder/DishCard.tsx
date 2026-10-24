@@ -12,11 +12,16 @@ import {
   type MotionStyle,
 } from 'motion/react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
+import { whenIdle } from '../../../lib/idle';
 import { DURATION, TINDER } from '../../../motion/tokens';
+import { DishInfo, InfoChevron } from './DishInfo';
+import type { DishTexts } from './dishData';
 import {
   BLURHASH_SIZE,
   decodeBlurhash,
   hexLuminance,
+  imageInfoLuminance,
+  infoLuminance,
   photosFor,
   PHOTO_SIZES,
   reportPhoto,
@@ -24,10 +29,10 @@ import {
   type PhotoSource,
 } from './photos';
 import {
-  decideSwipe,
+  decideGesture,
   flightAt,
   flightOf,
-  resistUp,
+  pullFor,
   rotationFor,
   velocityOf,
   type Sample,
@@ -49,6 +54,8 @@ export type CardEnter = 'rise' | 'still' | { readonly returnFrom: TasteAnswer };
 
 /** The minimum tint under the dish name (CSS token mirror). */
 const MIN_SHADE = 0.36;
+/** The minimum darkening over the blurred photo of the open card (CSS token --quiz-info-shade-min). */
+const MIN_INFO_SHADE = 0.45;
 
 const offscreen = (answer: TasteAnswer) => {
   const w = window.innerWidth;
@@ -82,6 +89,16 @@ type Props = {
   /** The top card takes swipes; a leaving one does not. */
   readonly interactive: boolean;
   readonly calm: boolean;
+  /** The dish info is shown (§5.1): it opens and closes with a tap, a vertical swipe, the chevron, ↓ and ↑. */
+  readonly open: boolean;
+  readonly onToggle: () => void;
+  /** The descriptions chunk: null while it loads; `failed` hides the chevron. */
+  readonly texts: DishTexts | null;
+  readonly textsFailed: boolean;
+  /** Numbers are left out (the eating-disorder flag is already known). */
+  readonly deemphasize: boolean;
+  /** The first card: the chevron dips once as a hint. */
+  readonly nudge: boolean;
   /** A swipe decided an answer (with the release velocity). */
   /** `false`: the answer was not taken (too soon after the previous one) — the card springs back. */
   readonly onSwipe: (answer: TasteAnswer, velocity: { vx: number; vy: number }) => boolean;
@@ -94,9 +111,24 @@ type Props = {
 /**
  * A dish card (ТЗ §9.1): the photo (chain: our own copy → placeholder, ADR 0011), the dish name in white at the
  * top over the photo's own blurred placeholder masked by a gradient plus a tint that keeps the name ≥ 4.5:1 — no live
- * blur. Drag/swipe with pointer events on motion values; leaving and arriving are driven by presence.
+ * blur. Drag/swipe with pointer events on motion values; leaving and arriving are driven by presence. Open (§5), the
+ * photo cross-fades to its pre-blurred copy under a shade chosen per photo, and the dish info comes in.
  */
-export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSource }: Props) {
+export function DishCard({
+  dish,
+  enter,
+  interactive,
+  calm,
+  open,
+  onToggle,
+  texts,
+  textsFailed,
+  deemphasize,
+  nudge,
+  onSwipe,
+  onMove,
+  onSource,
+}: Props) {
   const [isPresent, safeToRemove] = usePresence();
   const exit = usePresenceData() as CardExit | undefined;
   const cardRef = useRef<HTMLElement>(null);
@@ -113,8 +145,8 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
     id: number;
     startX: number;
     startY: number;
+    startT: number;
     x0: number;
-    y0: number;
     samples: Sample[];
   } | null>(null);
 
@@ -133,11 +165,13 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
 
   // The card's size, kept by a ResizeObserver: read on every move, it forced a layout per frame (audit, F8).
   const size = useRef({ width: 0, height: 0 });
+  const [measured, setMeasured] = useState(0);
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return undefined;
     const observer = new ResizeObserver(() => {
       size.current = { width: card.offsetWidth, height: card.offsetHeight };
+      setMeasured((n) => n + 1);
     });
     observer.observe(card);
     return () => {
@@ -145,21 +179,18 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
     };
   }, []);
 
-  // The buttons swell as the card moves towards them.
+  // The buttons swell as the card moves towards them (a vertical drag opens the info, not «Пропустить»).
   const report = () => {
     if (!isPresent || size.current.width === 0) return;
     const width = size.current.width * TINDER.commitShare;
-    const height = size.current.height * TINDER.commitDownShare;
     const dx = x.get();
-    const dy = y.get();
     onMove({
       like: Math.max(0, Math.min(1, dx / width)),
       dislike: Math.max(0, Math.min(1, -dx / width)),
-      skip: Math.max(0, Math.min(1, dy / height)) * (Math.abs(dx) < Math.abs(dy) ? 1 : 0.3),
+      skip: 0,
     });
   };
   useMotionValueEvent(x, 'change', report);
-  useMotionValueEvent(y, 'change', report);
 
   // How this card leaves is latched when it is removed: a newer answer changes the presence data, not its flight.
   const leaving = useRef<{ exit: CardExit | undefined; remove: () => void } | null>(null);
@@ -236,6 +267,11 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
     };
   }, [isPresent, calm, opacity, rotate, scale, x, y]);
 
+  // The info: numbers (unless left out) and the description; a dish with neither, or a failed chunk, has no chevron.
+  const text = texts?.[dish.id] ?? null;
+  const hasInfo = !textsFailed && (texts === null || text !== null);
+  const infoId = `quiz-card-info-${dish.id}`;
+
   const onPointerDown = (event: PointerEvent<HTMLElement>) => {
     if (!interactive || !isPresent || drag.current) return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
@@ -246,18 +282,21 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
       id: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
+      startT: event.timeStamp,
       x0: x.get(),
-      y0: y.get(),
       samples: [{ t: event.timeStamp, x: event.clientX, y: event.clientY }],
     };
   };
   const onPointerMove = (event: PointerEvent<HTMLElement>) => {
     const state = drag.current;
     if (!state || state.id !== event.pointerId) return;
-    const nx = state.x0 + event.clientX - state.startX;
-    const ny = state.y0 + resistUp(event.clientY - state.startY);
+    const dx = event.clientX - state.startX;
+    const dy = event.clientY - state.startY;
+    // A clearly vertical drag only nudges the card (it toggles the info); a horizontal one carries it.
+    const vertical = Math.abs(dy) > Math.abs(dx) / 0.8;
+    const nx = state.x0 + (vertical ? dx * TINDER.rubberBand : dx);
     x.set(nx);
-    y.set(ny);
+    y.set(pullFor(dy, open));
     rotate.set(rotationFor(nx, event.currentTarget.offsetWidth));
     state.samples.push({ t: event.timeStamp, x: event.clientX, y: event.clientY });
     if (state.samples.length > 12) state.samples.shift();
@@ -268,14 +307,21 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
     drag.current = null;
     const velocity = velocityOf(state.samples);
     const card = event.currentTarget;
-    const answer =
+    const gesture =
       event.type === 'pointercancel'
         ? null
-        : decideSwipe({ x: x.get(), y: y.get() }, velocity, {
-            width: card.offsetWidth,
-            height: card.offsetHeight,
-          });
-    if (answer && onSwipe(answer, velocity)) return;
+        : decideGesture(
+            {
+              dx: event.clientX - state.startX,
+              dy: event.clientY - state.startY,
+              ms: event.timeStamp - state.startT,
+            },
+            velocity,
+            { width: card.offsetWidth, height: card.offsetHeight },
+            open,
+          );
+    if (gesture?.kind === 'answer' && onSwipe(gesture.answer, velocity)) return;
+    if (gesture?.kind === 'toggle' && hasInfo) onToggle();
     void animate(x, 0, { ...TINDER.springBack, velocity: velocity.vx });
     void animate(y, 0, { ...TINDER.springBack, velocity: velocity.vy });
     void animate(rotate, 0, TINDER.springBack);
@@ -302,9 +348,29 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
 
   const blur = photos.blurhash ? decodeBlurhash(photos.blurhash) : null;
   const luminance = blur?.topLuminance ?? (photos.avgColor ? hexLuminance(photos.avgColor) : 0);
-  // CSS variables for the tint and the colour behind the photo (Motion passes unknown keys through to style).
+  // The shade of the open card: from the pre-blurred copy once it is decoded, until then from the blurhash.
+  const [blurredLuminance, setBlurredLuminance] = useState<number | null>(null);
+  const [blurredReady, setBlurredReady] = useState(false);
+  // The blurred copy is fetched on idle after the card has arrived (or at once when it is opened), never in its way.
+  const [wantBlurred, setWantBlurred] = useState(false);
+  useEffect(
+    () =>
+      whenIdle(() => {
+        setWantBlurred(true);
+      }, TINDER.lookaheadIdleMs),
+    [],
+  );
+  const underInfo =
+    blurredLuminance ??
+    (blur
+      ? infoLuminance(blur.data.data, BLURHASH_SIZE.width, BLURHASH_SIZE.height)
+      : photos.avgColor
+        ? hexLuminance(photos.avgColor)
+        : 0);
+  // CSS variables for the tints and the colour behind the photo (Motion passes unknown keys through to style).
   const variables = {
     '--card-tint': tintFor(luminance, MIN_SHADE).toFixed(3),
+    '--info-shade': tintFor(underInfo, MIN_INFO_SHADE).toFixed(3),
     ...(photos.avgColor ? { '--card-color': photos.avgColor } : {}),
   } as unknown as MotionStyle;
   const style: MotionStyle = {
@@ -320,7 +386,11 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
   return (
     <m.figure
       ref={cardRef}
-      className={clsx('quiz-card', !photos.blurhash && !photos.avgColor && 'is-generated')}
+      className={clsx(
+        'quiz-card',
+        !photos.blurhash && !photos.avgColor && 'is-generated',
+        open && 'is-open',
+      )}
       style={style}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -365,7 +435,59 @@ export function DishCard({ dish, enter, interactive, calm, onSwipe, onMove, onSo
           <BlurCanvas hash={photos.blurhash} className="quiz-card-top-blur" />
         ) : null}
       </div>
+      {hasInfo ? (
+        <m.div
+          className="quiz-card-veil"
+          aria-hidden
+          initial={false}
+          animate={{ opacity: open ? 1 : 0 }}
+          transition={{
+            duration: calm ? DURATION.fade : open ? TINDER.info.openS : TINDER.info.closeS,
+          }}
+        >
+          {photos.blurred && (wantBlurred || open) ? (
+            <img
+              className={clsx('quiz-card-blurred', blurredReady && 'is-loaded')}
+              src={photos.blurred}
+              alt=""
+              decoding="async"
+              draggable={false}
+              onLoad={(event) => {
+                setBlurredLuminance(imageInfoLuminance(event.currentTarget));
+                setBlurredReady(true);
+              }}
+            />
+          ) : null}
+          {!blurredReady && photos.blurhash ? (
+            <BlurCanvas hash={photos.blurhash} className="quiz-card-blurred is-loaded" />
+          ) : null}
+          <div className="quiz-card-shade" />
+        </m.div>
+      ) : null}
       <figcaption className="quiz-card-name">{dish.nameRu}</figcaption>
+      {hasInfo ? (
+        <>
+          <DishInfo
+            id={infoId}
+            dish={dish}
+            open={open}
+            calm={calm}
+            text={text}
+            deemphasize={deemphasize}
+            measured={measured}
+          />
+          <InfoChevron
+            controls={infoId}
+            open={open}
+            calm={calm}
+            nudge={nudge && isPresent}
+            enabled={interactive && isPresent}
+            cardRef={cardRef}
+            measured={measured}
+            onToggle={onToggle}
+          />
+        </>
+      ) : null}
     </m.figure>
   );
 }

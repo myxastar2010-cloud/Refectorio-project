@@ -293,6 +293,112 @@ test.describe('the dish game', () => {
   });
 });
 
+test.describe('the dish info on the card (stage 3, §5)', () => {
+  const card = (page: Page) => page.locator('.quiz-card:not([aria-hidden])');
+  const toggle = (page: Page) => card(page).getByRole('button', { name: 'Подробнее о блюде' });
+  const expanded = (page: Page) => toggle(page).getAttribute('aria-expanded');
+
+  test('opens and closes by the arrows, the chevron and a tap; answers still work, the next card comes closed', async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await openQuiz(page);
+    const dish = (await currentDish(page).textContent()) ?? '';
+    const region = page.getByRole('region', { name: `О блюде: ${dish}` });
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await expect(toggle(page)).toHaveAttribute('aria-keyshortcuts', 'ArrowDown ArrowUp');
+    // ↓ opens (it no longer skips: D-056), a second ↓ does nothing, ↑ closes.
+    await page.keyboard.press('ArrowDown');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await expect(region).toBeVisible();
+    await expect(region).toContainText('—');
+    await page.keyboard.press('ArrowDown');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('ArrowUp');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await expect(region).toBeHidden();
+    // The chevron by pointer (the card tells the tap from a drag) and by Enter.
+    await toggle(page).click();
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await toggle(page).focus();
+    await page.keyboard.press('Enter');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    // A tap anywhere on the card.
+    await card(page).click({ position: { x: 40, y: 160 } });
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    expect((await draft(page))?.answers.tasteDecisions ?? []).toHaveLength(0);
+    // Answering while open: the next card arrives closed; «Вернуться» brings this one back closed.
+    await page.keyboard.press('d');
+    await expect(currentDish(page)).not.toHaveText(dish);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await page.getByRole('button', { name: 'Вернуться', exact: true }).click();
+    await expect(currentDish(page)).toHaveText(dish);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    // S skips; the «Пропустить» button keeps its key. (The game's keys work while the focus is in the step, not on
+    // «Вернуться» in the header.)
+    await expect(page.getByRole('button', { name: 'Пропустить', exact: true })).toHaveAttribute(
+      'aria-keyshortcuts',
+      'S',
+    );
+    await toggle(page).focus();
+    await page.keyboard.press('s');
+    await expect
+      .poll(async () => (await draft(page))?.answers.tasteDecisions.at(-1)?.answer)
+      .toBe('skip');
+    expect(errors).toEqual([]);
+  });
+
+  test('a drag down opens, up closes, the other way does nothing; a sideways drag still answers', async ({
+    page,
+  }) => {
+    await openQuiz(page);
+    const drag = async (dx: number, dy: number) => {
+      const box = await card(page).boundingBox();
+      if (!box) throw new Error('no card');
+      const x = box.x + box.width / 2;
+      const y = box.y + box.height / 2;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x + dx * box.width, y + dy * box.height, { steps: 8 });
+      await page.mouse.up();
+    };
+    await drag(0, -0.3);
+    expect(await expanded(page)).toBe('false');
+    await drag(0, 0.3);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await drag(0, 0.3);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await drag(0, -0.3);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    expect((await draft(page))?.answers.tasteDecisions ?? []).toHaveLength(0);
+    await drag(0, 0.3);
+    await drag(1.2, 0);
+    await expect
+      .poll(async () => (await draft(page))?.answers.tasteDecisions[0]?.answer)
+      .toBe('like');
+  });
+
+  test('the open card passes axe and its text fits', async ({ page }) => {
+    await openQuiz(page);
+    await page.keyboard.press('ArrowDown');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    expect(await axeSerious(page)).toEqual([]);
+    const fits = await card(page)
+      .locator('.quiz-card-info')
+      .evaluate((info) => info.scrollHeight <= info.clientHeight + 1);
+    expect(fits).toBe(true);
+  });
+
+  test('reduced motion: the info cross-fades', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openQuiz(page);
+    await page.keyboard.press('ArrowDown');
+    const info = card(page).locator('.quiz-card-info');
+    await expect(info).toHaveCSS('opacity', '1');
+    await expect(info).not.toHaveCSS('filter', /blur/);
+  });
+});
+
 test.describe('the whole path', () => {
   test('every step starts to enter with its icons decoded, inside its animated blocks (4.5)', async ({
     page,

@@ -411,6 +411,20 @@
   --quiz-card-radius: 112;
   --quiz-card-shade: 0.36; /* top third: blurred photo + a light tint for white text ≥ 4.5:1 */
   --quiz-card-name-y: 52;
+  /* The open card's dish info (stage 3, §5; mockup px of the 448 card, scaled with the card). */
+  --quiz-info-shade-min: 0.45; /* the darkening over the blurred photo, more where the photo is light (≥ 4.5:1) */
+  --quiz-info-gap: 34; /* name → values */
+  --quiz-info-side: 47;
+  --quiz-info-value: 24;
+  --quiz-info-label: 15;
+  --quiz-info-columns-gap: 20;
+  --quiz-info-text: 22;
+  --quiz-info-text-line: 29;
+  --quiz-info-text-gap: 44; /* values → description */
+  --quiz-info-cuisine: 16;
+  --quiz-info-bottom: 96; /* the description ends above the chevron */
+  --quiz-info-chevron-y: 520; /* the open chevron's centre */
+  --quiz-info-chevron-w: 38;
   --quiz-game-title-y: 140; /* the game has no icon: the title starts high */
   --quiz-game-button: 83;
   --quiz-game-skip-w: 211;
@@ -427,6 +441,7 @@
   /* Quiet CSS fades and loops of the quiz (the frosted header band, a photo arriving, the CSS core, the shimmer). */
   --quiz-fade-ms: 200ms;
   --quiz-photo-fade-ms: 220ms;
+  --quiz-skeleton-pulse-ms: 1400ms;
   --finale-core-pulse-s: 2.6s;
   --finale-core-breathe-s: 3.2s;
   --finale-shimmer-loop-s: 2.2s;

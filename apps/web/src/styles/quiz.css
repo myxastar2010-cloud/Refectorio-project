@@ -2074,6 +2074,9 @@ html:has(.page[data-scene='quiz']) body {
   will-change: transform;
   /* The rounded clip of a transformed layer (Safari otherwise draws square corners while it moves). */
   isolation: isolate;
+  /* The dish info is sized by the card (one mockup px of the 448 card = --cu). */
+  container-type: size;
+  --cu: calc(100cqw / var(--quiz-card-w));
 }
 
 .quiz-card:active {
@@ -2149,6 +2152,235 @@ html:has(.page[data-scene='quiz']) body {
   text-wrap: balance;
   text-shadow: 0 1px 12px rgb(0 0 0 / 0.35);
   pointer-events: none;
+}
+
+/* ── The dish info of the open card (stage 3, §5; design «описание для карточек блюд») ─────────── */
+
+/* The photo cross-fades to its pre-blurred copy (no live blur, D-029) under a shade chosen per photo (≥ 4.5:1). */
+.quiz-card-veil {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.quiz-card-blurred {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--quiz-photo-fade-ms) var(--ease-out-soft);
+}
+
+.quiz-card-blurred.is-loaded {
+  opacity: 1;
+}
+
+.quiz-card-shade {
+  position: absolute;
+  inset: 0;
+  background-color: rgb(0 0 0 / var(--info-shade, 0.6));
+}
+
+.quiz-card-info {
+  --info-scale: 1;
+  position: absolute;
+  top: var(--info-top, 22%);
+  left: calc(var(--quiz-info-side) * var(--cu));
+  right: calc(var(--quiz-info-side) * var(--cu));
+  bottom: calc(var(--quiz-info-bottom) * var(--cu));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  color: var(--color-on-accent);
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.3);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Fitting (DishInfo fitInfo): smaller text → values 2 × 2 → no cuisine → the short description → smaller still. */
+.quiz-card-info:is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4']) {
+  --info-scale: 0.9;
+}
+
+/* The tiniest cards: the name moves into the text (the card's own name fades), the info starts at the top. */
+.quiz-card-info:is([data-fit='5'], [data-fit='6'], [data-fit='7']) {
+  --info-scale: 0.8;
+}
+
+.quiz-card-info:is([data-fit='6'], [data-fit='7']) {
+  top: max(10px, calc(30 * var(--cu)));
+}
+
+.quiz-card-name {
+  transition: opacity var(--quiz-photo-fade-ms) var(--ease-out-soft);
+}
+
+.quiz-card.is-open:has(.quiz-card-info:is([data-fit='6'], [data-fit='7'])) .quiz-card-name {
+  opacity: 0;
+}
+
+.quiz-card-text-name {
+  display: none;
+  font-weight: 700;
+}
+
+.quiz-card-info:is([data-fit='6'], [data-fit='7']) .quiz-card-text-name {
+  display: inline;
+}
+
+.quiz-card-info[data-fit='7'] .quiz-card-values {
+  display: none;
+}
+
+.quiz-card-values {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--quiz-info-columns-gap) * var(--cu) * var(--info-scale));
+  margin: 0;
+}
+
+.quiz-card-info:is([data-fit='2'], [data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6'])
+  .quiz-card-values {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  row-gap: calc(10 * var(--cu));
+}
+
+/* The value above its label (the label comes first for screen readers: «энергия 197 ккал»). */
+.quiz-card-values > div {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: calc(3 * var(--cu));
+}
+
+.quiz-card-values dd {
+  margin: 0;
+  font-size: max(12px, calc(var(--quiz-info-value) * var(--cu) * var(--info-scale)));
+  line-height: 1.15;
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-card-values dt {
+  font-size: max(10px, calc(var(--quiz-info-label) * var(--cu) * var(--info-scale)));
+  line-height: 1.2;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.quiz-card-cuisine {
+  margin-top: calc(var(--quiz-info-text-gap) * var(--cu) * var(--info-scale));
+  font-size: max(11px, calc(var(--quiz-info-cuisine) * var(--cu) * var(--info-scale)));
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.quiz-card-cuisine:first-child {
+  margin-top: 0;
+}
+
+.quiz-card-info:is([data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'])
+  .quiz-card-cuisine {
+  display: none;
+}
+
+.quiz-card-text,
+.quiz-card-skeleton {
+  align-self: stretch;
+  margin-top: calc(var(--quiz-info-text-gap) * var(--cu) * var(--info-scale));
+}
+
+.quiz-card-text:first-child,
+.quiz-card-skeleton:first-child {
+  margin-top: 0;
+}
+
+.quiz-card-cuisine + .quiz-card-text,
+.quiz-card-cuisine + .quiz-card-skeleton {
+  margin-top: calc(8 * var(--cu));
+}
+
+.quiz-card-text {
+  font-size: max(12px, calc(var(--quiz-info-text) * var(--cu) * var(--info-scale)));
+  line-height: calc(var(--quiz-info-text-line) / var(--quiz-info-text));
+  font-weight: 600;
+  text-align: left;
+}
+
+.quiz-card-text-short {
+  display: none;
+}
+
+.quiz-card-info:is([data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'])
+  .quiz-card-text-long {
+  display: none;
+}
+
+.quiz-card-info:is([data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'])
+  .quiz-card-text-short {
+  display: inline;
+}
+
+/* The descriptions are on their way: three soft lines. */
+.quiz-card-skeleton {
+  height: calc(3 * var(--quiz-info-text-line) * var(--cu));
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.24) 0 calc(14 * var(--cu)),
+    transparent calc(14 * var(--cu)) calc(var(--quiz-info-text-line) * var(--cu))
+  );
+  border-radius: calc(7 * var(--cu));
+  animation: quiz-skeleton-pulse var(--quiz-skeleton-pulse-ms) var(--ease-out-soft) infinite
+    alternate;
+}
+
+@keyframes quiz-skeleton-pulse {
+  to {
+    opacity: 0.45;
+  }
+}
+
+/* The chevron: a real button; the card takes pointer taps (tap vs drag), the button Enter and Space. */
+.quiz-card-toggle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: max(64px, calc(84 * var(--cu)));
+  height: 44px;
+  border-radius: 9999px;
+  color: var(--color-on-accent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--quiz-photo-fade-ms) var(--ease-out-soft);
+}
+
+.quiz-card-toggle:focus-visible {
+  outline: none;
+  background-color: rgb(255 255 255 / 0.22);
+}
+
+.quiz-card-toggle:disabled {
+  cursor: inherit;
+}
+
+.quiz-card-chevron-nudge {
+  display: block;
+}
+
+.quiz-card-chevron {
+  display: block;
+  width: max(26px, calc(var(--quiz-info-chevron-w) * var(--cu)));
+  height: auto;
+  overflow: visible;
 }
 
 /* Above the cards (4.4): a card swiped or skipped down passes under the buttons and leaves at the window's edge. */
@@ -2821,7 +3053,13 @@ html:has(.page[data-scene='quiz']) body {
     animation: none;
   }
 
-  .quiz-card-photo {
+  .quiz-card-photo,
+  .quiz-card-blurred,
+  .quiz-card-name {
     transition: none;
+  }
+
+  .quiz-card-skeleton {
+    animation: none;
   }
 }

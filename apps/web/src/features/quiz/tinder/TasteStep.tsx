@@ -16,6 +16,7 @@ import { PrivacyLabel } from '../components/PrivacyLabel';
 import { StepFrame } from '../components/StepFrame';
 import { fill, useQuiz } from '../quizContext';
 import { DishCard, type CardEnter, type CardExit } from './DishCard';
+import { loadDishTexts, type DishTexts } from './dishData';
 import { GameControls, type Swell } from './GameControls';
 import { PhotoCredit } from './PhotoCredit';
 import { HOTLINKED, preloadPhoto, type PhotoSource } from './photos';
@@ -43,11 +44,16 @@ const joinRu = (items: readonly string[]) =>
     ? (items[0] ?? '')
     : `${items.slice(0, -1).join(', ')} ${quiz.taste.and} ${items.at(-1) ?? ''}`;
 
-/** Letters by their place on the keyboard (works in the Russian layout too); arrows by key. */
-function answerOfKey(event: KeyboardEvent): TasteAnswer | null {
+/**
+ * Letters by their place on the keyboard (works in the Russian layout too); arrows by key. ↓ and ↑ open and close the
+ * dish info — skipping is S and «Пропустить» only (D-056).
+ */
+function actionOfKey(event: KeyboardEvent): TasteAnswer | 'open' | 'close' | null {
   if (event.code === 'KeyA' || event.key === 'ArrowLeft') return 'dislike';
-  if (event.code === 'KeyS' || event.key === 'ArrowDown') return 'skip';
+  if (event.code === 'KeyS') return 'skip';
   if (event.code === 'KeyD' || event.key === 'ArrowRight') return 'like';
+  if (event.key === 'ArrowDown') return 'open';
+  if (event.key === 'ArrowUp') return 'close';
   return null;
 }
 
@@ -63,7 +69,7 @@ type Track = {
  * history: «Вернуться» brings the last card back from where it left.
  */
 export function TasteStep() {
-  const { state, dispatch, tasteAnswer, next, calm, params, announce } = useQuiz();
+  const { state, dispatch, tasteAnswer, next, calm, params, announce, safety } = useQuiz();
   const present = useIsPresent();
   const { tasteSeed: seed, tasteDecisions: decisions, tasteExhausted } = state.answers;
   const session = useMemo(() => sessionFor(seed, decisions), [seed, decisions]);
@@ -80,6 +86,8 @@ export function TasteStep() {
     exit: { kind: 'answer', answer: 'skip', vx: 0, vy: 0 },
     enter: 'still',
   }));
+  // The dish info of the shown card (§5.1): the next card, and one brought back by «Вернуться», arrive closed.
+  const [open, setOpen] = useState(false);
   let { exit, enter } = track;
   if (track.decisions !== decisions) {
     const undone = decisions.length < track.decisions.length ? track.decisions.at(-1) : undefined;
@@ -88,7 +96,25 @@ export function TasteStep() {
       : { kind: 'answer', answer: decisions.at(-1)?.answer ?? 'skip', ...fling };
     enter = undone ? { returnFrom: undone.answer } : 'rise';
     setTrack({ decisions, exit, enter });
+    setOpen(false);
   }
+
+  // The descriptions: a chunk of their own, fetched on idle after the first card (or at once, when a card is opened).
+  const [texts, setTexts] = useState<DishTexts | null>(null);
+  const [textsFailed, setTextsFailed] = useState(false);
+  const fetchTexts = useCallback(() => {
+    loadDishTexts().then(setTexts, () => {
+      setTextsFailed(true);
+    });
+  }, []);
+  useEffect(() => whenIdle(fetchTexts, TINDER.lookaheadIdleMs), [fetchTexts]);
+  const toggle = useCallback(
+    (to?: boolean) => {
+      if (texts === null) fetchTexts();
+      setOpen((was) => to ?? !was);
+    },
+    [texts, fetchTexts],
+  );
 
   const like = useMotionValue(0);
   const dislike = useMotionValue(0);
@@ -143,9 +169,13 @@ export function TasteStep() {
 
   // Keys A/S/D and arrows (never inside a text field or under a dialog).
   const commitRef = useRef(commit);
+  const toggleRef = useRef<(to: boolean) => void>(() => undefined);
   useEffect(() => {
     commitRef.current = commit;
-  }, [commit]);
+    toggleRef.current = (to: boolean) => {
+      if (current && !complete && !blocked && !textsFailed) toggle(to);
+    };
+  }, [commit, toggle, current, complete, blocked, textsFailed]);
   useEffect(() => {
     if (!present) return undefined;
     const onKey = (event: KeyboardEvent) => {
@@ -157,10 +187,11 @@ export function TasteStep() {
       )
         return;
       if (document.querySelector('[aria-modal="true"]') || !focusInStep()) return;
-      const answer = answerOfKey(event);
-      if (!answer) return;
+      const action = actionOfKey(event);
+      if (!action) return;
       event.preventDefault();
-      commitRef.current(answer);
+      if (action === 'open' || action === 'close') toggleRef.current(action === 'open');
+      else commitRef.current(action);
     };
     window.addEventListener('keydown', onKey);
     return () => {
@@ -251,6 +282,12 @@ export function TasteStep() {
               enter={enter}
               interactive={!complete && !blocked}
               calm={calm}
+              open={open}
+              onToggle={toggle}
+              texts={texts}
+              textsFailed={textsFailed}
+              deemphasize={safety.decision.deemphasizeNumbers}
+              nudge={decisions.length === 0}
               onSwipe={commit}
               onMove={onMove}
               onSource={HOTLINKED ? setCredit : undefined}

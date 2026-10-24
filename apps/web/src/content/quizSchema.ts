@@ -1,3 +1,4 @@
+import { CUISINES } from '@refectorio/taste-core';
 import { z } from 'zod';
 
 const text = z.string().trim().min(1);
@@ -129,6 +130,19 @@ export const quizContentSchema = z.object({
     }),
     and: text,
     swipeHint: text,
+    info: z.object({
+      toggle: text,
+      region: template('dish'),
+      energy: text,
+      protein: text,
+      fat: text,
+      carbs: text,
+      kcal: text,
+      grams: text,
+      lead: text,
+      loading: text,
+      cuisines: z.record(z.enum(CUISINES), text),
+    }),
     debugTitle: text,
     debugLiked: text,
     debugDisliked: text,
