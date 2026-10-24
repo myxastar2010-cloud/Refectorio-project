@@ -413,6 +413,61 @@
   }
 }
 
+/* Tablets on their side with the browser's bars (Android 962×601, iPad 1024×690): part 1 and «О проекте» are
+   tightened by the height, so nothing is cut at the bottom. */
+@media (min-width: 48rem) and (orientation: landscape) and (max-height: 46rem) and (min-height: 35.01rem) and (not ((min-width: 80rem) and (hover: hover))) {
+  .site-header {
+    padding-top: calc(14px + env(safe-area-inset-top));
+  }
+
+  .scene--hero {
+    gap: 12px;
+    --hero-top: calc(76px + env(safe-area-inset-top));
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .hero-title {
+    font-size: clamp(34px, 7.4svh, 52px);
+  }
+
+  .hero-lead {
+    font-size: clamp(15px, 2.7svh, 18px);
+  }
+
+  .cta-slot {
+    height: clamp(48px, 8svh, 60px);
+  }
+
+  .features {
+    gap: 12px;
+    margin-top: clamp(14px, 3svh, 28px);
+  }
+
+  .feature-card {
+    min-height: clamp(84px, 15svh, 120px);
+  }
+
+  .feature-surface {
+    padding-block: 10px;
+  }
+
+  .feature-title {
+    font-size: clamp(19px, 3.6svh, 24px);
+  }
+
+  .feature-text {
+    font-size: clamp(13px, 2.3svh, 15px);
+  }
+
+  .about-title {
+    font-size: clamp(36px, 8svh, 52px);
+  }
+
+  .info-surface {
+    padding: 24px 32px 28px;
+  }
+}
+
 /* ── Low landscape screens (phones on their side, zoomed-in windows): text on the left, cards on the right ─── */
 
 @media (orientation: landscape) and (max-height: 35rem) and (not ((min-width: 80rem) and (hover: hover))) {

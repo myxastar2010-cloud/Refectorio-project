@@ -29,6 +29,7 @@ const ICONS = [
   ['q-activity', HEADER_BOX],
   ['q-strength', HEADER_BOX],
   ['q-notes', HEADER_BOX],
+  ['q-extra-goals', HEADER_BOX],
   ['o-goal-lose', OPTION_BOX],
   ['o-goal-gain', OPTION_BOX],
   ['o-goal-maintain', OPTION_BOX],
@@ -46,6 +47,11 @@ const ICONS = [
   ['o-life-standing', OPTION_BOX],
   ['o-life-moving', OPTION_BOX],
   ['o-life-labour', OPTION_BOX],
+  ['o-extra-clothes', OPTION_BOX],
+  ['o-extra-health', OPTION_BOX],
+  ['o-extra-fitness', OPTION_BOX],
+  ['o-extra-energy', OPTION_BOX],
+  ['o-extra-sleep', OPTION_BOX],
 ];
 
 const AVIF = { quality: 60, effort: 6 };

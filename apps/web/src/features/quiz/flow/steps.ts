@@ -5,9 +5,10 @@ import type { Answers, StepId } from './types';
 
 /**
  * The quiz as data (ТЗ §13): order (D-031), progress slot, kind, branching and completeness. Pure — unit-tested.
- * Slots: the 11 main questions; a sub-step sits in its parent's slot (+½).
+ * Slots: the 12 main questions (stage 3 added «Помимо вашей основной цели…»); a sub-step sits in its parent's slot.
+ * Drafts resume by step id (firstIncompleteStep), never by index.
  */
-export type StepKind = 'taste' | 'rows' | 'options' | 'yesNo' | 'chips' | 'text';
+export type StepKind = 'taste' | 'rows' | 'options' | 'multi' | 'yesNo' | 'chips' | 'text';
 
 export type IconKey =
   | 'q-body'
@@ -19,6 +20,7 @@ export type IconKey =
   | 'q-activity'
   | 'q-strength'
   | 'q-lifestyle'
+  | 'q-extra-goals'
   | 'q-notes';
 
 export type StepDef = {
@@ -33,7 +35,7 @@ export type StepDef = {
   readonly complete: (answers: Answers) => boolean;
 };
 
-export const TOTAL_SLOTS = 11;
+export const TOTAL_SLOTS = 12;
 
 const has = <T>(value: T | undefined): value is T => value !== undefined;
 const isAdultOrConfirmed = (a: Answers) =>
@@ -173,8 +175,19 @@ export const STEPS: readonly StepDef[] = [
     icon: 'q-lifestyle',
     complete: (a) => has(a.lifestyle),
   },
+  // Second to last (stage 3, §6). Not in family mode: «в себе» is wrong when a parent answers for a child. «Пропустить»
+  // stores [] — answered.
+  {
+    id: 'extraGoals',
+    kind: 'multi',
+    slot: 10,
+    sub: false,
+    icon: 'q-extra-goals',
+    showIf: (a) => (a.ageYears ?? 30) >= AGE_LIMITS.childUnderYears,
+    complete: (a) => has(a.extraGoals),
+  },
   // Optional: an empty «Готово» is fine.
-  { id: 'notes', kind: 'text', slot: 10, sub: false, icon: 'q-notes', complete: () => true },
+  { id: 'notes', kind: 'text', slot: 11, sub: false, icon: 'q-notes', complete: () => true },
 ];
 
 const BY_ID = new Map(STEPS.map((step) => [step.id, step]));

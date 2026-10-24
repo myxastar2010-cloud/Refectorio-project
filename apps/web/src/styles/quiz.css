@@ -30,10 +30,11 @@
 
   /* The header and the zone under it do not shrink with a step. */
   --q-header-h: calc(126 * var(--q-unit));
-  --q-progress-w: calc(var(--quiz-progress-w) * var(--q-unit));
-  --q-progress-h: calc(var(--quiz-progress-h) * var(--q-unit));
-  --q-progress-inset: max(2px, calc(var(--quiz-progress-inset) * var(--q-unit)));
-  --q-progress-y: calc(var(--quiz-progress-y) * var(--q-unit));
+  /* Whole pixels (an even height): on fractional ones the fill sat a pixel closer to one edge of its track. */
+  --q-progress-w: round(calc(var(--quiz-progress-w) * var(--q-unit)), 2px);
+  --q-progress-h: round(calc(var(--quiz-progress-h) * var(--q-unit)), 2px);
+  --q-progress-inset: max(2px, round(calc(var(--quiz-progress-inset) * var(--q-unit)), 1px));
+  --q-progress-y: round(calc(var(--quiz-progress-y) * var(--q-unit)), 1px);
   --q-back: max(44px, calc(var(--quiz-back-size) * var(--q-unit)));
   --q-back-gap: calc(var(--quiz-back-gap) * var(--q-unit));
 
@@ -148,14 +149,14 @@ html:has(.page[data-scene='quiz']) body {
    row of their own under the logo and «Выйти» (on one row they ran into «Refectorio»). */
 @media (min-width: 48rem) and (orientation: portrait) {
   .quiz {
-    --q-unit: max(0.62px, min(100vw / 1000, 100svh / 1000));
+    --q-unit: max(0.62px, min(100vw / 820, 100svh / 1150));
   }
 
   .quiz,
   .quiz-screen {
     --q-tablet-row: 56px;
     --q-header-h: calc(126 * var(--q-unit) + var(--q-tablet-row));
-    --q-progress-y: calc(var(--quiz-progress-y) * var(--q-unit) + var(--q-tablet-row));
+    --q-progress-y: round(calc(var(--quiz-progress-y) * var(--q-unit) + var(--q-tablet-row)), 1px);
     --q-top: calc(var(--quiz-icon-y) * var(--q-unit) + var(--q-tablet-row));
     --q-game-title-y: calc(var(--quiz-game-title-y) * var(--q-unit) + var(--q-tablet-row));
     /* The longest health chip stays on one line at 768–1000 px. */
@@ -788,6 +789,17 @@ html:has(.page[data-scene='quiz']) body {
     display: inline;
   }
 
+  /* «Помимо вашей основной цели…»: five answers fill the right column, «Готово» / «Пропустить» go under the title. */
+  .quiz-screen[data-compact] .quiz-frame--extra-goals .quiz-footer {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .quiz-screen[data-compact] .quiz-frame--extra-goals .quiz-privacy {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
   /* Chips: the question across the top, the chips on the left, what follows them on the right. */
   .quiz-screen[data-compact] .quiz-frame--chips {
     grid-template-columns: minmax(0, 1fr);
@@ -1068,6 +1080,69 @@ html:has(.page[data-scene='quiz']) body {
 .quiz-option .wave-layer .quiz-option-desc,
 .quiz-option .wave-layer .quiz-option-tag {
   color: rgb(255 255 255 / 0.82);
+}
+
+/* Several answers (stage 3, §6): the lifestyle pill, its label beside the icon, a round check on the right that fills
+   with the accent when chosen (the team's sketch). Under the wave the ring follows the white content. */
+.quiz-option--multi .quiz-option-text {
+  flex: 1 1 auto;
+}
+
+/* Touch tablets on their side: five two-line pills in one column were fitted down to ≈ 0.6 — two columns keep them
+   at the size of the other steps (the fifth centred under the others). */
+@media (orientation: landscape) and (min-width: 60rem) and (pointer: coarse) {
+  .quiz-frame--extra-goals .quiz-choices--multi {
+    display: grid;
+    grid-template-columns: repeat(2, var(--q-pill-w-short));
+    justify-content: center;
+    gap: var(--q-pill-gap-short);
+  }
+
+  .quiz-frame--extra-goals .quiz-choices--multi > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+}
+
+/* Two-line labels as in the sketch (48 px between lines at 37 px). */
+.quiz-option--multi .quiz-option-label {
+  line-height: 1.25;
+}
+
+.quiz-check-circle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--q-radio);
+  height: var(--q-radio);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 var(--q-outline) var(--color-ink-muted);
+  color: transparent;
+  transition:
+    background-color var(--quiz-fade-ms) var(--ease-out-soft),
+    box-shadow var(--quiz-fade-ms) var(--ease-out-soft),
+    color var(--quiz-fade-ms) var(--ease-out-soft);
+}
+
+.quiz-option--multi .wave-layer .quiz-check-circle {
+  box-shadow: inset 0 0 0 var(--q-outline) currentColor;
+}
+
+.quiz-check-circle.is-on,
+.quiz-option--multi .wave-layer .quiz-check-circle.is-on {
+  background-color: var(--color-accent);
+  box-shadow: none;
+  color: var(--color-on-accent);
+}
+
+.quiz-check-circle-mark {
+  width: 58%;
+  height: 58%;
+}
+
+/* «Пропустить» under the answers: quiet, but darker than the privacy label beneath it. */
+.quiz-skip {
+  color: var(--color-ink);
 }
 
 .quiz-option.is-disabled {
@@ -2016,6 +2091,9 @@ html:has(.page[data-scene='quiz']) body {
   will-change: transform;
   /* The rounded clip of a transformed layer (Safari otherwise draws square corners while it moves). */
   isolation: isolate;
+  /* The dish info is sized by the card (one mockup px of the 448 card = --cu). */
+  container-type: size;
+  --cu: calc(100cqw / var(--quiz-card-w));
 }
 
 .quiz-card:active {
@@ -2091,6 +2169,246 @@ html:has(.page[data-scene='quiz']) body {
   text-wrap: balance;
   text-shadow: 0 1px 12px rgb(0 0 0 / 0.35);
   pointer-events: none;
+}
+
+/* ── The dish info of the open card (stage 3, §5; design «описание для карточек блюд») ─────────── */
+
+/* The photo cross-fades to its pre-blurred copy (no live blur, D-029) under a shade chosen per photo (≥ 4.5:1). */
+.quiz-card-veil {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.quiz-card-blurred {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--quiz-photo-fade-ms) var(--ease-out-soft);
+}
+
+.quiz-card-blurred.is-loaded {
+  opacity: 1;
+}
+
+.quiz-card-shade {
+  position: absolute;
+  inset: 0;
+  background-color: rgb(0 0 0 / var(--info-shade, 0.6));
+}
+
+.quiz-card-info {
+  --info-scale: 1;
+  position: absolute;
+  top: var(--info-top, 22%);
+  left: calc(var(--quiz-info-side) * var(--cu));
+  right: calc(var(--quiz-info-side) * var(--cu));
+  bottom: calc(var(--quiz-info-bottom) * var(--cu));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  color: var(--color-on-accent);
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.3);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Fitting (DishInfo fitInfo): smaller text → values 2 × 2 → no cuisine → the short description → smaller still. */
+.quiz-card-info:is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4']) {
+  --info-scale: 0.9;
+}
+
+/* The tiniest cards: the name moves into the text (the card's own name fades), the info starts at the top. */
+.quiz-card-info:is([data-fit='5'], [data-fit='6'], [data-fit='7']) {
+  --info-scale: 0.8;
+}
+
+.quiz-card-info:is([data-fit='6'], [data-fit='7']) {
+  top: max(10px, calc(30 * var(--cu)));
+}
+
+.quiz-card-name {
+  transition: opacity var(--quiz-photo-fade-ms) var(--ease-out-soft);
+}
+
+.quiz-card.is-open:has(.quiz-card-info:is([data-fit='6'], [data-fit='7'])) .quiz-card-name {
+  opacity: 0;
+}
+
+.quiz-card-text-name {
+  display: none;
+  font-weight: 700;
+}
+
+.quiz-card-info:is([data-fit='6'], [data-fit='7']) .quiz-card-text-name {
+  display: inline;
+}
+
+.quiz-card-info[data-fit='7'] .quiz-card-values {
+  display: none;
+}
+
+.quiz-card-values {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--quiz-info-columns-gap) * var(--cu) * var(--info-scale));
+  margin: 0;
+}
+
+.quiz-card-info:is([data-fit='2'], [data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6'])
+  .quiz-card-values {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  row-gap: calc(10 * var(--cu));
+}
+
+/* The value above its label (the label comes first for screen readers: «энергия 197 ккал»). */
+.quiz-card-values > div {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: calc(3 * var(--cu));
+}
+
+.quiz-card-values dd {
+  margin: 0;
+  font-size: max(12px, calc(var(--quiz-info-value) * var(--cu) * var(--info-scale)));
+  line-height: 1.15;
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-card-values dt {
+  font-size: max(10px, calc(var(--quiz-info-label) * var(--cu) * var(--info-scale)));
+  line-height: 1.2;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.quiz-card-portion {
+  margin-top: calc(8 * var(--cu));
+  font-size: max(10px, calc(13 * var(--cu) * var(--info-scale)));
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.quiz-card-info[data-fit='7'] .quiz-card-portion {
+  display: none;
+}
+
+.quiz-card-cuisine {
+  margin-top: calc(var(--quiz-info-text-gap) * var(--cu) * var(--info-scale));
+  font-size: max(11px, calc(var(--quiz-info-cuisine) * var(--cu) * var(--info-scale)));
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.quiz-card-cuisine:first-child {
+  margin-top: 0;
+}
+
+.quiz-card-info:is([data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'])
+  .quiz-card-cuisine {
+  display: none;
+}
+
+.quiz-card-text,
+.quiz-card-skeleton {
+  align-self: stretch;
+  margin-top: calc(var(--quiz-info-text-gap) * var(--cu) * var(--info-scale));
+}
+
+.quiz-card-text:first-child,
+.quiz-card-skeleton:first-child {
+  margin-top: 0;
+}
+
+.quiz-card-cuisine + .quiz-card-text,
+.quiz-card-cuisine + .quiz-card-skeleton {
+  margin-top: calc(8 * var(--cu));
+}
+
+.quiz-card-text {
+  font-size: max(12px, calc(var(--quiz-info-text) * var(--cu) * var(--info-scale)));
+  line-height: calc(var(--quiz-info-text-line) / var(--quiz-info-text));
+  font-weight: 600;
+  text-align: left;
+}
+
+.quiz-card-text-short {
+  display: none;
+}
+
+.quiz-card-info:is([data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'])
+  .quiz-card-text-long {
+  display: none;
+}
+
+.quiz-card-info:is([data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'])
+  .quiz-card-text-short {
+  display: inline;
+}
+
+/* The descriptions are on their way: three soft lines. */
+.quiz-card-skeleton {
+  height: calc(3 * var(--quiz-info-text-line) * var(--cu));
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.24) 0 calc(14 * var(--cu)),
+    transparent calc(14 * var(--cu)) calc(var(--quiz-info-text-line) * var(--cu))
+  );
+  border-radius: calc(7 * var(--cu));
+  animation: quiz-skeleton-pulse var(--quiz-skeleton-pulse-ms) var(--ease-out-soft) infinite
+    alternate;
+}
+
+@keyframes quiz-skeleton-pulse {
+  to {
+    opacity: 0.45;
+  }
+}
+
+/* The chevron: a real button; the card takes pointer taps (tap vs drag), the button Enter and Space. */
+.quiz-card-toggle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: max(64px, calc(84 * var(--cu)));
+  height: 44px;
+  border-radius: 9999px;
+  color: var(--color-on-accent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--quiz-photo-fade-ms) var(--ease-out-soft);
+}
+
+.quiz-card-toggle:focus-visible {
+  outline: none;
+  background-color: rgb(255 255 255 / 0.22);
+}
+
+.quiz-card-toggle:disabled {
+  cursor: inherit;
+}
+
+.quiz-card-chevron-nudge {
+  display: block;
+}
+
+.quiz-card-chevron {
+  display: block;
+  width: max(26px, calc(var(--quiz-info-chevron-w) * var(--cu)));
+  height: auto;
+  overflow: visible;
 }
 
 /* Above the cards (4.4): a card swiped or skipped down passes under the buttons and leaves at the window's edge. */
@@ -2305,68 +2623,20 @@ html:has(.page[data-scene='quiz']) body {
   place-items: center;
 }
 
-.quiz-core {
+.quiz-story {
   position: relative;
-  display: grid;
-  place-items: center;
   max-width: 100%;
 }
 
-.quiz-core-canvas {
+/* The generation story (§7): a Canvas 2D line drawing in the composition's box. */
+.quiz-story-canvas {
+  display: block;
   width: 100%;
   height: 100%;
-  opacity: 0;
-}
-
-/* The canvas shows from the moment the dot has arrived (the same colour and size at the switch). */
-.quiz-finale-core[data-shown] .quiz-core-canvas[data-ready] {
-  opacity: 1;
-}
-
-.quiz-core-css {
-  width: 48%;
-  height: 48%;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.45) 0%, transparent 32%),
-    radial-gradient(
-      circle at 50% 50%,
-      var(--color-accent) 0%,
-      var(--color-accent) 55%,
-      var(--color-coral) 100%
-    );
-  animation: quiz-core-pulse var(--finale-core-pulse-s) var(--ease-in-out) infinite alternate;
-}
-
-/* The honest line is up: everything that moved in the finale stands still (WCAG 2.2.2). */
-.quiz-core-css.is-paused {
-  animation-play-state: paused;
 }
 
 .quiz-finale[data-paused] .quiz-shimmer {
   display: none;
-}
-
-.quiz-core-css.is-calm {
-  animation: quiz-core-breathe var(--finale-core-breathe-s) var(--ease-in-out) infinite alternate;
-}
-
-@keyframes quiz-core-pulse {
-  from {
-    opacity: 0.88;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes quiz-core-breathe {
-  from {
-    opacity: 0.82;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .quiz-handoff {
@@ -2379,12 +2649,12 @@ html:has(.page[data-scene='quiz']) body {
   pointer-events: none;
 }
 
-/* The core's canvas keeps room for its satellites and ripple: the captions sit up into that empty lower band. */
+/* The drawings leave a band free at the bottom of their box: the captions sit up into it. */
 .quiz-finale-captions {
   display: flex;
   justify-content: center;
   min-height: calc(var(--quiz-caption-h) + 8px);
-  margin-top: calc(var(--core-size, 360px) * -0.14);
+  margin-top: calc(var(--core-size, 360px) * -0.07);
 }
 
 .quiz-caption {
@@ -2759,11 +3029,13 @@ html:has(.page[data-scene='quiz']) body {
     animation-delay: 0ms;
   }
 
-  .quiz-core-css {
-    animation: none;
+  .quiz-card-photo,
+  .quiz-card-blurred,
+  .quiz-card-name {
+    transition: none;
   }
 
-  .quiz-card-photo {
-    transition: none;
+  .quiz-card-skeleton {
+    animation: none;
   }
 }

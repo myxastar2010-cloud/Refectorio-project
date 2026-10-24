@@ -68,6 +68,33 @@ test('the dish game fits the phone screen, and a swipe answers', async ({ page }
   expect(errors).toEqual([]);
 });
 
+test('a swipe down opens the dish info, which fits the card; a swipe up closes it (§5)', async ({
+  page,
+}) => {
+  await openQuiz(page);
+  const card = page.locator('.quiz-card:not([aria-hidden])');
+  const toggle = card.getByRole('button', { name: 'Подробнее о блюде' });
+  const swipe = async (dy: number) => {
+    const box = await card.boundingBox();
+    if (!box) throw new Error('no card');
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + dy * box.height, {
+      steps: 6,
+    });
+    await page.mouse.up();
+  };
+  await swipe(0.3);
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  const fits = await card
+    .locator('.quiz-card-info')
+    .evaluate((info) => info.scrollHeight <= info.clientHeight + 1);
+  expect(fits).toBe(true);
+  await swipe(-0.3);
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  expect((await draft(page))?.answers.tasteDecisions ?? []).toHaveLength(0);
+});
+
 test('a row opens a bottom sheet with the wheel', async ({ page }) => {
   await openQuiz(page);
   await playDishes(page, TEN_DECISIVE);

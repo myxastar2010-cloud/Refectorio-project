@@ -419,7 +419,7 @@
 
 /* ── Room for the mockup's composition: placed and scaled like the mockup ──────────────────── */
 
-@media (min-width: 56rem) and (min-height: 40rem) {
+@media (min-width: 56rem) and (min-height: 30rem) {
   .scene--pricing {
     --pu: min(100vw / var(--pricing-fit-w), 100svh / var(--pricing-fit-h));
     --top: calc((100svh - var(--pricing-fit-h) * var(--pu)) / 2 - var(--pricing-fit-y) * var(--pu));
@@ -495,7 +495,7 @@
 
 /* ── Phones and low windows: the title, then the frame with the cards in the flow ──────────── */
 
-@media not ((min-width: 56rem) and (min-height: 40rem)) {
+@media not ((min-width: 56rem) and (min-height: 30rem)) {
   .pricing-scroller {
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -574,7 +574,7 @@
 }
 
 /* Tablets upright: the two plans side by side, as on the mockup. */
-@media (min-width: 44rem) and (not ((min-width: 56rem) and (min-height: 40rem))) {
+@media (min-width: 44rem) and (not ((min-width: 56rem) and (min-height: 30rem))) {
   .pricing-plans {
     flex-wrap: nowrap;
   }

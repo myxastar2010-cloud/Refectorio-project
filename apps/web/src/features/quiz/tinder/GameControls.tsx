@@ -16,7 +16,7 @@ export type Swell = {
 
 const KEYS: Record<TasteAnswer, string> = {
   dislike: 'A ArrowLeft',
-  skip: 'S ArrowDown',
+  skip: 'S',
   like: 'D ArrowRight',
 };
 
@@ -65,7 +65,7 @@ function GameButton({
 
 /**
  * ✕ «Не нравится» (accent circle) · «Пропустить» (muted pill) · ✓ «Нравится» (green circle) — the design's controls;
- * the matching one swells as the card is dragged towards it. Keys: A/← · S/↓ · D/→ (TasteStep).
+ * the matching one swells as the card is dragged towards it. Keys: A/← · S · D/→ (TasteStep; ↓/↑ open the info).
  */
 export function GameControls({
   swell,

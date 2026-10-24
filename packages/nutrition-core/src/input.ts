@@ -5,6 +5,7 @@ import type {
   AllergenLevel,
   Budget,
   Diet,
+  ExtraGoal,
   Goal,
   HealthFlag,
   Lactation,
@@ -75,6 +76,7 @@ export type QuestionnaireInput = {
   healthOther?: readonly string[];
   allergensOther?: readonly string[];
   notes?: string;
+  extraGoals?: readonly ExtraGoal[];
 };
 
 const DEFAULT_MEALS_PER_DAY = 4;
@@ -202,5 +204,6 @@ export function validateQuestionnaire(
     healthOther,
     allergensOther,
     ...(notes ? { notes } : {}),
+    ...(input.extraGoals !== undefined ? { extraGoals: [...new Set(input.extraGoals)] } : {}),
   });
 }

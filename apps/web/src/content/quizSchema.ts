@@ -1,3 +1,4 @@
+import { CUISINES } from '@refectorio/taste-core';
 import { z } from 'zod';
 
 const text = z.string().trim().min(1);
@@ -129,6 +130,20 @@ export const quizContentSchema = z.object({
     }),
     and: text,
     swipeHint: text,
+    info: z.object({
+      toggle: text,
+      region: template('dish'),
+      energy: text,
+      protein: text,
+      fat: text,
+      carbs: text,
+      kcal: text,
+      grams: text,
+      portionNote: text,
+      lead: text,
+      loading: text,
+      cuisines: z.record(z.enum(CUISINES), text),
+    }),
     debugTitle: text,
     debugLiked: text,
     debugDisliked: text,
@@ -253,6 +268,18 @@ export const quizContentSchema = z.object({
       movingAllDay: text,
       physicalLabour: text,
     }),
+  }),
+  /** «Помимо вашей основной цели…» (stage 3, §6): several answers, or «Пропустить». */
+  extraGoals: z.object({
+    title: text,
+    options: z.object({
+      clothesFit: text,
+      overallHealth: text,
+      fitness: text,
+      energy: text,
+      sleep: text,
+    }),
+    skip: text,
   }),
   notes: z.object({ title: text, placeholder: text }),
   notices: z.object(

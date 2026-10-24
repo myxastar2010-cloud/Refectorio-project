@@ -7,7 +7,7 @@ import {
   IconShoppingCart,
   IconSparkles,
   IconTable,
-  IconToolsKitchen2,
+  IconWorldSearch,
   type Icon,
 } from '@tabler/icons-react';
 import clsx from 'clsx';
@@ -20,7 +20,7 @@ const ICONS: Record<string, Icon> = {
   listSearch: IconListSearch,
   calculator: IconCalculator,
   calendar: IconCalendar,
-  toolsKitchen: IconToolsKitchen2,
+  worldSearch: IconWorldSearch,
   chefHat: IconChefHat,
   table: IconTable,
   shoppingCart: IconShoppingCart,

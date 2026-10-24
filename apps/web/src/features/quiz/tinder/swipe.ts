@@ -2,8 +2,9 @@ import type { TasteAnswer } from '@refectorio/contracts';
 import { TINDER } from '../../../motion/tokens';
 
 /**
- * Swipe decisions of the dish card (ТЗ §9.1), pure and unit-tested: right — like, left — dislike, down — skip;
- * a swipe commits beyond a share of the card or by a fling; anything else springs back.
+ * Gestures of the dish card (ТЗ §9.1, stage 3 §5.1, D-056), pure and unit-tested: right — like, left — dislike; down
+ * opens the dish info, up closes it; a tap toggles it. A swipe commits beyond a share of the card or by a fling;
+ * anything else springs back.
  */
 export type Sample = { readonly t: number; readonly x: number; readonly y: number };
 
@@ -25,38 +26,46 @@ export function velocityOf(
   return { vx: (last.x - first.x) / dt, vy: (last.y - first.y) / dt };
 }
 
-/** Upward drags are resisted (there is no «up» answer). */
-export const resistUp = (dy: number) => (dy < 0 ? dy * 0.35 : dy);
+/**
+ * The card follows a vertical drag only a little: towards the toggle (down when closed, up when open) it gives way,
+ * the other way it is a rubber band with no action.
+ */
+export const pullFor = (dy: number, open: boolean) =>
+  dy * (dy > 0 !== open ? TINDER.toggleFollow : TINDER.rubberBand);
 
-export function decideSwipe(
-  offset: { readonly x: number; readonly y: number },
+export type Gesture =
+  | { readonly kind: 'answer'; readonly answer: Exclude<TasteAnswer, 'skip'> }
+  | { readonly kind: 'toggle' }
+  | null;
+
+/**
+ * A released drag: `move` is the finger's travel (px) and time (ms), `velocity` its speed at release. A short quick
+ * touch is a tap (toggle); a horizontal drag is a decision; a vertical one toggles the info in its direction.
+ */
+export function decideGesture(
+  move: { readonly dx: number; readonly dy: number; readonly ms: number },
   velocity: { readonly vx: number; readonly vy: number },
   card: { readonly width: number; readonly height: number },
-): TasteAnswer | null {
-  const horizontal = Math.abs(offset.x) >= Math.abs(offset.y) * 0.8;
-  const flungX =
-    Math.abs(velocity.vx) > TINDER.flingPxS &&
-    Math.sign(velocity.vx) === Math.sign(offset.x) &&
-    Math.abs(offset.x) > card.width * TINDER.flingMinShare;
-  if (
-    horizontal &&
-    (Math.abs(offset.x) > card.width * TINDER.commitShare || flungX) &&
-    offset.x !== 0
-  ) {
-    return offset.x > 0 ? 'like' : 'dislike';
+  open: boolean,
+): Gesture {
+  const { dx, dy } = move;
+  if (Math.hypot(dx, dy) < TINDER.tapMaxPx && move.ms < TINDER.tapMaxMs) return { kind: 'toggle' };
+  if (Math.abs(dx) >= Math.abs(dy) * 0.8) {
+    const flung =
+      Math.abs(velocity.vx) > TINDER.flingPxS &&
+      Math.sign(velocity.vx) === Math.sign(dx) &&
+      Math.abs(dx) > card.width * TINDER.flingMinShare;
+    if (dx !== 0 && (Math.abs(dx) > card.width * TINDER.commitShare || flung)) {
+      return { kind: 'answer', answer: dx > 0 ? 'like' : 'dislike' };
+    }
+    return null;
   }
-  const flungDown =
-    velocity.vy > TINDER.flingPxS &&
-    Math.abs(velocity.vx) < velocity.vy &&
-    offset.y > card.height * TINDER.flingMinShare;
-  if (
-    !horizontal &&
-    offset.y > 0 &&
-    (offset.y > card.height * TINDER.commitDownShare || flungDown)
-  ) {
-    return 'skip';
-  }
-  return null;
+  // Down opens, up closes; the other way does nothing.
+  const towards = open ? -dy : dy;
+  const speed = open ? -velocity.vy : velocity.vy;
+  const far = towards > Math.max(TINDER.toggleMinPx, card.height * TINDER.toggleShare);
+  const flung = speed > TINDER.flingPxS && towards > TINDER.toggleMinPx / 2;
+  return far || flung ? { kind: 'toggle' } : null;
 }
 
 /** Rotation follows the horizontal offset, up to ±maxRotateDeg at the commit distance. */

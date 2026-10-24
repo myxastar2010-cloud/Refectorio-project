@@ -100,6 +100,13 @@ export const LIFESTYLES = [
 ] as const;
 export type Lifestyle = (typeof LIFESTYLES)[number];
 
+/**
+ * «Помимо вашей основной цели, что бы вы хотели в себе изменить?» (stage 3, §6): what else the person wishes for. Stored
+ * for stage 4 (research/algorithm-spec.md): no calculation uses it yet.
+ */
+export const EXTRA_GOALS = ['clothesFit', 'overallHealth', 'fitness', 'energy', 'sleep'] as const;
+export type ExtraGoal = (typeof EXTRA_GOALS)[number];
+
 export type Questionnaire = {
   readonly ageYears: number;
   readonly sex: Sex;
@@ -132,4 +139,6 @@ export type Questionnaire = {
   readonly healthOther: readonly string[];
   readonly allergensOther: readonly string[];
   readonly notes?: string;
+  /** Absent: the question was never reached (or not asked — family mode); empty: skipped. */
+  readonly extraGoals?: readonly ExtraGoal[];
 };

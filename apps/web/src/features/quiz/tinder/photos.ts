@@ -170,6 +170,51 @@ export function decodeBlurhash(
   }
 }
 
+/** Where the open card's text lies (shares of the card): below the name, above the chevron. */
+export const INFO_BOX = { x0: 0.08, x1: 0.92, y0: 0.12, y1: 0.92 } as const;
+
+/**
+ * The 95th-percentile luminance under the info text of a blurred picture (RGBA pixels): the shade over it is chosen so
+ * that even the lightest spots keep white text ≥ 4.5:1 (§5.4).
+ */
+export function infoLuminance(
+  pixels: ArrayLike<number>,
+  width: number,
+  height: number,
+  share = 0.95,
+): number {
+  const values: number[] = [];
+  for (let y = Math.floor(height * INFO_BOX.y0); y < Math.ceil(height * INFO_BOX.y1); y += 1) {
+    for (let x = Math.floor(width * INFO_BOX.x0); x < Math.ceil(width * INFO_BOX.x1); x += 1) {
+      const i = (y * width + x) * 4;
+      values.push(
+        0.2126 * linear(pixels[i] ?? 0) +
+          0.7152 * linear(pixels[i + 1] ?? 0) +
+          0.0722 * linear(pixels[i + 2] ?? 0),
+      );
+    }
+  }
+  values.sort((a, b) => a - b);
+  return values[Math.floor(share * (values.length - 1))] ?? 0;
+}
+
+/** The same for a loaded (same-origin) image: drawn once at its own small size. */
+export function imageInfoLuminance(image: HTMLImageElement): number | null {
+  const { naturalWidth: width, naturalHeight: height } = image;
+  if (width === 0 || height === 0) return null;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) return null;
+    context.drawImage(image, 0, 0);
+    return infoLuminance(context.getImageData(0, 0, width, height).data, width, height);
+  } catch {
+    return null;
+  }
+}
+
 /** White text needs a background luminance ≤ 0.183 for 4.5:1; the tint darkens the blurred top until it gets there. */
 const WHITE_TEXT_MAX_LUMINANCE = 0.183;
 export function tintFor(topLuminance: number, minimum: number): number {

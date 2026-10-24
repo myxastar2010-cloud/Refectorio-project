@@ -61,6 +61,12 @@ async function toHealthChips(page: Page) {
   await choose(page, 'Да', 'healthConditions');
 }
 
+/** «Помимо вашей основной цели…» (§6): «Пропустить» goes on with none. */
+async function skipExtraGoals(page: Page) {
+  await page.getByRole('button', { name: 'Пропустить', exact: true }).click();
+  await onScreen(page, 'notes');
+}
+
 /** Waits for the finite animations only (the finale's shimmer and core pulse never end). */
 async function axeSerious(page: Page) {
   // Panels morph on motion values (not in document.getAnimations()), and a notice may not have started its fade yet
@@ -248,7 +254,7 @@ test.describe('the dish game', () => {
     await onScreen(page, 'taste');
     await playDishes(page, TEN_DECISIVE.slice(9));
     await onScreen(page, 'body', 'О вас');
-    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'Вопрос 2 из 11');
+    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'Вопрос 2 из 12');
   });
 
   test('Back undoes the last answer — also from «О вас», where the last card comes back', async ({
@@ -284,6 +290,112 @@ test.describe('the dish game', () => {
       'like',
       'skip',
     ]);
+  });
+});
+
+test.describe('the dish info on the card (stage 3, §5)', () => {
+  const card = (page: Page) => page.locator('.quiz-card:not([aria-hidden])');
+  const toggle = (page: Page) => card(page).getByRole('button', { name: 'Подробнее о блюде' });
+  const expanded = (page: Page) => toggle(page).getAttribute('aria-expanded');
+
+  test('opens and closes by the arrows, the chevron and a tap; answers still work, the next card comes closed', async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await openQuiz(page);
+    const dish = (await currentDish(page).textContent()) ?? '';
+    const region = page.getByRole('region', { name: `О блюде: ${dish}` });
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await expect(toggle(page)).toHaveAttribute('aria-keyshortcuts', 'ArrowDown ArrowUp');
+    // ↓ opens (it no longer skips: D-056), a second ↓ does nothing, ↑ closes.
+    await page.keyboard.press('ArrowDown');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await expect(region).toBeVisible();
+    await expect(region).toContainText('—');
+    await page.keyboard.press('ArrowDown');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('ArrowUp');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await expect(region).toBeHidden();
+    // The chevron by pointer (the card tells the tap from a drag) and by Enter.
+    await toggle(page).click();
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await toggle(page).focus();
+    await page.keyboard.press('Enter');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    // A tap anywhere on the card.
+    await card(page).click({ position: { x: 40, y: 160 } });
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    expect((await draft(page))?.answers.tasteDecisions ?? []).toHaveLength(0);
+    // Answering while open: the next card arrives closed; «Вернуться» brings this one back closed.
+    await page.keyboard.press('d');
+    await expect(currentDish(page)).not.toHaveText(dish);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await page.getByRole('button', { name: 'Вернуться', exact: true }).click();
+    await expect(currentDish(page)).toHaveText(dish);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    // S skips; the «Пропустить» button keeps its key. (The game's keys work while the focus is in the step, not on
+    // «Вернуться» in the header.)
+    await expect(page.getByRole('button', { name: 'Пропустить', exact: true })).toHaveAttribute(
+      'aria-keyshortcuts',
+      'S',
+    );
+    await toggle(page).focus();
+    await page.keyboard.press('s');
+    await expect
+      .poll(async () => (await draft(page))?.answers.tasteDecisions.at(-1)?.answer)
+      .toBe('skip');
+    expect(errors).toEqual([]);
+  });
+
+  test('a drag down opens, up closes, the other way does nothing; a sideways drag still answers', async ({
+    page,
+  }) => {
+    await openQuiz(page);
+    const drag = async (dx: number, dy: number) => {
+      const box = await card(page).boundingBox();
+      if (!box) throw new Error('no card');
+      const x = box.x + box.width / 2;
+      const y = box.y + box.height / 2;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x + dx * box.width, y + dy * box.height, { steps: 8 });
+      await page.mouse.up();
+    };
+    await drag(0, -0.3);
+    expect(await expanded(page)).toBe('false');
+    await drag(0, 0.3);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await drag(0, 0.3);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await drag(0, -0.3);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    expect((await draft(page))?.answers.tasteDecisions ?? []).toHaveLength(0);
+    await drag(0, 0.3);
+    await drag(1.2, 0);
+    await expect
+      .poll(async () => (await draft(page))?.answers.tasteDecisions[0]?.answer)
+      .toBe('like');
+  });
+
+  test('the open card passes axe and its text fits', async ({ page }) => {
+    await openQuiz(page);
+    await page.keyboard.press('ArrowDown');
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    expect(await axeSerious(page)).toEqual([]);
+    const fits = await card(page)
+      .locator('.quiz-card-info')
+      .evaluate((info) => info.scrollHeight <= info.clientHeight + 1);
+    expect(fits).toBe(true);
+  });
+
+  test('reduced motion: the info cross-fades', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openQuiz(page);
+    await page.keyboard.press('ArrowDown');
+    const info = card(page).locator('.quiz-card-info');
+    await expect(info).toHaveCSS('opacity', '1');
+    await expect(info).not.toHaveCSS('filter', /blur/);
   });
 });
 
@@ -349,7 +461,14 @@ test.describe('the whole path', () => {
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
-    await choose(page, 'В основном сидя', 'notes');
+    await choose(page, 'В основном сидя', 'extraGoals');
+    // Several answers (§6): «Готово» rises in with the first one.
+    await expect(page.getByRole('button', { name: 'Готово' })).toHaveCount(0);
+    await page.getByRole('checkbox', { name: 'Увеличить запас сил' }).click();
+    await page.getByRole('checkbox', { name: 'Лучше спать' }).click();
+    await expect(page.getByRole('checkbox', { name: 'Лучше спать' })).toBeChecked();
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await onScreen(page, 'notes');
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
     await expect(page.locator('.quiz-caption-item')).toContainText('Анализируем ответы', {
@@ -360,12 +479,14 @@ test.describe('the whole path', () => {
     const saved = JSON.parse(result ?? '{}') as Record<string, unknown> & {
       allergies: { items: { code: string }[]; custom: string[] };
       dislikesText: string;
+      extraGoals: string[];
       taste: { decisions: unknown[] };
     };
     expect(saved.version).toBe(1);
     expect(saved.allergies.items.map((item) => item.code)).toEqual(['CRUSTACEAN']);
     expect(saved.allergies.custom).toEqual(['креветки']);
     expect(saved.dislikesText).toBe('Оливки и печень');
+    expect(saved.extraGoals).toEqual(['energy', 'sleep']);
     expect(saved.taste.decisions).toHaveLength(10);
     // «Вернуться» is hidden in the finale; «Выйти» works.
     await expect(page.getByRole('button', { name: 'Вернуться', exact: true })).toBeHidden();
@@ -385,7 +506,8 @@ test.describe('the whole path', () => {
     await choose(page, 'Нет', 'dislikes');
     await choose(page, 'Нет', 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
-    await choose(page, 'В основном сидя', 'notes');
+    await choose(page, 'В основном сидя', 'extraGoals');
+    await skipExtraGoals(page);
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
     await expect(page.getByText('Ответы (проверенный JSON)')).toBeVisible();
@@ -404,7 +526,8 @@ test.describe('the whole path', () => {
     await choose(page, 'Нет', 'dislikes');
     await choose(page, 'Нет', 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
-    await choose(page, 'В основном сидя', 'notes');
+    await choose(page, 'В основном сидя', 'extraGoals');
+    await skipExtraGoals(page);
     // The honest line comes after 40 s: the page clock jumps over them. A jump, not runFor: running 45 s of animation
     // frames one by one took WebKit most of the test's budget (a timeout under load in the stage-3 baseline).
     await page.clock.install();
@@ -429,6 +552,53 @@ test.describe('the whole path', () => {
     await page.clock.fastForward(5_000);
     await onScreen(page, 'taste', 'Выберите блюдо');
     await expect.poll(async () => (await draft(page))?.answers.tasteDecisions.length ?? 0).toBe(0);
+  });
+});
+
+test.describe('the generation story (stage 3, §7)', () => {
+  const inked = (page: Page) =>
+    page.locator('.quiz-story-canvas').evaluate((canvas: HTMLCanvasElement) => {
+      const data = canvas.getContext('2d')?.getImageData(0, 0, canvas.width, canvas.height).data;
+      let count = 0;
+      if (data) for (let i = 3; i < data.length; i += 16) if ((data[i] ?? 0) > 0) count += 1;
+      return count;
+    });
+
+  test('grows from the dot into drawings, its captions follow the scenes; the dots loop', async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await page.goto('./?seed=11&step=finale&demo#quiz');
+    const caption = page.locator('.quiz-caption-item');
+    await expect(caption).toContainText('Анализируем ответы', { timeout: 15_000 });
+    await expect.poll(() => inked(page)).toBeGreaterThan(200);
+    // The test hook starts at a later scene: the planet, then the endless dots.
+    await page.goto('./?seed=11&step=finale&demo&story=planet#quiz');
+    await expect(caption).toContainText('Ищем подходящие блюда', { timeout: 15_000 });
+    await page.goto('./?seed=11&step=finale&demo&story=dots#quiz');
+    await expect(caption).toContainText('Последние штрихи', { timeout: 15_000 });
+    await expect.poll(() => inked(page)).toBeGreaterThan(200);
+    expect(errors).toEqual([]);
+  });
+
+  test('reduced motion: still drawings cross-fade, the captions change with them', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.clock.install();
+    await page.goto('./?seed=11&step=finale&demo#quiz');
+    // The whole caption line: while one caption leaves, the next is already there.
+    const caption = page.locator('.quiz-finale-captions');
+    await expect(caption).toContainText('Анализируем ответы', { timeout: 15_000 });
+    await expect
+      .poll(
+        async () => {
+          await page.clock.runFor(1_000);
+          return caption.textContent();
+        },
+        { timeout: 30_000 },
+      )
+      .toContain('Ищем подходящие блюда');
   });
 });
 
@@ -505,7 +675,8 @@ test.describe('safety', () => {
     await choose(page, 'Нет', 'dislikes');
     await choose(page, 'Нет', 'activity');
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
-    await choose(page, 'В основном сидя', 'notes');
+    await choose(page, 'В основном сидя', 'extraGoals');
+    await skipExtraGoals(page);
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale', 'Персональное меню — вместе с врачом');
     await page.getByRole('button', { name: 'Изменить ответы' }).click();
@@ -678,6 +849,25 @@ test.describe("health chips: the design's five, the rest through «+» (4.13)", 
     const notice = page.getByRole('alertdialog');
     await expect(notice).toContainText('меньше цифр');
     await expect(notice).toContainText('112');
+  });
+});
+
+test.describe('«Помимо вашей основной цели…» (§6)', () => {
+  test('a teenager sees no body-image answer; «Пропустить» stores none and goes on', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=1&step=extraGoals&state=teen#quiz');
+    await inQuiz(page);
+    const answers = page.getByRole('group', { name: /Помимо вашей основной цели/ });
+    await expect(answers.getByRole('checkbox')).toHaveCount(4);
+    await expect(answers.getByRole('checkbox', { name: /одежда/ })).toHaveCount(0);
+    // Digits toggle the n-th answer; the check fills.
+    await page.keyboard.press('2');
+    await expect(answers.getByRole('checkbox').nth(1)).toBeChecked();
+    await page.keyboard.press('2');
+    await expect(answers.getByRole('checkbox').nth(1)).not.toBeChecked();
+    await skipExtraGoals(page);
+    expect((await draft(page))?.answers.extraGoals).toEqual([]);
   });
 });
 

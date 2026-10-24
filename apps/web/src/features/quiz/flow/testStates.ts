@@ -76,6 +76,12 @@ const STATES: Partial<Record<StepId, Record<string, Partial<Answers>>>> = {
     empty: { dislikes: 'yes' },
     long: { dislikes: 'yes', dislikesText: LONG_DISLIKES },
   },
+  extraGoals: {
+    empty: {},
+    chosen: { extraGoals: ['clothesFit', 'overallHealth', 'energy'] },
+    // A teenager has no weight goal (else the step would first show that notice).
+    teen: { ageYears: 16, goal: 'maintain' },
+  },
   notes: { empty: {}, long: { notes: LONG_NOTES } },
 };
 

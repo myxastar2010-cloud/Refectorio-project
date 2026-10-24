@@ -4,6 +4,13 @@
  */
 export * from './catalog';
 export {
+  DESCRIPTION_MAX,
+  dishNumbersSchema,
+  dishTextSchema,
+  type DishNumbersFile,
+  type DishTextFile,
+} from './dishInfo';
+export {
   applyAnswer,
   createTasteSession,
   initialState,

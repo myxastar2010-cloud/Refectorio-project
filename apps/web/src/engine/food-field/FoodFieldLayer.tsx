@@ -5,9 +5,8 @@ import { foodSprites } from '../../lib/assets';
 import type { TestParams } from '../../lib/params';
 import { useCalmMotion } from '../../motion/hooks';
 import { EASE_OUT_EXPO, QUIZ, SCENE } from '../../motion/tokens';
-import { onFoodAttractor } from './attractorChannel';
 import { createFoodField, type Device, type FoodField } from './engine';
-import { cameraVisibleArea, type Attractor, type Rect } from './math';
+import { cameraVisibleArea, type Rect } from './math';
 import { whenIdle } from '../../lib/idle';
 
 const RESIZE_DEBOUNCE_MS = 200;
@@ -71,18 +70,6 @@ function quizColumn(): Rect {
   const width = window.innerWidth;
   const half = (width * QUIZ.foodColumn) / 2;
   return { left: width / 2 - half, top: 0, right: width / 2 + half, bottom: window.innerHeight };
-}
-
-/** A point on screen → the food plane under the pulled-back camera (scaled about a point below the frame). */
-function toPlane(point: Attractor, scene: Scene): Attractor {
-  const scale = scene === 'hero' ? 1 : SCENE.food.scale;
-  const ox = SCENE.food.originX * window.innerWidth;
-  const oy = SCENE.food.originY * window.innerHeight;
-  return {
-    x: ox + (point.x - ox) / scale,
-    y: oy + (point.y - oy) / scale,
-    radiusPx: point.radiusPx / scale,
-  };
 }
 
 const speedOf = (scene: Scene) =>
@@ -165,7 +152,6 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
       frame,
       visibleArea,
       device,
-      blurOpacity: SCENE.food.opacity,
     });
     fieldRef.current = field;
     const startScene = sceneRef.current;
@@ -218,12 +204,6 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
             void field.addSprites();
           }, LATE_FOODS_AFTER_MS);
         }, LATE_FOODS_AFTER_MS);
-    // The quiz finale's core pulls the food in (ТЗ §12.2).
-    const offAttractor = onFoodAttractor((attractor) => {
-      field.setAttractor(attractor ? toPlane(attractor, sceneRef.current) : null);
-      if (attractor) layerRef.current?.setAttribute('data-attract', '');
-      else layerRef.current?.removeAttribute('data-attract');
-    });
 
     const onPointerDown = (event: PointerEvent) => {
       if (sceneRef.current !== 'hero' || cardOpenRef.current || event.button !== 0) return;
@@ -241,7 +221,6 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
       window.clearTimeout(lateTimer);
       cancelLate();
       cancelPreload();
-      offAttractor();
       field.stop();
       fieldRef.current = null;
       delete window.__refectorioFood;

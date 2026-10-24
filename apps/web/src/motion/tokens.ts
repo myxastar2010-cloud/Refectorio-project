@@ -285,8 +285,30 @@ export const QUIZ = {
 export const TINDER = {
   /** A swipe commits beyond this share of the card width (or by fling speed). */
   commitShare: 0.3,
-  commitDownShare: 0.22,
   flingPxS: 650,
+  /** A touch shorter and shorter than these is a tap: it toggles the dish info (§5.1). */
+  tapMaxPx: 8,
+  tapMaxMs: 300,
+  /** A vertical drag toggles the info beyond this share of the card's height, at least this far. */
+  toggleShare: 0.1,
+  toggleMinPx: 36,
+  /** How much the card follows a vertical drag: towards the toggle / the other way (no action). */
+  toggleFollow: 0.4,
+  rubberBand: 0.25,
+  /** The dish info (§5.1): the photo cross-fades to its blurred copy and darkens; the text comes in blurred, moving down. */
+  info: {
+    openS: 0.42,
+    closeS: 0.28,
+    textDelayS: 0.08,
+    textBlurPx: 8,
+    textShiftPx: -10,
+    /** The chevron glides between the name and the card's bottom and flips. */
+    chevron: { type: 'spring', visualDuration: 0.5, bounce: 0.12 },
+    /** A one-time hint on the first card: the chevron dips twice. */
+    nudgeDelayMs: 1400,
+    nudgePx: 7,
+    nudgeS: 0.9,
+  },
   /** …but a fling commits only after this share of the width (a twitch of the finger is not an answer). */
   flingMinShare: 0.12,
   maxRotateDeg: 12,
@@ -336,16 +358,45 @@ export const FINALE = {
   shimmerMs: 900,
   dotMs: 520,
   glideMs: 700,
-  /** The dot grows into the full core. */
-  introMs: 900,
-  /** The first caption appears once the core has begun to grow. */
-  firstCaptionMs: 350,
-  captionMinMs: 2200,
-  captionMaxMs: 3200,
   captionSpring: { type: 'spring', stiffness: 380, damping: 30, mass: 0.8 },
   honestAfterMs: 40_000,
   revealDemoAfterMs: 6000,
   revealMs: 1600,
   canvasMaxPx: 520,
   dprMax: 2,
+} as const;
+
+/**
+ * The generation story (stage 3, §7; ADR 0012): scene lengths, the transformation between drawings (a cloud of points
+ * on arcs) and the dots that loop forever. Seconds.
+ */
+export const STORY = {
+  scenes: { notebook: 4.0, planet: 3.6, crane: 4.4, robot: 3.4, pot: 3.2, dots: 6 },
+  morph: {
+    durationS: 1.7,
+    /** The old drawing fades while its points appear on its strokes. */
+    fadeOutS: 0.24,
+    appearS: 0.12,
+    /** The points gather into a ring (each to the slot of its angle), in a sweep around it. */
+    gatherFromS: 0.06,
+    gatherS: 0.5,
+    gatherSweepS: 0.16,
+    ringR: 104,
+    /** The ring turns while it is a ring (radians). */
+    ringTurn: Math.PI / 2.5,
+    /** …then opens into the new drawing's points (a slight overshoot), which fade as its lines draw on. */
+    scatterFromS: 0.82,
+    scatterS: 0.56,
+    scatterSweepS: 0.16,
+    landS: 0.22,
+    revealFromS: 1.0,
+    revealSweepS: 0.3,
+    revealS: 0.4,
+  },
+  dotR: 2.6,
+  /** Reduced motion: still drawings cross-fading. */
+  calmHoldS: 3,
+  calmFadeS: 0.4,
+  /** Halve the points when frames take this long on average (ms). */
+  slowFrameMs: 20,
 } as const;

@@ -8,6 +8,7 @@ import {
 } from '@refectorio/contracts';
 import {
   EXERCISE_FREQUENCIES,
+  EXTRA_GOALS,
   INPUT_LIMITS,
   LIFESTYLES,
   MACRO_PROFILES,
@@ -57,6 +58,8 @@ const answersSchema = z.object({
   exercise: z.enum(EXERCISE_FREQUENCIES).optional(),
   strength: yesNo.optional(),
   lifestyle: z.enum(LIFESTYLES).optional(),
+  // Stage 3 (§6): optional — a stage-2 draft stays valid and resumes at this question.
+  extraGoals: z.array(z.enum(EXTRA_GOALS)).optional(),
   notes: text(INPUT_LIMITS.notesMaxLength),
 });
 

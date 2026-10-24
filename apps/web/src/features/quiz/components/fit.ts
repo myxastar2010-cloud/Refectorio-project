@@ -1,8 +1,8 @@
 /**
  * The fit of a step (stage 3, 4.11): no step ever scrolls. `--fit` (≤ 1, in steps of 0.01) scales the step's unit —
  * type, gaps, icons and controls together, down to the floors in quiz.css — to the largest value at which the step,
- * as it may still grow once shown (quiz.css «[data-fit-measure]»), fits the window. Found in at most three measuring
- * passes before the step enters, so the scale never changes during an animation; pure and unit-tested.
+ * as it may still grow once shown (quiz.css «[data-fit-measure]»), fits the window. Found in a few measuring passes
+ * before the step enters, so the scale never changes during an animation; pure and unit-tested.
  */
 export const FIT = {
   /**
@@ -13,6 +13,8 @@ export const FIT = {
   step: 0.01,
   /** Height a step may overflow by and still count as fitting (sub-pixel rounding). */
   tolerancePx: 1,
+  /** Measuring passes at most (three when the height is convex in the fit, a halving search when it is not). */
+  maxPasses: 10,
 } as const;
 
 /** Rounds a fit down to its step, within [FIT.min, 1]. */
@@ -45,10 +47,21 @@ export function solveFit(measure: (fit: number) => number, available: number): F
   const share = h1 > hMin ? (available - hMin) / (h1 - hMin) : 0;
   const fit = roundFit(FIT.min + (1 - FIT.min) * share);
   if (fit <= FIT.min) return { fit: FIT.min, fits: true, passes: 2 };
-  // A wrapped line could still break the convexity: then the smallest fit, which is known to fit.
-  return measure(fit) <= room
-    ? { fit, fits: true, passes: 3 }
-    : { fit: FIT.min, fits: true, passes: 3 };
+  if (measure(fit) <= room) return { fit, fits: true, passes: 3 };
+  // The height is not always convex: a wrapped line, or the dish card that takes the room the rest gives up (its
+  // height grows as the fit shrinks). Then halve the gap between the smallest fit, which is known to fit, and the
+  // chord's point — never a fall straight to the smallest (it left tablets at 40 %).
+  let lo: number = FIT.min;
+  let hi = fit;
+  let passes = 3;
+  while (passes < FIT.maxPasses) {
+    const mid = roundFit((lo + hi) / 2);
+    if (mid <= lo) break;
+    passes += 1;
+    if (measure(mid) <= room) lo = mid;
+    else hi = mid;
+  }
+  return { fit: lo, fits: true, passes };
 }
 
 /**

@@ -53,6 +53,12 @@
     "box": 140,
     "density": 2
   },
+  "q-extra-goals": {
+    "width": 215,
+    "height": 280,
+    "box": 140,
+    "density": 2
+  },
   "o-goal-lose": {
     "width": 99,
     "height": 128,
@@ -154,6 +160,36 @@
     "height": 68,
     "box": 64,
     "density": 1
+  },
+  "o-extra-clothes": {
+    "width": 117,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-extra-health": {
+    "width": 128,
+    "height": 120,
+    "box": 64,
+    "density": 2
+  },
+  "o-extra-fitness": {
+    "width": 113,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-extra-energy": {
+    "width": 90,
+    "height": 128,
+    "box": 64,
+    "density": 2
+  },
+  "o-extra-sleep": {
+    "width": 115,
+    "height": 128,
+    "box": 64,
+    "density": 2
   },
   "q-lifestyle": {
     "width": 104,
