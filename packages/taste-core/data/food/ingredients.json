@@ -498,6 +498,39 @@
         "fibreG": 0
       }
     },
+    "Pasta, dry, enriched": {
+      "fdcId": 169736,
+      "description": "Pasta, dry, enriched",
+      "per100g": {
+        "energyKcal": 371,
+        "proteinG": 13.04,
+        "fatG": 1.51,
+        "carbsG": 71.47,
+        "fibreG": 3.2
+      }
+    },
+    "Pork, cured, bacon, unprepared": {
+      "fdcId": 168277,
+      "description": "Pork, cured, bacon, unprepared",
+      "per100g": {
+        "energyKcal": 393,
+        "proteinG": 13.66,
+        "fatG": 37.13,
+        "carbsG": 0,
+        "fibreG": 0
+      }
+    },
+    "Egg, yolk, raw, fresh": {
+      "fdcId": 172184,
+      "description": "Egg, yolk, raw, fresh",
+      "per100g": {
+        "energyKcal": 322,
+        "proteinG": 15.86,
+        "fatG": 26.54,
+        "carbsG": 3.59,
+        "fibreG": 0
+      }
+    },
     "Chicken, broilers or fryers, dark meat, thigh, meat only, raw": {
       "fdcId": 173627,
       "description": "Chicken, broilers or fryers, dark meat, thigh, meat only, raw",
@@ -608,17 +641,6 @@
         "fibreG": 0
       }
     },
-    "Egg, yolk, raw, fresh": {
-      "fdcId": 172184,
-      "description": "Egg, yolk, raw, fresh",
-      "per100g": {
-        "energyKcal": 322,
-        "proteinG": 15.86,
-        "fatG": 26.54,
-        "carbsG": 3.59,
-        "fibreG": 0
-      }
-    },
     "Bread, crumbs, dry, grated, plain": {
       "fdcId": 174928,
       "description": "Bread, crumbs, dry, grated, plain",
@@ -718,6 +740,28 @@
         "fibreG": 0.3
       }
     },
+    "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids": {
+      "fdcId": 173800,
+      "description": "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
+      "per100g": {
+        "energyKcal": 139,
+        "proteinG": 7.05,
+        "fatG": 2.77,
+        "carbsG": 16.130000000000003,
+        "fibreG": 6.4
+      }
+    },
+    "Coriander (cilantro) leaves, raw": {
+      "fdcId": 169997,
+      "description": "Coriander (cilantro) leaves, raw",
+      "per100g": {
+        "energyKcal": 23,
+        "proteinG": 2.13,
+        "fatG": 0.52,
+        "carbsG": 0.8700000000000001,
+        "fibreG": 2.8
+      }
+    },
     "Semolina, enriched": {
       "fdcId": 169715,
       "description": "Semolina, enriched",
@@ -795,6 +839,39 @@
         "fibreG": 0.5
       }
     },
+    "Lentils, pink or red, raw": {
+      "fdcId": 174284,
+      "description": "Lentils, pink or red, raw",
+      "per100g": {
+        "energyKcal": 358,
+        "proteinG": 23.91,
+        "fatG": 2.17,
+        "carbsG": 52.3,
+        "fibreG": 10.8
+      }
+    },
+    "Butter oil, anhydrous": {
+      "fdcId": 173412,
+      "description": "Butter oil, anhydrous",
+      "per100g": {
+        "energyKcal": 876,
+        "proteinG": 0.28,
+        "fatG": 99.48,
+        "carbsG": 0,
+        "fibreG": 0
+      }
+    },
+    "Spices, cumin seed": {
+      "fdcId": 170923,
+      "description": "Spices, cumin seed",
+      "per100g": {
+        "energyKcal": 375,
+        "proteinG": 17.81,
+        "fatG": 22.27,
+        "carbsG": 33.74,
+        "fibreG": 10.5
+      }
+    },
     "Duck, domesticated, meat and skin, raw": {
       "fdcId": 172408,
       "description": "Duck, domesticated, meat and skin, raw",
@@ -817,6 +894,61 @@
         "fibreG": 2.4
       }
     },
+    "Eggplant, raw": {
+      "fdcId": 169228,
+      "description": "Eggplant, raw",
+      "per100g": {
+        "energyKcal": 25,
+        "proteinG": 0.98,
+        "fatG": 0.18,
+        "carbsG": 2.88,
+        "fibreG": 3
+      }
+    },
+    "Tomato products, canned, puree, without salt added": {
+      "fdcId": 170460,
+      "description": "Tomato products, canned, puree, without salt added",
+      "per100g": {
+        "energyKcal": 38,
+        "proteinG": 1.65,
+        "fatG": 0.21,
+        "carbsG": 7.08,
+        "fibreG": 1.9
+      }
+    },
+    "Chickpeas (garbanzo beans, bengal gram), mature seeds, raw": {
+      "fdcId": 173756,
+      "description": "Chickpeas (garbanzo beans, bengal gram), mature seeds, raw",
+      "per100g": {
+        "energyKcal": 378,
+        "proteinG": 20.47,
+        "fatG": 6.04,
+        "carbsG": 50.75,
+        "fibreG": 12.2
+      }
+    },
+    "Leavening agents, baking powder, double-acting, sodium aluminum sulfate": {
+      "fdcId": 172803,
+      "description": "Leavening agents, baking powder, double-acting, sodium aluminum sulfate",
+      "per100g": {
+        "energyKcal": 53,
+        "proteinG": 0,
+        "fatG": 0,
+        "carbsG": 27.5,
+        "fibreG": 0.2
+      }
+    },
+    "Seeds, sesame butter, tahini, from roasted and toasted kernels (most common type)": {
+      "fdcId": 170189,
+      "description": "Seeds, sesame butter, tahini, from roasted and toasted kernels (most common type)",
+      "per100g": {
+        "energyKcal": 595,
+        "proteinG": 17,
+        "fatG": 53.76,
+        "carbsG": 11.89,
+        "fibreG": 9.3
+      }
+    },
     "Fish, cod, Atlantic, raw": {
       "fdcId": 171955,
       "description": "Fish, cod, Atlantic, raw",
@@ -837,17 +969,6 @@
         "fatG": 0,
         "carbsG": 3.55,
         "fibreG": 0
-      }
-    },
-    "Leavening agents, baking powder, double-acting, sodium aluminum sulfate": {
-      "fdcId": 172803,
-      "description": "Leavening agents, baking powder, double-acting, sodium aluminum sulfate",
-      "per100g": {
-        "energyKcal": 53,
-        "proteinG": 0,
-        "fatG": 0,
-        "carbsG": 27.5,
-        "fibreG": 0.2
       }
     },
     "Pickles, cucumber, dill or kosher dill": {
@@ -905,15 +1026,15 @@
         "fibreG": null
       }
     },
-    "Crustaceans, shrimp, raw": {
-      "fdcId": 175179,
-      "description": "Crustaceans, shrimp, raw",
+    "Crustaceans, shrimp, mixed species, raw (may contain additives to retain moisture)": {
+      "fdcId": 174210,
+      "description": "Crustaceans, shrimp, mixed species, raw (may contain additives to retain moisture)",
       "per100g": {
-        "energyKcal": 85,
-        "proteinG": 20.1,
-        "fatG": 0.51,
-        "carbsG": 0,
-        "fibreG": null
+        "energyKcal": 71,
+        "proteinG": 13.61,
+        "fatG": 1.01,
+        "carbsG": 0.91,
+        "fibreG": 0
       }
     },
     "Cream, fluid, heavy whipping": {
@@ -1103,17 +1224,6 @@
         "fibreG": 2.1
       }
     },
-    "Coriander (cilantro) leaves, raw": {
-      "fdcId": 169997,
-      "description": "Coriander (cilantro) leaves, raw",
-      "per100g": {
-        "energyKcal": 23,
-        "proteinG": 2.13,
-        "fatG": 0.52,
-        "carbsG": 0.8700000000000001,
-        "fibreG": 2.8
-      }
-    },
     "Pork, fresh, variety meats and by-products, feet, raw": {
       "fdcId": 167859,
       "description": "Pork, fresh, variety meats and by-products, feet, raw",
@@ -1180,28 +1290,6 @@
         "fibreG": 0
       }
     },
-    "Lentils, pink or red, raw": {
-      "fdcId": 174284,
-      "description": "Lentils, pink or red, raw",
-      "per100g": {
-        "energyKcal": 358,
-        "proteinG": 23.91,
-        "fatG": 2.17,
-        "carbsG": 52.3,
-        "fibreG": 10.8
-      }
-    },
-    "Spices, cumin seed": {
-      "fdcId": 170923,
-      "description": "Spices, cumin seed",
-      "per100g": {
-        "energyKcal": 375,
-        "proteinG": 17.81,
-        "fatG": 22.27,
-        "carbsG": 33.74,
-        "fibreG": 10.5
-      }
-    },
     "Beef, variety meats and by-products, liver, raw": {
       "fdcId": 169451,
       "description": "Beef, variety meats and by-products, liver, raw",
@@ -1266,17 +1354,6 @@
         "fatG": 0.29,
         "carbsG": 16.4,
         "fibreG": 4.8
-      }
-    },
-    "Pasta, dry, enriched": {
-      "fdcId": 169736,
-      "description": "Pasta, dry, enriched",
-      "per100g": {
-        "energyKcal": 371,
-        "proteinG": 13.04,
-        "fatG": 1.51,
-        "carbsG": 71.47,
-        "fibreG": 3.2
       }
     },
     "Celery, raw": {
@@ -1431,6 +1508,17 @@
         "fatG": 23.4,
         "carbsG": 0,
         "fibreG": 0
+      }
+    },
+    "Nuts, pine nuts, dried": {
+      "fdcId": 170591,
+      "description": "Nuts, pine nuts, dried",
+      "per100g": {
+        "energyKcal": 673,
+        "proteinG": 13.69,
+        "fatG": 68.37,
+        "carbsG": 9.379999999999999,
+        "fibreG": 3.7
       }
     },
     "Pork, fresh, loin, center loin (chops), boneless, separable lean and fat, raw": {
@@ -1609,6 +1697,28 @@
         "fibreG": 3.2
       }
     },
+    "Alcoholic beverage, wine, table, red": {
+      "fdcId": 173190,
+      "description": "Alcoholic beverage, wine, table, red",
+      "per100g": {
+        "energyKcal": 85,
+        "proteinG": 0.07,
+        "fatG": 0,
+        "carbsG": 2.61,
+        "fibreG": 0
+      }
+    },
+    "Cheese, parmesan, grated": {
+      "fdcId": 171247,
+      "description": "Cheese, parmesan, grated",
+      "per100g": {
+        "energyKcal": 420,
+        "proteinG": 28.42,
+        "fatG": 27.84,
+        "carbsG": 13.91,
+        "fibreG": 0
+      }
+    },
     "Broccoli, raw": {
       "fdcId": 170379,
       "description": "Broccoli, raw",
@@ -1642,6 +1752,39 @@
         "fibreG": 6.8
       }
     },
+    "Tofu, raw, firm, prepared with calcium sulfate": {
+      "fdcId": 172475,
+      "description": "Tofu, raw, firm, prepared with calcium sulfate",
+      "per100g": {
+        "energyKcal": 144,
+        "proteinG": 17.27,
+        "fatG": 8.72,
+        "carbsG": 0.48,
+        "fibreG": 2.3
+      }
+    },
+    "Sauce, hoisin, ready-to-serve": {
+      "fdcId": 172886,
+      "description": "Sauce, hoisin, ready-to-serve",
+      "per100g": {
+        "energyKcal": 220,
+        "proteinG": 3.31,
+        "fatG": 3.39,
+        "carbsG": 41.28,
+        "fibreG": 2.8
+      }
+    },
+    "Oil, sesame, salad or cooking": {
+      "fdcId": 171016,
+      "description": "Oil, sesame, salad or cooking",
+      "per100g": {
+        "energyKcal": 884,
+        "proteinG": 0,
+        "fatG": 100,
+        "carbsG": 0,
+        "fibreG": 0
+      }
+    },
     "Fish, tuna, fresh, yellowfin, raw": {
       "fdcId": 175159,
       "description": "Fish, tuna, fresh, yellowfin, raw",
@@ -1662,17 +1805,6 @@
         "fatG": 49.67,
         "carbsG": 11.649999999999999,
         "fibreG": 11.8
-      }
-    },
-    "Oil, sesame, salad or cooking": {
-      "fdcId": 171016,
-      "description": "Oil, sesame, salad or cooking",
-      "per100g": {
-        "energyKcal": 884,
-        "proteinG": 0,
-        "fatG": 100,
-        "carbsG": 0,
-        "fibreG": 0
       }
     },
     "Oil, canola": {
@@ -1717,6 +1849,39 @@
         "fatG": 1.22,
         "carbsG": 0,
         "fibreG": 0
+      }
+    },
+    "Cheese, ricotta, whole milk": {
+      "fdcId": 170851,
+      "description": "Cheese, ricotta, whole milk",
+      "per100g": {
+        "energyKcal": 150,
+        "proteinG": 7.54,
+        "fatG": 10.18,
+        "carbsG": 7.27,
+        "fibreG": 0
+      }
+    },
+    "Beans, black, mature seeds, canned, low sodium": {
+      "fdcId": 175238,
+      "description": "Beans, black, mature seeds, canned, low sodium",
+      "per100g": {
+        "energyKcal": 91,
+        "proteinG": 6.03,
+        "fatG": 0.29,
+        "carbsG": 9.65,
+        "fibreG": 6.9
+      }
+    },
+    "Lettuce, green leaf, raw": {
+      "fdcId": 169249,
+      "description": "Lettuce, green leaf, raw",
+      "per100g": {
+        "energyKcal": 15,
+        "proteinG": 1.36,
+        "fatG": 0.15,
+        "carbsG": 1.57,
+        "fibreG": 1.3
       }
     }
   }

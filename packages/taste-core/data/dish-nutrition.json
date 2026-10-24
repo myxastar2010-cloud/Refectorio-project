@@ -602,6 +602,55 @@
         "roastedMeat": null
       }
     },
+    "d_carbonara": {
+      "portion": {
+        "grams": 280,
+        "pieces": null,
+        "what": "тарелка спагетти карбонара"
+      },
+      "perPortion": {
+        "energyKcal": 634,
+        "proteinG": 29.5,
+        "fatG": 27.2,
+        "carbsG": 62.2,
+        "fibreG": 2.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/carbonara/",
+        "https://www.lovefood.com/recipes/108196/spaghetti-carbonara-recipe"
+      ],
+      "ingredients": [
+        {
+          "key": "Pasta, dry, enriched",
+          "g": 85
+        },
+        {
+          "key": "Pork, cured, bacon, unprepared",
+          "g": 40
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 25
+        },
+        {
+          "key": "Egg, yolk, raw, fresh",
+          "g": 12
+        },
+        {
+          "key": "Cheese, parmesan, hard",
+          "g": 22
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_chicken_curry": {
       "portion": {
         "grams": 440,
@@ -1108,6 +1157,75 @@
         "roastedMeat": null
       }
     },
+    "d_chickpea_curry": {
+      "portion": {
+        "grams": 280,
+        "pieces": null,
+        "what": "порция карри из нута (тарелка)"
+      },
+      "perPortion": {
+        "energyKcal": 300,
+        "proteinG": 10.6,
+        "fatG": 13,
+        "carbsG": 26.4,
+        "fibreG": 12.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://loveandlemons.com/chana-masala/",
+        "https://www.funfoodfrolic.com/wprm_print/chana-masala-curry-recipe"
+      ],
+      "ingredients": [
+        {
+          "key": "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
+          "g": 120
+        },
+        {
+          "key": "Tomatoes, red, ripe, canned, packed in tomato juice",
+          "g": 130
+        },
+        {
+          "key": "Onions, raw",
+          "g": 45
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 9
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 3
+        },
+        {
+          "key": "Ginger root, raw",
+          "g": 2
+        },
+        {
+          "key": "Spices, curry powder",
+          "g": 2
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 5
+        },
+        {
+          "key": "Lemon juice, raw",
+          "g": 3
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 40
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_coleslaw": {
       "portion": {
         "grams": 155,
@@ -1328,6 +1446,125 @@
         "roastedMeat": null
       }
     },
+    "d_dal": {
+      "portion": {
+        "grams": 260,
+        "pieces": null,
+        "what": "порция густого дала из чечевицы (тарелка)"
+      },
+      "perPortion": {
+        "energyKcal": 256,
+        "proteinG": 11.8,
+        "fatG": 9.2,
+        "carbsG": 27.7,
+        "fibreG": 6
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.indianhealthyrecipes.com/wprm_print/masoor-dal-recipe-red-lentil-dal",
+        "https://www.cookingandme.com/wprm_print/masoor-dal-tadka-recipe"
+      ],
+      "ingredients": [
+        {
+          "key": "Lentils, pink or red, raw",
+          "g": 45
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 170
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 50
+        },
+        {
+          "key": "Onions, raw",
+          "g": 15
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 3
+        },
+        {
+          "key": "Butter oil, anhydrous",
+          "g": 8
+        },
+        {
+          "key": "Spices, cumin seed",
+          "g": 0.5
+        },
+        {
+          "key": "Spices, turmeric, ground",
+          "g": 0.5
+        },
+        {
+          "key": "Lemon juice, raw",
+          "g": 5
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 2
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_draniki": {
+      "portion": {
+        "grams": 175,
+        "pieces": 3,
+        "what": "3 драника"
+      },
+      "perPortion": {
+        "energyKcal": 343,
+        "proteinG": 8.1,
+        "fatG": 12.2,
+        "carbsG": 46,
+        "fibreG": 5.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=172298",
+        "https://1000.menu/cooking/3943-draniki-kartofelnye-klassicheskie",
+        "https://1000.menu/cooking/28024-jarenye-draniki-na-skovorode"
+      ],
+      "ingredients": [
+        {
+          "key": "Potatoes, flesh and skin, raw",
+          "g": 200
+        },
+        {
+          "key": "Onions, raw",
+          "g": 25
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 15
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 18
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "potatoes_raw_pan_fried"
+        },
+        "roastedMeat": null
+      }
+    },
     "d_duck_apples": {
       "portion": {
         "grams": 220,
@@ -1371,6 +1608,150 @@
       ],
       "cooking": {
         "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_eggplant_parmigiana": {
+      "portion": {
+        "grams": 300,
+        "pieces": null,
+        "what": "порция баклажанов пармиджана (кусок запеканки)"
+      },
+      "perPortion": {
+        "energyKcal": 395,
+        "proteinG": 24.1,
+        "fatG": 22.8,
+        "carbsG": 18,
+        "fibreG": 9.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.theinternationalkitchen.com/recipes/melanzane-alla-parmigiana-recipe-for-eggplant-parmesan/",
+        "https://www.sbs.com.au/food/recipes/eggplant-parmigiana-melanzane-alla-parmigiana",
+        "https://www.maricruzavalos.com/wprm_print/melanzane-alla-parmigiana"
+      ],
+      "ingredients": [
+        {
+          "key": "Eggplant, raw",
+          "g": 220
+        },
+        {
+          "key": "Tomato products, canned, puree, without salt added",
+          "g": 115
+        },
+        {
+          "key": "Cheese, mozzarella, whole milk",
+          "g": 65
+        },
+        {
+          "key": "Cheese, parmesan, hard",
+          "g": 15
+        },
+        {
+          "key": "Onions, raw",
+          "g": 15
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 4
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1
+        },
+        {
+          "key": "Basil, fresh",
+          "g": 3
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, olive, salad or cooking",
+          "category": "whole_meat_poultry_fish_unbreaded"
+        },
+        "roastedMeat": null
+      }
+    },
+    "d_falafel": {
+      "portion": {
+        "grams": 150,
+        "pieces": 5,
+        "what": "5 шариков фалафеля с соусом тахини"
+      },
+      "perPortion": {
+        "energyKcal": 310,
+        "proteinG": 14.7,
+        "fatG": 10.2,
+        "carbsG": 34.3,
+        "fibreG": 8.9
+      },
+      "method": "fetched",
+      "sources": [
+        "https://www.recipetineats.com/falafel/",
+        "https://bhfood.org.uk/falafel-2/",
+        "https://www.bbcgoodfood.com/recipes/falafel"
+      ],
+      "ingredients": [
+        {
+          "key": "Chickpeas (garbanzo beans, bengal gram), mature seeds, raw",
+          "g": 56
+        },
+        {
+          "key": "Parsley, fresh",
+          "g": 6
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 6
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 12
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Spices, cumin seed",
+          "g": 1
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 3
+        },
+        {
+          "key": "Leavening agents, baking powder, double-acting, sodium aluminum sulfate",
+          "g": 0.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 2
+        },
+        {
+          "key": "Seeds, sesame butter, tahini, from roasted and toasted kernels (most common type)",
+          "g": 12
+        },
+        {
+          "key": "Lemon juice, raw",
+          "g": 6
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 18
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "deep",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "whole_meat_poultry_fish_unbreaded"
+        },
         "roastedMeat": null
       }
     },
@@ -1698,6 +2079,55 @@
         "roastedMeat": null
       }
     },
+    "d_fried_potatoes_mushrooms": {
+      "portion": {
+        "grams": 230,
+        "pieces": null,
+        "what": "порция жареной картошки с грибами и луком"
+      },
+      "perPortion": {
+        "energyKcal": 273,
+        "proteinG": 6.4,
+        "fatG": 12.1,
+        "carbsG": 32.1,
+        "fibreG": 5.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=153502",
+        "https://1000.menu/cooking/3681-kartoshka-s-gribami-i-lukom-jarenaya-na-skovorode"
+      ],
+      "ingredients": [
+        {
+          "key": "Potatoes, flesh and skin, raw",
+          "g": 180
+        },
+        {
+          "key": "Mushrooms, white, raw",
+          "g": 75
+        },
+        {
+          "key": "Onions, raw",
+          "g": 35
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.2
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "potatoes_raw_pan_fried"
+        },
+        "roastedMeat": null
+      }
+    },
     "d_garlic_shrimp": {
       "portion": {
         "grams": 170,
@@ -1705,10 +2135,10 @@
         "what": "порция креветок в чесночно-сливочном соусе"
       },
       "perPortion": {
-        "energyKcal": 416,
-        "proteinG": 27,
-        "fatG": 32.1,
-        "carbsG": 3.9,
+        "energyKcal": 399,
+        "proteinG": 18.9,
+        "fatG": 32.7,
+        "carbsG": 5.1,
         "fibreG": 0.3
       },
       "method": "composed",
@@ -1718,7 +2148,7 @@
       ],
       "ingredients": [
         {
-          "key": "Crustaceans, shrimp, raw",
+          "key": "Crustaceans, shrimp, mixed species, raw (may contain additives to retain moisture)",
           "g": 125
         },
         {
@@ -2082,7 +2512,7 @@
       },
       "method": "composed",
       "sources": [
-        "https://realgreekrecipes.com/grilled-octopus-greek-style/",
+        "https://realgreekrecipes.com/wprm_print/grilled-octopus-greek-style",
         "https://thebigmansworld.com/grilled-octopus-recipe/"
       ],
       "ingredients": [
@@ -2688,6 +3118,47 @@
         "roastedMeat": null
       }
     },
+    "d_mashed_potatoes": {
+      "portion": {
+        "grams": 160,
+        "pieces": null,
+        "what": "порция картофельного пюре (гарнир)"
+      },
+      "perPortion": {
+        "energyKcal": 176,
+        "proteinG": 3.6,
+        "fatG": 8,
+        "carbsG": 20.7,
+        "fibreG": 2.6
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=141010",
+        "https://1000.menu/cooking/5081-kartofelnoe-pure-s-maslom-i-molokom"
+      ],
+      "ingredients": [
+        {
+          "key": "Potatoes, flesh and skin, raw",
+          "g": 125
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 30
+        },
+        {
+          "key": "Butter, salted",
+          "g": 9
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_millet_pumpkin_porridge": {
       "portion": {
         "grams": 280,
@@ -3028,6 +3499,59 @@
         {
           "key": "Salt, table",
           "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_navy_pasta": {
+      "portion": {
+        "grams": 300,
+        "pieces": null,
+        "what": "тарелка макарон по-флотски"
+      },
+      "perPortion": {
+        "energyKcal": 700,
+        "proteinG": 29.4,
+        "fatG": 32.5,
+        "carbsG": 67.1,
+        "fibreG": 3.5
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=156269",
+        "https://1000.menu/cooking/70186-makarony-po-flotski-s-farshem-na-skovorode-klassicheskie"
+      ],
+      "ingredients": [
+        {
+          "key": "Pasta, dry, enriched",
+          "g": 90
+        },
+        {
+          "key": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "g": 100
+        },
+        {
+          "key": "Onions, raw",
+          "g": 35
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 7
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 5
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.2
         }
       ],
       "cooking": {
@@ -3490,6 +4014,64 @@
         "roastedMeat": null
       }
     },
+    "d_pesto_pasta": {
+      "portion": {
+        "grams": 250,
+        "pieces": null,
+        "what": "тарелка пасты с песто"
+      },
+      "perPortion": {
+        "energyKcal": 612,
+        "proteinG": 17.8,
+        "fatG": 30.9,
+        "carbsG": 62.4,
+        "fibreG": 3.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/pesto/",
+        "https://smittenkitchen.com/2020/07/pasta-with-pesto-genovese/",
+        "https://www.recipetineats.com/pesto-pasta/"
+      ],
+      "ingredients": [
+        {
+          "key": "Pasta, dry, enriched",
+          "g": 85
+        },
+        {
+          "key": "Basil, fresh",
+          "g": 15
+        },
+        {
+          "key": "Nuts, pine nuts, dried",
+          "g": 5.5
+        },
+        {
+          "key": "Cheese, parmesan, hard",
+          "g": 15
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 22
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.8
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_pork_chop": {
       "portion": {
         "grams": 180,
@@ -3721,6 +4303,68 @@
         "roastedMeat": null
       }
     },
+    "d_ratatouille": {
+      "portion": {
+        "grams": 250,
+        "pieces": null,
+        "what": "порция рататуя (запечённые кружочки баклажана, кабачка и томата)"
+      },
+      "perPortion": {
+        "energyKcal": 177,
+        "proteinG": 3.2,
+        "fatG": 12.7,
+        "carbsG": 10.3,
+        "fibreG": 5.4
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.bbcgoodfood.com/recipes/ratatouille",
+        "https://www.recipetineats.com/ratatouille/",
+        "https://www.foodfaithfitness.com/wprm_print/ratatouille-recipe"
+      ],
+      "ingredients": [
+        {
+          "key": "Eggplant, raw",
+          "g": 80
+        },
+        {
+          "key": "Squash, summer, zucchini, includes skin, raw",
+          "g": 70
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 90
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 30
+        },
+        {
+          "key": "Onions, raw",
+          "g": 30
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 12
+        },
+        {
+          "key": "Basil, fresh",
+          "g": 2
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_roast_chicken": {
       "portion": {
         "grams": 190,
@@ -3781,10 +4425,10 @@
         "what": "порция паэльи с морепродуктами (тарелка)"
       },
       "perPortion": {
-        "energyKcal": 535,
-        "proteinG": 27.7,
-        "fatG": 12.2,
-        "carbsG": 73.9,
+        "energyKcal": 528,
+        "proteinG": 24.5,
+        "fatG": 12.5,
+        "carbsG": 74.4,
         "fibreG": 3.2
       },
       "method": "composed",
@@ -3798,7 +4442,7 @@
           "g": 80
         },
         {
-          "key": "Crustaceans, shrimp, raw",
+          "key": "Crustaceans, shrimp, mixed species, raw (may contain additives to retain moisture)",
           "g": 50
         },
         {
@@ -4018,10 +4662,10 @@
         "what": "5 креветок темпура"
       },
       "perPortion": {
-        "energyKcal": 404,
-        "proteinG": 28.5,
-        "fatG": 15,
-        "carbsG": 36.8,
+        "energyKcal": 389,
+        "proteinG": 21.4,
+        "fatG": 15.6,
+        "carbsG": 37.8,
         "fibreG": 1.2
       },
       "method": "composed",
@@ -4032,7 +4676,7 @@
       ],
       "ingredients": [
         {
-          "key": "Crustaceans, shrimp, raw",
+          "key": "Crustaceans, shrimp, mixed species, raw (may contain additives to retain moisture)",
           "g": 110
         },
         {
@@ -4233,6 +4877,79 @@
         {
           "key": "Beverages, water, tap, drinking",
           "g": 236
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_spaghetti_bolognese": {
+      "portion": {
+        "grams": 350,
+        "pieces": null,
+        "what": "тарелка спагетти болоньезе"
+      },
+      "perPortion": {
+        "energyKcal": 704,
+        "proteinG": 32.1,
+        "fatG": 28.9,
+        "carbsG": 67.1,
+        "fibreG": 6.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/spaghetti-bolognese/",
+        "https://www.bbcgoodfoodme.com/recipes/the-best-spaghetti-bolognese"
+      ],
+      "ingredients": [
+        {
+          "key": "Pasta, dry, enriched",
+          "g": 80
+        },
+        {
+          "key": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "g": 100
+        },
+        {
+          "key": "Onions, raw",
+          "g": 30
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 20
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Tomatoes, red, ripe, canned, packed in tomato juice",
+          "g": 130
+        },
+        {
+          "key": "Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",
+          "g": 12
+        },
+        {
+          "key": "Alcoholic beverage, wine, table, red",
+          "g": 25
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 5
+        },
+        {
+          "key": "Cheese, parmesan, grated",
+          "g": 8
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.3
         }
       ],
       "cooking": {
@@ -4491,6 +5208,84 @@
           "type": "shallow",
           "oil": "Oil, sunflower, linoleic, (approx. 65%)",
           "category": "meat_patties_cutlets_unbreaded"
+        },
+        "roastedMeat": null
+      }
+    },
+    "d_tofu_vegetables": {
+      "portion": {
+        "grams": 270,
+        "pieces": null,
+        "what": "порция тофу с брокколи и перцем в соевом соусе"
+      },
+      "perPortion": {
+        "energyKcal": 273,
+        "proteinG": 22.3,
+        "fatG": 13,
+        "carbsG": 16,
+        "fibreG": 6.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://myfoodstory.com/wprm_print/crispy-tofu-broccoli-stir-fry",
+        "https://cravinghomecooked.com/wprm_print/10360",
+        "https://www.hep.upenn.edu/~ashmansk/recipe/r-tofu-broccoli-stir-fry.html"
+      ],
+      "ingredients": [
+        {
+          "key": "Tofu, raw, firm, prepared with calcium sulfate",
+          "g": 100
+        },
+        {
+          "key": "Broccoli, raw",
+          "g": 90
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 60
+        },
+        {
+          "key": "Onions, raw",
+          "g": 25
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 16
+        },
+        {
+          "key": "Sauce, hoisin, ready-to-serve",
+          "g": 3
+        },
+        {
+          "key": "Vinegar, distilled",
+          "g": 8
+        },
+        {
+          "key": "Oil, sesame, salad or cooking",
+          "g": 3.5
+        },
+        {
+          "key": "Cornstarch",
+          "g": 5
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 3
+        },
+        {
+          "key": "Ginger root, raw",
+          "g": 2
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 15
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "whole_meat_poultry_fish_unbreaded"
         },
         "roastedMeat": null
       }
@@ -4754,6 +5549,226 @@
       ],
       "cooking": {
         "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_vegetable_lasagna": {
+      "portion": {
+        "grams": 300,
+        "pieces": 1,
+        "what": "кусок овощной лазаньи"
+      },
+      "perPortion": {
+        "energyKcal": 484,
+        "proteinG": 24.4,
+        "fatG": 26,
+        "carbsG": 35.2,
+        "fibreG": 5.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.jocooks.com/wprm_print/vegetable-lasagna",
+        "https://steenbergs.co.uk/recipes/vegetarian-spinach-and-ricotta-lasagne-recipe/"
+      ],
+      "ingredients": [
+        {
+          "key": "Pasta, dry, enriched",
+          "g": 25
+        },
+        {
+          "key": "Squash, summer, zucchini, includes skin, raw",
+          "g": 100
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 19
+        },
+        {
+          "key": "Spinach, raw",
+          "g": 50
+        },
+        {
+          "key": "Cheese, ricotta, whole milk",
+          "g": 55
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 8
+        },
+        {
+          "key": "Tomatoes, red, ripe, canned, packed in tomato juice",
+          "g": 90
+        },
+        {
+          "key": "Cheese, mozzarella, whole milk",
+          "g": 30
+        },
+        {
+          "key": "Cheese, parmesan, hard",
+          "g": 8
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 70
+        },
+        {
+          "key": "Butter, salted",
+          "g": 6
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 5
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 3.5
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_vegetable_stew": {
+      "portion": {
+        "grams": 300,
+        "pieces": null,
+        "what": "тарелка овощного рагу"
+      },
+      "perPortion": {
+        "energyKcal": 233,
+        "proteinG": 4.8,
+        "fatG": 10.6,
+        "carbsG": 26.5,
+        "fibreG": 5.9
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=170695",
+        "https://www.russianfood.com/recipes/recipe.php?rid=167515",
+        "https://1000.menu/cooking/23485-ovoshchnoe-ragu-s-kabachkami-kartoshkoi-i-kapustoi"
+      ],
+      "ingredients": [
+        {
+          "key": "Potatoes, flesh and skin, raw",
+          "g": 110
+        },
+        {
+          "key": "Squash, summer, zucchini, includes skin, raw",
+          "g": 80
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 35
+        },
+        {
+          "key": "Onions, raw",
+          "g": 35
+        },
+        {
+          "key": "Peppers, sweet, green, raw",
+          "g": 35
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 45
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 10
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 20
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_veggie_burger": {
+      "portion": {
+        "grams": 190,
+        "pieces": 1,
+        "what": "1 бургер: булочка, котлета из фасоли, салат, томат"
+      },
+      "perPortion": {
+        "energyKcal": 312,
+        "proteinG": 13.9,
+        "fatG": 4.2,
+        "carbsG": 46.8,
+        "fibreG": 7.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/veggie-burgers/",
+        "https://www.hep.upenn.edu/~ashmansk/recipe/r-black-bean-burgers.html"
+      ],
+      "ingredients": [
+        {
+          "key": "Beans, black, mature seeds, canned, low sodium",
+          "g": 75
+        },
+        {
+          "key": "Onions, raw",
+          "g": 15
+        },
+        {
+          "key": "Bread, crumbs, dry, grated, plain",
+          "g": 15
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 10
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.2
+        },
+        {
+          "key": "Rolls, hamburger or hotdog, plain",
+          "g": 55
+        },
+        {
+          "key": "Lettuce, green leaf, raw",
+          "g": 10
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 30
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "whole_meat_poultry_fish_unbreaded"
+        },
         "roastedMeat": null
       }
     },
