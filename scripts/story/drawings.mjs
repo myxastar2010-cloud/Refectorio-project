@@ -359,7 +359,7 @@ function crane() {
   strokes.push(
     stroke('mast-l', 'mast', 'ink', 'main', line(pt(x - 10, base), pt(x - 10, top))),
     stroke('mast-r', 'mast', 'ink', 'main', line(pt(x + 10, base), pt(x + 10, top))),
-    stroke('mast-zig', 'mast', 'muted', 'fine', lattice(x - 10, base, x - 10, top + 12, -20, 14)),
+    stroke('mast-zig', 'mast', 'muted', 'fine', lattice(x - 10, base, x - 10, top + 12, 20, 14)),
     stroke('mast-foot', 'mast', 'ink', 'main', line(pt(x - 32, base), pt(x + 32, base))),
     stroke('cab', 'mast', 'ink', 'main', roundRect(x - 14, top + 6, 28, 20, 5)),
     stroke(
@@ -380,7 +380,7 @@ function crane() {
       'jib',
       'muted',
       'fine',
-      lattice(reach + 14, top - 12, x - 12, top - 12, -12, 16),
+      lattice(reach + 14, top - 12, x - 12, top - 12, 12, 16),
     ),
     stroke(
       'tie',

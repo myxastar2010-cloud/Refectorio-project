@@ -18,7 +18,7 @@ type Props = {
 };
 
 /**
- * The generation story (stage 3, §7; ADR 0013): line drawings on a Canvas 2D that turn into one another through clouds
+ * The generation story (stage 3, §7; ADR 0012): line drawings on a Canvas 2D that turn into one another through clouds
  * of points — notebook, planet, … — then dots forever. The engine and the drawings are a lazy chunk of their own.
  * Decorative: the captions are the live region.
  */

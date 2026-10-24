@@ -367,7 +367,7 @@ export const FINALE = {
 } as const;
 
 /**
- * The generation story (stage 3, §7; ADR 0013): scene lengths, the transformation between drawings (a cloud of points
+ * The generation story (stage 3, §7; ADR 0012): scene lengths, the transformation between drawings (a cloud of points
  * on arcs) and the dots that loop forever. Seconds.
  */
 export const STORY = {
