@@ -5,8 +5,11 @@ import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  CART_PIVOT_X,
+  CART_WHEEL_R,
+  CART_WHEELS,
   CRANE,
-  DASH,
+  FLOOR_Y,
   HOOK_Y,
   LENS_AT,
   LENS_R,
@@ -25,8 +28,6 @@ import {
   TICK,
   TROLLEY_AT,
   TROLLEY_FROM,
-  WHEEL_R,
-  WHEELS,
 } from './drawings.mjs';
 import { sample } from './geometry.mjs';
 
@@ -111,7 +112,12 @@ export function buildStory() {
         hookY: HOOK_Y,
         slot: SLOT,
       },
-      robot: { wheels: WHEELS.map((w) => [w.x, w.y]), wheelR: WHEEL_R, dash: DASH },
+      cart: {
+        wheels: CART_WHEELS.map((w) => [w.x, w.y]),
+        wheelR: CART_WHEEL_R,
+        floorY: FLOOR_Y,
+        pivotX: CART_PIVOT_X,
+      },
       pot: { ...POT, lidPivot: [LID_PIVOT.x, LID_PIVOT.y] },
     },
     scenes: Object.fromEntries(SCENES.map((scene) => [scene.id, buildScene(scene)])),

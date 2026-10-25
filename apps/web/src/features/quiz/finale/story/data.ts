@@ -50,16 +50,11 @@ export type RawStory = {
         readonly h: number;
       };
     };
-    readonly robot: {
+    readonly cart: {
       readonly wheels: readonly (readonly [number, number])[];
       readonly wheelR: number;
-      readonly dash: {
-        readonly y: number;
-        readonly length: number;
-        readonly period: number;
-        readonly from: number;
-        readonly to: number;
-      };
+      readonly floorY: number;
+      readonly pivotX: number;
     };
     readonly pot: { readonly lidPivot: readonly [number, number] };
   };

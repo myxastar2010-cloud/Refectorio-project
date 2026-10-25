@@ -33,7 +33,7 @@
   /* Whole pixels (an even height): on fractional ones the fill sat a pixel closer to one edge of its track. */
   --q-progress-w: round(calc(var(--quiz-progress-w) * var(--q-unit)), 2px);
   --q-progress-h: round(calc(var(--quiz-progress-h) * var(--q-unit)), 2px);
-  --q-progress-inset: max(2px, round(calc(var(--quiz-progress-inset) * var(--q-unit)), 1px));
+  --q-progress-inset: max(3px, round(calc(var(--quiz-progress-inset) * var(--q-unit)), 1px));
   --q-progress-y: round(calc(var(--quiz-progress-y) * var(--q-unit)), 1px);
   --q-back: max(44px, calc(var(--quiz-back-size) * var(--q-unit)));
   --q-back-gap: calc(var(--quiz-back-gap) * var(--q-unit));
@@ -128,6 +128,15 @@
   --q-reserve-note: calc(64 * var(--q));
   --q-textarea-max: calc(var(--q-textarea-h) * 1.5);
   --q-panel-reserve: var(--q-panel-h);
+}
+
+/* «Помимо основной цели…» has the most answers: only they give way to the screen's fit — its icon and question keep
+   the size they have on the other steps. */
+.quiz-screen .quiz-frame--extra-goals {
+  --q-icon: calc(var(--quiz-icon-box) * var(--q-unit));
+  --q-title: max(20px, calc(var(--type-quiz-title-size) * var(--q-unit)));
+  --q-title-leading: calc(var(--type-quiz-title-leading) * var(--q-unit));
+  --q-title-gap: calc(var(--quiz-title-gap) * var(--q-unit));
 }
 
 /* The quiz is one full-viewport scene that clips what leaves it (a card flying off the bottom passes «under the
@@ -267,6 +276,13 @@ html:has(.page[data-scene='quiz']) body {
     --q-game-gap: calc(20px * var(--fit, 1));
     --q-game-buttons-gap: calc(16px * var(--fit, 1));
   }
+
+  .quiz-screen .quiz-frame--extra-goals {
+    --q-icon: 68px;
+    --q-title: clamp(26px, 7.4vw, 32px);
+    --q-title-leading: 1.18em;
+    --q-title-gap: 6px;
+  }
 }
 
 /* Landscape phones and very low windows: the steps scroll as usual, only their icon and title get smaller; the game
@@ -284,6 +300,12 @@ html:has(.page[data-scene='quiz']) body {
     /* Under the one-line title, with a little air at the bottom. */
     --q-card-h: calc(100svh - var(--q-game-title-y) - 70px - env(safe-area-inset-bottom));
     --q-card-w: calc(var(--q-card-h) * var(--quiz-card-w) / var(--quiz-card-h));
+  }
+
+  /* Phones on their side: here every step's question shrinks with its fit (the question sits beside the answers). */
+  .quiz-screen .quiz-frame--extra-goals {
+    --q-icon: calc(48px * var(--fit, 1));
+    --q-title: max(18px, calc(24px * var(--fit, 1)));
   }
 }
 
@@ -333,11 +355,10 @@ html:has(.page[data-scene='quiz']) body {
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
-  /* A soft light along the top edge: the fill reads as a pill, not a flat stripe. */
-  background:
-    linear-gradient(to bottom, rgb(255 255 255 / 0.28), rgb(255 255 255 / 0) 60%),
-    var(--color-accent);
-  will-change: transform;
+  /* Flat: a light along the top edge melted into the gap above and the fill looked lower than it is. */
+  background: var(--color-accent);
+  /* No layer of its own: a composited layer snaps to whole device pixels while the outline around it does not, and at
+     125 % the fill sat a device pixel closer to the top of its track than to the bottom. */
 }
 
 /* A narrow light band that runs along the fill once when it grows (QuizHeader animates its transform). */
@@ -582,6 +603,10 @@ html:has(.page[data-scene='quiz']) body {
   paint-order: stroke fill;
   text-wrap: balance;
   outline: none;
+}
+
+.quiz-frame--extra-goals .quiz-title {
+  max-width: min(100%, calc(1640 * var(--q-unit)));
 }
 
 .quiz-answers {
@@ -2225,11 +2250,11 @@ html:has(.page[data-scene='quiz']) body {
 }
 
 /* The tiniest cards: the name moves into the text (the card's own name fades), the info starts at the top. */
-.quiz-card-info:is([data-fit='5'], [data-fit='6'], [data-fit='7']) {
+.quiz-card-info:is([data-fit='5'], [data-fit='6'], [data-fit='7'], [data-fit='8']) {
   --info-scale: 0.8;
 }
 
-.quiz-card-info:is([data-fit='6'], [data-fit='7']) {
+.quiz-card-info:is([data-fit='6'], [data-fit='7'], [data-fit='8']) {
   top: max(10px, calc(30 * var(--cu)));
 }
 
@@ -2237,7 +2262,8 @@ html:has(.page[data-scene='quiz']) body {
   transition: opacity var(--quiz-photo-fade-ms) var(--ease-out-soft);
 }
 
-.quiz-card.is-open:has(.quiz-card-info:is([data-fit='6'], [data-fit='7'])) .quiz-card-name {
+.quiz-card.is-open:has(.quiz-card-info:is([data-fit='6'], [data-fit='7'], [data-fit='8']))
+  .quiz-card-name {
   opacity: 0;
 }
 
@@ -2246,22 +2272,42 @@ html:has(.page[data-scene='quiz']) body {
   font-weight: 700;
 }
 
-.quiz-card-info:is([data-fit='6'], [data-fit='7']) .quiz-card-text-name {
+.quiz-card-info:is([data-fit='6'], [data-fit='7'], [data-fit='8']) .quiz-card-text-name {
   display: inline;
 }
 
-.quiz-card-info[data-fit='7'] .quiz-card-values {
+/* Level 7: the name over the values, no description — on so small a card the numbers matter more. Level 8, the last
+   resort: the name and the short description only. */
+.quiz-card-info[data-fit='7'] .quiz-card-text {
+  order: -1;
+  margin: 0 0 calc(10 * var(--cu));
+  text-align: center;
+}
+
+.quiz-card-info[data-fit='7'] .quiz-card-text-body {
+  display: none;
+}
+
+.quiz-card-info[data-fit='8'] .quiz-card-values {
   display: none;
 }
 
 .quiz-card-values {
   display: flex;
   justify-content: center;
+  max-width: 100%;
   gap: calc(var(--quiz-info-columns-gap) * var(--cu) * var(--info-scale));
   margin: 0;
 }
 
-.quiz-card-info:is([data-fit='2'], [data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6'])
+.quiz-card-info:is(
+    [data-fit='2'],
+    [data-fit='3'],
+    [data-fit='4'],
+    [data-fit='5'],
+    [data-fit='6'],
+    [data-fit='7']
+  )
   .quiz-card-values {
   display: grid;
   grid-template-columns: repeat(2, auto);
@@ -2292,17 +2338,6 @@ html:has(.page[data-scene='quiz']) body {
   white-space: nowrap;
 }
 
-.quiz-card-portion {
-  margin-top: calc(8 * var(--cu));
-  font-size: max(10px, calc(13 * var(--cu) * var(--info-scale)));
-  line-height: 1.2;
-  font-weight: 500;
-}
-
-.quiz-card-info[data-fit='7'] .quiz-card-portion {
-  display: none;
-}
-
 .quiz-card-cuisine {
   margin-top: calc(var(--quiz-info-text-gap) * var(--cu) * var(--info-scale));
   font-size: max(11px, calc(var(--quiz-info-cuisine) * var(--cu) * var(--info-scale)));
@@ -2314,7 +2349,14 @@ html:has(.page[data-scene='quiz']) body {
   margin-top: 0;
 }
 
-.quiz-card-info:is([data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'])
+.quiz-card-info:is(
+    [data-fit='3'],
+    [data-fit='4'],
+    [data-fit='5'],
+    [data-fit='6'],
+    [data-fit='7'],
+    [data-fit='8']
+  )
   .quiz-card-cuisine {
   display: none;
 }
@@ -2346,12 +2388,12 @@ html:has(.page[data-scene='quiz']) body {
   display: none;
 }
 
-.quiz-card-info:is([data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'])
+.quiz-card-info:is([data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'], [data-fit='8'])
   .quiz-card-text-long {
   display: none;
 }
 
-.quiz-card-info:is([data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'])
+.quiz-card-info:is([data-fit='4'], [data-fit='5'], [data-fit='6'], [data-fit='7'], [data-fit='8'])
   .quiz-card-text-short {
   display: inline;
 }

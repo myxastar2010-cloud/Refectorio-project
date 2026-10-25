@@ -77,8 +77,6 @@ export const quiz = {
       carbs: 'углеводы',
       kcal: 'ккал',
       grams: 'г',
-      /** Under the numbers (research R08 §5): what they are, without judgement. */
-      portionNote: 'На стандартную порцию, ориентировочно',
       /** The description continues the dish name: «Овсяная каша — это блюдо…». */
       lead: '—',
       loading: 'Загружаем описание',

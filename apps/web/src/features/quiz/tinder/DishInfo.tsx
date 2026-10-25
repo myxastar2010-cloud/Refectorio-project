@@ -16,14 +16,31 @@ const CHEVRON_UNDER_NAME_PX = 6;
 /**
  * The info fits the card at every size without scrolling (§5.4): each level gives up a little more — smaller text,
  * the values 2 × 2, no cuisine line, the short description, smaller still; on the tiniest cards (low landscape
- * phones) the name moves into the text and the info takes its place, and last the values give way to the description
- * (styles: .quiz-card-info[data-fit]).
+ * phones) the name moves into the text and the info takes its place, then the description gives way to the values
+ * (the name over them), and only as the last resort the values give way to the description (styles:
+ * .quiz-card-info[data-fit]).
  */
-const FIT_LEVELS = 8;
+const FIT_LEVELS = 9;
+
+/**
+ * The values row runs past the info's sides (it is one line until level 2): measured in fractional px — integer
+ * widths let a label stand 0.7 px over the edge, where the info clips it.
+ */
+function valuesTooWide(info: HTMLElement, values: HTMLElement | null): boolean {
+  if (!values || values.offsetParent === null) return false;
+  const box = info.getBoundingClientRect();
+  for (const item of values.children) {
+    const r = item.getBoundingClientRect();
+    if (r.left < box.left - 0.25 || r.right > box.right + 0.25) return true;
+  }
+  return values.scrollWidth > values.clientWidth;
+}
+
 function fitInfo(info: HTMLElement) {
+  const values = info.querySelector<HTMLElement>('.quiz-card-values');
   for (let level = 0; level < FIT_LEVELS; level += 1) {
     info.dataset.fit = String(level);
-    if (info.scrollHeight <= info.clientHeight) return;
+    if (info.scrollHeight <= info.clientHeight && !valuesTooWide(info, values)) return;
   }
 }
 
@@ -132,7 +149,6 @@ export function DishInfo({ id, dish, open, calm, text, deemphasize, measured }: 
           </div>
         </dl>
       ) : null}
-      {numbers ? <p className="quiz-card-portion">{quiz.taste.info.portionNote}</p> : null}
       {cuisine ? <p className="quiz-card-cuisine">{cuisine}</p> : null}
       {text ? (
         <p className="quiz-card-text">
@@ -141,7 +157,9 @@ export function DishInfo({ id, dish, open, calm, text, deemphasize, measured }: 
           </span>
           <span className="quiz-card-text-short">
             <span className="quiz-card-text-name">{dish.nameRu} </span>
-            {quiz.taste.info.lead} {text.short}
+            <span className="quiz-card-text-body">
+              {quiz.taste.info.lead} {text.short}
+            </span>
           </span>
         </p>
       ) : (

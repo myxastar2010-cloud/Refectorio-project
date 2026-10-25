@@ -66,6 +66,14 @@ const ALIASES = {
   'Tomato products, canned, paste, without salt added':
     "Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",
   'Tvorog 5% fat (Russian cottage cheese)': 'Cheese, cottage, creamed, large or small curd',
+  'Tvorog 9% fat (Russian cottage cheese)': 'ru:tvorog-9',
+  'Gochujang (Korean red chili paste)': 'ru:gochujang',
+  'Mascarpone 42% fat (Italian cream cheese)': 'ru:mascarpone-42',
+  // Russian 33 % cream: the closest US row is heavy whipping cream (36 % fat).
+  'Cream 33% fat (Russian slivki)': 'Cream, fluid, heavy whipping',
+  'Peas, green, frozen, unprepared':
+    "Peas, green, frozen, unprepared (Includes foods for USDA's Food Distribution Program)",
+  'Peas, split, mature seeds, raw': 'Peas, green, split, mature seeds, raw',
   Water: 'Beverages, water, tap, drinking',
   'Yogurt, plain, low fat, 12 grams protein per 8 ounce': 'Yogurt, plain, low fat',
   'Mayonnaise 67% fat (Provencal)': 'ru:mayonnaise-67',
@@ -93,6 +101,35 @@ const RU_FOODS = {
       title:
         'Open Food Facts: медиана этикеток 15 кефиров 2,5 % (49–55 ккал, белок 2,9–3,3, углеводы 3,5–4,8)',
       accessed: '2026-10-24',
+    },
+  },
+  'ru:tvorog-9': {
+    nameRu: 'творог 9 %',
+    per100g: { energyKcal: 159, proteinG: 16.7, fatG: 9, carbsG: 2, fibreG: 0 },
+    source: {
+      url: null,
+      title:
+        'Скурихин И. М., Тутельян В. А. «Химический состав российских пищевых продуктов» (2002): творог полужирный 9 %; белок ≥ 16 % — ГОСТ 31453-2013',
+      accessed: '2026-10-25',
+    },
+  },
+  'ru:gochujang': {
+    nameRu: 'паста кочхуджан',
+    per100g: { energyKcal: 225, proteinG: 5, fatG: 0, carbsG: 50, fibreG: 5 },
+    source: {
+      url: 'https://fdc.nal.usda.gov/food-details/2410981/nutrients',
+      title:
+        'USDA FoodData Central 2410981: Jayone «Gochujang Korean fermented chili sauce» (этикетка)',
+      accessed: '2026-10-25',
+    },
+  },
+  'ru:mascarpone-42': {
+    nameRu: 'маскарпоне 42 %',
+    per100g: { energyKcal: 429, proteinG: 3.57, fatG: 42.9, carbsG: 3.57, fibreG: 0 },
+    source: {
+      url: 'https://fdc.nal.usda.gov/food-details/2289625/nutrients',
+      title: 'USDA FoodData Central 2289625: Murray’s «Mascarpone» (этикетка)',
+      accessed: '2026-10-25',
     },
   },
   'ru:kvass': {

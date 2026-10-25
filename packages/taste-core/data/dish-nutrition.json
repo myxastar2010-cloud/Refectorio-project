@@ -1,7 +1,64 @@
 {
-  "version": "2026-10-24",
+  "version": "2026-10-25",
   "method": "research/stage-3-dish-data.md",
   "dishes": {
+    "d_ajapsandali": {
+      "portion": {
+        "grams": 280,
+        "pieces": null,
+        "what": "тарелка овощного рагу"
+      },
+      "perPortion": {
+        "energyKcal": 219,
+        "proteinG": 3.8,
+        "fatG": 14.8,
+        "carbsG": 13.8,
+        "fibreG": 8
+      },
+      "method": "composed",
+      "sources": [
+        "https://madloba.info/blog/georgian-cuisine/ajapsandali/",
+        "https://www.russianfood.com/recipes/recipe.php?rid=174090"
+      ],
+      "ingredients": [
+        {
+          "key": "Eggplant, raw",
+          "g": 150
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 60
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 100
+        },
+        {
+          "key": "Onions, raw",
+          "g": 45
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 3
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 8
+        },
+        {
+          "key": "Oil, sunflower, linoleic (less than 60%)",
+          "g": 14
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_avocado_toast": {
       "portion": {
         "grams": 190,
@@ -250,6 +307,222 @@
         "roastedMeat": null
       }
     },
+    "d_beshbarmak": {
+      "portion": {
+        "grams": 330,
+        "pieces": null,
+        "what": "тарелка бешбармака: мясо на домашней лапше с луком"
+      },
+      "perPortion": {
+        "energyKcal": 516,
+        "proteinG": 24.4,
+        "fatG": 22.9,
+        "carbsG": 48.3,
+        "fibreG": 2.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/1272-beshbarmak-iz-baraninj",
+        "https://1000.menu/cooking/14475-beshbarmak-iz-govyadiny",
+        "https://1000.menu/cooking/19068-beshbarmak-iz-myasa"
+      ],
+      "ingredients": [
+        {
+          "key": "Lamb, shoulder, whole (arm and blade), separable lean and fat, trimmed to 1/4\" fat, choice, raw",
+          "g": 100
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 60
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 8
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 25
+        },
+        {
+          "key": "Onions, raw",
+          "g": 45
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 8
+        },
+        {
+          "key": "Salt, table",
+          "g": 3
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_bibimbap": {
+      "portion": {
+        "grams": 400,
+        "pieces": null,
+        "what": "миска бибимбапа с рисом, овощами, говядиной и яйцом"
+      },
+      "perPortion": {
+        "energyKcal": 676,
+        "proteinG": 32.5,
+        "fatG": 24.3,
+        "carbsG": 78.4,
+        "fibreG": 5.5
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/bibimbap/",
+        "https://www.sbs.com.au/food/recipes/bibimbap-0"
+      ],
+      "ingredients": [
+        {
+          "key": "Rice, white, short-grain, enriched, uncooked",
+          "g": 70
+        },
+        {
+          "key": "Beef, tenderloin, steak, separable lean and fat, trimmed to 1/8\" fat, choice, raw",
+          "g": 65
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 50
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 25
+        },
+        {
+          "key": "Squash, summer, zucchini, includes skin, raw",
+          "g": 30
+        },
+        {
+          "key": "Spinach, raw",
+          "g": 25
+        },
+        {
+          "key": "Soybeans, mature seeds, sprouted, raw",
+          "g": 40
+        },
+        {
+          "key": "Mushrooms, shiitake, dried",
+          "g": 3
+        },
+        {
+          "key": "ru:gochujang",
+          "g": 20
+        },
+        {
+          "key": "Oil, sesame, salad or cooking",
+          "g": 4
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 6
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 5
+        },
+        {
+          "key": "Vinegar, distilled",
+          "g": 4
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 4
+        },
+        {
+          "key": "Seeds, sesame seeds, whole, dried",
+          "g": 1
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "whole_meat_poultry_fish_unbreaded"
+        },
+        "roastedMeat": null
+      }
+    },
+    "d_bird_milk_cake": {
+      "portion": {
+        "grams": 140,
+        "pieces": 1,
+        "what": "кусок торта (1/8-1/10 торта)"
+      },
+      "perPortion": {
+        "energyKcal": 487,
+        "proteinG": 9.6,
+        "fatG": 28,
+        "carbsG": 50.2,
+        "fibreG": 0.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=135909",
+        "https://1000.menu/cooking/3196-tort-ptiche-moloko-s-jelatinom"
+      ],
+      "ingredients": [
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 40
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 33
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 26
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 10.5
+        },
+        {
+          "key": "Milk, canned, condensed, sweetened",
+          "g": 10
+        },
+        {
+          "key": "Milk, whole, 3.25% milkfat, with added vitamin D",
+          "g": 8
+        },
+        {
+          "key": "Chocolate, dark, 45- 59% cacao solids",
+          "g": 6
+        },
+        {
+          "key": "Gelatins, dry powder, unsweetened",
+          "g": 2.3
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 8
+        },
+        {
+          "key": "Leavening agents, baking powder, double-acting, straight phosphate",
+          "g": 0.4
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_blini": {
       "portion": {
         "grams": 150,
@@ -377,6 +650,239 @@
         "roastedMeat": null
       }
     },
+    "d_brownie": {
+      "portion": {
+        "grams": 93,
+        "pieces": 2,
+        "what": "2 квадратика брауни (из 16 в форме 20 см)"
+      },
+      "perPortion": {
+        "energyKcal": 438,
+        "proteinG": 4.9,
+        "fatG": 23.4,
+        "carbsG": 51.5,
+        "fibreG": 3.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://joyofbaking.com/printpages/fudgychocolatebrowniesprint.html",
+        "https://cakesbymk.com/wprm_print/fudgy-brownies",
+        "https://www.surlatable.com/recipe/classic-fudgy-brownies/REC-167237"
+      ],
+      "ingredients": [
+        {
+          "key": "Chocolate, dark, 45- 59% cacao solids",
+          "g": 26
+        },
+        {
+          "key": "Cocoa, dry powder, unsweetened",
+          "g": 3
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 14
+        },
+        {
+          "key": "Oil, canola",
+          "g": 2
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 25
+        },
+        {
+          "key": "Sugars, brown",
+          "g": 4
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 15
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 10.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_bruschetta": {
+      "portion": {
+        "grams": 150,
+        "pieces": 2,
+        "what": "две брускетты с томатами"
+      },
+      "perPortion": {
+        "energyKcal": 271,
+        "proteinG": 7.4,
+        "fatG": 11.6,
+        "carbsG": 32.9,
+        "fibreG": 2.4
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/real-tomato-basil-bruschetta/",
+        "https://natashaskitchen.com/classic-bruschetta-recipe/"
+      ],
+      "ingredients": [
+        {
+          "key": "Bread, french or vienna (includes sourdough)",
+          "g": 60
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 80
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 10
+        },
+        {
+          "key": "Basil, fresh",
+          "g": 2
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Vinegar, balsamic",
+          "g": 2
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.7
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_buckwheat_merchant": {
+      "portion": {
+        "grams": 290,
+        "pieces": null,
+        "what": "тарелка гречки по-купечески с мясом"
+      },
+      "perPortion": {
+        "energyKcal": 546,
+        "proteinG": 25.8,
+        "fatG": 25.9,
+        "carbsG": 47.8,
+        "fibreG": 8.4
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=166337",
+        "https://1000.menu/cooking/19783-grechka-po-kupecheski-s-farshem"
+      ],
+      "ingredients": [
+        {
+          "key": "Buckwheat groats, roasted, dry",
+          "g": 65
+        },
+        {
+          "key": "Pork, fresh, shoulder, whole, separable lean and fat, raw",
+          "g": 100
+        },
+        {
+          "key": "Onions, raw",
+          "g": 30
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 30
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1.5
+        },
+        {
+          "key": "Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",
+          "g": 6
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 6
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_buckwheat_mushrooms": {
+      "portion": {
+        "grams": 240,
+        "pieces": null,
+        "what": "миска гречки с грибами и луком"
+      },
+      "perPortion": {
+        "energyKcal": 339,
+        "proteinG": 10.3,
+        "fatG": 12,
+        "carbsG": 45.1,
+        "fibreG": 8.3
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=161288",
+        "https://1000.menu/cooking/52925-griby-s-grechkoi-na-skovorode"
+      ],
+      "ingredients": [
+        {
+          "key": "Buckwheat groats, roasted, dry",
+          "g": 60
+        },
+        {
+          "key": "Mushrooms, white, raw",
+          "g": 85
+        },
+        {
+          "key": "Onions, raw",
+          "g": 35
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 20
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 10
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_buckwheat_porridge": {
       "portion": {
         "grams": 220,
@@ -411,6 +917,72 @@
         {
           "key": "Salt, table",
           "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_bulgur_vegetables": {
+      "portion": {
+        "grams": 210,
+        "pieces": null,
+        "what": "порция булгура с овощами (гарнир)"
+      },
+      "perPortion": {
+        "energyKcal": 263,
+        "proteinG": 6.3,
+        "fatG": 10.8,
+        "carbsG": 31.6,
+        "fibreG": 7.4
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=167830",
+        "https://1000.menu/cooking/60121-bulgur-po-turecki",
+        "https://www.russianfood.com/recipes/recipe.php?rid=147426"
+      ],
+      "ingredients": [
+        {
+          "key": "Bulgur, dry",
+          "g": 40
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 40
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 45
+        },
+        {
+          "key": "Onions, raw",
+          "g": 25
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 15
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 10
+        },
+        {
+          "key": "Parsley, fresh",
+          "g": 4
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.2
         }
       ],
       "cooking": {
@@ -485,6 +1057,75 @@
           "cut": "Beef, ground, 80% lean meat / 20% fat, raw",
           "row": "beef-ground-80-20-patty-broiled"
         }
+      }
+    },
+    "d_cabbage_pie": {
+      "portion": {
+        "grams": 130,
+        "pieces": 1,
+        "what": "кусок закрытого пирога с капустой (1/10)"
+      },
+      "perPortion": {
+        "energyKcal": 281,
+        "proteinG": 7.3,
+        "fatG": 10.6,
+        "carbsG": 36.2,
+        "fibreG": 3.5
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=164529",
+        "https://www.russianfood.com/recipes/recipe.php?rid=174242"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 38
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 24
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 8
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, active dry",
+          "g": 1
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 3
+        },
+        {
+          "key": "Butter, salted",
+          "g": 3.5
+        },
+        {
+          "key": "Oil, sunflower, linoleic (less than 60%)",
+          "g": 6
+        },
+        {
+          "key": "Cabbage, raw",
+          "g": 70
+        },
+        {
+          "key": "Onions, raw",
+          "g": 11
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 11
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
       }
     },
     "d_caesar_chicken": {
@@ -644,6 +1285,281 @@
         {
           "key": "Spices, pepper, black",
           "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_chakhokhbili": {
+      "portion": {
+        "grams": 260,
+        "pieces": null,
+        "what": "порция чахохбили из курицы"
+      },
+      "perPortion": {
+        "energyKcal": 403,
+        "proteinG": 27.8,
+        "fatG": 27.9,
+        "carbsG": 7.7,
+        "fibreG": 2.3
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/34324-klassicheskii-chaxoxbili-iz-kuricy-po-gruzinski",
+        "https://1000.menu/cooking/15352-chaxoxbili",
+        "https://1000.menu/cooking/1154-chahohbili-iz-kuritsj"
+      ],
+      "ingredients": [
+        {
+          "key": "Chicken, broilers or fryers, meat and skin, raw",
+          "g": 140
+        },
+        {
+          "key": "Onions, raw",
+          "g": 55
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 70
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 15
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 3
+        },
+        {
+          "key": "Butter, salted",
+          "g": 8
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 5
+        },
+        {
+          "key": "Basil, fresh",
+          "g": 1
+        },
+        {
+          "key": "Salt, table",
+          "g": 2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_chebureki": {
+      "portion": {
+        "grams": 185,
+        "pieces": 1,
+        "what": "1 чебурек с мясной начинкой"
+      },
+      "perPortion": {
+        "energyKcal": 515,
+        "proteinG": 16.9,
+        "fatG": 29.4,
+        "carbsG": 42.7,
+        "fibreG": 2
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/17389-chebureki-s-myasnym-farshem",
+        "https://1000.menu/cooking/15578-chebureki-s-puzyrkami-xrustyaschie-na-vodke",
+        "https://1000.menu/cooking/13542-chebureki-iz-zavarnogo-testa-s-dobavlenim-vodki"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 55
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 28
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 5
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 2
+        },
+        {
+          "key": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "g": 30
+        },
+        {
+          "key": "Pork, fresh, ground, raw",
+          "g": 30
+        },
+        {
+          "key": "Onions, raw",
+          "g": 27
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 20
+        },
+        {
+          "key": "Salt, table",
+          "g": 2
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "deep",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "fried_dough_doughnuts_pies_chebureki"
+        },
+        "roastedMeat": null
+      }
+    },
+    "d_cheese_plate": {
+      "portion": {
+        "grams": 80,
+        "pieces": null,
+        "what": "сырная тарелка на одного (сыры, орехи, мёд)"
+      },
+      "perPortion": {
+        "energyKcal": 320,
+        "proteinG": 15.4,
+        "fatG": 25.5,
+        "carbsG": 8.5,
+        "fibreG": 0.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.cheese.help/articles/cheese-per-person/",
+        "https://savannahbee.com/blogs/recipes/ultimate-cheese-and-honey-grazing-board"
+      ],
+      "ingredients": [
+        {
+          "key": "Cheese, cheddar (Includes foods for USDA's Food Distribution Program)",
+          "g": 20
+        },
+        {
+          "key": "Cheese, gouda",
+          "g": 15
+        },
+        {
+          "key": "Cheese, brie",
+          "g": 25
+        },
+        {
+          "key": "Nuts, walnuts, english",
+          "g": 12
+        },
+        {
+          "key": "Honey",
+          "g": 8
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_cheese_sandwich": {
+      "portion": {
+        "grams": 63,
+        "pieces": 1,
+        "what": "один бутерброд (ломтик хлеба, масло, сыр)"
+      },
+      "perPortion": {
+        "energyKcal": 222,
+        "proteinG": 8.2,
+        "fatG": 13.1,
+        "carbsG": 16.8,
+        "fibreG": 0.9
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=7905",
+        "https://1000.menu/cooking/29183-buterbrody-s-maslom-i-syrom"
+      ],
+      "ingredients": [
+        {
+          "key": "Bread, white, commercially prepared (includes soft bread crumbs)",
+          "g": 35
+        },
+        {
+          "key": "Butter, salted",
+          "g": 8
+        },
+        {
+          "key": "Cheese, gouda",
+          "g": 20
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_cheesecake": {
+      "portion": {
+        "grams": 150,
+        "pieces": 1,
+        "what": "кусок чизкейка (1/12 торта)"
+      },
+      "perPortion": {
+        "energyKcal": 541,
+        "proteinG": 8.1,
+        "fatG": 38.2,
+        "carbsG": 43,
+        "fibreG": 0.6
+      },
+      "method": "composed",
+      "sources": [
+        "https://gimmeyummy.com/wprm_print/crack-free-new-york-cheesecake-with-sour-cream",
+        "https://sweetlycakes.com/en/new-york-style-cheesecake-recipe/print/30183/"
+      ],
+      "ingredients": [
+        {
+          "key": "Cheese, cream",
+          "g": 65
+        },
+        {
+          "key": "Cookies, graham crackers, plain or honey (includes cinnamon)",
+          "g": 18
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 9.4
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 24
+        },
+        {
+          "key": "Cream, sour, cultured",
+          "g": 19
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 18
+        },
+        {
+          "key": "Cream, fluid, heavy whipping",
+          "g": 2.5
+        },
+        {
+          "key": "Cornstarch",
+          "g": 0.9
+        },
+        {
+          "key": "Lemon juice, raw",
+          "g": 2
         }
       ],
       "cooking": {
@@ -866,6 +1782,67 @@
           "oil": "Oil, sunflower, linoleic, (approx. 65%)",
           "category": "breaded_pieces_meat_poultry_fish"
         },
+        "roastedMeat": null
+      }
+    },
+    "d_chicken_mushroom_pasta": {
+      "portion": {
+        "grams": 360,
+        "pieces": null,
+        "what": "тарелка пасты с курицей и грибами в сливочном соусе"
+      },
+      "perPortion": {
+        "energyKcal": 600,
+        "proteinG": 35.1,
+        "fatG": 20.7,
+        "carbsG": 63.8,
+        "fibreG": 3.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=169472",
+        "https://1000.menu/cooking/34296-spagetti-s-kuricei-i-gribami-v-slivochnom-souse"
+      ],
+      "ingredients": [
+        {
+          "key": "Pasta, dry, enriched",
+          "g": 80
+        },
+        {
+          "key": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+          "g": 90
+        },
+        {
+          "key": "Mushrooms, white, raw",
+          "g": 70
+        },
+        {
+          "key": "Onions, raw",
+          "g": 25
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1.5
+        },
+        {
+          "key": "Cream, fluid, half and half",
+          "g": 60
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 10
+        },
+        {
+          "key": "Salt, table",
+          "g": 2
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
         "roastedMeat": null
       }
     },
@@ -1226,6 +2203,120 @@
         "roastedMeat": null
       }
     },
+    "d_chocolate_fondant": {
+      "portion": {
+        "grams": 95,
+        "pieces": 1,
+        "what": "1 фондан (одна формочка)"
+      },
+      "perPortion": {
+        "energyKcal": 427,
+        "proteinG": 6.6,
+        "fatG": 27,
+        "carbsG": 36.7,
+        "fibreG": 3.3
+      },
+      "method": "fetched",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=155432",
+        "https://1000.menu/cooking/11750-shokoladnyi-fondan-s-jidkoi-nachinkoi"
+      ],
+      "ingredients": [
+        {
+          "key": "Chocolate, dark, 60-69% cacao solids",
+          "g": 37.5
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 12.5
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 25
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 12.5
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 10
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_cinnamon_bun": {
+      "portion": {
+        "grams": 115,
+        "pieces": 1,
+        "what": "1 булочка с корицей и глазурью"
+      },
+      "perPortion": {
+        "energyKcal": 436,
+        "proteinG": 7.5,
+        "fatG": 14.3,
+        "carbsG": 67.9,
+        "fibreG": 2.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=150616",
+        "https://1000.menu/cooking/44649-bulochki-sinnabon-s-koricei"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 48
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 21
+        },
+        {
+          "key": "Butter, salted",
+          "g": 13
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 8
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 4
+        },
+        {
+          "key": "Sugars, brown",
+          "g": 15
+        },
+        {
+          "key": "Spices, cinnamon, ground",
+          "g": 1.2
+        },
+        {
+          "key": "Sugars, powdered",
+          "g": 12
+        },
+        {
+          "key": "Cheese, cream",
+          "g": 6
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, active dry",
+          "g": 0.8
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_coleslaw": {
       "portion": {
         "grams": 155,
@@ -1276,6 +2367,120 @@
         {
           "key": "Salt, table",
           "g": 0.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_cottage_cheese_casserole": {
+      "portion": {
+        "grams": 130,
+        "pieces": 1,
+        "what": "кусок запеканки"
+      },
+      "perPortion": {
+        "energyKcal": 296,
+        "proteinG": 18.9,
+        "fatG": 14.2,
+        "carbsG": 22.2,
+        "fibreG": 0.5
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/10591-nejnaya-tvorojnaya-zapekanka-s-mankoi",
+        "https://1000.menu/cooking/4584-tvorojnaya-zapekanka-kak-v-detskom-sadu"
+      ],
+      "ingredients": [
+        {
+          "key": "ru:tvorog-9",
+          "g": 85
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 25
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 12
+        },
+        {
+          "key": "Semolina, enriched",
+          "g": 12
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 5
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_couscous_vegetables": {
+      "portion": {
+        "grams": 190,
+        "pieces": null,
+        "what": "порция кус-куса с овощами (гарнир)"
+      },
+      "perPortion": {
+        "energyKcal": 244,
+        "proteinG": 6.5,
+        "fatG": 7.7,
+        "carbsG": 33.4,
+        "fibreG": 4.6
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=162533",
+        "https://1000.menu/cooking/25490-kuskus-s-ovoshchami"
+      ],
+      "ingredients": [
+        {
+          "key": "Couscous, dry",
+          "g": 37
+        },
+        {
+          "key": "Squash, summer, zucchini, includes skin, raw",
+          "g": 50
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 35
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 25
+        },
+        {
+          "key": "Onions, raw",
+          "g": 20
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 30
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 7
+        },
+        {
+          "key": "Parsley, fresh",
+          "g": 3
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.2
         }
       ],
       "cooking": {
@@ -1390,6 +2595,108 @@
         {
           "key": "ru:mayonnaise-67",
           "g": 12
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_creme_brulee": {
+      "portion": {
+        "grams": 150,
+        "pieces": 1,
+        "what": "одна формочка крем-брюле (150 мл)"
+      },
+      "perPortion": {
+        "energyKcal": 527,
+        "proteinG": 7,
+        "fatG": 47.5,
+        "carbsG": 19.7,
+        "fibreG": 0
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/creme-brulee/",
+        "https://www.bbcgoodfoodme.com/recipes/ultimate-creme-brulee/"
+      ],
+      "ingredients": [
+        {
+          "key": "Cream, fluid, heavy whipping",
+          "g": 115
+        },
+        {
+          "key": "Milk, whole, 3.25% milkfat, with added vitamin D",
+          "g": 12
+        },
+        {
+          "key": "Egg, yolk, raw, fresh",
+          "g": 21
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 15
+        },
+        {
+          "key": "Vanilla extract",
+          "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_croissant": {
+      "portion": {
+        "grams": 75,
+        "pieces": 1,
+        "what": "1 круассан"
+      },
+      "perPortion": {
+        "energyKcal": 341,
+        "proteinG": 5.2,
+        "fatG": 20.3,
+        "carbsG": 33.4,
+        "fibreG": 1.3
+      },
+      "method": "composed",
+      "sources": [
+        "https://lacuisinedebernard.com/pure-butter-croissants/",
+        "https://www.food.com/recipe/croissants-and-puff-pastry-500439"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 40
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 24
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 18
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 6
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 3.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.8
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, active dry",
+          "g": 0.8
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 3
         }
       ],
       "cooking": {
@@ -1515,6 +2822,193 @@
         "roastedMeat": null
       }
     },
+    "d_deviled_eggs": {
+      "portion": {
+        "grams": 135,
+        "pieces": 4,
+        "what": "4 половинки яиц (2 яйца) с начинкой"
+      },
+      "perPortion": {
+        "energyKcal": 343,
+        "proteinG": 12.9,
+        "fatG": 31,
+        "carbsG": 2.1,
+        "fibreG": 0.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=76149",
+        "https://1000.menu/cooking/6919-yaitsa-s-chesnokom"
+      ],
+      "ingredients": [
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 100
+        },
+        {
+          "key": "ru:mayonnaise-67",
+          "g": 32
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Dill weed, fresh",
+          "g": 1.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_dim_sum": {
+      "portion": {
+        "grams": 105,
+        "pieces": 4,
+        "what": "4 паровых димсама с креветками (ха-гао) в корзинке"
+      },
+      "perPortion": {
+        "energyKcal": 184,
+        "proteinG": 7.5,
+        "fatG": 5.6,
+        "carbsG": 24.5,
+        "fibreG": 0.4
+      },
+      "method": "composed",
+      "sources": [
+        "https://casuallypeckish.com/har-gow-crystal-prawn-dumplings/",
+        "https://www.surlatable.com/print/recipe/crystal-shrimp-dumplings-har-gow/REC-370276",
+        "https://mission-food.com/wprm_print/har-gow-crystal-shrimp-dumplings"
+      ],
+      "ingredients": [
+        {
+          "key": "Crustaceans, shrimp, mixed species, raw (may contain additives to retain moisture)",
+          "g": 52
+        },
+        {
+          "key": "Bamboo shoots, canned, drained solids",
+          "g": 8
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 2
+        },
+        {
+          "key": "Ginger root, raw",
+          "g": 1
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 2
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 1
+        },
+        {
+          "key": "Oil, sesame, salad or cooking",
+          "g": 1
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 4
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.6
+        },
+        {
+          "key": "Cornstarch",
+          "g": 25
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 24
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_dolma": {
+      "portion": {
+        "grams": 235,
+        "pieces": 5,
+        "what": "5 долма в виноградных листьях с соусом из мацони"
+      },
+      "perPortion": {
+        "energyKcal": 373,
+        "proteinG": 22.3,
+        "fatG": 18.8,
+        "carbsG": 24.2,
+        "fibreG": 4.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/50907-dolma-iz-farsha-s-myatoi-v-vinogradnyx-listyax-v-souse-maconi",
+        "https://1000.menu/cooking/15111-klassicheskaya-dolma-v-vinogradnyx-listyax-v-kastrule"
+      ],
+      "ingredients": [
+        {
+          "key": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "g": 50
+        },
+        {
+          "key": "Pork, fresh, ground, raw",
+          "g": 50
+        },
+        {
+          "key": "Rice, white, short-grain, enriched, uncooked",
+          "g": 22
+        },
+        {
+          "key": "Onions, raw",
+          "g": 25
+        },
+        {
+          "key": "Grape leaves, raw",
+          "g": 25
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 5
+        },
+        {
+          "key": "Spearmint, fresh",
+          "g": 2
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 2
+        },
+        {
+          "key": "Yogurt, plain, whole milk",
+          "g": 50
+        },
+        {
+          "key": "Salt, table",
+          "g": 2
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 40
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": {
+          "cut": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "row": "beef-chuck-arm-pot-roast-braised"
+        }
+      }
+    },
     "d_draniki": {
       "portion": {
         "grams": 175,
@@ -1604,6 +3098,120 @@
         {
           "key": "Spices, pepper, black",
           "g": 0.2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_eclairs": {
+      "portion": {
+        "grams": 90,
+        "pieces": 1,
+        "what": "1 эклер с заварным кремом и глазурью"
+      },
+      "perPortion": {
+        "energyKcal": 349,
+        "proteinG": 4.5,
+        "fatG": 25.1,
+        "carbsG": 26,
+        "fibreG": 1.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=165620",
+        "https://1000.menu/cooking/108428-ekler-klassicheskii-v-domashnix-usloviyax-s-zavarnym-kremom"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 10.6
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 12
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 23.8
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 18.2
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 11.3
+        },
+        {
+          "key": "Milk, whole, 3.25% milkfat, with added vitamin D",
+          "g": 11.7
+        },
+        {
+          "key": "Chocolate, dark, 45- 59% cacao solids",
+          "g": 11.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_egg_fried_rice": {
+      "portion": {
+        "grams": 270,
+        "pieces": null,
+        "what": "миска жареного риса с яйцом, горошком и морковью"
+      },
+      "perPortion": {
+        "energyKcal": 401,
+        "proteinG": 13.3,
+        "fatG": 14.8,
+        "carbsG": 49.1,
+        "fibreG": 3.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/egg-fried-rice/",
+        "https://bbcgoodfoodme.com/recipes/eggy-fried-rice"
+      ],
+      "ingredients": [
+        {
+          "key": "Rice, white, long-grain, regular, raw, enriched",
+          "g": 55
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 55
+        },
+        {
+          "key": "Peas, green, frozen, unprepared (Includes foods for USDA's Food Distribution Program)",
+          "g": 30
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 30
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 10
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 6
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 9
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.5
         }
       ],
       "cooking": {
@@ -1873,6 +3481,94 @@
         "roastedMeat": null
       }
     },
+    "d_focaccia": {
+      "portion": {
+        "grams": 90,
+        "pieces": 1,
+        "what": "квадратный кусок фокаччи (1/9 противня)"
+      },
+      "perPortion": {
+        "energyKcal": 295,
+        "proteinG": 6.1,
+        "fatG": 10.6,
+        "carbsG": 41.4,
+        "fibreG": 1.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.irishexaminer.com/recipes/recipe-13081.html",
+        "https://xml.silmaril.ie/recipes/focaccia.html",
+        "https://ediblesarasota.ediblecommunities.com/recipes/rosemary-focaccia-bread"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 56
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 38
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 10
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, active dry",
+          "g": 0.8
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Rosemary, fresh",
+          "g": 0.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_french_fries": {
+      "portion": {
+        "grams": 130,
+        "pieces": null,
+        "what": "порция картофеля фри"
+      },
+      "perPortion": {
+        "energyKcal": 243,
+        "proteinG": 4.1,
+        "fatG": 10.2,
+        "carbsG": 30.8,
+        "fibreG": 4.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/french-fries/",
+        "https://heartscontentfarmhouse.com/deep-fried-french-fries/",
+        "https://stacylynharris.com/how-to-make-french-fries-at-home/"
+      ],
+      "ingredients": [
+        {
+          "key": "Potatoes, flesh and skin, raw",
+          "g": 200
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "deep",
+          "oil": "Oil, canola",
+          "category": "potatoes_french_fries_deep"
+        },
+        "roastedMeat": null
+      }
+    },
     "d_french_style_meat": {
       "portion": {
         "grams": 280,
@@ -2125,6 +3821,55 @@
           "oil": "Oil, sunflower, linoleic, (approx. 65%)",
           "category": "potatoes_raw_pan_fried"
         },
+        "roastedMeat": null
+      }
+    },
+    "d_fruit_salad": {
+      "portion": {
+        "grams": 195,
+        "pieces": null,
+        "what": "миска фруктового салата"
+      },
+      "perPortion": {
+        "energyKcal": 130,
+        "proteinG": 1.6,
+        "fatG": 0.5,
+        "carbsG": 28.2,
+        "fibreG": 4.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/9867-fruktovji-salat",
+        "https://www.russianfood.com/recipes/recipe.php?rid=133446"
+      ],
+      "ingredients": [
+        {
+          "key": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",
+          "g": 55
+        },
+        {
+          "key": "Bananas, raw",
+          "g": 50
+        },
+        {
+          "key": "Oranges, raw, all commercial varieties",
+          "g": 55
+        },
+        {
+          "key": "Kiwifruit, green, raw",
+          "g": 30
+        },
+        {
+          "key": "Lemon juice, raw",
+          "g": 3
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 3
+        }
+      ],
+      "cooking": {
+        "frying": null,
         "roastedMeat": null
       }
     },
@@ -2583,6 +4328,189 @@
         "roastedMeat": null
       }
     },
+    "d_grilled_vegetables": {
+      "portion": {
+        "grams": 150,
+        "pieces": null,
+        "what": "порция овощей гриль (гарнир)"
+      },
+      "perPortion": {
+        "energyKcal": 109,
+        "proteinG": 1.8,
+        "fatG": 8.4,
+        "carbsG": 5.3,
+        "fibreG": 3.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://bcliving.ca/food/recipe-grilled-vegetables-with-herbs",
+        "https://thebuzzmagazines.com/recipes/grilled-vegetables"
+      ],
+      "ingredients": [
+        {
+          "key": "Squash, summer, zucchini, includes skin, raw",
+          "g": 50
+        },
+        {
+          "key": "Eggplant, raw",
+          "g": 40
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 50
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 30
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 8
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_guacamole": {
+      "portion": {
+        "grams": 160,
+        "pieces": null,
+        "what": "гуакамоле ~130 г с кукурузными чипсами"
+      },
+      "perPortion": {
+        "energyKcal": 303,
+        "proteinG": 4.3,
+        "fatG": 20.1,
+        "carbsG": 22.5,
+        "fibreG": 8.3
+      },
+      "method": "composed",
+      "sources": [
+        "https://downshiftology.com/recipes/best-ever-guacamole/",
+        "https://natashaskitchen.com/best-guacamole-recipe/"
+      ],
+      "ingredients": [
+        {
+          "key": "Avocados, raw, California",
+          "g": 90
+        },
+        {
+          "key": "Onions, raw",
+          "g": 9
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 20
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 1
+        },
+        {
+          "key": "Lime juice, raw",
+          "g": 7.5
+        },
+        {
+          "key": "Peppers, jalapeno, raw",
+          "g": 2
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 0.8
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.6
+        },
+        {
+          "key": "Snacks, tortilla chips, plain, white corn, salted",
+          "g": 30
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_gyoza": {
+      "portion": {
+        "grams": 125,
+        "pieces": 6,
+        "what": "6 штук гёдза (обжарены, затем пропарены)"
+      },
+      "perPortion": {
+        "energyKcal": 238,
+        "proteinG": 10.1,
+        "fatG": 9.5,
+        "carbsG": 25.7,
+        "fibreG": 1.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.justonecookbook.com/gyoza/",
+        "https://www.recipetineats.com/gyoza-japanese-dumplings/"
+      ],
+      "ingredients": [
+        {
+          "key": "Pork, fresh, ground, raw",
+          "g": 36
+        },
+        {
+          "key": "Cabbage, raw",
+          "g": 30
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 6
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Ginger root, raw",
+          "g": 1.5
+        },
+        {
+          "key": "Oil, sesame, salad or cooking",
+          "g": 1.5
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 3
+        },
+        {
+          "key": "Cornstarch",
+          "g": 1.5
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 30
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 12
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "whole_meat_poultry_fish_unbreaded"
+        },
+        "roastedMeat": null
+      }
+    },
     "d_herring_potatoes": {
       "portion": {
         "grams": 290,
@@ -2687,6 +4615,284 @@
         "roastedMeat": null
       }
     },
+    "d_hot_dog": {
+      "portion": {
+        "grams": 115,
+        "pieces": 1,
+        "what": "один хот-дог в булочке"
+      },
+      "perPortion": {
+        "energyKcal": 320,
+        "proteinG": 10.6,
+        "fatG": 18.4,
+        "carbsG": 26.6,
+        "fibreG": 1
+      },
+      "method": "composed",
+      "sources": [
+        "https://myvietkitchen.com/hot-dog/",
+        "https://myreliablerecipes.com/grilled-hot-dogs/",
+        "https://1000.menu/cooking/53551-xot-dog-v-domashnix-usloviyax-v-bulochke-s-sosiskoi"
+      ],
+      "ingredients": [
+        {
+          "key": "Frankfurter, beef, unheated",
+          "g": 50
+        },
+        {
+          "key": "Rolls, hamburger or hotdog, plain",
+          "g": 45
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 3
+        },
+        {
+          "key": "Catsup",
+          "g": 12
+        },
+        {
+          "key": "Mustard, prepared, yellow",
+          "g": 5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_hummus_pita": {
+      "portion": {
+        "grams": 165,
+        "pieces": null,
+        "what": "тарелка хумуса с оливковым маслом и питой"
+      },
+      "perPortion": {
+        "energyKcal": 435,
+        "proteinG": 11.9,
+        "fatG": 22.3,
+        "carbsG": 43.1,
+        "fibreG": 6
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/hummus/",
+        "https://www.inspiredtaste.net/15938/easy-and-smooth-hummus-recipe/"
+      ],
+      "ingredients": [
+        {
+          "key": "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
+          "g": 47
+        },
+        {
+          "key": "Seeds, sesame butter, tahini, from roasted and toasted kernels (most common type)",
+          "g": 17
+        },
+        {
+          "key": "Lemon juice, raw",
+          "g": 12
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 12
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 11
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1.5
+        },
+        {
+          "key": "Spices, cumin seed",
+          "g": 0.3
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.5
+        },
+        {
+          "key": "Bread, pita, white, enriched",
+          "g": 60
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_ice_cream": {
+      "portion": {
+        "grams": 100,
+        "pieces": null,
+        "what": "3 шарика пломбира в креманке"
+      },
+      "perPortion": {
+        "energyKcal": 282,
+        "proteinG": 3.5,
+        "fatG": 22,
+        "carbsG": 18.9,
+        "fibreG": 0
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=131032",
+        "https://www.russianfood.com/recipes/recipe.php?rid=146839"
+      ],
+      "ingredients": [
+        {
+          "key": "Cream, fluid, heavy whipping",
+          "g": 53
+        },
+        {
+          "key": "Milk, whole, 3.25% milkfat, with added vitamin D",
+          "g": 23
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 16
+        },
+        {
+          "key": "Egg, yolk, raw, fresh",
+          "g": 8
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_kartoshka_cake": {
+      "portion": {
+        "grams": 57,
+        "pieces": 1,
+        "what": "одно пирожное «Картошка»"
+      },
+      "perPortion": {
+        "energyKcal": 229,
+        "proteinG": 3.9,
+        "fatG": 12.6,
+        "carbsG": 26,
+        "fibreG": 1.7
+      },
+      "method": "fetched",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=118042",
+        "https://www.russianfood.com/recipes/recipe.php?rid=142748"
+      ],
+      "ingredients": [
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 15
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 9
+        },
+        {
+          "key": "Cornstarch",
+          "g": 1.5
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 7.5
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 12.5
+        },
+        {
+          "key": "Sugars, powdered",
+          "g": 6.5
+        },
+        {
+          "key": "Milk, canned, condensed, sweetened",
+          "g": 5
+        },
+        {
+          "key": "Cocoa, dry powder, unsweetened",
+          "g": 4
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_khachapuri": {
+      "portion": {
+        "grams": 310,
+        "pieces": 1,
+        "what": "1 хачапури-лодочка по-аджарски"
+      },
+      "perPortion": {
+        "energyKcal": 942,
+        "proteinG": 35.4,
+        "fatG": 49.3,
+        "carbsG": 84.6,
+        "fibreG": 2.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/1007-xachapuri-lodochka-po-adjarski-s-yaicom",
+        "https://1000.menu/cooking/19853-xachapuri-po-adjarski"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 105
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 40
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 45
+        },
+        {
+          "key": "Butter, salted",
+          "g": 4
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 8
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 1.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        },
+        {
+          "key": "Cheese, mozzarella, whole milk",
+          "g": 50
+        },
+        {
+          "key": "Cheese, feta",
+          "g": 35
+        },
+        {
+          "key": "Cream, fluid, light (coffee cream or table cream)",
+          "g": 25
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 50
+        },
+        {
+          "key": "Butter, salted",
+          "g": 10
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_kharcho": {
       "portion": {
         "grams": 300,
@@ -2764,6 +4970,71 @@
         "roastedMeat": null
       }
     },
+    "d_khinkali": {
+      "portion": {
+        "grams": 350,
+        "pieces": 3,
+        "what": "3 варёных хинкали (≈115 г каждое)"
+      },
+      "perPortion": {
+        "energyKcal": 574,
+        "proteinG": 25.1,
+        "fatG": 19.5,
+        "carbsG": 68.6,
+        "fibreG": 3.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/15509-xinkali",
+        "https://1000.menu/cooking/62465-xinkali-so-smeshannym-farshem-i-speciyami-po-gruzinski"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 90
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 50
+        },
+        {
+          "key": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "g": 45
+        },
+        {
+          "key": "Pork, fresh, ground, raw",
+          "g": 45
+        },
+        {
+          "key": "Onions, raw",
+          "g": 24
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 55
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 5
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_kholodets": {
       "portion": {
         "grams": 200,
@@ -2802,6 +5073,75 @@
         {
           "key": "Beverages, water, tap, drinking",
           "g": 120
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_kimchi_jjigae": {
+      "portion": {
+        "grams": 350,
+        "pieces": null,
+        "what": "миска кимчи-чиге"
+      },
+      "perPortion": {
+        "energyKcal": 520,
+        "proteinG": 20,
+        "fatG": 46.1,
+        "carbsG": 5.9,
+        "fibreG": 5
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.bbcgoodfoodme.com/recipes/kimchi-jjigae/",
+        "https://www.saveur.com/kimchi-stew-with-pork-belly-tofu-recipe"
+      ],
+      "ingredients": [
+        {
+          "key": "Cabbage, kimchi",
+          "g": 130
+        },
+        {
+          "key": "Pork, fresh, belly, raw",
+          "g": 60
+        },
+        {
+          "key": "Tofu, raw, firm, prepared with calcium sulfate",
+          "g": 70
+        },
+        {
+          "key": "Onions, raw",
+          "g": 15
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 8
+        },
+        {
+          "key": "Spices, pepper, red or cayenne",
+          "g": 3
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 2
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 6
+        },
+        {
+          "key": "Oil, sesame, salad or cooking",
+          "g": 1
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 3
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 190
         }
       ],
       "cooking": {
@@ -2926,6 +5266,325 @@
         }
       }
     },
+    "d_kulebyaka": {
+      "portion": {
+        "grams": 160,
+        "pieces": 1,
+        "what": "кусок кулебяки (1/8 пирога)"
+      },
+      "perPortion": {
+        "energyKcal": 477,
+        "proteinG": 20,
+        "fatG": 19.9,
+        "carbsG": 51.1,
+        "fibreG": 2
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=169660",
+        "https://www.russianfood.com/recipes/recipe.php?rid=48137"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 50
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 30
+        },
+        {
+          "key": "Butter, salted",
+          "g": 10
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 26
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 3
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, active dry",
+          "g": 1
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        },
+        {
+          "key": "Fish, salmon, Atlantic, farmed, raw",
+          "g": 45
+        },
+        {
+          "key": "Rice, white, long-grain, regular, raw, enriched",
+          "g": 11
+        },
+        {
+          "key": "Onions, raw",
+          "g": 12
+        },
+        {
+          "key": "Oil, sunflower, linoleic (less than 60%)",
+          "g": 2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_kung_pao_chicken": {
+      "portion": {
+        "grams": 190,
+        "pieces": null,
+        "what": "порция курицы гунбао (без риса)"
+      },
+      "perPortion": {
+        "energyKcal": 376,
+        "proteinG": 31.5,
+        "fatG": 17,
+        "carbsG": 22.7,
+        "fibreG": 2.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/kung-pao-chicken/",
+        "https://www.nur.kz/food/recipes/2041321-kurica-gunbao-poshagovyj-recept-prigotovleniya/"
+      ],
+      "ingredients": [
+        {
+          "key": "Chicken, broilers or fryers, dark meat, thigh, meat only, raw",
+          "g": 125
+        },
+        {
+          "key": "Peanuts, all types, dry-roasted, without salt",
+          "g": 20
+        },
+        {
+          "key": "Cornstarch",
+          "g": 6
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 15
+        },
+        {
+          "key": "Vinegar, balsamic",
+          "g": 8
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 10
+        },
+        {
+          "key": "Oil, sesame, salad or cooking",
+          "g": 1.5
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 4
+        },
+        {
+          "key": "Ginger root, raw",
+          "g": 2
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 15
+        },
+        {
+          "key": "Spices, pepper, red or cayenne",
+          "g": 1.5
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 20
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.5
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, peanut, salad or cooking",
+          "category": "whole_meat_poultry_fish_unbreaded"
+        },
+        "roastedMeat": null
+      }
+    },
+    "d_lagman": {
+      "portion": {
+        "grams": 450,
+        "pieces": null,
+        "what": "глубокая тарелка густого лагмана с лапшой"
+      },
+      "perPortion": {
+        "energyKcal": 500,
+        "proteinG": 23,
+        "fatG": 18.1,
+        "carbsG": 55.5,
+        "fibreG": 6
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/14198-lagman-iz-govyadiny-v-multivarke",
+        "https://1000.menu/cooking/27272-lagman-govyajii"
+      ],
+      "ingredients": [
+        {
+          "key": "Beef, chuck, blade roast, separable lean and fat, trimmed to 1/8\" fat, choice, raw",
+          "g": 75
+        },
+        {
+          "key": "Pasta, dry, enriched",
+          "g": 60
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 25
+        },
+        {
+          "key": "Onions, raw",
+          "g": 25
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 25
+        },
+        {
+          "key": "Eggplant, raw",
+          "g": 30
+        },
+        {
+          "key": "Potatoes, flesh and skin, raw",
+          "g": 20
+        },
+        {
+          "key": "Radishes, oriental, raw",
+          "g": 10
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 40
+        },
+        {
+          "key": "Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",
+          "g": 6
+        },
+        {
+          "key": "Celery, raw",
+          "g": 8
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 3
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 7
+        },
+        {
+          "key": "Salt, table",
+          "g": 3.5
+        },
+        {
+          "key": "Spices, cumin seed",
+          "g": 0.3
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 160
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": {
+          "cut": "Beef, chuck, blade roast, separable lean and fat, trimmed to 1/8\" fat, choice, raw",
+          "row": "beef-chuck-arm-pot-roast-braised"
+        }
+      }
+    },
+    "d_lasagna": {
+      "portion": {
+        "grams": 360,
+        "pieces": 1,
+        "what": "порция (кусок) лазаньи"
+      },
+      "perPortion": {
+        "energyKcal": 694,
+        "proteinG": 33.6,
+        "fatG": 36.9,
+        "carbsG": 52.2,
+        "fibreG": 4.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=134858",
+        "https://1000.menu/cooking/30072-lazanya-boloneze"
+      ],
+      "ingredients": [
+        {
+          "key": "Pasta, dry, enriched",
+          "g": 45
+        },
+        {
+          "key": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "g": 80
+        },
+        {
+          "key": "Onions, raw",
+          "g": 25
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 20
+        },
+        {
+          "key": "Tomatoes, red, ripe, canned, packed in tomato juice",
+          "g": 50
+        },
+        {
+          "key": "Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",
+          "g": 10
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 15
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 10
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 130
+        },
+        {
+          "key": "Cheese, parmesan, hard",
+          "g": 20
+        },
+        {
+          "key": "Salt, table",
+          "g": 2
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.4
+        },
+        {
+          "key": "Spices, nutmeg, ground",
+          "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_lentil_soup": {
       "portion": {
         "grams": 310,
@@ -3045,6 +5704,234 @@
         "roastedMeat": null
       }
     },
+    "d_lobio": {
+      "portion": {
+        "grams": 290,
+        "pieces": null,
+        "what": "порция лобио из красной фасоли с орехами"
+      },
+      "perPortion": {
+        "energyKcal": 508,
+        "proteinG": 23.8,
+        "fatG": 18.7,
+        "carbsG": 49.4,
+        "fibreG": 16.6
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/672-lobio-iz-krasnoi-fasoli",
+        "https://1000.menu/cooking/8765-krasnoje-lobio"
+      ],
+      "ingredients": [
+        {
+          "key": "Beans, kidney, red, mature seeds, raw",
+          "g": 90
+        },
+        {
+          "key": "Onions, raw",
+          "g": 45
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 20
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 30
+        },
+        {
+          "key": "Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",
+          "g": 7
+        },
+        {
+          "key": "Nuts, walnuts, english",
+          "g": 13
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 3
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 9
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 4
+        },
+        {
+          "key": "Salt, table",
+          "g": 2
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 20
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_lula_kebab": {
+      "portion": {
+        "grams": 140,
+        "pieces": 2,
+        "what": "2 шампура люля-кебаба"
+      },
+      "perPortion": {
+        "energyKcal": 412,
+        "proteinG": 23.8,
+        "fatG": 33,
+        "carbsG": 2.7,
+        "fibreG": 0.9
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=23476",
+        "https://1000.menu/cooking/4295-baranii-lulya-kebab-na-mangale-s-lukom"
+      ],
+      "ingredients": [
+        {
+          "key": "Lamb, ground, raw",
+          "g": 140
+        },
+        {
+          "key": "Onions, raw",
+          "g": 30
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 3
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.3
+        },
+        {
+          "key": "Spices, cumin seed",
+          "g": 0.5
+        },
+        {
+          "key": "Spices, coriander seed",
+          "g": 0.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_mac_and_cheese": {
+      "portion": {
+        "grams": 340,
+        "pieces": null,
+        "what": "порция запечённых макарон с сыром"
+      },
+      "perPortion": {
+        "energyKcal": 735,
+        "proteinG": 29.2,
+        "fatG": 36.3,
+        "carbsG": 69.6,
+        "fibreG": 2.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/baked-mac-and-cheese/",
+        "https://vikalinka.com/wprm_print/baked-macaroni-and-cheese-with-breadcrumb-topping"
+      ],
+      "ingredients": [
+        {
+          "key": "Pasta, dry, enriched",
+          "g": 70
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 130
+        },
+        {
+          "key": "Cheese, cheddar (Includes foods for USDA's Food Distribution Program)",
+          "g": 60
+        },
+        {
+          "key": "Butter, salted",
+          "g": 15
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 8
+        },
+        {
+          "key": "Bread, crumbs, dry, grated, plain",
+          "g": 8
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_manty": {
+      "portion": {
+        "grams": 260,
+        "pieces": 5,
+        "what": "5 манты на пару (≈52 г каждый)"
+      },
+      "perPortion": {
+        "energyKcal": 583,
+        "proteinG": 24.5,
+        "fatG": 29.5,
+        "carbsG": 49.7,
+        "fibreG": 2.9
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/1604-manty-na-paru-iz-govyadiny",
+        "https://1000.menu/cooking/1811-mantj-po-kirgizski"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 60
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 28
+        },
+        {
+          "key": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "g": 100
+        },
+        {
+          "key": "Pork, fresh, backfat, raw",
+          "g": 10
+        },
+        {
+          "key": "Onions, raw",
+          "g": 70
+        },
+        {
+          "key": "Salt, table",
+          "g": 2.5
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_marinated_fish": {
       "portion": {
         "grams": 280,
@@ -3152,6 +6039,140 @@
         {
           "key": "Salt, table",
           "g": 1.3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_meat_pirozhki": {
+      "portion": {
+        "grams": 210,
+        "pieces": 2,
+        "what": "2 жареных пирожка с мясом"
+      },
+      "perPortion": {
+        "energyKcal": 700,
+        "proteinG": 21.1,
+        "fatG": 38,
+        "carbsG": 64.5,
+        "fibreG": 2.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=149854",
+        "https://1000.menu/cooking/39663-pirojki-s-myasom-jarenye-na-skovorode"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 81
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 37
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 25
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, active dry",
+          "g": 1
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 2
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Oil, sunflower, linoleic (less than 60%)",
+          "g": 5
+        },
+        {
+          "key": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "g": 33
+        },
+        {
+          "key": "Pork, fresh, ground, raw",
+          "g": 33
+        },
+        {
+          "key": "Onions, raw",
+          "g": 20
+        },
+        {
+          "key": "Butter, salted",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "deep",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "fried_dough_doughnuts_pies_chebureki"
+        },
+        "roastedMeat": null
+      }
+    },
+    "d_medovik": {
+      "portion": {
+        "grams": 155,
+        "pieces": 1,
+        "what": "кусок торта (1/10-1/12 торта)"
+      },
+      "perPortion": {
+        "energyKcal": 559,
+        "proteinG": 6.8,
+        "fatG": 27.2,
+        "carbsG": 72.6,
+        "fibreG": 1.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/16894-medovyi-tort-so-smetannym-kremom-klassicheskii",
+        "https://www.russianfood.com/recipes/recipe.php?rid=143086"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 40
+        },
+        {
+          "key": "Cream, sour, cultured",
+          "g": 50
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 28
+        },
+        {
+          "key": "Sugars, powdered",
+          "g": 7
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 20
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 10
+        },
+        {
+          "key": "Honey",
+          "g": 7
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 1
+        },
+        {
+          "key": "Leavening agents, baking soda",
+          "g": 0.5
         }
       ],
       "cooking": {
@@ -3330,6 +6351,120 @@
         "roastedMeat": null
       }
     },
+    "d_miso_soup": {
+      "portion": {
+        "grams": 250,
+        "pieces": null,
+        "what": "чашка мисо-супа"
+      },
+      "perPortion": {
+        "energyKcal": 77,
+        "proteinG": 6.6,
+        "fatG": 3.5,
+        "carbsG": 5,
+        "fibreG": 1.3
+      },
+      "method": "fetched",
+      "sources": [
+        "https://www.justonecookbook.com/wprm_print/homemade-miso-soup-with-tofu",
+        "https://pickledplum.com/miso-soup-tofu-wakame/print/73897/"
+      ],
+      "ingredients": [
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 175
+        },
+        {
+          "key": "Miso",
+          "g": 18
+        },
+        {
+          "key": "Tofu, raw, regular, prepared with calcium sulfate",
+          "g": 50
+        },
+        {
+          "key": "Seaweed, wakame, raw",
+          "g": 5
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_mushroom_risotto": {
+      "portion": {
+        "grams": 320,
+        "pieces": null,
+        "what": "тарелка ризотто с грибами"
+      },
+      "perPortion": {
+        "energyKcal": 514,
+        "proteinG": 13.8,
+        "fatG": 19.3,
+        "carbsG": 63.4,
+        "fibreG": 3.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/15344-rizotto-s-belymi-gribami-so-slivkami",
+        "https://www.russianfood.com/recipes/recipe.php?rid=158998"
+      ],
+      "ingredients": [
+        {
+          "key": "Rice, white, short-grain, enriched, uncooked",
+          "g": 75
+        },
+        {
+          "key": "Mushrooms, white, raw",
+          "g": 62
+        },
+        {
+          "key": "Onions, raw",
+          "g": 25
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1.5
+        },
+        {
+          "key": "Alcoholic beverage, wine, table, white",
+          "g": 25
+        },
+        {
+          "key": "Soup, chicken broth, ready-to-serve",
+          "g": 180
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 6
+        },
+        {
+          "key": "Butter, salted",
+          "g": 8
+        },
+        {
+          "key": "Cream, fluid, light (coffee cream or table cream)",
+          "g": 12
+        },
+        {
+          "key": "Cheese, parmesan, hard",
+          "g": 14
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.8
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_mushroom_soup": {
       "portion": {
         "grams": 300,
@@ -3499,6 +6634,100 @@
         {
           "key": "Salt, table",
           "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_nachos": {
+      "portion": {
+        "grams": 100,
+        "pieces": null,
+        "what": "порция начос с расплавленным сыром"
+      },
+      "perPortion": {
+        "energyKcal": 426,
+        "proteinG": 12.3,
+        "fatG": 24.1,
+        "carbsG": 38.8,
+        "fibreG": 3.4
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.saltandlavender.com/loaded-sheet-pan-nachos/",
+        "https://www.thecandidcooks.com/loaded-sheet-pan-nachos/"
+      ],
+      "ingredients": [
+        {
+          "key": "Snacks, tortilla chips, plain, white corn, salted",
+          "g": 60
+        },
+        {
+          "key": "Cheese, cheddar (Includes foods for USDA's Food Distribution Program)",
+          "g": 35
+        },
+        {
+          "key": "Peppers, jalapeno, raw",
+          "g": 5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_napoleon": {
+      "portion": {
+        "grams": 120,
+        "pieces": 1,
+        "what": "кусок торта (1/16 торта)"
+      },
+      "perPortion": {
+        "energyKcal": 417,
+        "proteinG": 6.6,
+        "fatG": 25.9,
+        "carbsG": 39.3,
+        "fibreG": 0.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=145198",
+        "https://www.russianfood.com/recipes/recipe.php?rid=153867"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 30.5
+        },
+        {
+          "key": "Cornstarch",
+          "g": 2
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 28
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 13
+        },
+        {
+          "key": "Milk, whole, 3.25% milkfat, with added vitamin D",
+          "g": 51
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 12.5
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 7
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.3
         }
       ],
       "cooking": {
@@ -3891,6 +7120,79 @@
         "roastedMeat": null
       }
     },
+    "d_pad_thai": {
+      "portion": {
+        "grams": 330,
+        "pieces": null,
+        "what": "тарелка пад тай с курицей"
+      },
+      "perPortion": {
+        "energyKcal": 684,
+        "proteinG": 30.3,
+        "fatG": 21.3,
+        "carbsG": 88.3,
+        "fibreG": 4.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://tasty.co/recipe/classic-pad-thai",
+        "https://www.corriecooks.com/wprm_print/114019"
+      ],
+      "ingredients": [
+        {
+          "key": "Rice noodles, dry",
+          "g": 80
+        },
+        {
+          "key": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+          "g": 70
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 25
+        },
+        {
+          "key": "Mung beans, mature seeds, sprouted, raw",
+          "g": 40
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 10
+        },
+        {
+          "key": "Shallots, raw",
+          "g": 10
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 3
+        },
+        {
+          "key": "Tamarinds, raw",
+          "g": 15
+        },
+        {
+          "key": "Sugars, brown",
+          "g": 10
+        },
+        {
+          "key": "Sauce, fish, ready-to-serve",
+          "g": 14
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 9
+        },
+        {
+          "key": "Peanuts, all types, dry-roasted, without salt",
+          "g": 15
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_pancakes": {
       "portion": {
         "grams": 175,
@@ -3946,6 +7248,224 @@
           "oil": "Oil, sunflower, linoleic, (approx. 65%)",
           "category": "pancakes_blini_crepes"
         },
+        "roastedMeat": null
+      }
+    },
+    "d_panna_cotta": {
+      "portion": {
+        "grams": 140,
+        "pieces": 1,
+        "what": "1 порция панна-котты в формочке"
+      },
+      "perPortion": {
+        "energyKcal": 379,
+        "proteinG": 5.8,
+        "fatG": 31.9,
+        "carbsG": 19.2,
+        "fibreG": 0
+      },
+      "method": "composed",
+      "sources": [
+        "https://cakesbymk.com/wprm_print/creamy-panna-cotta-recipe",
+        "https://www.russianfood.com/recipes/recipe.php?rid=144687",
+        "https://1000.menu/cooking/34608-klassicheskaya-panna-kotta"
+      ],
+      "ingredients": [
+        {
+          "key": "Cream, fluid, heavy whipping",
+          "g": 85
+        },
+        {
+          "key": "Milk, whole, 3.25% milkfat, with added vitamin D",
+          "g": 38
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 15
+        },
+        {
+          "key": "Gelatins, dry powder, unsweetened",
+          "g": 2.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_pavlova": {
+      "portion": {
+        "grams": 105,
+        "pieces": 1,
+        "what": "кусок павловы (1/10 торта) с кремом и ягодами"
+      },
+      "perPortion": {
+        "energyKcal": 245,
+        "proteinG": 2.8,
+        "fatG": 13.1,
+        "carbsG": 29.7,
+        "fibreG": 0.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/pavlova-recipe/",
+        "https://egginfo.co.uk/recipes/berries-cream-pavlova"
+      ],
+      "ingredients": [
+        {
+          "key": "Egg, white, raw, fresh",
+          "g": 14
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 25
+        },
+        {
+          "key": "Cornstarch",
+          "g": 1
+        },
+        {
+          "key": "Vinegar, distilled",
+          "g": 0.5
+        },
+        {
+          "key": "Cream, fluid, heavy whipping",
+          "g": 36
+        },
+        {
+          "key": "Vanilla extract",
+          "g": 0.5
+        },
+        {
+          "key": "Strawberries, raw",
+          "g": 20
+        },
+        {
+          "key": "Blueberries, raw",
+          "g": 12
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_pea_soup": {
+      "portion": {
+        "grams": 300,
+        "pieces": null,
+        "what": "тарелка горохового супа"
+      },
+      "perPortion": {
+        "energyKcal": 160,
+        "proteinG": 8.3,
+        "fatG": 6,
+        "carbsG": 12.8,
+        "fibreG": 6
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/276-sup-gorohovji-s-kopchenostyami",
+        "https://1000.menu/cooking/2384-sup-gorohovji-s-kopchenjmi-rebrjshkami"
+      ],
+      "ingredients": [
+        {
+          "key": "Peas, green, split, mature seeds, raw",
+          "g": 24
+        },
+        {
+          "key": "Pork, fresh, spareribs, separable lean and fat, raw",
+          "g": 15
+        },
+        {
+          "key": "Potatoes, flesh and skin, raw",
+          "g": 13
+        },
+        {
+          "key": "Onions, raw",
+          "g": 10
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 8.5
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 1.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 266.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_peking_duck": {
+      "portion": {
+        "grams": 180,
+        "pieces": null,
+        "what": "порция утки по-пекински: ломтики с кожей, 3 блинчика, огурец, лук, соус"
+      },
+      "perPortion": {
+        "energyKcal": 729,
+        "proteinG": 20.5,
+        "fatG": 56,
+        "carbsG": 33,
+        "fibreG": 1.6
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/87308-utka-po-pekinski",
+        "https://1000.menu/cooking/4836-pekinskaya-utka",
+        "https://www.jamieoliver.com/recipes/duck/crispy-peking-duck-in-pancakes"
+      ],
+      "ingredients": [
+        {
+          "key": "Duck, domesticated, meat and skin, raw",
+          "g": 140
+        },
+        {
+          "key": "Honey",
+          "g": 4
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 6
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 30
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 20
+        },
+        {
+          "key": "Sauce, hoisin, ready-to-serve",
+          "g": 15
+        },
+        {
+          "key": "Cucumber, with peel, raw",
+          "g": 25
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 8
+        }
+      ],
+      "cooking": {
+        "frying": null,
         "roastedMeat": null
       }
     },
@@ -4065,6 +7585,358 @@
         {
           "key": "Spices, pepper, black",
           "g": 0.2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_pho_bo": {
+      "portion": {
+        "grams": 550,
+        "pieces": null,
+        "what": "большая миска фо бо"
+      },
+      "perPortion": {
+        "energyKcal": 373,
+        "proteinG": 25.5,
+        "fatG": 7.7,
+        "carbsG": 46,
+        "fibreG": 1.9
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.eatright.org/recipes/soups-and-stews/easy-beef-pho-recipe",
+        "https://tasty.lu/shop/en/wprm_print/pho-bo-vietnamese-beef-noodle-soup"
+      ],
+      "ingredients": [
+        {
+          "key": "Soup, beef broth or bouillon canned, ready-to-serve",
+          "g": 300
+        },
+        {
+          "key": "Rice noodles, dry",
+          "g": 55
+        },
+        {
+          "key": "Beef, round, eye of round, roast, separable lean and fat, trimmed to 1/8\" fat, all grades, raw",
+          "g": 80
+        },
+        {
+          "key": "Mung beans, mature seeds, sprouted, raw",
+          "g": 20
+        },
+        {
+          "key": "Onions, raw",
+          "g": 15
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 8
+        },
+        {
+          "key": "Basil, fresh",
+          "g": 4
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 4
+        },
+        {
+          "key": "Sauce, fish, ready-to-serve",
+          "g": 4
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_pizza_margherita": {
+      "portion": {
+        "grams": 360,
+        "pieces": 1,
+        "what": "одна пицца 28-30 см на одного"
+      },
+      "perPortion": {
+        "energyKcal": 784,
+        "proteinG": 29.6,
+        "fatG": 20,
+        "carbsG": 113.2,
+        "fibreG": 5.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.pbs.org/food/recipes/margherita-pizza/",
+        "https://www.lovefood.com/recipes/59848/authentic-margherita-pizza-recipe"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 150
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 100
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, compressed",
+          "g": 1
+        },
+        {
+          "key": "Salt, table",
+          "g": 3.5
+        },
+        {
+          "key": "Tomatoes, red, ripe, canned, packed in tomato juice",
+          "g": 80
+        },
+        {
+          "key": "Cheese, mozzarella, whole milk",
+          "g": 60
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 5
+        },
+        {
+          "key": "Basil, fresh",
+          "g": 3
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_pizza_pepperoni": {
+      "portion": {
+        "grams": 390,
+        "pieces": 1,
+        "what": "одна пицца 28-30 см на одного"
+      },
+      "perPortion": {
+        "energyKcal": 1014,
+        "proteinG": 40.8,
+        "fatG": 37.4,
+        "carbsG": 119.5,
+        "fibreG": 5.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://vice.com/en/article/sheet-pan-pepperoni-pizza-recipe",
+        "https://www.notquitenigella.com/2007/11/30/home-made-pepperoni-pizza-thin-crust/print/",
+        "https://www.pbs.org/food/recipes/margherita-pizza/"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 150
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 100
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, active dry",
+          "g": 1
+        },
+        {
+          "key": "Salt, table",
+          "g": 3
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 5
+        },
+        {
+          "key": "Sauce, pizza, canned, ready-to-serve",
+          "g": 70
+        },
+        {
+          "key": "Cheese, mozzarella, low moisture, part-skim",
+          "g": 70
+        },
+        {
+          "key": "Pepperoni, beef and pork, sliced",
+          "g": 35
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_plov": {
+      "portion": {
+        "grams": 340,
+        "pieces": null,
+        "what": "тарелка плова с бараниной"
+      },
+      "perPortion": {
+        "energyKcal": 724,
+        "proteinG": 22.2,
+        "fatG": 36.3,
+        "carbsG": 72.2,
+        "fibreG": 3.6
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/37525-ferganskii-plov-iz-uzbekistana",
+        "https://1000.menu/cooking/43032-plov-samarkandskii",
+        "https://1000.menu/cooking/5692-plov-s-vostochnogo-uzbekistana"
+      ],
+      "ingredients": [
+        {
+          "key": "Rice, white, long-grain, regular, raw, enriched",
+          "g": 80
+        },
+        {
+          "key": "Lamb, shoulder, whole (arm and blade), separable lean and fat, trimmed to 1/4\" fat, choice, raw",
+          "g": 90
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 60
+        },
+        {
+          "key": "Onions, raw",
+          "g": 40
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 16
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 6
+        },
+        {
+          "key": "Spices, cumin seed",
+          "g": 1
+        },
+        {
+          "key": "Salt, table",
+          "g": 3
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 150
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_poke": {
+      "portion": {
+        "grams": 400,
+        "pieces": null,
+        "what": "боул поке с лососем"
+      },
+      "perPortion": {
+        "energyKcal": 619,
+        "proteinG": 32.2,
+        "fatG": 28,
+        "carbsG": 51.7,
+        "fibreG": 8.5
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.lemonblossoms.com/wprm_print/salmon-poke-bowl",
+        "https://www.heartfoundation.org.au/recipes/salmon-poke-bowl"
+      ],
+      "ingredients": [
+        {
+          "key": "Rice, white, short-grain, enriched, uncooked",
+          "g": 60
+        },
+        {
+          "key": "Fish, salmon, Atlantic, farmed, raw",
+          "g": 100
+        },
+        {
+          "key": "Avocados, raw, California",
+          "g": 55
+        },
+        {
+          "key": "Edamame, frozen, prepared",
+          "g": 40
+        },
+        {
+          "key": "Cucumber, with peel, raw",
+          "g": 40
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 15
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 16
+        },
+        {
+          "key": "Oil, sesame, salad or cooking",
+          "g": 3
+        },
+        {
+          "key": "Vinegar, distilled",
+          "g": 4
+        },
+        {
+          "key": "Ginger root, raw",
+          "g": 1
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 5
+        },
+        {
+          "key": "Seeds, sesame seeds, whole, dried",
+          "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_popcorn": {
+      "portion": {
+        "grams": 45,
+        "pieces": null,
+        "what": "ведёрко солёного попкорна (~5 стаканов)"
+      },
+      "perPortion": {
+        "energyKcal": 190,
+        "proteinG": 3.8,
+        "fatG": 6.9,
+        "carbsG": 26.8,
+        "fibreG": 2.9
+      },
+      "method": "composed",
+      "sources": [
+        "https://minimalistbaker.com/perfect-stovetop-popcorn-5-minutes/",
+        "https://www.101cookbooks.com/perfect-stovetop-popcorn/"
+      ],
+      "ingredients": [
+        {
+          "key": "Corn grain, yellow",
+          "g": 40
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 5
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
         }
       ],
       "cooking": {
@@ -4238,6 +8110,128 @@
         "roastedMeat": null
       }
     },
+    "d_quiche": {
+      "portion": {
+        "grams": 150,
+        "pieces": 1,
+        "what": "кусок киша (1/6-1/8 пирога)"
+      },
+      "perPortion": {
+        "energyKcal": 603,
+        "proteinG": 16.7,
+        "fatG": 48.1,
+        "carbsG": 24.9,
+        "fibreG": 1
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.sainsburysmagazine.co.uk/recipes/mains/quiche-lorraine",
+        "https://www.irishcentral.com/culture/food-drink/darina-allen-quiche-lorraine-recipe"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 31
+        },
+        {
+          "key": "Butter, without salt",
+          "g": 15
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 4
+        },
+        {
+          "key": "Pork, cured, bacon, unprepared",
+          "g": 30
+        },
+        {
+          "key": "Onions, raw",
+          "g": 8
+        },
+        {
+          "key": "Oil, olive, salad or cooking",
+          "g": 1.5
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 28
+        },
+        {
+          "key": "Cream, fluid, heavy whipping",
+          "g": 43
+        },
+        {
+          "key": "Cheese, gruyere",
+          "g": 15
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.8
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_ramen": {
+      "portion": {
+        "grams": 520,
+        "pieces": null,
+        "what": "большая миска рамена"
+      },
+      "perPortion": {
+        "energyKcal": 763,
+        "proteinG": 26.5,
+        "fatG": 51.1,
+        "carbsG": 45.5,
+        "fibreG": 3.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://glebekitchen.com/wprm_print/recipe/4251",
+        "https://www.pacificfoods.com/recipes/pork-tonkotsu-ramen/"
+      ],
+      "ingredients": [
+        {
+          "key": "Soup, chicken broth, ready-to-serve",
+          "g": 280
+        },
+        {
+          "key": "Noodles, egg, dry, enriched",
+          "g": 60
+        },
+        {
+          "key": "Pork, fresh, belly, raw",
+          "g": 80
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 50
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 12
+        },
+        {
+          "key": "Miso",
+          "g": 8
+        },
+        {
+          "key": "Mushrooms, shiitake, raw",
+          "g": 15
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 8
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_rassolnik": {
       "portion": {
         "grams": 300,
@@ -4296,6 +8290,79 @@
         {
           "key": "Beverages, water, tap, drinking",
           "g": 245
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_rasstegai": {
+      "portion": {
+        "grams": 165,
+        "pieces": 1,
+        "what": "1 расстегай с рыбой"
+      },
+      "perPortion": {
+        "energyKcal": 437,
+        "proteinG": 19.1,
+        "fatG": 11.8,
+        "carbsG": 59.7,
+        "fibreG": 2.3
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=168318",
+        "https://1000.menu/cooking/49882-rasstegai-s-ryboi-i-risom-v-duxovke-iz-drojjevogo-testa"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 70
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 15
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 15
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 14
+        },
+        {
+          "key": "Butter, salted",
+          "g": 5
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 3
+        },
+        {
+          "key": "Oil, sunflower, linoleic (less than 60%)",
+          "g": 5
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, active dry",
+          "g": 0.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Fish, cod, Atlantic, raw",
+          "g": 50
+        },
+        {
+          "key": "Rice, white, long-grain, regular, raw, enriched",
+          "g": 4
+        },
+        {
+          "key": "Onions, raw",
+          "g": 15
         }
       ],
       "cooking": {
@@ -4416,6 +8483,151 @@
           "cut": "Chicken, broilers or fryers, meat and skin, raw",
           "row": "chicken-thigh-meat-skin-enhanced-roasted"
         }
+      }
+    },
+    "d_salo": {
+      "portion": {
+        "grams": 78,
+        "pieces": 2,
+        "what": "2 бутерброда: ломтики сала с чесноком на ржаном хлебе"
+      },
+      "perPortion": {
+        "energyKcal": 369,
+        "proteinG": 5.3,
+        "fatG": 29.5,
+        "carbsG": 17.7,
+        "fibreG": 2.4
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=168601",
+        "https://www.russianfood.com/recipes/recipe.php?rid=172162",
+        "https://1000.menu/cooking/22913-buterbrodnoe-salo"
+      ],
+      "ingredients": [
+        {
+          "key": "Pork, cured, salt pork, raw",
+          "g": 35
+        },
+        {
+          "key": "Bread, rye",
+          "g": 40
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Dill weed, fresh",
+          "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_samsa": {
+      "portion": {
+        "grams": 125,
+        "pieces": 1,
+        "what": "1 слоёная самса с мясом"
+      },
+      "perPortion": {
+        "energyKcal": 567,
+        "proteinG": 13.8,
+        "fatG": 41.2,
+        "carbsG": 33.7,
+        "fibreG": 1.9
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/52982-samsa-iz-sloenogo-testa-s-myasom-baraniny-po-uzbekski",
+        "https://1000.menu/cooking/5688-sloenaya-samsa-s-myasnym-farshem",
+        "https://1000.menu/cooking/29226-samsa-iz-sloenogo-testa-s-myasom"
+      ],
+      "ingredients": [
+        {
+          "key": "Puff pastry, frozen, ready-to-bake",
+          "g": 70
+        },
+        {
+          "key": "Lamb, shoulder, whole (arm and blade), separable lean and fat, trimmed to 1/4\" fat, choice, raw",
+          "g": 45
+        },
+        {
+          "key": "Onions, raw",
+          "g": 35
+        },
+        {
+          "key": "Butter, salted",
+          "g": 4
+        },
+        {
+          "key": "Egg, yolk, raw, fresh",
+          "g": 3
+        },
+        {
+          "key": "Seeds, sesame seeds, whole, dried",
+          "g": 1.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Spices, cumin seed",
+          "g": 0.3
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_sauerkraut": {
+      "portion": {
+        "grams": 150,
+        "pieces": null,
+        "what": "миска квашеной капусты с морковью и клюквой"
+      },
+      "perPortion": {
+        "energyKcal": 39,
+        "proteinG": 1.9,
+        "fatG": 0.2,
+        "carbsG": 5.2,
+        "fibreG": 3.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=64338",
+        "https://1000.menu/cooking/3903-kapusta-s-klukvoi"
+      ],
+      "ingredients": [
+        {
+          "key": "Cabbage, raw",
+          "g": 142
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 3
+        },
+        {
+          "key": "Cranberries, raw",
+          "g": 4
+        },
+        {
+          "key": "Salt, table",
+          "g": 2.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
       }
     },
     "d_seafood_paella": {
@@ -4595,6 +8807,169 @@
       ],
       "cooking": {
         "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_sharlotka": {
+      "portion": {
+        "grams": 100,
+        "pieces": 1,
+        "what": "кусок шарлотки (1/8 пирога)"
+      },
+      "perPortion": {
+        "energyKcal": 211,
+        "proteinG": 5.2,
+        "fatG": 2.7,
+        "carbsG": 40.6,
+        "fibreG": 1.5
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=164495",
+        "https://1000.menu/cooking/25209-sharlotka-klassicheskaya-s-yablokami-v-duxovke-pyshnaya"
+      ],
+      "ingredients": [
+        {
+          "key": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",
+          "g": 44
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 26
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 21
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 18
+        },
+        {
+          "key": "Lemon juice, raw",
+          "g": 2
+        },
+        {
+          "key": "Sugars, powdered",
+          "g": 1
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_shashlik": {
+      "portion": {
+        "grams": 180,
+        "pieces": null,
+        "what": "порция шашлыка из свинины (2 шампура) с луком"
+      },
+      "perPortion": {
+        "energyKcal": 486,
+        "proteinG": 34.8,
+        "fatG": 36.1,
+        "carbsG": 2.6,
+        "fibreG": 0.7
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/1006-shashlyk-iz-svininy-v-mineralke",
+        "https://1000.menu/cooking/25407-shashlyk-iz-svininy-s-limonom-i-lukom"
+      ],
+      "ingredients": [
+        {
+          "key": "Pork, fresh, shoulder, whole, separable lean and fat, raw",
+          "g": 200
+        },
+        {
+          "key": "Onions, raw",
+          "g": 30
+        },
+        {
+          "key": "Parsley, fresh",
+          "g": 3
+        },
+        {
+          "key": "Salt, table",
+          "g": 2
+        },
+        {
+          "key": "Spices, pepper, black",
+          "g": 0.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_shawarma": {
+      "portion": {
+        "grams": 310,
+        "pieces": 1,
+        "what": "1 шаурма с курицей в лаваше"
+      },
+      "perPortion": {
+        "energyKcal": 444,
+        "proteinG": 33.9,
+        "fatG": 17.1,
+        "carbsG": 34.7,
+        "fibreG": 2.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/21554-klassicheskaya-shaurma",
+        "https://1000.menu/cooking/19060-domashnyaya-shaurma-s-kuricei"
+      ],
+      "ingredients": [
+        {
+          "key": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+          "g": 120
+        },
+        {
+          "key": "Bread, pita, white, enriched",
+          "g": 55
+        },
+        {
+          "key": "Cabbage, chinese (pe-tsai), raw",
+          "g": 55
+        },
+        {
+          "key": "Cucumber, with peel, raw",
+          "g": 35
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 40
+        },
+        {
+          "key": "ru:mayonnaise-67",
+          "g": 15
+        },
+        {
+          "key": "Cream, sour, cultured",
+          "g": 15
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 3
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.5
+        },
+        {
+          "key": "Spices, paprika",
+          "g": 0.5
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "whole_meat_poultry_fish_unbreaded"
+        },
         "roastedMeat": null
       }
     },
@@ -4957,6 +9332,83 @@
         "roastedMeat": null
       }
     },
+    "d_spring_rolls": {
+      "portion": {
+        "grams": 125,
+        "pieces": 3,
+        "what": "3 жареных спринг-ролла (по ~40 г)"
+      },
+      "perPortion": {
+        "energyKcal": 317,
+        "proteinG": 5.4,
+        "fatG": 19.8,
+        "carbsG": 27.3,
+        "fibreG": 4
+      },
+      "method": "composed",
+      "sources": [
+        "https://groceries.morrisons.com/recipes/easy-vegetable-spring-rolls/015LOtvp8GHMtvedpF1YHI",
+        "https://wokandskillet.com/vegetable-spring-rolls"
+      ],
+      "ingredients": [
+        {
+          "key": "Cabbage, raw",
+          "g": 60
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 36
+        },
+        {
+          "key": "Mung beans, mature seeds, sprouted, raw",
+          "g": 24
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 7
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 2
+        },
+        {
+          "key": "Ginger root, raw",
+          "g": 1
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 4.5
+        },
+        {
+          "key": "Oil, sesame, salad or cooking",
+          "g": 1.5
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 5
+        },
+        {
+          "key": "Salt, table",
+          "g": 1
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 28
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 12
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "deep",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "fried_dough_doughnuts_pies_chebureki"
+        },
+        "roastedMeat": null
+      }
+    },
     "d_steamed_cod": {
       "portion": {
         "grams": 270,
@@ -5072,6 +9524,197 @@
         "roastedMeat": null
       }
     },
+    "d_sushi_rolls": {
+      "portion": {
+        "grams": 220,
+        "pieces": 8,
+        "what": "набор из 8 кусочков суши-роллов с лососем"
+      },
+      "perPortion": {
+        "energyKcal": 341,
+        "proteinG": 15.4,
+        "fatG": 7.7,
+        "carbsG": 48.4,
+        "fibreG": 1.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://feastgloriousfeast.com/wprm_print/salmon-maki-sushi-rolls-recipe",
+        "https://chefjacooks.com/en/wprm_print/salmon-roll-with-cream-cheese-japanese-maki-sushi-recipe"
+      ],
+      "ingredients": [
+        {
+          "key": "Rice, white, short-grain, enriched, uncooked",
+          "g": 60
+        },
+        {
+          "key": "Fish, salmon, Atlantic, farmed, raw",
+          "g": 55
+        },
+        {
+          "key": "Seaweed, laver, raw",
+          "g": 2.5
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 5
+        },
+        {
+          "key": "Vinegar, distilled",
+          "g": 5.5
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 2.2
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.1
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_sweet_sour_pork": {
+      "portion": {
+        "grams": 250,
+        "pieces": null,
+        "what": "порция свинины в кляре в кисло-сладком соусе"
+      },
+      "perPortion": {
+        "energyKcal": 481,
+        "proteinG": 22.3,
+        "fatG": 19.8,
+        "carbsG": 50.7,
+        "fibreG": 1.9
+      },
+      "method": "composed",
+      "sources": [
+        "https://teletype.in/@chinese_cuisine/Fh1wUDWvC7n",
+        "https://www.recipetineats.com/sweet-and-sour-pork/"
+      ],
+      "ingredients": [
+        {
+          "key": "Pork, fresh, shoulder, whole, separable lean and fat, raw",
+          "g": 100
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 20
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 15
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 15
+        },
+        {
+          "key": "Leavening agents, baking powder, double-acting, sodium aluminum sulfate",
+          "g": 0.5
+        },
+        {
+          "key": "Cornstarch",
+          "g": 10
+        },
+        {
+          "key": "Catsup",
+          "g": 20
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 16
+        },
+        {
+          "key": "Vinegar, distilled",
+          "g": 12
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 5
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 20
+        },
+        {
+          "key": "Pineapple, raw, all varieties",
+          "g": 25
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 15
+        },
+        {
+          "key": "Peppers, sweet, green, raw",
+          "g": 15
+        },
+        {
+          "key": "Onions, raw",
+          "g": 15
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "deep",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "whole_meat_poultry_fish_unbreaded"
+        },
+        "roastedMeat": null
+      }
+    },
+    "d_syrniki": {
+      "portion": {
+        "grams": 125,
+        "pieces": 3,
+        "what": "3 сырника"
+      },
+      "perPortion": {
+        "energyKcal": 359,
+        "proteinG": 19.2,
+        "fatG": 19.2,
+        "carbsG": 26.1,
+        "fibreG": 0.6
+      },
+      "method": "composed",
+      "sources": [
+        "https://1000.menu/cooking/17890-syrniki-klassicheskie-iz-tvoroga-na-skovorode",
+        "https://1000.menu/cooking/37190-prostye-syrniki-iz-tvoroga-na-skovorode"
+      ],
+      "ingredients": [
+        {
+          "key": "ru:tvorog-9",
+          "g": 90
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 15
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 8
+        },
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 22
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.3
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "pancakes_blini_crepes"
+        },
+        "roastedMeat": null
+      }
+    },
     "d_tabbouleh": {
       "portion": {
         "grams": 160,
@@ -5132,6 +9775,82 @@
       "cooking": {
         "frying": null,
         "roastedMeat": null
+      }
+    },
+    "d_tacos": {
+      "portion": {
+        "grams": 190,
+        "pieces": 2,
+        "what": "2 тако с говядиной"
+      },
+      "perPortion": {
+        "energyKcal": 398,
+        "proteinG": 24.2,
+        "fatG": 20.7,
+        "carbsG": 24.9,
+        "fibreG": 4.9
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/ground-beef-tacos/",
+        "https://natashaskitchen.com/ground-beef-tacos/"
+      ],
+      "ingredients": [
+        {
+          "key": "Tortillas, ready-to-bake or -fry, corn",
+          "g": 52
+        },
+        {
+          "key": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "g": 100
+        },
+        {
+          "key": "Onions, raw",
+          "g": 22
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 1.2
+        },
+        {
+          "key": "Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",
+          "g": 5
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 15
+        },
+        {
+          "key": "Spices, cumin seed",
+          "g": 0.8
+        },
+        {
+          "key": "Spices, paprika",
+          "g": 0.9
+        },
+        {
+          "key": "Salt, table",
+          "g": 1.2
+        },
+        {
+          "key": "Cheese, cheddar (Includes foods for USDA's Food Distribution Program)",
+          "g": 12
+        },
+        {
+          "key": "Sauce, salsa, ready-to-serve",
+          "g": 25
+        },
+        {
+          "key": "Lettuce, iceberg (includes crisphead types), raw",
+          "g": 10
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": {
+          "cut": "Beef, ground, 80% lean meat / 20% fat, raw",
+          "row": "beef-ground-80-20-patty-broiled"
+        }
       }
     },
     "d_tefteli": {
@@ -5212,6 +9931,56 @@
         "roastedMeat": null
       }
     },
+    "d_tiramisu": {
+      "portion": {
+        "grams": 150,
+        "pieces": 1,
+        "what": "порция тирамису (квадратный кусок)"
+      },
+      "perPortion": {
+        "energyKcal": 426,
+        "proteinG": 8.2,
+        "fatG": 27.4,
+        "carbsG": 35.1,
+        "fibreG": 0.8
+      },
+      "method": "composed",
+      "sources": [
+        "https://merano-suedtirol.it/en/partschins-rabland-und-toell/food-wine/taste-of-parcines/recipes/worth-the-indulgence-kaiserschmarren-pancakes-doughnuts-strudel-strauben/537-tiramisu.html?amp=true",
+        "https://www.russianfood.com/recipes/recipe.php?rid=149546",
+        "https://www.russianfood.com/recipes/recipe.php?rid=146805"
+      ],
+      "ingredients": [
+        {
+          "key": "ru:mascarpone-42",
+          "g": 52
+        },
+        {
+          "key": "Cookies, ladyfingers, without lemon juice and rind",
+          "g": 26
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 26
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 17
+        },
+        {
+          "key": "Beverages, coffee, brewed, espresso, restaurant-prepared",
+          "g": 28
+        },
+        {
+          "key": "Cocoa, dry powder, unsweetened",
+          "g": 1.5
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
     "d_tofu_vegetables": {
       "portion": {
         "grams": 270,
@@ -5287,6 +10056,71 @@
           "oil": "Oil, sunflower, linoleic, (approx. 65%)",
           "category": "whole_meat_poultry_fish_unbreaded"
         },
+        "roastedMeat": null
+      }
+    },
+    "d_tom_yum": {
+      "portion": {
+        "grams": 380,
+        "pieces": null,
+        "what": "миска острого супа том ям с креветками"
+      },
+      "perPortion": {
+        "energyKcal": 113,
+        "proteinG": 13.2,
+        "fatG": 1.3,
+        "carbsG": 11.3,
+        "fibreG": 2.4
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.cookingwithnart.com/wprm_print/tom-yum-goong-recipe-thai-lemongrass-soup-with-shrimp",
+        "https://www.beyondkimchee.com/wprm_print/tom-yum-goong-authentic-thai-hot-and-sour-prawn-soup"
+      ],
+      "ingredients": [
+        {
+          "key": "Soup, chicken broth, ready-to-serve",
+          "g": 110
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 100
+        },
+        {
+          "key": "Crustaceans, shrimp, mixed species, raw (may contain additives to retain moisture)",
+          "g": 70
+        },
+        {
+          "key": "Mushrooms, oyster, raw",
+          "g": 50
+        },
+        {
+          "key": "Tomatoes, red, ripe, raw, year round average",
+          "g": 40
+        },
+        {
+          "key": "Shallots, raw",
+          "g": 20
+        },
+        {
+          "key": "Lime juice, raw",
+          "g": 15
+        },
+        {
+          "key": "Sauce, fish, ready-to-serve",
+          "g": 7
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 3
+        },
+        {
+          "key": "Coriander (cilantro) leaves, raw",
+          "g": 3
+        }
+      ],
+      "cooking": {
+        "frying": null,
         "roastedMeat": null
       }
     },
@@ -5545,6 +10379,72 @@
         {
           "key": "Salt, table",
           "g": 2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_vatrushka": {
+      "portion": {
+        "grams": 88,
+        "pieces": 1,
+        "what": "1 ватрушка с творогом"
+      },
+      "perPortion": {
+        "energyKcal": 241,
+        "proteinG": 9.9,
+        "fatG": 7.2,
+        "carbsG": 32.5,
+        "fibreG": 1.1
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=145688",
+        "https://www.russianfood.com/recipes/recipe.php?rid=150397",
+        "https://www.russianfood.com/recipes/recipe.php?rid=119591"
+      ],
+      "ingredients": [
+        {
+          "key": "Wheat flour, white, all-purpose, enriched, unbleached",
+          "g": 33
+        },
+        {
+          "key": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+          "g": 18
+        },
+        {
+          "key": "ru:tvorog-9",
+          "g": 28
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 6
+        },
+        {
+          "key": "Egg, whole, raw, fresh",
+          "g": 7
+        },
+        {
+          "key": "Oil, sunflower, linoleic (less than 60%)",
+          "g": 2.5
+        },
+        {
+          "key": "Cream, sour, cultured",
+          "g": 4
+        },
+        {
+          "key": "Leavening agents, yeast, baker's, active dry",
+          "g": 0.7
+        },
+        {
+          "key": "Cornstarch",
+          "g": 0.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.4
         }
       ],
       "cooking": {
@@ -5829,6 +10729,87 @@
         "roastedMeat": null
       }
     },
+    "d_wok_noodles": {
+      "portion": {
+        "grams": 350,
+        "pieces": null,
+        "what": "коробочка лапши вок с курицей и овощами"
+      },
+      "perPortion": {
+        "energyKcal": 471,
+        "proteinG": 33.8,
+        "fatG": 7,
+        "carbsG": 62.2,
+        "fibreG": 6.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.recipetineats.com/chicken-chow-mein/",
+        "https://1000.menu/cooking/17034-lapsha-vok"
+      ],
+      "ingredients": [
+        {
+          "key": "Noodles, egg, dry, enriched",
+          "g": 70
+        },
+        {
+          "key": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+          "g": 90
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 40
+        },
+        {
+          "key": "Peppers, sweet, red, raw",
+          "g": 40
+        },
+        {
+          "key": "Squash, summer, zucchini, includes skin, raw",
+          "g": 40
+        },
+        {
+          "key": "Cabbage, raw",
+          "g": 40
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 4
+        },
+        {
+          "key": "Onions, spring or scallions (includes tops and bulb), raw",
+          "g": 10
+        },
+        {
+          "key": "Soy sauce made from soy and wheat (shoyu)",
+          "g": 18
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 3
+        },
+        {
+          "key": "Cornstarch",
+          "g": 3
+        },
+        {
+          "key": "Oil, sesame, salad or cooking",
+          "g": 1
+        },
+        {
+          "key": "Beverages, water, tap, drinking",
+          "g": 30
+        }
+      ],
+      "cooking": {
+        "frying": {
+          "type": "shallow",
+          "oil": "Oil, sunflower, linoleic, (approx. 65%)",
+          "category": "whole_meat_poultry_fish_unbreaded"
+        },
+        "roastedMeat": null
+      }
+    },
     "d_zander_polish": {
       "portion": {
         "grams": 340,
@@ -5933,6 +10914,64 @@
         {
           "key": "Spices, pepper, black",
           "g": 0.2
+        }
+      ],
+      "cooking": {
+        "frying": null,
+        "roastedMeat": null
+      }
+    },
+    "d_zucchini_caviar": {
+      "portion": {
+        "grams": 100,
+        "pieces": null,
+        "what": "порция кабачковой икры (пиала)"
+      },
+      "perPortion": {
+        "energyKcal": 116,
+        "proteinG": 1.9,
+        "fatG": 8.4,
+        "carbsG": 7.7,
+        "fibreG": 2.2
+      },
+      "method": "composed",
+      "sources": [
+        "https://www.russianfood.com/recipes/recipe.php?rid=157524",
+        "https://www.russianfood.com/recipes/recipe.php?rid=136527",
+        "https://1000.menu/cooking/31689-kabachkovaya-ikra-klassicheskaya"
+      ],
+      "ingredients": [
+        {
+          "key": "Squash, summer, zucchini, includes skin, raw",
+          "g": 90
+        },
+        {
+          "key": "Onions, raw",
+          "g": 18
+        },
+        {
+          "key": "Carrots, raw",
+          "g": 19
+        },
+        {
+          "key": "Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",
+          "g": 10
+        },
+        {
+          "key": "Garlic, raw",
+          "g": 0.6
+        },
+        {
+          "key": "Oil, sunflower, linoleic, (approx. 65%)",
+          "g": 8
+        },
+        {
+          "key": "Sugars, granulated",
+          "g": 1.5
+        },
+        {
+          "key": "Salt, table",
+          "g": 0.6
         }
       ],
       "cooking": {

@@ -45,8 +45,10 @@ describe('the generation story timeline (stage 3, §7.4)', () => {
   });
 
   it('the first pass of the real story lasts 20–28 s (§7.2)', () => {
-    const { notebook, planet, crane, robot, pot } = STORY.scenes;
-    const firstPass = notebook + planet + crane + robot + pot + 5 * STORY.morph.durationS;
+    const { notebook, planet, crane, cart, pot } = STORY.scenes;
+    // In wall-clock seconds: the story's clock runs STORY.speed times faster.
+    const firstPass =
+      (notebook + planet + crane + cart + pot + 5 * STORY.morph.durationS) / STORY.speed;
     // The transformation's beats fit inside it.
     const m = STORY.morph;
     expect(m.scatterFromS + m.scatterSweepS + m.scatterS + m.landS).toBeLessThanOrEqual(
@@ -87,14 +89,16 @@ describe('transformations and loops', () => {
   });
 
   it('every drawing has its clouds; the scenes that loop end where they began', () => {
-    for (const id of ['notebook', 'planet', 'crane', 'robot', 'pot']) {
+    for (const id of ['notebook', 'planet', 'crane', 'cart', 'pot']) {
       const scene = raw.scenes[id];
       expect(scene?.in.c.length, id).toBe(180);
       expect(scene?.out.c.length, id).toBe(180);
     }
-    const dot = { lat: 0.3, lon: 1.2 };
-    const start = projectDot(dot, 0, STORY.scenes.dots);
-    const end = projectDot(dot, STORY.scenes.dots, STORY.scenes.dots);
+    // The disc turns a sixth of a turn a loop: on ring 3 (18 dots) each dot ends where the third one after it began.
+    const loop = STORY.scenes.dots;
+    const slot = (j: number) => ({ r: 0.5, phi: (2 * Math.PI * j) / 18 });
+    const end = projectDot(slot(2), loop, loop);
+    const start = projectDot(slot(5), 0, loop);
     expect(end.x).toBeCloseTo(start.x);
     expect(end.y).toBeCloseTo(start.y);
   });

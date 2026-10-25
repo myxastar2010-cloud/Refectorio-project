@@ -266,9 +266,19 @@ export const QUIZ = {
   progressSheen: { durationMs: 750, delayMs: 60 },
   /** «Далее» / «Готово» rise in when the answer is complete. */
   continueIn: { durationMs: 360, risePx: 14 },
-  /** «+» → add panel and row → picker panel (transform-only shape morph). */
+  /** A chip cloud follows the add panel's height (useLayoutFollow). */
   panelSpring: { stiffness: 420, damping: 38, mass: 0.9 },
-  panelContentAt: 0.6,
+  /** «+» → add panel and row → picker panel (transform-only shape morph): opens on a spring with a small settle… */
+  panelOpen: { type: 'spring', visualDuration: 0.34, bounce: 0.12 },
+  /** …and lands back on a short ease-out, without a spring's tail over the row. */
+  panelClose: { duration: 0.3, ease: [0.32, 0.72, 0, 1] },
+  /** Over its anchor the shape is see-through; solid from this share of the way. */
+  panelSolidBy: 0.14,
+  /** The content fades in over this part of the way while opening… */
+  panelContentAt: 0.32,
+  panelContentSpan: 0.5,
+  /** …and out over the first steps of the way back. */
+  panelContentOutAt: 0.45,
   /** «Продолжаем с вопроса n»: long enough to read and reach «Начать заново»; paused under the pointer or focus. */
   toastMs: 12000,
   /** The quiz chunk is fetched on idle once the landing has settled — never during its first animations. */
@@ -371,7 +381,9 @@ export const FINALE = {
  * on arcs) and the dots that loop forever. Seconds.
  */
 export const STORY = {
-  scenes: { notebook: 4.0, planet: 3.6, crane: 4.4, robot: 3.4, pot: 3.2, dots: 6 },
+  scenes: { notebook: 4.0, planet: 3.6, crane: 4.4, cart: 3.2, pot: 3.2, dots: 5.2 },
+  /** The story's clock against the wall clock: everything above plays this much faster (a livelier pace). */
+  speed: 1.15,
   morph: {
     durationS: 1.7,
     /** The old drawing fades while its points appear on its strokes. */
