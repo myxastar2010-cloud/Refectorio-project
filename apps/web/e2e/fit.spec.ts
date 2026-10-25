@@ -51,6 +51,8 @@ async function measure(page: Page, step: string, state: string) {
   await page.goto(`./?seed=1&step=${step}${state ? `&state=${state}` : ''}#quiz`);
   const screen = page.locator(`.quiz-screen[data-screen="${step}"]`);
   await expect(screen).toHaveCount(1);
+  // A lazy screen (the finale's chunk) may still be empty under load: measure it once it has its frame.
+  await expect(screen.locator(':scope > *').first()).toBeAttached();
   // The fit is set before the step is painted; wrapping depends on the fonts only.
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
   return screen.evaluate((element) => {

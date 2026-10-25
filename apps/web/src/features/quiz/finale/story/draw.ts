@@ -54,24 +54,38 @@ export const span = (t: number, start: number, duration: number) =>
   clamp01((t - start) / Math.max(1e-6, duration));
 export const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 
-/** Traces a stroke up to `progress` of its length (the draw-on). */
-export function tracePath(ctx: CanvasRenderingContext2D, stroke: Stroke, progress: number): void {
+/**
+ * Traces a stroke up to `progress` of its length (the draw-on). With `m` its points are moved by the matrix here
+ * rather than by the canvas, so the pen keeps its width however the part is squashed.
+ */
+export function tracePath(
+  ctx: CanvasRenderingContext2D,
+  stroke: Stroke,
+  progress: number,
+  m: Mat = IDENTITY,
+): void {
   const { xy, along } = stroke;
   const n = along.length;
   if (n === 0 || progress <= 0) return;
+  const to = (x: number, y: number, first: boolean) => {
+    const px = m[0] * x + m[2] * y + m[4];
+    const py = m[1] * x + m[3] * y + m[5];
+    if (first) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  };
   const end = progress >= 1 ? Number.POSITIVE_INFINITY : progress * stroke.length;
-  ctx.moveTo(xy[0] ?? 0, xy[1] ?? 0);
+  to(xy[0] ?? 0, xy[1] ?? 0, true);
   for (let i = 1; i < n; i += 1) {
     const at = along[i] ?? 0;
     if (at <= end) {
-      ctx.lineTo(xy[2 * i] ?? 0, xy[2 * i + 1] ?? 0);
+      to(xy[2 * i] ?? 0, xy[2 * i + 1] ?? 0, false);
       continue;
     }
     const before = along[i - 1] ?? 0;
     const t = (end - before) / Math.max(1e-6, at - before);
     const x0 = xy[2 * i - 2] ?? 0;
     const y0 = xy[2 * i - 1] ?? 0;
-    ctx.lineTo(x0 + ((xy[2 * i] ?? 0) - x0) * t, y0 + ((xy[2 * i + 1] ?? 0) - y0) * t);
+    to(x0 + ((xy[2 * i] ?? 0) - x0) * t, y0 + ((xy[2 * i + 1] ?? 0) - y0) * t, false);
     break;
   }
 }
@@ -86,7 +100,8 @@ export type StrokeLook = {
 
 /**
  * Draws a scene's strokes part by part: `matrixOf(part)` places each part, `look(stroke, index)` says how much of a
- * stroke shows (null: not at all).
+ * stroke shows (null: not at all). `even`: the matrices move the points only — line widths stay even on a part
+ * squashed to a sliver (the cart turning about itself).
  */
 export function drawStrokes(
   ctx: CanvasRenderingContext2D,
@@ -95,12 +110,13 @@ export function drawStrokes(
   matrixOf: (part: number) => Mat,
   look: (stroke: Stroke, index: number) => StrokeLook | null,
   alpha = 1,
+  even = false,
 ): void {
   const parts = scene.parts.length;
   for (let part = 0; part < parts; part += 1) {
     const m = matrixOf(part);
     ctx.save();
-    ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+    if (!even) ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
     scene.strokes.forEach((stroke, index) => {
       if (stroke.part !== part) return;
       const state = look(stroke, index);
@@ -109,7 +125,7 @@ export function drawStrokes(
       ctx.strokeStyle = palette[state.color ?? stroke.color] ?? palette[0];
       ctx.lineWidth = STROKE_WIDTHS[stroke.width] ?? STROKE_WIDTHS[0];
       ctx.beginPath();
-      tracePath(ctx, stroke, state.progress);
+      tracePath(ctx, stroke, state.progress, even ? m : IDENTITY);
       ctx.stroke();
     });
     ctx.restore();

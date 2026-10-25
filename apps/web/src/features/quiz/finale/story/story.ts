@@ -2,13 +2,13 @@ import { FINALE, STORY } from '../../../../motion/tokens';
 import { decodeScene, type RawStory, type SceneData } from './data';
 import { clamp01, type Palette } from './draw';
 import { drawMorph, planMorph, type MorphPlan } from './morph';
-import { craneScene, dotsScene, potScene, robotScene } from './laterScenes';
+import { cartScene, craneScene, dotsScene, potScene } from './laterScenes';
 import { notebookScene, planetScene, type SceneContext, type SceneScript } from './scenes';
 import { buildTimeline, captionAt, sceneStart, stepAt, type Timeline } from './timeline';
 
 /** The order of the story (§7.2); the last scene loops forever. */
-export const STORY_SCENES = ['notebook', 'planet', 'crane', 'robot', 'pot', 'dots'] as const;
-const DRAWN = ['notebook', 'planet', 'crane', 'robot', 'pot'] as const;
+export const STORY_SCENES = ['notebook', 'planet', 'crane', 'cart', 'pot', 'dots'] as const;
+const DRAWN = ['notebook', 'planet', 'crane', 'cart', 'pot'] as const;
 export type StorySceneId = (typeof STORY_SCENES)[number];
 
 export type StoryOptions = {
@@ -53,7 +53,7 @@ export function createStory(raw: RawStory, options: StoryOptions): StoryHandle |
     seed: options.seed,
     dotR: (options.dotPx / 2) * (BOX_UNITS / sizePx),
   };
-  const [notebook, planet, crane, robot, pot] = drawn as [
+  const [notebook, planet, crane, cart, pot] = drawn as [
     SceneData,
     SceneData,
     SceneData,
@@ -66,7 +66,7 @@ export function createStory(raw: RawStory, options: StoryOptions): StoryHandle |
     notebookScene(notebook, context),
     planetScene(planet, context, STORY.scenes.planet),
     craneScene(crane, context, STORY.scenes.crane),
-    robotScene(robot, context, STORY.scenes.robot),
+    cartScene(cart, context, STORY.scenes.cart),
     potScene(pot, context, STORY.scenes.pot),
     dots.script,
   ];
@@ -158,7 +158,8 @@ export function createStory(raw: RawStory, options: StoryOptions): StoryHandle |
     const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
     last = now;
     if (paused || document.hidden) return;
-    time += dt;
+    // The story's own clock runs a little faster than the wall clock (STORY.speed); the calm stills keep real time.
+    time += calm ? dt : dt * STORY.speed;
     if (calm) renderCalm(time - start);
     else renderMotion(time);
     // Adaptive quality: frames slower than STORY.slowFrameMs on average → half the points from the next

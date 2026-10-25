@@ -1,7 +1,7 @@
 import { AGE_LIMITS, cleanItems, INPUT_LIMITS } from '@refectorio/nutrition-core';
 import clsx from 'clsx';
 import { AnimatePresence, m } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { quiz } from '../../../content/quiz.ru';
 import {
@@ -76,6 +76,9 @@ export function ChipsStep({ step }: { readonly step: Step }) {
   const health = step === 'healthConditions';
   const [adding, setAdding] = useState(false);
   const [closing, setClosing] = useState(false);
+  // The panel leaves the chips' grid only when its exit completes — AnimatePresence renders then, not this step: one
+  // more render lets what is below glide up (useLayoutFollow) instead of jumping.
+  const [, settle] = useReducer((count: number) => count + 1, 0);
   // Every opening is a panel of its own: «+» pressed again while the last one still fades out must not bring that
   // one back (it is already leaving — inert and hidden from screen readers).
   const [addVisit, setAddVisit] = useState(0);
@@ -347,7 +350,7 @@ export function ChipsStep({ step }: { readonly step: Step }) {
             />
           ) : null}
         </m.div>
-        <AnimatePresence>
+        <AnimatePresence onExitComplete={settle}>
           {adding ? (
             <AddPanel
               key={`add-${String(addVisit)}`}

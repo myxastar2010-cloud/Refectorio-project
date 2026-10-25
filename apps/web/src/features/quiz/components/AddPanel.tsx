@@ -92,7 +92,9 @@ export function AddPanel({
       onKeyDown={onKeyDown}
       initial={calm ? { opacity: 0 } : false}
       animate={{ opacity: 1, transition: { duration: DURATION.fade } }}
-      exit={{ opacity: 0, transition: { duration: calm ? DURATION.fade : DURATION.micro } }}
+      // The morph has already cleared the shape over its target: leaving is instant (a fade from the value Motion
+      // last set would flash it back). Calm: the short fade is the whole animation.
+      exit={{ opacity: 0, transition: { duration: calm ? DURATION.fade : 0 } }}
     >
       <span ref={inkRef} className="quiz-add-ink" aria-hidden />
       <div ref={contentRef} className="quiz-add-content">

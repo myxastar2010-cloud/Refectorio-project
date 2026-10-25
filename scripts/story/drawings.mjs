@@ -320,55 +320,127 @@ function crane() {
   return strokes;
 }
 
-// ── 4. A delivery robot on a road ────────────────────────────────────────────────────────────────────────────────
+// ── 4. A shopping cart someone sent rolling ─────────────────────────────────────────────────────────────────────
 
-export const ROAD_Y = 84;
-export const WHEELS = [pt(-60, 64), pt(-8, 64), pt(44, 64)];
-export const WHEEL_R = 18;
-/** Lane marks stream past: whole periods per scene keep its last frame equal to its first. */
-export const DASH = { y: 112, length: 28, period: 56, from: -168, to: 168 };
+export const FLOOR_Y = 104;
+export const CART_WHEEL_R = 12;
+export const CART_WHEELS = [pt(-50, FLOOR_Y - CART_WHEEL_R), pt(50, FLOOR_Y - CART_WHEEL_R)];
+/** The cart turns about this vertical line (the middle of its body, handle included). */
+export const CART_PIVOT_X = -14;
+/** The basket: the back edge nearly upright under the handle, the front one leaning in. */
+const BASKET = [pt(-82, -34), pt(84, -34), pt(62, 34), pt(-74, 34)];
 
-function robot() {
-  const strokes = [
-    stroke('road', 'road', 'ink', 'fine', line(pt(-SAFE, ROAD_Y), pt(SAFE, ROAD_Y))),
-    stroke('body', 'body', 'ink', 'main', roundRect(-88, -48, 164, 92, 24)),
-    stroke('lid', 'body', 'muted', 'fine', line(pt(-64, -20), pt(28, -20))),
-    stroke('face', 'body', 'ink', 'main', roundRect(36, -32, 28, 22, 8)),
-    stroke('eye-0', 'body', 'ink', 'main', circle(45, -21, 1.5)),
-    stroke('eye-1', 'body', 'ink', 'main', circle(55, -21, 1.5)),
-    stroke('heart', 'body', 'accent', 'main', heart(-26, 10, 13)),
-    stroke('antenna', 'antenna', 'ink', 'fine', line(pt(-60, -48), pt(-60, -92))),
-    stroke('flag', 'antenna', 'accent', 'main', poly(pt(-60, -92), pt(-34, -84), pt(-60, -76))),
-  ];
-  WHEELS.forEach((w, i) => {
-    strokes.push(
-      stroke(`wheel-${i}`, `wheel-${i}`, 'ink', 'main', circle(w.x, w.y, WHEEL_R)),
-      stroke(`hub-${i}`, `wheel-${i}`, 'muted', 'fine', line(pt(w.x - 8, w.y), pt(w.x + 8, w.y))),
-    );
-  });
-  for (let x = DASH.from, i = 0; x + DASH.length <= DASH.to; x += DASH.period, i += 1) {
-    strokes.push(
-      stroke(
-        `dash-${i}`,
-        'dashes',
-        'muted',
-        'main',
-        line(pt(x, DASH.y), pt(x + DASH.length, DASH.y)),
-      ),
-    );
+/** A closed polygon with its corners rounded by `r` (a quadratic corner as a cubic). */
+function roundPoly(points, r) {
+  const n = points.length;
+  const toward = (a, b, d) => {
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    return pt(a.x + ((b.x - a.x) * d) / len, a.y + ((b.y - a.y) * d) / len);
+  };
+  const corner = (i) => {
+    const p = points[i];
+    const start = toward(p, points[(i - 1 + n) % n], r);
+    const end = toward(p, points[(i + 1) % n], r);
+    const c1 = pt(start.x + ((p.x - start.x) * 2) / 3, start.y + ((p.y - start.y) * 2) / 3);
+    const c2 = pt(end.x + ((p.x - end.x) * 2) / 3, end.y + ((p.y - end.y) * 2) / 3);
+    return { start, end, c1, c2 };
+  };
+  const corners = points.map((_, i) => corner(i));
+  const out = [corners[0].end];
+  for (let i = 1; i <= n; i += 1) {
+    const c = corners[i % n];
+    out.push(...line(out[out.length - 1], c.start).slice(1));
+    out.push(...curve(c.start, c.c1, c.c2, c.end).slice(1));
   }
-  return strokes;
+  return out;
 }
 
-/** A symmetric heart: two arcs and two straight sides meeting at the bottom point. */
-function heart(cx, cy, r) {
-  const k = r * 0.5;
-  return [
-    ...line(pt(cx, cy + r), pt(cx - r, cy - k * 0.15)),
-    ...arc(cx - k, cy - k, k * 1.12, k * 1.12, Math.PI * 0.82, Math.PI * 2).slice(1),
-    ...arc(cx + k, cy - k, k * 1.12, k * 1.12, Math.PI, Math.PI * 2.18).slice(1),
-    ...line(pt(cx + r, cy - k * 0.15), pt(cx, cy + r)).slice(1),
+/** The x of the basket's edge from a to b at height y. */
+const edgeX = (a, b, y) => a.x + ((b.x - a.x) * (y - a.y)) / (b.y - a.y);
+
+function cart() {
+  const [backTop, frontTop, frontBottom, backBottom] = BASKET;
+  const handleEnd = pt(-104, -62);
+  const dir = pt((handleEnd.x - backTop.x) / 35.6, (handleEnd.y - backTop.y) / 35.6);
+  const grip = pt(handleEnd.x + dir.x * 14, handleEnd.y + dir.y * 14);
+  const strokes = [
+    stroke('floor', 'floor', 'muted', 'fine', line(pt(-SAFE, FLOOR_Y), pt(SAFE, FLOOR_Y))),
+    stroke('basket', 'cart', 'ink', 'main', roundPoly(BASKET, 7)),
+    stroke('handle', 'cart', 'ink', 'main', line(backTop, handleEnd)),
+    stroke('grip', 'cart', 'accent', 'main', line(handleEnd, grip)),
+    stroke(
+      'wire-h',
+      'cart',
+      'muted',
+      'fine',
+      line(pt(edgeX(backTop, backBottom, 0), 0), pt(edgeX(frontTop, frontBottom, 0), 0)),
+    ),
+    stroke('leg-back', 'cart', 'ink', 'main', line(pt(-70, 34), pt(-56, 80))),
+    stroke('leg-front', 'cart', 'ink', 'main', line(pt(58, 34), pt(54, 80))),
+    stroke('chassis', 'cart', 'ink', 'main', line(pt(-64, 80), pt(64, 80))),
   ];
+  [-46, -10, 26].forEach((x, i) => {
+    strokes.push(stroke(`wire-${i}`, 'cart', 'muted', 'fine', line(pt(x, -34), pt(x, 34))));
+  });
+  // Groceries over the rim: a baguette, an apple, a carton of milk.
+  const a = pt(-50, -36);
+  const b = pt(-24, -86);
+  const len = Math.hypot(b.x - a.x, b.y - a.y);
+  const u = pt((b.x - a.x) / len, (b.y - a.y) / len);
+  const nrm = pt(-u.y, u.x);
+  const side = (p, d) => pt(p.x + nrm.x * d, p.y + nrm.y * d);
+  const angle = Math.atan2(u.y, u.x);
+  strokes.push(
+    stroke('baguette', 'goods', 'ink', 'main', [
+      ...line(side(a, 8), side(b, 8)),
+      ...arc(b.x, b.y, 8, 8, angle + Math.PI / 2, angle - Math.PI / 2).slice(1),
+      ...line(side(b, -8), side(a, -8)).slice(1),
+    ]),
+  );
+  [0.35, 0.6, 0.85].forEach((at, i) => {
+    const c = pt(a.x + u.x * len * at, a.y + u.y * len * at);
+    strokes.push(
+      stroke(
+        `score-${i}`,
+        'goods',
+        'muted',
+        'fine',
+        line(
+          pt(c.x + nrm.x * 4 - u.x * 4, c.y + nrm.y * 4 - u.y * 4),
+          pt(c.x - nrm.x * 4 + u.x * 4, c.y - nrm.y * 4 + u.y * 4),
+        ),
+      ),
+    );
+  });
+  strokes.push(
+    stroke('apple', 'goods', 'accent', 'main', circle(8, -50, 15)),
+    stroke('stem', 'goods', 'ink', 'fine', line(pt(8, -64), pt(11, -73))),
+    stroke(
+      'carton',
+      'goods',
+      'ink',
+      'main',
+      poly(pt(38, -36), pt(38, -80), pt(44, -92), pt(58, -92), pt(64, -80), pt(64, -36)),
+    ),
+    stroke('carton-fold', 'goods', 'muted', 'fine', line(pt(38, -80), pt(64, -80))),
+  );
+  CART_WHEELS.forEach((w, i) => {
+    strokes.push(
+      stroke(`wheel-${i}`, `wheel-${i}`, 'ink', 'main', circle(w.x, w.y, CART_WHEEL_R)),
+      stroke(`hub-${i}`, `wheel-${i}`, 'muted', 'fine', line(pt(w.x - 6, w.y), pt(w.x + 6, w.y))),
+    );
+  });
+  // Speed lines behind it while it is fast (they appear during the scene).
+  [
+    [-4, -138, -100],
+    [24, -136, -106],
+    [52, -128, -98],
+  ].forEach(([y, x0, x1], i) => {
+    strokes.push(
+      stroke(`streak-${i}`, 'streaks', 'muted', 'fine', line(pt(x0, y), pt(x1, y)), false),
+    );
+  });
+  return strokes;
 }
 
 // ── 5. A pot with steam («Пишем рецепты») ────────────────────────────────────────────────────────────────────────
@@ -449,7 +521,7 @@ export const SCENES = [
   { id: 'notebook', strokes: notebook() },
   { id: 'planet', strokes: planet() },
   { id: 'crane', strokes: crane() },
-  { id: 'robot', strokes: robot() },
+  { id: 'cart', strokes: cart() },
   { id: 'pot', strokes: pot() },
 ];
 

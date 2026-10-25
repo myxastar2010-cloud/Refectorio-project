@@ -30,9 +30,10 @@ function QuestionIcon({ icon }: { readonly icon: IconKey }) {
   const { calm } = useQuiz();
   const motion = useContext(StepMotionContext);
   const presence = usePresenceData() as PresenceInfo | undefined;
-  // Leaving towards a screen with the same icon: stay put, the new screen's icon is drawn on the same spot.
-  const leavingToSameIcon = presence?.icon === icon;
-  const still = motion.iconStill || leavingToSameIcon;
+  const present = useIsPresent();
+  // Entering after a screen with the same icon, or leaving towards one: stay put (the other icon is drawn on the same
+  // spot). How it entered says nothing about how it leaves — an icon that had entered still used to vanish at once.
+  const still = present ? motion.iconStill : presence?.icon === icon;
   const source = quizIcon(icon);
   return (
     <m.div
