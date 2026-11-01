@@ -2,33 +2,33 @@ import type { SiteContent } from './schema';
 
 /**
  * All user-facing text of the site (see .claude/rules/content.md).
- * 17.10: the team asked for new, «selling» slogans — the site sells the goal, not the menu — and for the «Цены»
- * block (plans from the project's business model). The texts of part 1 and of the project card are therefore new
- * (part 1 rewritten by the team on 22.10, D-052, as on their screenshots); the rest keeps the mockups with typos fixed («Ясинский
- * алексей» → «Ясинский Алексей», «Название Проекта» → «Refectorio»).
+ * Part 1 follows the mockup of the rebrand (stage 4, D-060), with its typos fixed: «Refectorio» → «ПроЛанч» in the lead,
+ * «ИИ консультант» → «ИИ-консультант», «твою» → «вашу» (the site says «вы»), «ланч бокс» → «ланч-бокс». The rest keeps
+ * the earlier mockups with typos fixed («Ясинский алексей» → «Ясинский Алексей»); «Цены» comes from the project's business
+ * model (17.10).
  */
 export const site = {
   meta: {
     lang: 'ru',
-    title: 'Refectorio — максимум результата, минимум усилий',
+    title: 'ПроЛанч — минимум усилий, максимум результата',
     description:
-      'Refectorio возьмёт на себя планирование вашего меню: худейте без диет или просто питайтесь вовремя. Расчёт по науке, ИИ-консультант и меню под вас.',
+      'ПроЛанч возьмёт на себя планирование вашего меню: худейте без диет или просто питайтесь вовремя. Расчёт по науке, ИИ-консультант и меню под вас.',
   },
   brand: {
-    name: 'Refectorio',
-    logoIcon: 'apple',
+    name: 'ПроЛанч',
+    logoAlt: 'Логотип ПроЛанч — кочан капусты',
   },
   hero: {
     aboutButton: 'О проекте',
     pricingButton: 'Цены',
-    titleLines: ['Максимум результата,', 'минимум усилий'],
+    titleLines: ['Минимум усилий', 'Максимум результата'],
     leadLines: [
-      'Refectorio возьмёт на себя планирование вашего меню.',
+      'ПроЛанч возьмёт на себя планирование вашего меню.',
       'Худейте без диет или просто питайтесь вовремя, даже',
       'если весь день не встаёте из-за стола',
     ],
     cta: { label: 'Создать меню', href: '#quiz' },
-    featuresLabel: 'Возможности Refectorio',
+    featuresLabel: 'Возможности ПроЛанч',
     features: [
       {
         title: 'Исследования',
@@ -45,12 +45,8 @@ export const site = {
         icon: 'sparkles',
       },
       {
-        title: 'Ваш комфорт',
-        textLines: [
-          'Точный расчёт КБЖУ, соберём',
-          'вкусный ланч на работу',
-          'с заботой о вашем здоровье',
-        ],
+        title: 'Комфорт в офисе',
+        textLines: ['Соберём рацион с учётом', 'локации офиса и ланч-бокс', 'с точным КБЖУ'],
         icon: 'listDetails',
       },
       {
@@ -74,11 +70,10 @@ export const site = {
     },
     project: {
       label: 'Проект:',
-      nameLines: ['Refectorio'],
+      nameLines: ['ПроЛанч'],
       leadLines: ['Ваша цель —', 'наше меню'],
-      logoAlt: 'Логотип Refectorio — яблоко',
       more: 'Подробнее',
-      moreLabel: 'Подробнее о проекте Refectorio',
+      moreLabel: 'Подробнее о проекте ПроЛанч',
     },
   },
   quizShell: {
@@ -102,7 +97,7 @@ export const site = {
   },
   /** The project details card (stage 3, 4.19). Every sentence is true of the site as it is now. */
   projectDialog: {
-    title: 'Refectorio',
+    title: 'ПроЛанч',
     paragraphs: [
       'Сайт, который помогает поставить цель в питании — сбросить вес, набрать мышцы или удержать форму — и прийти к ней без жёстких диет.',
       'Вы выбираете цель и проходите короткий тест: о себе, режиме дня и вкусах. По ответам мы собираем меню — генерацию сейчас дорабатываем.',
