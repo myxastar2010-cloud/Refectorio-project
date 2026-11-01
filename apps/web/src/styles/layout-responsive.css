@@ -96,7 +96,7 @@
 
   /* The two lines stay two lines, like on the mockup: the longer one fits a 360-px phone at this size. */
   .hero-title {
-    font-size: clamp(26px, 8vw, 44px);
+    font-size: clamp(24px, 7.6vw, 44px);
     line-height: 1.08;
   }
 
@@ -147,6 +147,7 @@
   .cta {
     gap: 8px;
     font-size: 21px;
+    font-weight: 700;
   }
 
   /* As tall as the longest text of the row (the grid stretches the others to it). */
@@ -355,39 +356,40 @@
   /* The title over the whole width; the lead and the button on the left, she on the right of them, the cards below. */
   .scene--hero {
     display: grid;
-    grid-template-rows: 1fr auto auto auto auto 1fr;
+    grid-template-rows: repeat(4, auto);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-content: safe center;
     column-gap: 24px;
   }
 
   .hero-title {
-    grid-row: 2;
+    grid-row: 1;
     grid-column: 1 / -1;
     margin-top: 0;
   }
 
   .hero-lead {
-    grid-row: 3;
+    grid-row: 2;
     grid-column: 1;
     align-self: end;
   }
 
   .cta-slot {
-    grid-row: 4;
+    grid-row: 3;
     grid-column: 1;
     align-self: start;
     width: 100%;
   }
 
   .hero-girl-slot {
-    grid-row: 3 / 5;
+    grid-row: 2 / 4;
     grid-column: 2;
     max-height: none;
     min-height: clamp(180px, 26svh, 340px);
   }
 
   .features {
-    grid-row: 5;
+    grid-row: 4;
     grid-column: 1 / -1;
   }
 
@@ -425,7 +427,7 @@
      enough for the left column here, and she stands beside the whole text block. */
   .scene--hero {
     --hero-top: calc(96px + env(safe-area-inset-top));
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
   }
 
   .hero-title {
@@ -433,12 +435,13 @@
   }
 
   .hero-girl-slot {
-    grid-row: 2 / 5;
+    grid-row: 1 / 4;
     min-height: 0;
   }
 
+  /* On one line each in the left column, 1024×768 included. */
   .hero-title {
-    font-size: clamp(40px, 6.8svh, 60px);
+    font-size: clamp(40px, 6.6svh, 60px);
   }
 
   /* The lead in two lines and the cards' texts a little closer to their edges: part 1 fits 1024×768 too. */

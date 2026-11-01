@@ -11,9 +11,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = process.env.SITE ?? 'http://localhost:4173';
 
 const browser = await chromium.launch();
+// The desktop composition, in the proportions of an OG image: narrower than 1280 px the page is the tablet layout.
 const page = await browser.newPage({
-  viewport: { width: 1200, height: 630 },
-  deviceScaleFactor: 2,
+  viewport: { width: 1920, height: 1008 },
+  deviceScaleFactor: 1,
 });
 await page.goto(`${SITE}/?pose=design&freeze=1&seed=1`);
 // Runs in the page (browser globals), hence the string form.

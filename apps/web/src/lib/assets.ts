@@ -108,10 +108,12 @@ export const images: Readonly<Record<ImageKey, ResponsiveImage>> = {
 
 /** The hero girl (scripts/girl-video): the loop's first frame and the loop itself. */
 export const girlAssets = {
+  /** Each still is the first frame of the file below it: the same pixels at the same size. */
   still: {
-    avifSrcSet: `${url('girl-still-400.avif')} 400w, ${url('girl-still-800.avif')} 800w`,
-    webpSrcSet: `${url('girl-still-400.webp')} 400w, ${url('girl-still-800.webp')} 800w`,
-    fallback: url('girl-still-800.webp'),
+    avif: url('girl-still-full.avif'),
+    webp: url('girl-still-full.webp'),
+    avifSmall: url('girl-still-480.avif'),
+    webpSmall: url('girl-still-480.webp'),
   },
   video: {
     av1: girlFullAv1,

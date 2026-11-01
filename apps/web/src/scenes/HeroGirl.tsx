@@ -9,6 +9,7 @@ import {
   GIRL_START,
   isFirstFrame,
   nextGirl,
+  pixelGrid,
   shouldPlay,
   type GirlEvent,
 } from './girlPlayback';
@@ -20,6 +21,8 @@ type Props = {
   readonly slotRef: RefObject<HTMLElement | null>;
   /** Part 1 itself: it scrolls where it does not fit, and she scrolls with it. */
   readonly scrollerRef: RefObject<HTMLElement | null>;
+  /** ?freeze=1: time stops for her too, so a screenshot is always the same picture. */
+  readonly frozen: boolean;
 };
 
 const FRAME_S = 1 / GIRL.fps;
@@ -38,8 +41,15 @@ const CASCADE_INDEX = 2;
  * The still is the loop's first frame: it shows at once, and the video takes over in the frame in which its own first
  * frame is presented. Reduced motion or Save-Data: the still, and the video is never requested.
  */
-export const HeroGirl = memo(function HeroGirl({ phase, instant, slotRef, scrollerRef }: Props) {
+export const HeroGirl = memo(function HeroGirl({
+  phase,
+  instant,
+  slotRef,
+  scrollerRef,
+  frozen,
+}: Props) {
   const calm = useCalmMotion();
+  const stillOnly = calm || frozen;
   const placeRef = useRef<HTMLDivElement>(null);
   const artRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -56,16 +66,22 @@ export const HeroGirl = memo(function HeroGirl({ phase, instant, slotRef, scroll
     const measure = () => {
       const box = fitGirl(slot.getBoundingClientRect(), GIRL.width / GIRL.height);
       scrollAtMeasure = scroller.scrollTop;
-      place.style.left = `${String(box.left)}px`;
-      place.style.top = `${String(box.top)}px`;
-      place.style.width = `${String(box.width)}px`;
-      place.style.height = `${String(box.height)}px`;
+      // On a grid that is whole in CSS and in device pixels: at a fractional box an image and a video are snapped
+      // differently, and the swap would shift her lines by a fraction of a pixel.
+      const step = pixelGrid(window.devicePixelRatio);
+      const snap = (px: number) => `${String(Math.round(px / step) * step)}px`;
+      place.style.left = snap(box.left);
+      place.style.top = snap(box.top);
+      place.style.width = snap(box.width);
+      place.style.height = snap(box.height);
       place.style.transform = '';
     };
     const onScroll = () => {
       place.style.transform = `translate3d(0, ${String(scrollAtMeasure - scroller.scrollTop)}px, 0)`;
     };
     measure();
+    // The web font changes the height of the text above her on small screens, and her slot moves without resizing.
+    void document.fonts.ready.then(measure);
     const observer = new ResizeObserver(measure);
     observer.observe(slot);
     observer.observe(scroller);
@@ -170,7 +186,7 @@ export const HeroGirl = memo(function HeroGirl({ phase, instant, slotRef, scroll
       window.removeEventListener('keydown', onGesture);
       video.pause();
     };
-  }, [calm]);
+  }, [stillOnly]);
 
   useEffect(() => {
     activeRef.current = phase === 'shown';
@@ -191,12 +207,12 @@ export const HeroGirl = memo(function HeroGirl({ phase, instant, slotRef, scroll
         {...(instant ? { initial: false as const } : {})}
       >
         <picture>
-          <source type="image/avif" srcSet={still.avifSrcSet} sizes={GIRL.sizes} />
+          <source type="image/avif" srcSet={still.avif} media={GIRL.wideMedia} />
+          <source type="image/webp" srcSet={still.webp} media={GIRL.wideMedia} />
+          <source type="image/avif" srcSet={still.avifSmall} />
           <img
             className="hero-girl-still"
-            src={still.fallback}
-            srcSet={still.webpSrcSet}
-            sizes={GIRL.sizes}
+            src={still.webpSmall}
             width={GIRL.width}
             height={GIRL.height}
             alt=""
@@ -205,7 +221,7 @@ export const HeroGirl = memo(function HeroGirl({ phase, instant, slotRef, scroll
             draggable={false}
           />
         </picture>
-        {!calm && (
+        {!stillOnly && (
           <video
             ref={videoRef}
             className="hero-girl-video"

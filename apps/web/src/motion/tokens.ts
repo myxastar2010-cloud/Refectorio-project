@@ -100,7 +100,6 @@ export const GIRL = {
   wideMedia: '(min-width: 48rem)',
   av1: 'video/mp4; codecs="av01.0.05M.08"',
   h264: 'video/mp4; codecs="avc1.640028"',
-  sizes: '(min-width: 80rem) 34vw, (min-width: 48rem) 45vw, 92vw',
 } as const;
 
 export const PRICING = {

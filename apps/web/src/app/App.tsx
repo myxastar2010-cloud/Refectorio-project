@@ -383,6 +383,7 @@ function Page() {
             instant={instant}
             slotRef={girlSlotRef}
             scrollerRef={heroRef}
+            frozen={params.freeze}
           />
           <div className="about-scroller" ref={aboutRef} inert={scene !== 'about'}>
             <AboutScene

@@ -64,6 +64,15 @@ export function fitGirl(
   };
 }
 
+/** The smallest step in CSS px that is whole in device px too: 1 at 100 % and 200 %, 2 at 150 %, 4 at 125 %. */
+export function pixelGrid(deviceRatio: number): number {
+  for (let step = 1; step < 8; step += 1) {
+    const device = step * deviceRatio;
+    if (Math.abs(device - Math.round(device)) < 0.01) return step;
+  }
+  return 1;
+}
+
 /** The video plays only while somebody can see it. */
 export const shouldPlay = (input: {
   readonly active: boolean;

@@ -156,24 +156,49 @@ export function buildSilhouette(mask: SilhouetteMask): SilhouetteField {
   const { grid, width, height, rows } = mask;
   const cellWidth = width / grid;
   const cellHeight = height / grid;
-  const isSet = (row: number, column: number) => {
-    const digit = Number.parseInt((rows[row] ?? '').charAt(column >> 2) || '0', 16);
-    return ((digit >> (3 - (column & 3))) & 1) === 1;
+  const cells = new Uint8Array(grid * grid);
+  for (let row = 0; row < grid; row += 1) {
+    for (let column = 0; column < grid; column += 1) {
+      const digit = Number.parseInt((rows[row] ?? '').charAt(column >> 2) || '0', 16);
+      cells[row * grid + column] = (digit >> (3 - (column & 3))) & 1;
+    }
+  }
+  const cellAt = (row: number, column: number) =>
+    row < 0 || column < 0 || row >= grid || column >= grid ? 0 : (cells[row * grid + column] ?? 0);
+  // Only cells on the border of their kind can be the nearest of the other kind: this runs at page load.
+  const borderOf = (kind: number) => {
+    const rowsOf: number[] = [];
+    const columnsOf: number[] = [];
+    for (let row = 0; row < grid; row += 1) {
+      for (let column = 0; column < grid; column += 1) {
+        if (cellAt(row, column) !== kind) continue;
+        const border =
+          cellAt(row - 1, column) !== kind ||
+          cellAt(row + 1, column) !== kind ||
+          cellAt(row, column - 1) !== kind ||
+          cellAt(row, column + 1) !== kind;
+        if (border) {
+          rowsOf.push(row);
+          columnsOf.push(column);
+        }
+      }
+    }
+    return { rows: Int16Array.from(rowsOf), columns: Int16Array.from(columnsOf) };
   };
+  const borders = [borderOf(0), borderOf(1)] as const;
   const distance = new Float32Array(grid * grid);
   for (let row = 0; row < grid; row += 1) {
     for (let column = 0; column < grid; column += 1) {
-      const own = isSet(row, column);
+      const own = cellAt(row, column);
+      const other = own === 1 ? borders[0] : borders[1];
       let nearest = Number.POSITIVE_INFINITY;
-      for (let otherRow = 0; otherRow < grid; otherRow += 1) {
-        for (let otherColumn = 0; otherColumn < grid; otherColumn += 1) {
-          if (isSet(otherRow, otherColumn) === own) continue;
-          const dx = Math.max(0, Math.abs(otherColumn - column) - 0.5) * cellWidth;
-          const dy = Math.max(0, Math.abs(otherRow - row) - 0.5) * cellHeight;
-          nearest = Math.min(nearest, dx * dx + dy * dy);
-        }
+      for (let at = 0; at < other.rows.length; at += 1) {
+        const dx = Math.max(0, Math.abs((other.columns[at] as number) - column) - 0.5) * cellWidth;
+        const dy = Math.max(0, Math.abs((other.rows[at] as number) - row) - 0.5) * cellHeight;
+        const squared = dx * dx + dy * dy;
+        if (squared < nearest) nearest = squared;
       }
-      distance[row * grid + column] = (own ? -1 : 1) * Math.sqrt(nearest);
+      distance[row * grid + column] = (own === 1 ? -1 : 1) * Math.sqrt(nearest);
     }
   }
   return { grid, width, distance, cellWidth, cellHeight };

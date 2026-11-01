@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
+import sharp from 'sharp';
 import { collectErrors, settled } from './helpers';
 
 /** Stage 4, §1.5–1.6: the animated girl and the food that goes around her. */
@@ -24,6 +25,15 @@ async function boxOf(page: Page) {
   return box;
 }
 
+async function pixels(png: Buffer) {
+  const { data, info } = await sharp(png).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  return { data, width: info.width, height: info.height, channels: info.channels };
+}
+
+/** Without the food: these tests look at her own pixels. */
+const hideFood = (page: Page) =>
+  page.addStyleTag({ content: '.food-layer { visibility: hidden !important; }' });
+
 test.describe('the girl', () => {
   test('the still is there at once, and the video takes its place without moving a pixel', async ({
     page,
@@ -44,57 +54,13 @@ test.describe('the girl', () => {
     expect(errors).toEqual([]);
   });
 
-  test('the still and the video’s first frame are the same picture', async ({
-    page,
-    browserName,
-  }) => {
-    test.skip(browserName !== 'chromium', 'one engine is enough: a property of the two files');
-    await page.goto('./?pose=design&freeze=1&seed=1');
-    await expect(art(page)).toHaveAttribute('data-girl', 'video', { timeout: 20_000 });
-    const box = await boxOf(page);
-    await page.evaluate(async () => {
-      const video = document.querySelector('video');
-      if (!video) throw new Error('no video');
-      video.pause();
-      await new Promise((resolve) => {
-        video.onseeked = resolve;
-        video.currentTime = 0;
-      });
-    });
-    const clip = { x: box.x, y: box.y, width: box.width, height: box.height };
-    const shot = () => page.screenshot({ clip, type: 'png' });
-    const videoFrame = await shot();
-    await art(page).evaluate((element) => {
-      (element as HTMLElement).dataset.girl = 'still';
-    });
-    await expect(page.locator('.hero-girl-still')).toBeVisible();
-    const still = await shot();
-    const difference = await page.evaluate(
-      async ([one, two]) => {
-        const pixels = async (base64: string) => {
-          const blob = await (await fetch(`data:image/png;base64,${base64}`)).blob();
-          const bitmap = await createImageBitmap(blob);
-          const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-          const context = canvas.getContext('2d');
-          context?.drawImage(bitmap, 0, 0);
-          return context?.getImageData(0, 0, bitmap.width, bitmap.height).data;
-        };
-        const [a, b] = [await pixels(one ?? ''), await pixels(two ?? '')];
-        if (!a || !b) return 255;
-        let sum = 0;
-        for (let at = 0; at < a.length; at += 4) sum += Math.abs((a[at] ?? 0) - (b[at] ?? 0));
-        return sum / (a.length / 4);
-      },
-      [videoFrame.toString('base64'), still.toString('base64')],
-    );
-    // The mean difference over her box, in levels of 255: an eye sees no change at the swap.
-    expect(difference).toBeLessThan(2.5);
-  });
-
-  test('no edge of her box shows on the page', async ({ page }) => {
-    await page.goto('./?pose=design&freeze=1&seed=1');
-    await expect(page.locator('.hero-girl-still')).toBeVisible();
+  test('no edge of her box shows on the page', async ({ page, browserName }) => {
+    await page.goto('./?seed=1');
+    await hideFood(page);
     await page.waitForLoadState('networkidle');
+    if (browserName !== 'webkit') {
+      await expect(art(page)).toHaveAttribute('data-girl', 'video', { timeout: 20_000 });
+    }
     const box = await boxOf(page);
     const band = 6;
     const clip = {
@@ -103,36 +69,23 @@ test.describe('the girl', () => {
       width: box.width + 2 * band,
       height: box.height + 2 * band,
     };
-    const png = await page.screenshot({ clip, type: 'png' });
-    const lowest = await page.evaluate(
-      async ({ base64, inset }) => {
-        const blob = await (await fetch(`data:image/png;base64,${base64}`)).blob();
-        const bitmap = await createImageBitmap(blob);
-        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-        const context = canvas.getContext('2d');
-        context?.drawImage(bitmap, 0, 0);
-        const data = context?.getImageData(0, 0, bitmap.width, bitmap.height).data;
-        if (!data) return 0;
-        // The page colour on either side of the box edge: the top, left and right bands (the floor lines are not there).
-        let worst = 0;
-        for (let y = 0; y < bitmap.height; y += 1) {
-          for (let x = 0; x < bitmap.width; x += 1) {
-            const inBand = y < inset * 2 || x < inset * 2 || x >= bitmap.width - inset * 2;
-            if (!inBand) continue;
-            const at = (y * bitmap.width + x) * 4;
-            worst = Math.max(
-              worst,
-              Math.abs((data[at] ?? 0) - 254),
-              Math.abs((data[at + 1] ?? 0) - 249),
-              Math.abs((data[at + 2] ?? 0) - 247),
-            );
-          }
-        }
-        return worst;
-      },
-      { base64: png.toString('base64'), inset: band },
-    );
-    expect(lowest).toBeLessThanOrEqual(3);
+    const image = await pixels(await page.screenshot({ clip, type: 'png' }));
+    // The page colour on either side of the box's edge: the top, left and right bands (her floor lines are at the bottom).
+    let worst = 0;
+    for (let y = 0; y < image.height; y += 1) {
+      for (let x = 0; x < image.width; x += 1) {
+        const inBand = y < 2 * band || x < 2 * band || x >= image.width - 2 * band;
+        if (!inBand) continue;
+        const at = (y * image.width + x) * image.channels;
+        worst = Math.max(
+          worst,
+          Math.abs((image.data[at] ?? 0) - 254),
+          Math.abs((image.data[at + 1] ?? 0) - 249),
+          Math.abs((image.data[at + 2] ?? 0) - 247),
+        );
+      }
+    }
+    expect(worst).toBeLessThanOrEqual(3);
   });
 
   test('reduced motion: the still, and the video is never requested', async ({ page }) => {
@@ -166,6 +119,48 @@ test.describe('the girl', () => {
     await expect.poll(paused).toBe(false);
   });
 });
+
+for (const [name, screen] of [
+  ['1920×1080', { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 }],
+  ['the team’s laptop', { viewport: { width: 1536, height: 730 }, deviceScaleFactor: 1.25 }],
+] as const) {
+  test.describe(`the swap on ${name}`, () => {
+    test.use(screen);
+
+    test('the still and the video’s first frame are the same picture', async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName !== 'chromium', 'one engine is enough: a property of the two files');
+      await page.goto('./?seed=1');
+      await hideFood(page);
+      await expect(art(page)).toHaveAttribute('data-girl', 'video', { timeout: 20_000 });
+      const box = await boxOf(page);
+      await page.evaluate(async () => {
+        const video = document.querySelector('video');
+        if (!video) throw new Error('no video');
+        video.pause();
+        await new Promise((resolve) => {
+          video.onseeked = resolve;
+          video.currentTime = 0;
+        });
+      });
+      const clip = { x: box.x, y: box.y, width: box.width, height: box.height };
+      const videoFrame = await pixels(await page.screenshot({ clip, type: 'png' }));
+      await art(page).evaluate((element) => {
+        (element as HTMLElement).dataset.girl = 'still';
+      });
+      await expect(page.locator('.hero-girl-still')).toBeVisible();
+      const still = await pixels(await page.screenshot({ clip, type: 'png' }));
+      let sum = 0;
+      for (let at = 1; at < still.data.length; at += still.channels) {
+        sum += Math.abs((still.data[at] ?? 0) - (videoFrame.data[at] ?? 0));
+      }
+      // The mean difference over her box, in levels of 255: an eye sees no change at the swap.
+      expect(sum / (still.width * still.height)).toBeLessThan(1.5);
+    });
+  });
+}
 
 test.describe('the food goes around her', () => {
   const VIEWPORTS = [

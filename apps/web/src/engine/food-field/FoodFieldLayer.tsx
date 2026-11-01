@@ -205,6 +205,7 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
     // Text boxes change once the web font arrives.
     void document.fonts.ready.then(() => {
       field.setObstacles(obstaclesOf(sceneRef.current));
+      placeGirl();
     });
     const cancelPreload = whenIdle(() => {
       field.ensureBlur();

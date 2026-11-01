@@ -8,7 +8,7 @@ import { parseArgs } from 'node:util';
 import { chromium } from '@playwright/test';
 import sharp from 'sharp';
 import { av1Config, concat, muxMp4, stripTemporalDelimiters } from './mp4.mjs';
-import { encode, finishFrames, framePng, loadFrames, unionPng, verify } from './page.mjs';
+import { encode, finishFrames, loadFrames, unionPng, verify } from './page.mjs';
 
 const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const SOURCE = path.resolve(
@@ -39,7 +39,11 @@ const MASK_LIMIT = 232;
 const MASK_GRID = 48;
 /** Silhouette grows by this share of her width before it is cut into the grid. */
 const MASK_DILATE = 0.012;
-const STILL_WIDTHS = [400, 800];
+/** Each still is its AV1 file's decoded first frame, at the file's own size: the swap changes no pixel. */
+const STILLS = [
+  { id: 'girl-still-full', video: 'girl-full.av1' },
+  { id: 'girl-still-480', video: 'girl-480.av1' },
+];
 /** The step from the loop's last frame to its first, against a normal step between frames. */
 const SEAM_LIMIT = 2.5;
 
@@ -200,10 +204,9 @@ async function main() {
       throw new Error(`The loop's seam is too visible: ${JSON.stringify(finished)}`);
     }
 
-    const still = fromBase64(await page.evaluate(framePng, 0));
-    await writeFile(path.join(args.work, 'still.png'), still);
     const quantizer = args.q === undefined ? undefined : Number(args.q);
     const report = {};
+    const firstFrames = new Map();
     for (const target of TARGETS) {
       if (args.only && !target.id.includes(args.only)) continue;
       const run = {
@@ -219,10 +222,9 @@ async function main() {
       const url = `${ORIGIN}/${target.id}.mp4`;
       files.set(url, concat([bytes]));
       const check = await page.evaluate(verify, { url, fps: LOOP.fps });
-      await writeFile(
-        path.join(args.work, `${target.id}.first-frame.png`),
-        fromBase64(check.firstFrame),
-      );
+      const firstFrame = fromBase64(check.firstFrame);
+      await writeFile(path.join(args.work, `${target.id}.first-frame.png`), firstFrame);
+      firstFrames.set(target.id, Buffer.from(firstFrame));
       delete check.firstFrame;
       report[target.id] = {
         kb: Math.round(bytes.length / 1024),
@@ -240,16 +242,17 @@ async function main() {
     await writeFile(path.join(args.work, 'silhouette.png'), union);
     const mask = await silhouette(Buffer.from(union), crop.w, crop.h);
     await writeFile(path.join(args.out, 'girl-mask.json'), `${JSON.stringify(mask)}\n`);
-    for (const width of STILL_WIDTHS) {
+    for (const { id, video } of STILLS) {
+      const frame = firstFrames.get(video);
+      if (!frame) continue;
       // sharp writes through a buffer: its own file paths break on the Cyrillic folder (3afe286).
-      const resized = sharp(Buffer.from(still)).resize({ width, kernel: 'lanczos3' });
       await writeFile(
-        path.join(args.out, `girl-still-${width}.webp`),
-        await resized.clone().webp({ quality: 88, effort: 6 }).toBuffer(),
+        path.join(args.out, `${id}.webp`),
+        await sharp(frame).webp({ quality: 92, effort: 6 }).toBuffer(),
       );
       await writeFile(
-        path.join(args.out, `girl-still-${width}.avif`),
-        await resized.clone().avif({ quality: 62, effort: 6 }).toBuffer(),
+        path.join(args.out, `${id}.avif`),
+        await sharp(frame).avif({ quality: 72, effort: 6 }).toBuffer(),
       );
     }
     await writeFile(

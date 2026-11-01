@@ -223,20 +223,6 @@ export async function encode({ fps, target }) {
   };
 }
 
-/** Frame `index` of the finished loop at its full size as a PNG (base64), for the still and the mask. */
-export async function framePng(index) {
-  const { output, size } = window.__girl;
-  const canvas = new OffscreenCanvas(size.w, size.h);
-  canvas.getContext('2d').putImageData(new ImageData(output[index], size.w, size.h), 0, 0);
-  const blob = await canvas.convertToBlob({ type: 'image/png' });
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let text = '';
-  for (let at = 0; at < bytes.length; at += 0x8000) {
-    text += String.fromCharCode(...bytes.subarray(at, at + 0x8000));
-  }
-  return btoa(text);
-}
-
 /** Every pixel that is not white in any frame of the loop: one PNG, the silhouette the food must keep away from. */
 export async function unionPng({ limit }) {
   const { output, size } = window.__girl;
@@ -283,6 +269,9 @@ export async function verify({ url, fps }) {
   const canvas = new OffscreenCanvas(size.w, size.h);
   const context = canvas.getContext('2d', { willReadFrequently: true });
   context.imageSmoothingQuality = 'high';
+  // The decoded first frame at the video's own size: the still is made of these very pixels.
+  const natural = new OffscreenCanvas(video.videoWidth, video.videoHeight);
+  const naturalContext = natural.getContext('2d', { willReadFrequently: true });
   const seek = (time) =>
     new Promise((resolve) => {
       video.onseeked = resolve;
@@ -298,7 +287,10 @@ export async function verify({ url, fps }) {
     });
     context.drawImage(video, 0, 0, size.w, size.h);
     const { data } = context.getImageData(0, 0, size.w, size.h);
-    firstFrame ??= await canvas.convertToBlob({ type: 'image/png' });
+    if (!firstFrame) {
+      naturalContext.drawImage(video, 0, 0);
+      firstFrame = await natural.convertToBlob({ type: 'image/png' });
+    }
     const reference = output[index];
     let squared = 0;
     for (let at = 0; at < data.length; at += 4) {

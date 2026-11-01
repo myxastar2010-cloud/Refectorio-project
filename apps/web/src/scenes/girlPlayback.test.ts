@@ -4,6 +4,7 @@ import {
   GIRL_START,
   isFirstFrame,
   nextGirl,
+  pixelGrid,
   shouldPlay,
   type GirlEvent,
 } from './girlPlayback';
@@ -67,6 +68,15 @@ describe('the girl’s playback', () => {
     const none = fitGirl({ left: 0, top: 0, width: 0, height: 0 }, 2);
     expect(none.width).toBe(0);
     expect(none.height).toBe(0);
+  });
+
+  it('finds a pixel grid that is whole in CSS and in device pixels', () => {
+    expect(pixelGrid(1)).toBe(1);
+    expect(pixelGrid(2)).toBe(1);
+    expect(pixelGrid(3)).toBe(1);
+    expect(pixelGrid(1.5)).toBe(2);
+    expect(pixelGrid(1.25)).toBe(4);
+    expect(pixelGrid(1.1234)).toBe(1);
   });
 
   it('plays only while it can be seen', () => {

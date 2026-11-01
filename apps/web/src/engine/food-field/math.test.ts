@@ -1,14 +1,18 @@
 import { describe, expect, it } from 'vitest';
+import girlMask from '../../assets/generated/girl-mask.json';
 import { SCENE } from '../../motion/tokens';
 import {
   assignSprites,
+  buildSilhouette,
   cameraVisibleArea,
   createRandom,
   FRESH_PROBE,
   maskHit,
+  maskRadius,
   probeFrame,
   rebalanceSprite,
   repulsion,
+  sampleSilhouette,
   scatter,
   stepSpring,
   toLocal,
@@ -227,5 +231,73 @@ describe('rebalanceSprite', () => {
     for (let current = 0; current < 15; current += 1) {
       expect(rebalanceSprite(random, usage, current)).toBe(-1);
     }
+  });
+});
+
+describe('the girl’s silhouette', () => {
+  /** A square of 2×2 cells in the middle of a 4×4 grid, each cell 10 px. */
+  const mask = { grid: 4, width: 40, height: 40, rows: ['0', '6', '6', '0'] };
+  const box = { left: 100, top: 100, right: 140, bottom: 140 };
+  const probe = { distance: 0, nx: 0, ny: 0 };
+
+  it('stores the signed distance to the cells', () => {
+    const field = buildSilhouette({ ...mask, rows: ['000', '600', '600', '000'] });
+    const at = (row: number, column: number) => field.distance[row * 4 + column] ?? 0;
+    expect(at(1, 1)).toBeLessThan(0);
+    expect(at(0, 1)).toBeCloseTo(5, 5);
+    expect(at(1, 0)).toBeCloseTo(5, 5);
+    expect(at(0, 0)).toBeCloseTo(Math.hypot(5, 5), 5);
+  });
+
+  it('points away from her on every side', () => {
+    const field = buildSilhouette({ ...mask, rows: ['000', '600', '600', '000'] });
+    sampleSilhouette(field, box, 95, 120, probe);
+    expect(probe.nx).toBeLessThan(-0.7);
+    sampleSilhouette(field, box, 145, 120, probe);
+    expect(probe.nx).toBeGreaterThan(0.7);
+    sampleSilhouette(field, box, 120, 95, probe);
+    expect(probe.ny).toBeLessThan(-0.7);
+    sampleSilhouette(field, box, 120, 145, probe);
+    expect(probe.ny).toBeGreaterThan(0.7);
+  });
+
+  it('never overstates the room: the sampled distance stays under the true one', () => {
+    const field = buildSilhouette({ ...mask, rows: ['000', '600', '600', '000'] });
+    // The set square covers x, y in 110…130 of the box.
+    for (let x = 60; x <= 180; x += 3) {
+      for (let y = 60; y <= 180; y += 3) {
+        sampleSilhouette(field, box, x, y, probe);
+        const dx = Math.max(0, 110 - x, x - 130);
+        const dy = Math.max(0, 110 - y, y - 130);
+        expect(probe.distance).toBeLessThanOrEqual(Math.hypot(dx, dy) + 1e-3);
+      }
+    }
+  });
+
+  it('scales with the box she is drawn in', () => {
+    const field = buildSilhouette({ ...mask, rows: ['000', '600', '600', '000'] });
+    const twice = { left: 0, top: 0, right: 80, bottom: 80 };
+    sampleSilhouette(field, box, 95, 120, probe);
+    const small = probe.distance;
+    sampleSilhouette(field, twice, -10, 40, probe);
+    expect(probe.distance).toBeCloseTo(small * 2, 3);
+  });
+
+  it('is built from the real mask fast enough for a page load', () => {
+    const started = performance.now();
+    const field = buildSilhouette(girlMask);
+    expect(performance.now() - started).toBeLessThan(40);
+    expect(field.distance.some((value) => value < 0)).toBe(true);
+    expect(field.distance.some((value) => value > 0)).toBe(true);
+  });
+
+  it('measures how far a sprite reaches at any rotation', () => {
+    const mask32 = new Uint32Array(32);
+    mask32[0] = 0x80000000; // the top left cell: its far corner is the sprite's corner
+    expect(maskRadius(mask32, 32)).toBeCloseTo(Math.SQRT1_2, 5);
+    const centre = new Uint32Array(32);
+    centre[16] = 1 << 15; // the cell right of the centre
+    expect(maskRadius(centre, 32)).toBeCloseTo(Math.hypot(1, 1) / 32, 5);
+    expect(maskRadius(new Uint32Array(32), 32)).toBe(0);
   });
 });
