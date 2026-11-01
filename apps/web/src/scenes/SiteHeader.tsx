@@ -1,6 +1,6 @@
 import { memo } from 'react';
-import { IconApple } from '@tabler/icons-react';
 import { m } from 'motion/react';
+import { BrandLogo } from '../components/BrandLogo';
 import { site } from '../content/site.ru';
 import { useCalmMotion } from '../motion/hooks';
 import { DURATION, EASE_IN_OUT, EASE_OUT_SOFT, QUIZ } from '../motion/tokens';
@@ -140,7 +140,9 @@ export const SiteHeader = memo(function SiteHeader({
       {...(instant ? { initial: false as const } : {})}
     >
       <m.div className="brand" variants={heroFadeVariants(0, calm)}>
-        <IconApple aria-hidden className="brand-icon at box" stroke={2} data-food-avoid />
+        <span className="brand-icon at box" aria-hidden data-food-avoid>
+          <BrandLogo sizes="(min-width: 80rem) 7vw, 40px" />
+        </span>
         <span className="brand-name at text-at" data-food-avoid>
           {site.brand.name}
         </span>

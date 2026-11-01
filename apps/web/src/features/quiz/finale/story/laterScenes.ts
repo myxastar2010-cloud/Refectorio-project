@@ -378,11 +378,11 @@ export function dotsScene(ctx0: SceneContext, loopS: number, calm: boolean): Dot
     cloudOut: cloud,
   };
   const accent = rgbOf(ctx0.palette[2]);
-  /** A warmer, lighter companion of the accent (towards coral) for the second light. */
+  /** A lighter companion of the accent (towards --color-accent-soft) for the second light. */
   const warm: Rgb = [
-    Math.round(accent[0] + (255 - accent[0]) * 0.6),
-    Math.round(accent[1] + (150 - accent[1]) * 0.6),
-    Math.round(accent[2] + (110 - accent[2]) * 0.6),
+    Math.round(accent[0] + (214 - accent[0]) * 0.6),
+    Math.round(accent[1] + (232 - accent[1]) * 0.6),
+    Math.round(accent[2] + (190 - accent[2]) * 0.6),
   ];
   const stopsOf = (c: Rgb) =>
     GLOW_STOPS.map(

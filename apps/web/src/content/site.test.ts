@@ -31,7 +31,12 @@ describe('site content', () => {
   it('has a 2-line heading and a 3-line lead, as the composition of part 1 expects', () => {
     expect(site.hero.titleLines).toHaveLength(2);
     expect(site.hero.leadLines).toHaveLength(3);
-    expect(site.hero.titleLines.join(' ')).toBe('Максимум результата, минимум усилий');
+    expect(site.hero.titleLines.join(' ')).toBe('Минимум усилий Максимум результата');
+  });
+
+  it('calls the product ПроЛанч everywhere: the old name stays only in addresses', () => {
+    expect(JSON.stringify(site)).not.toContain('Refectorio');
+    expect(site.meta.title).toBe('ПроЛанч — минимум усилий, максимум результата');
   });
 
   it('shows the two plans of the mockups, a month and a year of Premium', () => {

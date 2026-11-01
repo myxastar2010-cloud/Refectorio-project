@@ -116,6 +116,122 @@ export function maskHit(mask: Uint32Array, size: number, local: Vec): boolean {
   return ((bits >>> (size - 1 - column)) & 1) === 1;
 }
 
+/** How far an item's opaque part reaches from its centre at any rotation, as a share of the sprite's edge. */
+export function maskRadius(mask: Uint32Array, size: number): number {
+  let radius = 0;
+  for (let row = 0; row < size; row += 1) {
+    for (let column = 0; column < size; column += 1) {
+      if (((mask[row] ?? 0) >>> (size - 1 - column)) & 1) {
+        // The cell's far corner.
+        const dx = Math.max(Math.abs(column - size / 2), Math.abs(column + 1 - size / 2));
+        const dy = Math.max(Math.abs(row - size / 2), Math.abs(row + 1 - size / 2));
+        radius = Math.max(radius, Math.hypot(dx, dy));
+      }
+    }
+  }
+  return radius / size;
+}
+
+/**
+ * The girl's silhouette for the food (stage 4, §1.6): the signed distance to it at the centre of every cell of the mask's
+ * grid, in the mask's own pixels, negative inside. A cell is a square of the union: the distance never overstates.
+ */
+export type SilhouetteMask = {
+  readonly grid: number;
+  readonly width: number;
+  readonly height: number;
+  /** Hexadecimal rows, the leftmost cell in the highest bit. */
+  readonly rows: readonly string[];
+};
+
+export type SilhouetteField = {
+  readonly grid: number;
+  readonly width: number;
+  readonly distance: Float32Array;
+  readonly cellWidth: number;
+  readonly cellHeight: number;
+};
+
+export function buildSilhouette(mask: SilhouetteMask): SilhouetteField {
+  const { grid, width, height, rows } = mask;
+  const cellWidth = width / grid;
+  const cellHeight = height / grid;
+  const isSet = (row: number, column: number) => {
+    const digit = Number.parseInt((rows[row] ?? '').charAt(column >> 2) || '0', 16);
+    return ((digit >> (3 - (column & 3))) & 1) === 1;
+  };
+  const distance = new Float32Array(grid * grid);
+  for (let row = 0; row < grid; row += 1) {
+    for (let column = 0; column < grid; column += 1) {
+      const own = isSet(row, column);
+      let nearest = Number.POSITIVE_INFINITY;
+      for (let otherRow = 0; otherRow < grid; otherRow += 1) {
+        for (let otherColumn = 0; otherColumn < grid; otherColumn += 1) {
+          if (isSet(otherRow, otherColumn) === own) continue;
+          const dx = Math.max(0, Math.abs(otherColumn - column) - 0.5) * cellWidth;
+          const dy = Math.max(0, Math.abs(otherRow - row) - 0.5) * cellHeight;
+          nearest = Math.min(nearest, dx * dx + dy * dy);
+        }
+      }
+      distance[row * grid + column] = (own ? -1 : 1) * Math.sqrt(nearest);
+    }
+  }
+  return { grid, width, distance, cellWidth, cellHeight };
+}
+
+/** Result of sampleSilhouette, reused from frame to frame. */
+export type SilhouetteProbe = { distance: number; nx: number; ny: number };
+
+function fieldAt(field: SilhouetteField, u: number, v: number): number {
+  const last = field.grid - 1;
+  const x = Math.min(Math.max(u, 0), last);
+  const y = Math.min(Math.max(v, 0), last);
+  const column = Math.min(Math.floor(x), last - 1);
+  const row = Math.min(Math.floor(y), last - 1);
+  const fx = x - column;
+  const fy = y - row;
+  const at = (r: number, c: number) => field.distance[r * field.grid + c] ?? 0;
+  const top = at(row, column) * (1 - fx) + at(row, column + 1) * fx;
+  const bottom = at(row + 1, column) * (1 - fx) + at(row + 1, column + 1) * fx;
+  return top * (1 - fy) + bottom * fy;
+}
+
+/**
+ * Distance from a point (CSS px) to the silhouette drawn in `box`, and the unit direction away from it. Beyond the box
+ * the distance grows with the way to the box. No allocations: it runs for the items near her on every frame.
+ */
+export function sampleSilhouette(
+  field: SilhouetteField,
+  box: Rect,
+  x: number,
+  y: number,
+  out: SilhouetteProbe,
+): void {
+  const scale = (box.right - box.left) / field.width;
+  const inX = Math.min(Math.max(x, box.left), box.right);
+  const inY = Math.min(Math.max(y, box.top), box.bottom);
+  const u = (inX - box.left) / scale / field.cellWidth - 0.5;
+  const v = (inY - box.top) / scale / field.cellHeight - 0.5;
+  const beyondX = x - inX;
+  const beyondY = y - inY;
+  const beyond = Math.hypot(beyondX, beyondY);
+  // Half a cell of bilinear smoothing must never read as more room than there is.
+  const margin = (Math.min(field.cellWidth, field.cellHeight) / 4) * scale;
+  out.distance = fieldAt(field, u, v) * scale + beyond - margin;
+  let nx = fieldAt(field, u + 0.5, v) - fieldAt(field, u - 0.5, v);
+  let ny = fieldAt(field, u, v + 0.5) - fieldAt(field, u, v - 0.5);
+  const gradient = Math.hypot(nx, ny) || 1;
+  nx /= gradient;
+  ny /= gradient;
+  if (beyond > 0) {
+    nx += beyondX / beyond;
+    ny += beyondY / beyond;
+  }
+  const length = Math.hypot(nx, ny) || 1;
+  out.nx = nx / length;
+  out.ny = ny / length;
+}
+
 /** Damped spring towards 1 for the click "bounce" (semi-implicit Euler, stable for dt ≤ 50 ms). */
 export type Spring = { value: number; velocity: number };
 export function stepSpring(spring: Spring, dt: number, stiffness: number, damping: number): Spring {

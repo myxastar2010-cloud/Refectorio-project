@@ -22,6 +22,7 @@ import { useCalmMotion } from '../motion/hooks';
 import type { PlanPictures } from '../features/pricing/pictures';
 import { DURATION, PRICING, QUIZ, SCENE } from '../motion/tokens';
 import { AboutScene } from '../scenes/AboutScene';
+import { HeroGirl } from '../scenes/HeroGirl';
 import { HeroScene } from '../scenes/HeroScene';
 import { SiteHeader } from '../scenes/SiteHeader';
 import { useSceneInput } from '../scenes/useSceneInput';
@@ -98,6 +99,7 @@ function Page() {
   const projectMoreRef = useRef<HTMLButtonElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
+  const girlSlotRef = useRef<HTMLDivElement>(null);
   const [heroScrolled, setHeroScrolled] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
   const cardOpen = openCard !== null;
@@ -373,6 +375,14 @@ function Page() {
             onScrolled={setHeroScrolled}
             onCreateMenu={onCreateMenu}
             onPrefetch={prefetchQuiz}
+            girlSlotRef={girlSlotRef}
+          />
+          {/* After the scene: she reads its refs in her layout effect, and z-index puts her under the food. */}
+          <HeroGirl
+            phase={scene === 'hero' ? 'shown' : 'hidden'}
+            instant={instant}
+            slotRef={girlSlotRef}
+            scrollerRef={heroRef}
           />
           <div className="about-scroller" ref={aboutRef} inert={scene !== 'about'}>
             <AboutScene

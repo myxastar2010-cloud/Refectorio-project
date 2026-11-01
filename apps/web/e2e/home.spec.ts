@@ -300,10 +300,10 @@ test.describe('quality', () => {
     const errors = collectErrors(page);
     await page.goto('./?seed=1');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Максимум результата, минимум усилий',
+      'Минимум усилий Максимум результата',
     );
     const faces = await page.evaluate(async () => {
-      const loaded = await document.fonts.load('700 16px "Open Runde"', 'Питаться Refectorio');
+      const loaded = await document.fonts.load('700 16px "Open Runde"', 'Питаться ПроЛанч');
       return loaded.filter((face) => face.status === 'loaded').length;
     });
     expect(faces).toBeGreaterThan(0);
@@ -361,7 +361,7 @@ test.describe('quality', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toBeHidden();
     await page.getByRole('button', { name: /Подробнее о проекте/ }).click();
-    await expect(page.getByRole('dialog', { name: 'Refectorio' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'ПроЛанч' })).toBeVisible();
     expect(await seriousViolations(page)).toEqual([]);
   });
 
@@ -515,12 +515,12 @@ test.describe('project card', () => {
   }) => {
     await page.goto('./?seed=1#about');
     await settled(page, 'about');
-    await expect(page.getByRole('img', { name: 'Логотип Refectorio — яблоко' })).toBeVisible();
+    await expect(page.getByRole('img', { name: 'Логотип ПроЛанч — кочан капусты' })).toBeVisible();
     // The links moved from the about card into the details.
     await expect(page.getByRole('button', { name: 'Исходный код' })).toHaveCount(0);
-    const more = page.getByRole('button', { name: 'Подробнее о проекте Refectorio' });
+    const more = page.getByRole('button', { name: 'Подробнее о проекте ПроЛанч' });
     await more.click();
-    const dialog = page.getByRole('dialog', { name: 'Refectorio' });
+    const dialog = page.getByRole('dialog', { name: 'ПроЛанч' });
     await expect(dialog).toBeVisible();
     const close = page.getByRole('button', { name: 'Закрыть подробности о проекте' });
     await expect(close).toBeFocused();
@@ -555,7 +555,7 @@ test.describe('project card', () => {
   }) => {
     await page.goto('./?seed=1#about');
     await settled(page, 'about');
-    const more = page.getByRole('button', { name: 'Подробнее о проекте Refectorio' });
+    const more = page.getByRole('button', { name: 'Подробнее о проекте ПроЛанч' });
     await more.click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await page.keyboard.press('ArrowUp');

@@ -31,6 +31,9 @@ const BLUR_PAD_RATIO = Math.ceil(((3 * FOOD_BLUR_SIGMA_1X) / FOOD_SIZE_1X) * 100
 const MASK_SIZE = 32;
 const ALPHA_THRESHOLD = 128;
 
+/** The logo's ladder: the header at 1×, 2× and 3×; the project tile takes what it needs. */
+const LOGO_WIDTHS = [100, 200, 300];
+
 const AVIF_SPRITE = { quality: 62, effort: 6 };
 const WEBP_SPRITE = { quality: 82, alphaQuality: 90, effort: 6 };
 const AVIF_PHOTO = { quality: 60, effort: 6 };
@@ -222,6 +225,24 @@ async function buildLogo(file, baseName) {
   return { width: meta.width, height: meta.height, ...files };
 }
 
+/** The logo without its transparent margins, as a ladder of widths. */
+async function buildBrand() {
+  const input = await sharp(await load(path.join(SRC, 'brand/logo-cabbage.png')))
+    .trim()
+    .png()
+    .toBuffer();
+  const meta = await sharp(input).metadata();
+  const variants = {};
+  for (const width of LOGO_WIDTHS) {
+    variants[width] = await writeVariants(
+      sharp(input).resize({ width, kernel: 'lanczos3' }),
+      `logo-cabbage-${width}`,
+      { avif: AVIF_SPRITE, webp: WEBP_SPRITE },
+    );
+  }
+  return { logo: { width: meta.width, height: meta.height, variants } };
+}
+
 async function buildTeam() {
   return {
     // One picture for every screen: phones show it whole, landscape cards a band of it (DIALOG.picture).
@@ -275,13 +296,14 @@ async function buildPricing() {
   await writeFile(toFile('pricing/manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
-/** This script's own outputs: everything in generated/ except the quiz icons (scripts/quiz-icons.mjs). */
+/** Its own outputs: everything in generated/ except the quiz icons (quiz-icons.mjs) and the hero girl (girl-video/). */
 async function removeOwnOutputs() {
   await mkdir(OUT, { recursive: true });
   for (const entry of await readdir(OUT, { withFileTypes: true })) {
     const own = entry.isDirectory()
       ? entry.name === 'pricing'
-      : /\.(avif|webp)$/.test(entry.name) || entry.name === 'manifest.json';
+      : (/\.(avif|webp)$/.test(entry.name) && !entry.name.startsWith('girl-')) ||
+        entry.name === 'manifest.json';
     if (own) await rm(path.join(OUT, entry.name), { recursive: true, force: true });
   }
 }
@@ -301,6 +323,7 @@ async function main() {
       items: await buildFood(),
     },
     team: await buildTeam(),
+    brand: await buildBrand(),
   };
   await writeFile(toFile('manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   await buildPricing();

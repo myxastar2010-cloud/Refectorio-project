@@ -1,6 +1,7 @@
-import { IconApple, IconChevronUp } from '@tabler/icons-react';
+import { IconChevronUp } from '@tabler/icons-react';
 import { m, type MotionStyle } from 'motion/react';
 import { memo, useEffect, useRef, type Ref, type RefObject } from 'react';
+import { BrandLogo } from '../components/BrandLogo';
 import { site } from '../content/site.ru';
 import { TeamTile } from '../features/team-dialog/TeamTile';
 import { preloadTeamPicture } from '../features/team-dialog/preload';
@@ -139,14 +140,14 @@ export const AboutScene = memo(function AboutScene({
             ref={projectTileRef}
             className="info-tile at box project-tile"
             role="img"
-            aria-label={projectText.logoAlt}
+            aria-label={site.brand.logoAlt}
           >
-            <IconApple
-              aria-hidden
+            <span
               className="project-tile-icon"
-              stroke={2}
               style={project.out ? { visibility: 'hidden' } : undefined}
-            />
+            >
+              <BrandLogo sizes="(min-width: 80rem) 10vw, 96px" />
+            </span>
           </div>
           <h3 id="project-card-name" className="info-name at text-at">
             <Lines lines={projectText.nameLines} />

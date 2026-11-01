@@ -113,21 +113,20 @@ html {
     height: calc(var(--hero-header-h) * var(--s));
   }
 
-  /* Part 1 hangs on the side margins: the apple, the heading, the lead, the button and the cards start at the left
-     one, «О проекте» and the last card end at the right one. */
+  /* Part 1 hangs on the side margins: the logo, the heading, the lead and the button start at the left one, «О проекте»
+     ends at the right one; the row of cards has a slightly wider stretch of its own. */
   .brand-icon {
-    --y: var(--hero-logo-icon-y);
-    --w: var(--hero-logo-icon-size);
-    --h: var(--hero-logo-icon-size);
-    left: calc(var(--hero-side) - var(--hero-logo-icon-inset) * var(--w) * var(--s));
+    --y: var(--hero-logo-y);
+    --w: var(--hero-logo-w);
+    --h: var(--hero-logo-h);
+    left: calc(var(--hero-side) + var(--hero-logo-x) * var(--s));
   }
 
   .brand-name {
     --baseline: var(--hero-brand-baseline);
     --size: var(--type-brand-size);
     left: calc(
-      var(--hero-side) +
-        ((1 - var(--hero-logo-icon-inset)) * var(--hero-logo-icon-size) + var(--hero-brand-gap)) *
+      var(--hero-side) + (var(--hero-logo-x) + var(--hero-logo-w) + var(--hero-brand-gap)) *
         var(--s)
     );
   }
@@ -191,29 +190,39 @@ html {
     border-radius: calc(var(--radius-pill) * var(--s));
   }
 
+  /* Her place on the right of part 1, moving with the window's right edge (HeroGirl follows this box). */
+  .hero-girl-slot {
+    --y: var(--hero-girl-y);
+    --w: var(--hero-girl-w);
+    --h: var(--hero-girl-h);
+    --dy: var(--mid);
+    left: calc(100% - (var(--hero-girl-right) + var(--hero-girl-w)) * var(--s));
+  }
+
   .cta {
-    /* White on #E63946 needs large text (≥ 18.66 px bold): small laptops get at least 19 px. */
+    /* White on the accent needs large text (≥ 18.66 px bold): small laptops get at least 19 px. */
     font-size: max(19px, calc(var(--type-cta-label-size) * var(--s)));
     gap: calc(var(--hero-cta-gap) * var(--s));
   }
 
-  /* Four cards between the side margins. */
+  /* Four cards between their side margins. */
   .feature-card {
-    --card-w: calc((100% - 2 * var(--hero-side) - 3 * var(--hero-cards-gap-w)) / 4);
+    --card-w: calc((100% - 2 * var(--hero-cards-side) - 3 * var(--hero-cards-gap-w)) / 4);
     --y: var(--hero-cards-y);
     --h: var(--hero-card-h);
     --dy: var(--extra);
-    left: calc(var(--hero-side) + var(--i) * (var(--card-w) + var(--hero-cards-gap-w)));
+    left: calc(var(--hero-cards-side) + var(--i) * (var(--card-w) + var(--hero-cards-gap-w)));
     width: var(--card-w);
     border-radius: calc(var(--radius-feature-card) * var(--s));
   }
 
-  /* Title and text: one block centred in the card's height. */
+  /* Title and text from the same height in every card, whatever the text's length (the mockup). */
   .feature-surface {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     gap: calc(var(--hero-card-text-gap) * var(--s));
+    padding-top: calc(var(--hero-card-pad-y) * var(--s));
     padding-left: calc(var(--hero-card-pad-x) * var(--s));
   }
 
@@ -381,7 +390,7 @@ html {
 .about-title {
   font-weight: var(--type-about-title-weight);
   letter-spacing: var(--type-about-title-tracking);
-  color: var(--color-accent);
+  color: var(--color-accent-fill);
 }
 
 .info-label {
@@ -421,8 +430,6 @@ html {
      and their texts keep the frame size so the text never runs into the icon. */
   @media (max-width: 1439.98px) {
     .stage {
-      --hero-side: max(32px, 2.6vw);
-      --hero-cards-gap-w: max(16px, 1.5vw);
       --card-boost: 1;
     }
   }
@@ -506,6 +513,7 @@ html {
 
   .feature-surface {
     gap: calc(var(--hero-card-text-gap) * var(--card-boost) * var(--s));
+    padding-top: calc(var(--hero-card-pad-y) * var(--card-boost) * var(--s));
   }
 
   .feature-title {

@@ -1,12 +1,13 @@
 import { m } from 'motion/react';
 import { memo, useEffect, useRef } from 'react';
 import type { Scene } from '../../app/useScene';
+import girlMask from '../../assets/generated/girl-mask.json';
 import { foodSprites } from '../../lib/assets';
 import type { TestParams } from '../../lib/params';
 import { useCalmMotion } from '../../motion/hooks';
 import { EASE_OUT_EXPO, QUIZ, SCENE } from '../../motion/tokens';
 import { createFoodField, type Device, type FoodField } from './engine';
-import { cameraVisibleArea, type Rect } from './math';
+import { buildSilhouette, cameraVisibleArea, type Rect, type SilhouetteField } from './math';
 import { whenIdle } from '../../lib/idle';
 
 const RESIZE_DEBOUNCE_MS = 200;
@@ -63,6 +64,13 @@ function obstacles(): Rect[] {
     .map((element) => element.getBoundingClientRect())
     .filter((rect) => rect.width > 0 && rect.height > 0)
     .map((rect) => ({ left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }));
+}
+
+/** Where the girl stands now (HeroGirl places her box); null where this layout has no room for her. */
+function girlBox(): Rect | null {
+  const rect = document.querySelector('.hero-girl')?.getBoundingClientRect();
+  if (!rect || rect.width === 0 || rect.height === 0) return null;
+  return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
 }
 
 /** The quiz's central column: the food drifts around it softly (ТЗ §7.9). */
@@ -154,6 +162,12 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
       device,
     });
     fieldRef.current = field;
+    const silhouette: SilhouetteField = buildSilhouette(girlMask);
+    const placeGirl = () => {
+      const box = girlBox();
+      field.setSilhouette(box ? { field: silhouette, box } : null);
+    };
+    placeGirl();
     const startScene = sceneRef.current;
     const receded = startScene !== 'hero';
     /** The obstacles of a scene; part 1's are measured now and kept, a window changed elsewhere forgets them. */
@@ -184,6 +198,7 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(() => {
         field.setObstacles(obstaclesOf(sceneRef.current));
+        placeGirl();
         field.resize();
       }, RESIZE_DEBOUNCE_MS);
     };
@@ -212,9 +227,13 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
       if (index >= 0) field.bounce(index);
     };
 
+    // Small screens scroll part 1, and she goes with it.
+    const hero = document.querySelector('.scene--hero');
+    hero?.addEventListener('scroll', placeGirl, { passive: true });
     window.addEventListener('resize', onResize);
     window.addEventListener('pointerdown', onPointerDown);
     return () => {
+      hero?.removeEventListener('scroll', placeGirl);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('pointerdown', onPointerDown);
       window.clearTimeout(resizeTimer);
