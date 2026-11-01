@@ -93,6 +93,8 @@ export const GIRL = {
   fps: 24,
   width: 782,
   height: 702,
+  /** The video element joins the page when it is idle, at the latest after this. */
+  videoAfterMs: 500,
   /** No first frame by then: the still stays, and one more try comes with the first gesture. */
   stallMs: 4000,
   /** Without frame callbacks: how late the first time update may come and still count as the loop's start. */

@@ -296,6 +296,15 @@ test.describe('food', () => {
 });
 
 test.describe('quality', () => {
+  test('no scene shows the old name (D-060: it stays only in addresses)', async ({ page }) => {
+    for (const hash of ['', '#about', '#pricing', '#quiz']) {
+      await page.goto(`./?seed=1${hash}`);
+      await expect(page.locator('.page')).toHaveAttribute('data-ready', '');
+      expect(await page.locator('body').innerText()).not.toContain('Refectorio');
+    }
+    await expect(page).toHaveTitle(/^ПроЛанч/);
+  });
+
   test('no console errors, Open Runde is used', async ({ page }) => {
     const errors = collectErrors(page);
     await page.goto('./?seed=1');

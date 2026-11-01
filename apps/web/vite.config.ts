@@ -51,6 +51,46 @@ function preloadFonts(): Plugin {
 }
 
 /**
+ * The hero girl's still is the largest thing of the first screen: fetched from the HTML itself, it does not wait for the
+ * page's JavaScript to name it. Browsers without AVIF skip these, and the <picture> gives them the WebP.
+ */
+function preloadGirl(): Plugin {
+  const STILLS = [
+    { name: 'girl-still-full', media: '(min-width: 48rem)' },
+    { name: 'girl-still-480', media: '(max-width: 47.99rem)' },
+  ];
+  return {
+    name: 'refectorio:preload-girl',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, ctx) {
+        const files = Object.keys(ctx.bundle ?? {});
+        return STILLS.flatMap(({ name, media }) => {
+          const file = files.find((path) => path.includes(name) && path.endsWith('.avif'));
+          return file
+            ? [
+                {
+                  tag: 'link',
+                  attrs: {
+                    rel: 'preload',
+                    as: 'image',
+                    type: 'image/avif',
+                    href: `${base()}${file}`,
+                    media,
+                    fetchpriority: 'high',
+                  },
+                  injectTo: 'head' as const,
+                },
+              ]
+            : [];
+        });
+      },
+    },
+  };
+}
+
+/**
  * GitHub Pages cannot send response headers, so the production build carries the CSP as a <meta> tag too
  * (Render sends the full set from render.yaml). frame-ancestors and upgrade-insecure-requests are header-only:
  * in <meta> they are ignored or break the local http preview.
@@ -130,6 +170,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     tailwindcss(),
     preloadFonts(),
+    preloadGirl(),
     metaCsp(),
     siteMeta(),
     process.env.ANALYZE

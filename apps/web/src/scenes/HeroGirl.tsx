@@ -1,5 +1,6 @@
 import { m } from 'motion/react';
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { whenIdle } from '../lib/idle';
 import { girlAssets } from '../lib/assets';
 import { useCalmMotion } from '../motion/hooks';
 import { GIRL } from '../motion/tokens';
@@ -50,6 +51,8 @@ export const HeroGirl = memo(function HeroGirl({
 }: Props) {
   const calm = useCalmMotion();
   const stillOnly = calm || frozen;
+  // The still is on the screen from the first paint; the video joins when the page is idle and competes with nothing.
+  const [videoReady, setVideoReady] = useState(false);
   const placeRef = useRef<HTMLDivElement>(null);
   const artRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -91,6 +94,13 @@ export const HeroGirl = memo(function HeroGirl({
       scroller.removeEventListener('scroll', onScroll);
     };
   }, [slotRef, scrollerRef]);
+
+  useEffect(() => {
+    if (stillOnly) return undefined;
+    return whenIdle(() => {
+      setVideoReady(true);
+    }, GIRL.videoAfterMs);
+  }, [stillOnly]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -186,7 +196,7 @@ export const HeroGirl = memo(function HeroGirl({
       window.removeEventListener('keydown', onGesture);
       video.pause();
     };
-  }, [stillOnly]);
+  }, [videoReady]);
 
   useEffect(() => {
     activeRef.current = phase === 'shown';
@@ -221,7 +231,7 @@ export const HeroGirl = memo(function HeroGirl({
             draggable={false}
           />
         </picture>
-        {!stillOnly && (
+        {videoReady && !stillOnly && (
           <video
             ref={videoRef}
             className="hero-girl-video"
