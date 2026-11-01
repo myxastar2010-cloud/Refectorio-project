@@ -1,5 +1,6 @@
 // Checks the photo API keys and whether this computer reaches the Pexels CDN (ТЗ §9.8 step 1).
 // Prints only statuses — never a key. Run: node scripts/photos/check-keys.mjs
+import { pathToFileURL } from 'node:url';
 import { fetchWithTimeout, rateLimit, readKey } from './lib.mjs';
 
 const PEXELS_PROBE_IMAGE =
@@ -23,7 +24,7 @@ async function checkPexels() {
   }
 }
 
-async function checkUnsplash() {
+export async function checkUnsplash() {
   const key = await readKey('unsplash');
   if (!key) return 'Unsplash: нет ключа';
   try {
@@ -57,6 +58,8 @@ async function checkPexelsCdn() {
   }
 }
 
-for (const line of await Promise.all([checkPexels(), checkUnsplash(), checkPexelsCdn()])) {
-  console.log(line);
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  for (const line of await Promise.all([checkPexels(), checkUnsplash(), checkPexelsCdn()])) {
+    console.log(line);
+  }
 }

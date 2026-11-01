@@ -2,7 +2,8 @@
 name: perf-auditor
 description: Аудит производительности — Lighthouse, размер бандла, FPS анимаций, долгие задачи. Вызывать после изменений в анимациях, зависимостях и ассетах и перед публикацией.
 tools: Read, Grep, Glob, Bash, mcp__playwright
-model: inherit
+model: sonnet
+effort: high
 color: orange
 ---
 
@@ -28,3 +29,5 @@ color: orange
 ## Результат
 
 Таблица метрик «бюджет → факт → статус», топ-5 причин потерь с конкретными исправлениями (файл, что поменять, ожидаемый выигрыш).
+
+Work from the JSON/metrics files and ≤ 6 downscaled crops. Write the full report to the given file; return ≤ 15 lines + the path.

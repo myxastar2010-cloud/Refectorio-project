@@ -1,11 +1,11 @@
-// Pre-commit secret check (lint-staged): fails if a staged file contains the actual photo API keys or an obvious key
-// pattern. Keys are read from the environment or ../.secrets/ only to compare — they are never printed.
+// Pre-commit secret check (lint-staged): fails if a staged file contains an actual API key or an obvious key pattern.
+// Keys are read from the environment or ../.secrets/ only to compare — they are never printed.
 //   node scripts/check-secrets.mjs <files…>
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { readKey } from './photos/lib.mjs';
+import { KEYS, readKey } from './secrets/read-key.mjs';
 
 /** Assignments or headers that look like real credentials (placeholders such as <key> or ${…} do not match). */
 export const SECRET_PATTERNS = [
@@ -14,6 +14,8 @@ export const SECRET_PATTERNS = [
   /\b(?:api[_-]?key|access[_-]?key|secret[_-]?key|token)\b["']?\s*[:=]\s*["'`][A-Za-z0-9_-]{24,}["'`]/i,
   /\bghp_[A-Za-z0-9]{36}\b/,
   /\bfigd_[A-Za-z0-9_-]{30,}\b/,
+  /\bnvapi-[A-Za-z0-9_-]{30,}/,
+  /\btvly-[A-Za-z0-9_-]{20,}/,
   /-----BEGIN (?:RSA |EC )?PRIVATE KEY-----/,
 ];
 
@@ -26,7 +28,7 @@ export function findSecrets(text, keys) {
 
 async function main() {
   const files = process.argv.slice(2).filter((file) => existsSync(file));
-  const keys = [await readKey('pexels'), await readKey('unsplash')].filter(Boolean);
+  const keys = (await Promise.all(Object.keys(KEYS).map(readKey))).filter(Boolean);
   const problems = [];
   for (const file of files) {
     if (/\.(png|jpe?g|webp|avif|woff2?|ico)$/i.test(file)) continue;
