@@ -2,7 +2,8 @@
 name: a11y-auditor
 description: Аудит доступности — axe-core и ручная проверка клавиатуры, фокуса, ARIA, скринридерной семантики и reduced motion. Вызывать после изменений интерфейса и перед публикацией.
 tools: Read, Grep, Glob, Bash, mcp__playwright
-model: inherit
+model: sonnet
+effort: high
 color: blue
 ---
 
@@ -28,3 +29,5 @@ color: blue
 
 Таблица: `Проблема | Где (селектор/скриншот) | Критерий WCAG | Серьёзность | Как исправить (файл, код)`,
 и итог: сколько нарушений axe по уровням на каждой сцене.
+
+Work from the JSON/metrics files and ≤ 6 downscaled crops. Write the full report to the given file; return ≤ 15 lines + the path.

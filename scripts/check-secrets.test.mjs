@@ -13,6 +13,8 @@ describe('secret check', () => {
     expect(findSecrets(`UNSPLASH_ACCESS_KEY = "x"; api_key: "${key}"`, [])).not.toEqual([]);
     // Split so this very file passes the check it tests.
     expect(findSecrets(`ghp_${'abcdefghijklmnopqrstuvwxyz0123456789'}`, [])).not.toEqual([]);
+    expect(findSecrets(`nvapi-${'abcdefghijklmnopqrstuvwxyz0123456789'}`, [])).not.toEqual([]);
+    expect(findSecrets(`tvly-${'abcdefghijklmnopqrstuvwxyz0123456789'}`, [])).not.toEqual([]);
   });
 
   it('ignores placeholders and code that only mentions keys', () => {

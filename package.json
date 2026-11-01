@@ -22,7 +22,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:quiet": "vitest run --reporter=dot --silent",
     "test:e2e": "npm run test:e2e -w @refectorio/web --",
+    "e2e:quiet": "npm run test:e2e -w @refectorio/web -- --project=chromium --reporter=line",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "assets": "node scripts/optimize-assets.mjs",
@@ -42,7 +44,8 @@
     "photos:materialize": "node scripts/photos/materialize.mjs",
     "sim": "npm run sim -w @refectorio/taste-core --",
     "story": "node scripts/story/build.mjs",
-    "dish-data": "node scripts/dish-data/build.mjs"
+    "dish-data": "node scripts/dish-data/build.mjs",
+    "secrets:check": "node scripts/secrets/check.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

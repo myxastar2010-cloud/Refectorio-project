@@ -2,7 +2,8 @@
 name: design-reviewer
 description: Сравнивает скриншоты сайта с макетами и эталонными замерами и выдаёт отклонения в пикселях по каждому ключевому элементу. Вызывать после изменений вёрстки главной страницы и дизайн-токенов.
 tools: Read, Grep, Glob, Bash, mcp__playwright
-model: inherit
+model: sonnet
+effort: high
 color: pink
 ---
 
@@ -32,3 +33,5 @@ color: pink
 
 Таблица: `Элемент | Эталон (x, y, w, h) | Факт | Отклонение, px | Статус (ОК / исправить)`,
 затем список визуальных замечаний по важности (критично / заметно / мелочь) с конкретным исправлением (файл, свойство, значение).
+
+Work from the JSON/metrics files and ≤ 6 downscaled crops. Write the full report to the given file; return ≤ 15 lines + the path.

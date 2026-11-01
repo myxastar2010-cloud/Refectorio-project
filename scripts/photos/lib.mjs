@@ -1,9 +1,10 @@
-// Shared helpers of the dish photo pipeline (ТЗ §9.8). Keys are read here and only here: environment variables first,
-// then the project's .secrets/ folder outside the repository. They are never printed, logged or written anywhere.
+// Shared helpers of the dish photo pipeline (ТЗ §9.8). Keys come through scripts/secrets/read-key.mjs.
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+export { readKey } from '../secrets/read-key.mjs';
 
 export const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const PROJECT_ROOT = path.resolve(APP_ROOT, '..');
@@ -18,22 +19,6 @@ export const PICKS_FILE = path.join(CACHE_DIR, 'picks.json');
 
 /** The Unsplash app is named «Refectorio» (КЛЮЧИ ДЛЯ ФОТО.md): attribution links carry this utm_source. */
 export const UTM = 'utm_source=refectorio&utm_medium=referral';
-
-const KEYS = {
-  pexels: { env: 'PEXELS_API_KEY', file: 'pexels-api-key.txt' },
-  unsplash: { env: 'UNSPLASH_ACCESS_KEY', file: 'unsplash-access-key.txt' },
-};
-
-/** The key or null. Never print the result. */
-export async function readKey(provider) {
-  const spec = KEYS[provider];
-  const fromEnv = process.env[spec.env]?.trim();
-  if (fromEnv) return fromEnv;
-  const file = path.join(PROJECT_ROOT, '.secrets', spec.file);
-  if (!existsSync(file)) return null;
-  const value = (await readFile(file, 'utf8')).trim();
-  return value.length > 0 ? value : null;
-}
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 

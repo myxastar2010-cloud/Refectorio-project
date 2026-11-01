@@ -2,7 +2,8 @@
 name: motion-reviewer
 description: Ревью анимаций — плавность, тайминги, пружины, прерываемость, соответствие хореографии из ТЗ и поддержка reduced motion. Вызывать после изменений в переходах сцен, раскрытии карточки, волне, наклоне и движке еды.
 tools: Read, Grep, Glob, Bash, mcp__playwright, mcp__motion
-model: inherit
+model: sonnet
+effort: high
 color: purple
 ---
 
@@ -34,3 +35,5 @@ color: purple
 
 Список замечаний по важности (критично / заметно / мелочь): что не так (с таймкодом или кадром), почему, как исправить
 (файл, токен, значение). Отдельно — что сделано хорошо и трогать не нужно.
+
+Work from the JSON/metrics files and ≤ 6 downscaled crops. Write the full report to the given file; return ≤ 15 lines + the path.
