@@ -39,6 +39,7 @@ export const siteContentSchema = z.object({
     aboutButton: text,
     pricingButton: text,
     titleLines: lines,
+    titleSpoken: text,
     leadLines: lines,
     cta: z.object({ label: text, href: z.string().startsWith('#') }),
     featuresLabel: text,

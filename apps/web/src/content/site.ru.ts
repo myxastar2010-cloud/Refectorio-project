@@ -22,6 +22,8 @@ export const site = {
     aboutButton: 'О проекте',
     pricingButton: 'Цены',
     titleLines: ['Минимум усилий', 'Максимум результата'],
+    /** What a screen reader says for the two lines: the pause between them that the layout shows. */
+    titleSpoken: 'Минимум усилий, максимум результата',
     leadLines: [
       'ПроЛанч возьмёт на себя планирование вашего меню.',
       'Худейте без диет или просто питайтесь вовремя, даже',

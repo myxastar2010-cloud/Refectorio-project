@@ -80,7 +80,13 @@ export const HeroScene = memo(function HeroScene({
         onScrolled(event.currentTarget.scrollTop > 0);
       }}
     >
-      <m.h1 id="hero-title" className="hero-title at text-at" data-food-avoid {...motionProps(1)}>
+      <m.h1
+        id="hero-title"
+        className="hero-title at text-at"
+        aria-label={site.hero.titleSpoken}
+        data-food-avoid
+        {...motionProps(1)}
+      >
         <Lines lines={site.hero.titleLines} />
       </m.h1>
 

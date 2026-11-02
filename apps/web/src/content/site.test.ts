@@ -32,6 +32,7 @@ describe('site content', () => {
     expect(site.hero.titleLines).toHaveLength(2);
     expect(site.hero.leadLines).toHaveLength(3);
     expect(site.hero.titleLines.join(' ')).toBe('Минимум усилий Максимум результата');
+    expect(site.hero.titleSpoken.toLowerCase()).toBe(site.hero.titleLines.join(', ').toLowerCase());
   });
 
   it('calls the product ПроЛанч everywhere: the old name stays only in addresses', () => {

@@ -773,8 +773,8 @@ html[data-modality='keyboard'] .quiz-chip-remove:focus-visible {
 
 /* The wheel: its selection band glows in the accent. */
 html[data-modality='keyboard'] .quiz-wheel:focus-visible .quiz-wheel-band {
-  background-color: rgb(230 57 70 / 0.12);
-  box-shadow: 0 0 22px rgb(230 57 70 / 0.35);
+  background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--color-accent) 35%, transparent);
 }
 
 /* Text-like buttons and choices without a wave: their label is underlined, as a link would be. */

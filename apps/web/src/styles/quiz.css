@@ -2940,7 +2940,7 @@ html:has(.page[data-scene='quiz']) body {
   border-radius: 50%;
   box-shadow:
     0 0 0 3px var(--color-accent-soft),
-    0 0 18px 8px rgb(125 156 101 / 0.45);
+    0 0 18px 8px color-mix(in srgb, var(--color-accent) 45%, transparent);
   transform-origin: 50% 50%;
   will-change: transform, opacity;
 }

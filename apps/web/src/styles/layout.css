@@ -505,6 +505,15 @@ html {
     gap: calc(var(--hero-cta-gap) * var(--boost) * var(--s));
   }
 
+  /* White on the accent is 3.08:1, enough for large text only. The label drops under 24 px where 33 × 1.2 × s < 24,
+     s < 0.606 — on the desktop frame (≥ 1280 px wide) only below 654.5 px of height; there bold keeps it large
+     (≥ 18.66 px bold, and it never gets under 19 px). */
+  @media (max-height: 654.49px) {
+    .cta {
+      font-weight: 700;
+    }
+  }
+
   /* The cards grow upwards, keeping the space under them. */
   .feature-card {
     --y: calc(var(--hero-cards-y) - var(--hero-card-h) * (var(--boost-soft) - 1));
