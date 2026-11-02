@@ -1,7 +1,7 @@
-# Черновик контракта API Refectorio (этапы 2–3). Не реализован.
+# Черновик контракта API ПроЛанча (этапы 2–3). Не реализован.
 openapi: 3.1.0
 info:
-  title: Refectorio API
+  title: ПроЛанч API
   version: 0.1.0-draft
   description: >
     Сервер считает нормы детерминированно (packages/nutrition-core), фильтрует базу блюд, вызывает ИИ только для выбора
