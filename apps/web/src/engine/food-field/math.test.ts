@@ -17,6 +17,7 @@ import {
   stepSpring,
   toLocal,
   wrap,
+  type SilhouetteMask,
   type Spring,
 } from './math';
 
@@ -283,10 +284,55 @@ describe('the girl’s silhouette', () => {
     expect(probe.distance).toBeCloseTo(small * 2, 3);
   });
 
+  it('is the exact distance to the nearest cell of the other kind, on any mask', () => {
+    // Every cell against every cell: the definition itself, slow and plain.
+    const reference = ({ grid, width, height, rows }: SilhouetteMask) => {
+      const kinds = Array.from({ length: grid * grid }, (_, at) => {
+        const column = at % grid;
+        const digit = Number.parseInt(rows[Math.floor(at / grid)]?.charAt(column >> 2) || '0', 16);
+        return (digit >> (3 - (column & 3))) & 1;
+      });
+      return Float32Array.from(kinds, (own, at) => {
+        let nearest = Number.POSITIVE_INFINITY;
+        kinds.forEach((kind, other) => {
+          if (kind === own) return;
+          const dx = Math.max(0, Math.abs((other % grid) - (at % grid)) - 0.5) * (width / grid);
+          const dy =
+            Math.max(0, Math.abs(Math.floor(other / grid) - Math.floor(at / grid)) - 0.5) *
+            (height / grid);
+          nearest = Math.min(nearest, dx * dx + dy * dy);
+        });
+        return (own === 1 ? -1 : 1) * Math.sqrt(nearest);
+      });
+    };
+    const random = createRandom(2107);
+    const masks: SilhouetteMask[] = [
+      girlMask,
+      { grid: 3, width: 30, height: 30, rows: ['0', '0', '0'] },
+    ];
+    for (let index = 0; index < 60; index += 1) {
+      const grid = 1 + random.int(12);
+      const density = random.next();
+      const digit = () =>
+        [0, 1, 2, 3].reduce((value) => value * 2 + (random.next() < density ? 1 : 0), 0);
+      const rows = Array.from({ length: grid }, () =>
+        Array.from({ length: Math.ceil(grid / 4) }, () => digit().toString(16)).join(''),
+      );
+      masks.push({ grid, width: random.range(10, 100), height: random.range(10, 100), rows });
+    }
+    for (const mask of masks) expect(buildSilhouette(mask).distance).toEqual(reference(mask));
+  });
+
   it('is built from the real mask fast enough for a page load', () => {
-    const started = performance.now();
-    const field = buildSilhouette(girlMask);
-    expect(performance.now() - started).toBeLessThan(40);
+    // The best of a few builds: a busy computer or coverage counters must not fail it, a slower algorithm must.
+    let fastest = Number.POSITIVE_INFINITY;
+    let field = buildSilhouette(girlMask);
+    for (let run = 0; run < 5; run += 1) {
+      const started = performance.now();
+      field = buildSilhouette(girlMask);
+      fastest = Math.min(fastest, performance.now() - started);
+    }
+    expect(fastest).toBeLessThan(20);
     expect(field.distance.some((value) => value < 0)).toBe(true);
     expect(field.distance.some((value) => value > 0)).toBe(true);
   });

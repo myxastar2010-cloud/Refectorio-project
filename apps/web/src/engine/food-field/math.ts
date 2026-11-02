@@ -163,40 +163,48 @@ export function buildSilhouette(mask: SilhouetteMask): SilhouetteField {
       cells[row * grid + column] = (digit >> (3 - (column & 3))) & 1;
     }
   }
-  const cellAt = (row: number, column: number) =>
-    row < 0 || column < 0 || row >= grid || column >= grid ? 0 : (cells[row * grid + column] ?? 0);
-  // Only cells on the border of their kind can be the nearest of the other kind: this runs at page load.
-  const borderOf = (kind: number) => {
-    const rowsOf: number[] = [];
-    const columnsOf: number[] = [];
+  // This runs at page load, on a phone too. The squared way to a cell's square is a part along the row plus a part along
+  // the column, so it splits in two passes (exact, not a chamfer): the nearest cell of the other kind in every row,
+  // then the best row for every cell — O(grid³) at worst instead of every cell against every border cell.
+  const squaredGap = (cellsApart: number, cellSize: number) => {
+    const gap = Math.max(0, cellsApart - 0.5) * cellSize;
+    return gap * gap;
+  };
+  const alongRow = [new Float64Array(grid * grid), new Float64Array(grid * grid)] as const;
+  for (let kind = 0; kind < 2; kind += 1) {
+    const along = alongRow[kind] as Float64Array;
     for (let row = 0; row < grid; row += 1) {
+      const start = row * grid;
+      let last = Number.NEGATIVE_INFINITY;
       for (let column = 0; column < grid; column += 1) {
-        if (cellAt(row, column) !== kind) continue;
-        const border =
-          cellAt(row - 1, column) !== kind ||
-          cellAt(row + 1, column) !== kind ||
-          cellAt(row, column - 1) !== kind ||
-          cellAt(row, column + 1) !== kind;
-        if (border) {
-          rowsOf.push(row);
-          columnsOf.push(column);
-        }
+        if (cells[start + column] === kind) last = column;
+        along[start + column] = column - last;
+      }
+      last = Number.POSITIVE_INFINITY;
+      for (let column = grid - 1; column >= 0; column -= 1) {
+        if (cells[start + column] === kind) last = column;
+        along[start + column] = squaredGap(
+          Math.min(along[start + column] as number, last - column),
+          cellWidth,
+        );
       }
     }
-    return { rows: Int16Array.from(rowsOf), columns: Int16Array.from(columnsOf) };
-  };
-  const borders = [borderOf(0), borderOf(1)] as const;
+  }
   const distance = new Float32Array(grid * grid);
-  for (let row = 0; row < grid; row += 1) {
-    for (let column = 0; column < grid; column += 1) {
-      const own = cellAt(row, column);
-      const other = own === 1 ? borders[0] : borders[1];
+  for (let column = 0; column < grid; column += 1) {
+    for (let row = 0; row < grid; row += 1) {
+      const own = cells[row * grid + column] as number;
+      const along = alongRow[1 - own] as Float64Array;
       let nearest = Number.POSITIVE_INFINITY;
-      for (let at = 0; at < other.rows.length; at += 1) {
-        const dx = Math.max(0, Math.abs((other.columns[at] as number) - column) - 0.5) * cellWidth;
-        const dy = Math.max(0, Math.abs((other.rows[at] as number) - row) - 0.5) * cellHeight;
-        const squared = dx * dx + dy * dy;
-        if (squared < nearest) nearest = squared;
+      for (let apart = 0; apart < grid; apart += 1) {
+        const across = squaredGap(apart, cellHeight);
+        if (across >= nearest) break;
+        const above = row - apart;
+        const below = row + apart;
+        if (above >= 0)
+          nearest = Math.min(nearest, across + (along[above * grid + column] as number));
+        if (below < grid)
+          nearest = Math.min(nearest, across + (along[below * grid + column] as number));
       }
       distance[row * grid + column] = (own === 1 ? -1 : 1) * Math.sqrt(nearest);
     }
