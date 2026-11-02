@@ -322,18 +322,32 @@ export function createFoodField(options: FieldOptions) {
 
   /**
    * The guarantee behind the soft field: an item that still reached her slides along her edge. A few steps: in a hollow
-   * of her outline (between the chair and her back) one step along the field falls short.
+   * of her outline (between the chair and her back) one step along the field falls short, and a window resized under
+   * an item can put her right onto it, where the way out turns more than once.
    */
   function keepOffGirl(item: Item) {
     if (!silhouette) return;
+    const { field, box } = silhouette;
     const edge = item.reach * Math.max(1, item.bounce.value);
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      sampleSilhouette(silhouette.field, silhouette.box, item.x, item.y, probeOfGirl);
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      sampleSilhouette(field, box, item.x, item.y, probeOfGirl);
       if (probeOfGirl.distance >= edge) return;
       const overlap = edge - probeOfGirl.distance;
       item.x += probeOfGirl.nx * overlap;
       item.y += probeOfGirl.ny * overlap;
     }
+    sampleSilhouette(field, box, item.x, item.y, probeOfGirl);
+    if (probeOfGirl.distance >= edge) return;
+    // Still on her: out of her box the short way, where none of her can be.
+    const toLeft = item.x - box.left;
+    const toRight = box.right - item.x;
+    const toTop = item.y - box.top;
+    const toBottom = box.bottom - item.y;
+    const shortest = Math.min(toLeft, toRight, toTop, toBottom);
+    if (shortest === toLeft) item.x = box.left - edge;
+    else if (shortest === toRight) item.x = box.right + edge;
+    else if (shortest === toTop) item.y = box.top - edge;
+    else item.y = box.bottom + edge;
   }
 
   /** An item that has just wrapped around (fully off screen) may take a less-used sprite (math.ts rebalanceSprite). */
