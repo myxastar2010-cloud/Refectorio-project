@@ -38,7 +38,8 @@ declare global {
 
 function device(): Device {
   const width = window.innerWidth;
-  if (width < 768) return 'phone';
+  // A phone on its side too: 130-px food on a screen 390 px high leaves no composition around it.
+  if (width < 768 || window.innerHeight < 500) return 'phone';
   if (width < 1024) return 'tablet';
   return 'desktop';
 }
