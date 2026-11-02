@@ -1,3 +1,7 @@
+import girlFullAv1 from '../assets/generated/girl-full.av1.mp4?url';
+import girlFullH264 from '../assets/generated/girl-full.h264.mp4?url';
+import girlSmallAv1 from '../assets/generated/girl-480.av1.mp4?url';
+import girlSmallH264 from '../assets/generated/girl-480.h264.mp4?url';
 import manifest from '../assets/generated/manifest.json';
 import type { ImageKey } from '../content/schema';
 
@@ -99,4 +103,22 @@ export const images: Readonly<Record<ImageKey, ResponsiveImage>> = {
   teamLogo: logo(team.logo),
   projectLogo: logo(team.projectLogo),
   teamCard: background(team.card),
+  brandLogo: background(manifest.brand.logo),
 };
+
+/** The hero girl (scripts/girl-video): the loop's first frame and the loop itself. */
+export const girlAssets = {
+  /** Each still is the first frame of the file below it: the same pixels at the same size. */
+  still: {
+    avif: url('girl-still-full.avif'),
+    webp: url('girl-still-full.webp'),
+    avifSmall: url('girl-still-480.avif'),
+    webpSmall: url('girl-still-480.webp'),
+  },
+  video: {
+    av1: girlFullAv1,
+    av1Small: girlSmallAv1,
+    h264: girlFullH264,
+    h264Small: girlSmallH264,
+  },
+} as const;

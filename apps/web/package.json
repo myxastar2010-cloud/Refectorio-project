@@ -2,7 +2,7 @@
   "name": "@refectorio/web",
   "version": "0.1.0",
   "private": true,
-  "description": "Refectorio — сайт (главная страница и будущие разделы).",
+  "description": "ПроЛанч — сайт (главная страница и будущие разделы).",
   "license": "MIT",
   "type": "module",
   "scripts": {

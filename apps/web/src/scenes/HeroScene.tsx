@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { memo } from 'react';
 import {
   IconListDetails,
@@ -21,7 +22,7 @@ import { Lines } from '../components/Lines';
 const FEATURE_ICONS: Record<FeatureIcon, Icon> = {
   school: IconSchoolFilled,
   sparkles: IconSparklesFilled,
-  listDetails: IconListDetails, // the team's own pick (22.10): an outline icon among the filled ones
+  listDetails: IconListDetails, // Its squares are filled by CSS, as on the mockup: Tabler has no such filled icon.
   shieldCheck: IconShieldCheckFilled,
 };
 
@@ -34,6 +35,8 @@ type Props = {
   readonly onCreateMenu: (event: MouseEvent<HTMLAnchorElement>) => void;
   /** Hover, focus or touch on «Создать меню» starts loading the quiz chunk. */
   readonly onPrefetch: () => void;
+  /** The empty box that keeps her place in the layout (HeroGirl draws her under the scenes). */
+  readonly girlSlotRef: Ref<HTMLDivElement>;
 };
 
 /**
@@ -48,6 +51,7 @@ export const HeroScene = memo(function HeroScene({
   onScrolled,
   onCreateMenu,
   onPrefetch,
+  girlSlotRef,
 }: Props) {
   const calm = useCalmMotion();
   const hidden = phase === 'hidden';
@@ -76,7 +80,13 @@ export const HeroScene = memo(function HeroScene({
         onScrolled(event.currentTarget.scrollTop > 0);
       }}
     >
-      <m.h1 id="hero-title" className="hero-title at text-at" data-food-avoid {...motionProps(1)}>
+      <m.h1
+        id="hero-title"
+        className="hero-title at text-at"
+        aria-label={site.hero.titleSpoken}
+        data-food-avoid
+        {...motionProps(1)}
+      >
         <Lines lines={site.hero.titleLines} />
       </m.h1>
 
@@ -125,6 +135,8 @@ export const HeroScene = memo(function HeroScene({
         </TiltGlare>
       </m.div>
 
+      <div ref={girlSlotRef} className="hero-girl-slot at box" aria-hidden />
+
       <ul className="features" aria-label={site.hero.featuresLabel}>
         {site.hero.features.map((feature, index) => {
           const FeatureIconComponent = FEATURE_ICONS[feature.icon];
@@ -141,7 +153,13 @@ export const HeroScene = memo(function HeroScene({
                 <p className="feature-text at text-at">
                   <Lines lines={feature.textLines} />
                 </p>
-                <FeatureIconComponent aria-hidden className="feature-icon" />
+                <FeatureIconComponent
+                  aria-hidden
+                  className={clsx(
+                    'feature-icon',
+                    feature.icon === 'listDetails' && 'feature-icon--list',
+                  )}
+                />
               </TiltGlare>
             </m.li>
           );

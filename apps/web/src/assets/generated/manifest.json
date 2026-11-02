@@ -1010,5 +1010,25 @@
       "avif": "project-logo-187.avif",
       "webp": "project-logo-187.webp"
     }
+  },
+  "brand": {
+    "logo": {
+      "width": 1076,
+      "height": 998,
+      "variants": {
+        "100": {
+          "avif": "logo-cabbage-100.avif",
+          "webp": "logo-cabbage-100.webp"
+        },
+        "200": {
+          "avif": "logo-cabbage-200.avif",
+          "webp": "logo-cabbage-200.webp"
+        },
+        "300": {
+          "avif": "logo-cabbage-300.avif",
+          "webp": "logo-cabbage-300.webp"
+        }
+      }
+    }
   }
 }

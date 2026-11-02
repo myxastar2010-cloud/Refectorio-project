@@ -1,15 +1,19 @@
 import { m } from 'motion/react';
 import { memo, useEffect, useRef } from 'react';
 import type { Scene } from '../../app/useScene';
+import girlMask from '../../assets/generated/girl-mask.json';
 import { foodSprites } from '../../lib/assets';
 import type { TestParams } from '../../lib/params';
 import { useCalmMotion } from '../../motion/hooks';
-import { EASE_OUT_EXPO, QUIZ, SCENE } from '../../motion/tokens';
+import { EASE_OUT_EXPO, LAYOUT_MEDIA, QUIZ, SCENE } from '../../motion/tokens';
 import { createFoodField, type Device, type FoodField } from './engine';
-import { cameraVisibleArea, type Rect } from './math';
+import { buildSilhouette, cameraVisibleArea, type Rect, type SilhouetteField } from './math';
+import { watchGirlPlace } from '../../lib/girlPlace';
 import { whenIdle } from '../../lib/idle';
 
 const RESIZE_DEBOUNCE_MS = 200;
+/** The field starts once the page is idle, at the latest after this. */
+const FIELD_START_MS = 400;
 /** The pre-blurred copies are fetched and decoded once the page is idle (at the latest after this). */
 const BLUR_PRELOAD_MS = 1500;
 /** The field starts with the mockups' nine foods; the six of stage 3 (§8) join once the page has settled. */
@@ -35,7 +39,8 @@ declare global {
 
 function device(): Device {
   const width = window.innerWidth;
-  if (width < 768) return 'phone';
+  // A phone on its side too, as the CSS lays it out: 130-px food on a screen 390 px high leaves no room around it.
+  if (width < 768 || window.matchMedia(LAYOUT_MEDIA.lowLandscape).matches) return 'phone';
   if (width < 1024) return 'tablet';
   return 'desktop';
 }
@@ -139,91 +144,110 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
     const sharpPlane = sharpRef.current;
     const blurPlane = blurRef.current;
     if (!sharpPlane || !blurPlane) return;
-    const field = createFoodField({
-      sprites: foodSprites,
-      initialSprites: FIRST_FOODS,
-      sharpPlane,
-      blurPlane,
-      seed: params.seed ?? Math.floor(Math.random() * 1e9),
-      reduced: calm,
-      frozen: params.freeze,
-      designPose: params.designPose,
-      adaptiveQuality: params.seed === null && !params.designPose,
-      frame,
-      visibleArea,
-      device,
-    });
-    fieldRef.current = field;
-    const startScene = sceneRef.current;
-    const receded = startScene !== 'hero';
-    /** The obstacles of a scene; part 1's are measured now and kept, a window changed elsewhere forgets them. */
-    const obstaclesOf = (current: Scene): Rect[] => {
-      if (current === 'hero') {
-        heroRectsRef.current = obstacles();
-        return heroRectsRef.current;
-      }
-      heroRectsRef.current = null;
-      return current === 'quiz' ? [quizColumn()] : [];
-    };
-    field.setObstacles(obstaclesOf(startScene));
-    field.setSpeedFactor(speedOf(startScene));
-    field.setAvoidStrength(startScene === 'quiz' ? QUIZ.foodAvoidStrength : 1);
-    field.start();
-    if (receded) field.ensureBlur();
-    field.setVisiblePlanes(!receded, receded);
-    field.setWideWrap(receded);
-    if (params.seed !== null || params.freeze || params.designPose) {
-      window.__refectorioFood = {
-        snapshot: () => field.snapshot(),
-        hitTest: (x, y) => field.hitTest(x, y),
+    const start = () => {
+      const field = createFoodField({
+        sprites: foodSprites,
+        initialSprites: FIRST_FOODS,
+        sharpPlane,
+        blurPlane,
+        seed: params.seed ?? Math.floor(Math.random() * 1e9),
+        reduced: calm,
+        frozen: params.freeze,
+        designPose: params.designPose,
+        adaptiveQuality: params.seed === null && !params.designPose,
+        frame,
+        visibleArea,
+        device,
+      });
+      fieldRef.current = field;
+      const silhouette: SilhouetteField = buildSilhouette(girlMask);
+      // HeroGirl tells where she is whenever she is placed: at the start, on a resize, a font, a scroll of part 1.
+      const unwatchGirl = watchGirlPlace((box) => {
+        field.setSilhouette(box ? { field: silhouette, box } : null);
+      });
+      const startScene = sceneRef.current;
+      const receded = startScene !== 'hero';
+      /** The obstacles of a scene; part 1's are measured now and kept, a window changed elsewhere forgets them. */
+      const obstaclesOf = (current: Scene): Rect[] => {
+        if (current === 'hero') {
+          heroRectsRef.current = obstacles();
+          return heroRectsRef.current;
+        }
+        heroRectsRef.current = null;
+        return current === 'quiz' ? [quizColumn()] : [];
       };
-    }
+      field.setObstacles(obstaclesOf(startScene));
+      field.setSpeedFactor(speedOf(startScene));
+      field.setAvoidStrength(startScene === 'quiz' ? QUIZ.foodAvoidStrength : 1);
+      field.start();
+      if (receded) field.ensureBlur();
+      field.setVisiblePlanes(!receded, receded);
+      field.setWideWrap(receded);
+      if (params.seed !== null || params.freeze || params.designPose) {
+        window.__refectorioFood = {
+          snapshot: () => field.snapshot(),
+          hitTest: (x, y) => field.hitTest(x, y),
+        };
+      }
 
-    let resizeTimer = 0;
-    const onResize = () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => {
+      let resizeTimer = 0;
+      const onResize = () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(() => {
+          field.setObstacles(obstaclesOf(sceneRef.current));
+          field.resize();
+        }, RESIZE_DEBOUNCE_MS);
+      };
+      // Text boxes change once the web font arrives.
+      void document.fonts.ready.then(() => {
         field.setObstacles(obstaclesOf(sceneRef.current));
-        field.resize();
-      }, RESIZE_DEBOUNCE_MS);
-    };
-    // Text boxes change once the web font arrives.
-    void document.fonts.ready.then(() => {
-      field.setObstacles(obstaclesOf(sceneRef.current));
-    });
-    const cancelPreload = whenIdle(() => {
-      field.ensureBlur();
-    }, BLUR_PRELOAD_MS);
-    // Test modes keep the first nine: their layouts and snapshots are fixed.
-    const fixedLayout = params.seed !== null || params.freeze || params.designPose;
-    let cancelLate = (): void => undefined;
-    const lateTimer = fixedLayout
-      ? 0
-      : window.setTimeout(() => {
-          cancelLate = whenIdle(() => {
-            void field.addSprites();
+      });
+      const cancelPreload = whenIdle(() => {
+        field.ensureBlur();
+      }, BLUR_PRELOAD_MS);
+      // Test modes keep the first nine: their layouts and snapshots are fixed.
+      const fixedLayout = params.seed !== null || params.freeze || params.designPose;
+      let cancelLate = (): void => undefined;
+      const lateTimer = fixedLayout
+        ? 0
+        : window.setTimeout(() => {
+            cancelLate = whenIdle(() => {
+              void field.addSprites();
+            }, LATE_FOODS_AFTER_MS);
           }, LATE_FOODS_AFTER_MS);
-        }, LATE_FOODS_AFTER_MS);
 
-    const onPointerDown = (event: PointerEvent) => {
-      if (sceneRef.current !== 'hero' || cardOpenRef.current || event.button !== 0) return;
-      if ((event.target as Element | null)?.closest(NOT_FOOD)) return;
-      const index = field.hitTest(event.clientX, event.clientY);
-      if (index >= 0) field.bounce(index);
+      const onPointerDown = (event: PointerEvent) => {
+        if (sceneRef.current !== 'hero' || cardOpenRef.current || event.button !== 0) return;
+        if ((event.target as Element | null)?.closest(NOT_FOOD)) return;
+        const index = field.hitTest(event.clientX, event.clientY);
+        if (index >= 0) field.bounce(index);
+      };
+
+      window.addEventListener('resize', onResize);
+      window.addEventListener('pointerdown', onPointerDown);
+      return () => {
+        unwatchGirl();
+        window.removeEventListener('resize', onResize);
+        window.removeEventListener('pointerdown', onPointerDown);
+        window.clearTimeout(resizeTimer);
+        window.clearTimeout(lateTimer);
+        cancelLate();
+        cancelPreload();
+        field.stop();
+        fieldRef.current = null;
+        delete window.__refectorioFood;
+      };
     };
-
-    window.addEventListener('resize', onResize);
-    window.addEventListener('pointerdown', onPointerDown);
+    // The test modes start at once: their layouts are fixed from the first frame on.
+    if (params.seed !== null || params.freeze || params.designPose) return start();
+    // The food never competes with the first paint of the page: the largest picture of the first screen comes first.
+    let stop = (): void => undefined;
+    const cancelStart = whenIdle(() => {
+      stop = start();
+    }, FIELD_START_MS);
     return () => {
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('pointerdown', onPointerDown);
-      window.clearTimeout(resizeTimer);
-      window.clearTimeout(lateTimer);
-      cancelLate();
-      cancelPreload();
-      field.stop();
-      fieldRef.current = null;
-      delete window.__refectorioFood;
+      cancelStart();
+      stop();
     };
   }, [calm, params]);
 

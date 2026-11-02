@@ -3,7 +3,7 @@ import { FULLSCREEN_VERTEX, fullscreenTriangle, link } from './gl';
 /**
  * The reveal wave's front (ТЗ §12.5): a full-screen WebGL2 pass at a capped resolution. A ring expands from the core;
  * its edge is displaced by two octaves of value noise along the angle, it is soft (a blurred profile, no hard line) and
- * has volume — a bright inner slope and a deeper outer one — with the accent → coral → warm cream gradient across it.
+ * has volume — a bright inner slope and a deeper outer one — with the accent → soft green → cream gradient across it.
  * The DOM content behind is revealed by a circle that runs just inside the front (RevealWave), so the front covers
  * the mask's edge.
  */
@@ -18,8 +18,8 @@ uniform float uWidth;
 uniform float uTime;
 uniform float uFade;
 
-const vec3 ACCENT = vec3(0.902, 0.224, 0.275);
-const vec3 CORAL = vec3(1.0, 0.52, 0.42);
+const vec3 ACCENT = vec3(0.490, 0.612, 0.396);
+const vec3 SOFT = vec3(0.749, 0.827, 0.678);
 const vec3 CREAM = vec3(0.996, 0.976, 0.969);
 
 float hash(vec2 p) {
@@ -41,7 +41,7 @@ void main() {
     + (noise(vec2(angle * 7.0 - 3.0, uTime * 2.6)) - 0.5) * 0.35;
   float x = (r - uRadius - wobble * uWidth) / uWidth;
   float band = exp(-x * x * 2.2);
-  vec3 across = mix(CREAM, CORAL, smoothstep(-1.4, -0.1, x));
+  vec3 across = mix(CREAM, SOFT, smoothstep(-1.4, -0.1, x));
   across = mix(across, ACCENT, smoothstep(-0.2, 0.9, x));
   float slope = 0.82 + 0.3 * smoothstep(0.4, -0.7, x) - 0.18 * smoothstep(0.0, 1.0, x);
   float highlight = exp(-pow((x + 0.45) / 0.18, 2.0)) * 0.35;

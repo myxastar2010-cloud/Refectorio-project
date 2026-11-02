@@ -2,7 +2,7 @@
   "name": "refectorio",
   "version": "0.1.0",
   "private": true,
-  "description": "Refectorio — сайт-постановщик целей в питании с ИИ. Школьный проект команды Modern Manifesto (школа #2107).",
+  "description": "ПроЛанч (бывший Refectorio) — ИИ-платформа персонального питания для офисных сотрудников. Школьный проект команды Modern Manifesto (школа #2107).",
   "license": "MIT",
   "type": "module",
   "workspaces": [
@@ -45,7 +45,8 @@
     "sim": "npm run sim -w @refectorio/taste-core --",
     "story": "node scripts/story/build.mjs",
     "dish-data": "node scripts/dish-data/build.mjs",
-    "secrets:check": "node scripts/secrets/check.mjs"
+    "secrets:check": "node scripts/secrets/check.mjs",
+    "girl-video": "node scripts/girl-video/build.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

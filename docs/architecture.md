@@ -1,4 +1,4 @@
-# Архитектура Refectorio
+# Архитектура ПроЛанча
 
 Решения — в `docs/adr/` (0001–0010). Черновики этапов 2–3: модель данных — `docs/drafts/data-model.md`,
 контракт API — `docs/drafts/openapi.yaml`.
@@ -9,7 +9,7 @@
 flowchart LR
   user([Пользователь<br/>браузер, телефон])
   parent([Взрослый<br/>семейный режим])
-  subgraph refectorio[Refectorio]
+  subgraph refectorio[ПроЛанч]
     web[Сайт<br/>статический фронтенд]
     api[API<br/>этапы 2–3]
   end

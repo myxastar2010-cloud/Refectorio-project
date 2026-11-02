@@ -84,6 +84,29 @@ export const SCENE = {
   aboutCardsOut: { durationMs: 340, fadeMs: 260 },
 } as const;
 
+/** The hero girl (§1.5): her video's own frame and rhythm, and what the browser needs to pick a file. */
+export const GIRL = {
+  fps: 24,
+  width: 782,
+  height: 702,
+  /** The video element joins the page when it is idle, at the latest after this. */
+  videoAfterMs: 500,
+  /** No first frame by then: the still stays, and one more try comes with the first gesture. */
+  stallMs: 4000,
+  /** Without frame callbacks: how late the first time update may come and still count as the loop's start. */
+  lateFirstFrameS: 0.25,
+  wideMedia: '(min-width: 48rem)',
+  av1: 'video/mp4; codecs="av01.0.05M.08"',
+  h264: 'video/mp4; codecs="avc1.640028"',
+} as const;
+
+/** Layouts of the CSS (layout-responsive.css) that the food field follows too. */
+export const LAYOUT_MEDIA = {
+  /** Low landscape screens, phones on their side: the phone's composition. */
+  lowLandscape:
+    '(orientation: landscape) and (max-height: 35rem) and (not ((min-width: 80rem) and (hover: hover)))',
+} as const;
+
 /**
  * «Цены» (#pricing): reached only by its button, left by its × or a scroll up. It comes and goes exactly like part 2
  * (SCENE.heroOut, aboutTitleIn, aboutCardsIn: the frame, then the two plans in cascade); the rest is its own.

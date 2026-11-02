@@ -9,7 +9,17 @@
 }
 
 .brand-icon {
-  color: var(--color-accent);
+  display: block;
+}
+
+.brand-icon picture,
+.brand-icon img,
+.project-tile-icon picture,
+.project-tile-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* ── Wave hosts (ТЗ 6.8) ─────────────────────────────────────────────────────────────────── */
@@ -89,7 +99,7 @@
 }
 
 .info-more {
-  color: var(--color-on-accent);
+  color: var(--color-ink);
 }
 
 /* ── Tilt and glare (ТЗ 6.9) ─────────────────────────────────────────────────────────────── */
@@ -165,12 +175,58 @@
 
 .feature-surface,
 .info-surface {
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
+  background-color: var(--color-surface-beige);
+  color: var(--color-ink);
+}
+
+.feature-text {
+  color: var(--color-ink-muted);
 }
 
 .feature-icon {
-  color: var(--color-on-accent);
+  color: var(--color-accent);
+}
+
+/* The mockup's icon: Tabler's list with its two squares filled. */
+.feature-icon--list path:nth-last-child(-n + 2) {
+  fill: currentColor;
+}
+
+/*
+ * The girl (scenes/HeroGirl.tsx). Her white background goes by multiply against the box itself: it paints the page colour,
+ * so the blend never depends on what lies under it or on a transform or opacity of the box in a scene change (in such a
+ * group a transparent backdrop would leave the white white). She lies under the food, whose avoidance keeps it off her.
+ */
+.hero-girl {
+  position: absolute;
+  z-index: var(--z-girl);
+  pointer-events: none;
+}
+
+.hero-girl-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--color-bg);
+}
+
+/* Both fill the box the same way: by default a video keeps its proportions inside it, and an image does not. */
+.hero-girl-still,
+.hero-girl-video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  mix-blend-mode: multiply;
+}
+
+/* The video is under the still and changes places with it in one frame: identical pixels, an invisible swap. */
+.hero-girl-art[data-girl='still'] .hero-girl-video,
+.hero-girl-art[data-girl='video'] .hero-girl-still {
+  visibility: hidden;
 }
 
 /* ── About ───────────────────────────────────────────────────────────────────────────────── */
@@ -220,9 +276,9 @@ html[data-modality='keyboard']
 }
 
 .project-tile-icon {
+  display: block;
   width: 74%;
   height: 74%;
-  color: var(--color-accent);
 }
 
 /* The card at its final size; useCornerMorph draws it squeezed onto the icon with a projective transform. */
@@ -473,7 +529,7 @@ html[data-modality='keyboard']
 
 .project-dialog-title {
   margin: 0;
-  color: var(--color-accent);
+  color: var(--color-accent-fill);
   font-size: calc(var(--type-dialog-title-size) * var(--sd));
   line-height: calc(var(--type-dialog-title-leading) * var(--sd));
   font-weight: var(--type-dialog-title-weight);
@@ -538,7 +594,7 @@ html[data-modality='keyboard']
 }
 
 .soon-link .wave-layer--light {
-  /* The deeper red: small text on white needs 4.5:1 (the accent has 4.17:1). */
+  /* The deeper green: small text on white needs 4.5:1 (the accent has 3.08:1). */
   color: var(--color-accent-deep);
 }
 
@@ -717,8 +773,8 @@ html[data-modality='keyboard'] .quiz-chip-remove:focus-visible {
 
 /* The wheel: its selection band glows in the accent. */
 html[data-modality='keyboard'] .quiz-wheel:focus-visible .quiz-wheel-band {
-  background-color: rgb(230 57 70 / 0.12);
-  box-shadow: 0 0 22px rgb(230 57 70 / 0.35);
+  background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--color-accent) 35%, transparent);
 }
 
 /* Text-like buttons and choices without a wave: their label is underlined, as a link would be. */

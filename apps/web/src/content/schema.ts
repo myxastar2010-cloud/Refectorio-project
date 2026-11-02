@@ -8,7 +8,7 @@ const text = z.string().trim().min(1);
 const lines = z.array(text).min(1);
 
 const featureIcon = z.enum(['school', 'sparkles', 'listDetails', 'shieldCheck']);
-const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamCard']);
+const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamCard', 'brandLogo']);
 
 /** A link of the project details card: not working yet — a press says «Мы работаем над этим» (D-051). */
 const link = z.object({ label: text });
@@ -33,13 +33,13 @@ export const siteContentSchema = z.object({
   }),
   brand: z.object({
     name: text,
-    /** Temporary logo: Tabler icon name, replace with an image key when the team sends the logo. */
-    logoIcon: z.literal('apple'),
+    logoAlt: text,
   }),
   hero: z.object({
     aboutButton: text,
     pricingButton: text,
     titleLines: lines,
+    titleSpoken: text,
     leadLines: lines,
     cta: z.object({ label: text, href: z.string().startsWith('#') }),
     featuresLabel: text,
@@ -61,8 +61,6 @@ export const siteContentSchema = z.object({
       label: text,
       nameLines: lines,
       leadLines: lines,
-      /** The project logo is the site's apple (Tabler) on a white tile. */
-      logoAlt: text,
       more: text,
       moreLabel: text,
     }),

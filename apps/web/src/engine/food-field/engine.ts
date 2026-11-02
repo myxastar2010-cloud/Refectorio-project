@@ -5,9 +5,11 @@ import {
   createRandom,
   FRESH_PROBE,
   maskHit,
+  maskRadius,
   probeFrame,
   rebalanceSprite,
   repulsion,
+  sampleSilhouette,
   scatter,
   stepSpring,
   toLocal,
@@ -15,6 +17,8 @@ import {
   type FpsProbe,
   type Random,
   type Rect,
+  type SilhouetteField,
+  type SilhouetteProbe,
   type Spring,
 } from './math';
 
@@ -25,8 +29,8 @@ export const FIELD = {
    * screen in either part on a 1536×730 laptop, ≈5.4 and ≈6 on a phone (D-030 measurements).
    */
   count: { desktop: 13, tablet: 10, phone: 8 },
-  /** Sprite edge: desktop scales with the frame (mockup ≈ 185 px at 1920), tablet/phone are fixed. */
-  sizeDesktopFrame: 185,
+  /** Sprite edge: desktop scales with the frame (the rebrand's mockup: 143 px at 1920), tablet/phone are fixed. */
+  sizeDesktopFrame: 143,
   sizeTablet: 130,
   sizePhone: 95,
   sizeJitter: 0.1,
@@ -38,6 +42,23 @@ export const FIELD = {
   avoidReachPx: 70,
   avoidAccelPxS2: 260,
   avoidDragS: 0.9,
+  /**
+   * The girl (§1.6): how far her field reaches beyond an item's edge, and how fast the item's way bends along her —
+   * faster than the wander turns it back (≤ 0.23 rad/s), or a slow item would hang where her push meets its speed.
+   */
+  girlReachPx: 150,
+  /** Her width on the mockup (1920 px): the reach shrinks with her, or on a phone her field would fill the screen. */
+  girlReachAtWidthPx: 611,
+  girlSteerRadS: 2,
+  /** A drift along her outline the way the item goes round: beside her it always flows on, pressed or not. */
+  girlSwirlPxS2: 80,
+  /**
+   * An item held in place — its way against a push (a text, her, both) — moves at a fraction of its own pace; after a
+   * while it is turned aside, slowly, until it moves on: the field never parks an item.
+   */
+  stallPace: 0.25,
+  stallS: 1.5,
+  stallTurnRadS: 1.5,
   bounce: { stiffness: 180, damping: 12, kick: 3.2 },
   impulsePxS: [120, 180] as const,
   impulseDecayS: 0.5,
@@ -103,9 +124,15 @@ type Item = {
   impulseY: number;
   spinKick: number;
   bounce: Spring;
+  /** How far its opaque part reaches from its centre at any rotation, CSS px at scale 1. */
+  reach: number;
   sharp: HTMLElement;
   blur: HTMLElement | null;
   hidden: boolean;
+  /** The way round the girl it took when it came near her (±1), 0 away from her. */
+  girlSide: number;
+  /** How long it has been held in place. */
+  stalledS: number;
 };
 
 const sizesAttr = (px: number) => `${Math.round(px)}px`;
@@ -143,6 +170,9 @@ export function createFoodField(options: FieldOptions) {
   let random: Random = createRandom(options.seed);
   let items: Item[] = [];
   let obstacles: Rect[] = [];
+  /** The girl's silhouette and where she stands now. No food overlaps her, in any scene: she may come back at any time. */
+  let silhouette: { readonly field: SilhouetteField; readonly box: Rect } | null = null;
+  const probeOfGirl: SilhouetteProbe = { distance: 0, nx: 0, ny: 0 };
   let width = window.innerWidth;
   let height = window.innerHeight;
   let wideWrap = false;
@@ -227,12 +257,14 @@ export function createFoodField(options: FieldOptions) {
     } else {
       const count = FIELD.count[device];
       const minDistance = Math.sqrt((width * height) / count) * 0.75;
-      const avoid = obstacles.map((r) => ({
-        left: r.left - base / 2,
-        top: r.top - base / 2,
-        right: r.right + base / 2,
-        bottom: r.bottom + base / 2,
-      }));
+      const grown = (r: Rect, by: number) => ({
+        left: r.left - by,
+        top: r.top - by,
+        right: r.right + by,
+        bottom: r.bottom + by,
+      });
+      const avoid = obstacles.map((r) => grown(r, base / 2));
+      if (silhouette) avoid.push(grown(silhouette.box, base * 0.55));
       const points = scatter(random, count, width, height, minDistance, avoid);
       const assigned = assignSprites(random, points, available.length, minDistance * 1.6);
       items = points.flatMap((point, index) => {
@@ -243,8 +275,79 @@ export function createFoodField(options: FieldOptions) {
       });
     }
     items.forEach(mountItem);
+    items.forEach(keepOffGirl);
     applyQuality();
     items.forEach(render);
+  }
+
+  /** Its soft push away from her, and its way bending along her outline: natural arcs instead of a stop at the edge. */
+  function steerAroundGirl(item: Item, heading: number, dt: number) {
+    if (!silhouette) {
+      item.girlSide = 0;
+      return;
+    }
+    const { field, box } = silhouette;
+    const edge = item.reach * Math.max(1, item.bounce.value);
+    const reachPx =
+      FIELD.girlReachPx * Math.min(1, (box.right - box.left) / FIELD.girlReachAtWidthPx);
+    const reach = edge + reachPx;
+    if (
+      item.x < box.left - reach ||
+      item.x > box.right + reach ||
+      item.y < box.top - reach ||
+      item.y > box.bottom + reach
+    ) {
+      item.girlSide = 0;
+      return;
+    }
+    sampleSilhouette(field, box, item.x, item.y, probeOfGirl);
+    if (probeOfGirl.distance >= reach) {
+      item.girlSide = 0;
+      return;
+    }
+    const { distance, nx, ny } = probeOfGirl;
+    const near = 1 - Math.max(0, distance - edge) / reachPx;
+    const closeness = near * near;
+    item.pushX += nx * FIELD.avoidAccelPxS2 * closeness * dt;
+    item.pushY += ny * FIELD.avoidAccelPxS2 * closeness * dt;
+    // One way round her, chosen as it comes: the wander swinging across her normal must not turn it back and forth.
+    if (item.girlSide === 0) {
+      item.girlSide = Math.cos(heading) * ny - Math.sin(heading) * nx >= 0 ? 1 : -1;
+    }
+    item.pushX += item.girlSide * ny * FIELD.girlSwirlPxS2 * closeness * dt;
+    item.pushY -= item.girlSide * nx * FIELD.girlSwirlPxS2 * closeness * dt;
+    const towards = -(Math.cos(heading) * nx + Math.sin(heading) * ny);
+    item.baseHeading += item.girlSide * FIELD.girlSteerRadS * Math.max(0, towards) * near * dt;
+  }
+
+  /**
+   * The guarantee behind the soft field: an item that still reached her slides along her edge. A few steps: in a hollow
+   * of her outline (between the chair and her back) one step along the field falls short, and a window resized under
+   * an item can put her right onto it, where the way out turns more than once.
+   */
+  function keepOffGirl(item: Item) {
+    if (!silhouette) return;
+    const { field, box } = silhouette;
+    const edge = item.reach * Math.max(1, item.bounce.value);
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      sampleSilhouette(field, box, item.x, item.y, probeOfGirl);
+      if (probeOfGirl.distance >= edge) return;
+      const overlap = edge - probeOfGirl.distance;
+      item.x += probeOfGirl.nx * overlap;
+      item.y += probeOfGirl.ny * overlap;
+    }
+    sampleSilhouette(field, box, item.x, item.y, probeOfGirl);
+    if (probeOfGirl.distance >= edge) return;
+    // Still on her: out of her box the short way, where none of her can be.
+    const toLeft = item.x - box.left;
+    const toRight = box.right - item.x;
+    const toTop = item.y - box.top;
+    const toBottom = box.bottom - item.y;
+    const shortest = Math.min(toLeft, toRight, toTop, toBottom);
+    if (shortest === toLeft) item.x = box.left - edge;
+    else if (shortest === toRight) item.x = box.right + edge;
+    else if (shortest === toTop) item.y = box.top - edge;
+    else item.y = box.bottom + edge;
   }
 
   /** An item that has just wrapped around (fully off screen) may take a less-used sprite (math.ts rebalanceSprite). */
@@ -256,6 +359,7 @@ export function createFoodField(options: FieldOptions) {
     const next = available[rebalanceSprite(random, usage, available.indexOf(item.sprite))];
     if (!next) return;
     item.sprite = next;
+    item.reach = maskRadius(next.mask, next.mask.length) * item.size;
     const sharp = makeImage(next.sharp, item.size, 'food-item');
     sharp.style.width = `${item.size}px`;
     sharp.style.height = `${item.size}px`;
@@ -293,9 +397,12 @@ export function createFoodField(options: FieldOptions) {
       impulseY: 0,
       spinKick: 0,
       bounce: { value: 1, velocity: 0 },
+      reach: maskRadius(sprite.mask, sprite.mask.length) * size,
       sharp,
       blur: null,
       hidden: false,
+      girlSide: 0,
+      stalledS: 0,
     };
   }
 
@@ -331,12 +438,22 @@ export function createFoodField(options: FieldOptions) {
         item.pushX += push.x * dt;
         item.pushY += push.y * dt;
       }
+      steerAroundGirl(item, heading, dt);
       item.pushX *= decayPush;
       item.pushY *= decayPush;
       item.impulseY *= decayImpulse;
       item.spinKick *= decayImpulse;
-      item.x += (Math.cos(heading) * speed + item.pushX) * dt;
-      item.y += (Math.sin(heading) * speed + item.pushY + item.impulseY) * dt;
+      const vx = Math.cos(heading) * speed + item.pushX;
+      const vy = Math.sin(heading) * speed + item.pushY + item.impulseY;
+      item.x += vx * dt;
+      item.y += vy * dt;
+      item.stalledS = Math.hypot(vx, vy) < FIELD.stallPace * speed ? item.stalledS + dt : 0;
+      if (item.stalledS > FIELD.stallS) {
+        // Round her the way it already goes; elsewhere the way it spins.
+        const side = item.girlSide || Math.sign(item.spin) || 1;
+        item.baseHeading += side * FIELD.stallTurnRadS * dt;
+      }
+      keepOffGirl(item);
       if (quality < 1) item.angle += (item.spin * speedFactor + item.spinKick) * dt;
       // Part 2 shows the pre-blurred copy, larger than the sprite (transparent padding for the blur): it must be off
       // screen too. Part 1 shows only the sprite — a wider margin there would just keep food off screen longer.
@@ -429,6 +546,14 @@ export function createFoodField(options: FieldOptions) {
     setObstacles(rects: readonly Rect[]) {
       obstacles = [...rects];
     },
+    /** Where the girl stands; null: she is not on this layout. */
+    setSilhouette(next: { readonly field: SilhouetteField; readonly box: Rect } | null) {
+      silhouette = next;
+      // Her new place must not land on the food even for one paint: she moves in the layout, after this frame's step
+      // (and without motion no frame moves the food again).
+      items.forEach(keepOffGirl);
+      items.forEach(render);
+    },
     /** Part 2 (camera pulled back): items wrap around beyond its wider view; part 1 — beyond the screen. */
     setWideWrap(wide: boolean) {
       wideWrap = wide;
@@ -496,6 +621,7 @@ export function createFoodField(options: FieldOptions) {
         y: item.y,
         size: item.size,
         scale: item.bounce.value,
+        angle: item.angle,
         hidden: item.hidden,
       }));
     },

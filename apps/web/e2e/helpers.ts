@@ -43,10 +43,7 @@ export async function countSceneChanges(page: Page) {
     page.evaluate(() => (window as Window & { __sceneChanges?: number }).__sceneChanges ?? 0);
 }
 
-/**
- * axe with the documented contrast exception (ТЗ, design-system.md): small white text on #E63946 is 4.17:1 by the
- * team's decision. Only those elements are excluded — every other rule and element is checked.
- */
+/** axe on the settled page, with no exceptions: the green palette needs none (D-065). */
 export async function seriousViolations(page: Page) {
   // Colours are judged on the settled page: a card still fading in (slow engines) would read as low contrast.
   await page.waitForFunction(() =>
@@ -76,10 +73,7 @@ export async function seriousViolations(page: Page) {
         });
       }),
   );
-  const { violations } = await new AxeBuilder({ page })
-    .exclude('.feature-text')
-    .exclude('.info-lead')
-    .analyze();
+  const { violations } = await new AxeBuilder({ page }).analyze();
   return violations
     .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
     .map(

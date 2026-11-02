@@ -637,7 +637,7 @@ html:has(.page[data-scene='quiz']) body {
 }
 
 .quiz-note--warn {
-  color: var(--color-accent-deep);
+  color: var(--color-danger-deep);
   font-weight: 600;
 }
 
@@ -671,10 +671,10 @@ html:has(.page[data-scene='quiz']) body {
   }
 }
 
-/* The accent wave with white text (the landing's accent layer keeps ink text): the deeper red, because the label is
-   small text — white on #C42532 is 5.7:1, on #E63946 only 4.2:1 (WCAG 1.4.3, D-040). */
+/* The accent wave with white text (the landing's accent layer keeps ink text): the fill tone, because the label is
+   small text — white on it is 4.55:1, on the accent only 3.08:1 (WCAG 1.4.3, D-040). */
 .wave-layer--accent-fill {
-  background-color: var(--color-accent-deep);
+  background-color: var(--color-accent-fill);
   color: var(--color-on-accent);
 }
 
@@ -895,7 +895,7 @@ html:has(.page[data-scene='quiz']) body {
   height: var(--q-done-h);
   padding: 0 calc(36 * var(--q));
   border-radius: 9999px;
-  /* White on #E63946 is 4.17:1: the label is large text (≥ 18.67 px bold → 3:1, WCAG 1.4.3), never small. */
+  /* White on the accent is 3.08:1: the label is large text (≥ 18.67 px bold → 3:1, WCAG 1.4.3), never small. */
   font-size: max(19px, var(--q-button));
   font-weight: 700;
   white-space: nowrap;
@@ -1235,7 +1235,7 @@ html:has(.page[data-scene='quiz']) body {
   white-space: nowrap;
 }
 
-/* «Выбрать ›»: the mockup's red, one step deeper — at row-value size #E63946 is 4.0:1, #C42532 is 5.4:1 (WCAG 1.4.3). */
+/* «Выбрать ›»: the accent's deep tone — at row-value size it needs 4.5:1, and the accent has 2.95:1 (WCAG 1.4.3). */
 .quiz-row-value.is-empty {
   color: var(--color-accent-deep);
   font-weight: 700;
@@ -2482,7 +2482,7 @@ html:has(.page[data-scene='quiz']) body {
 }
 
 .quiz-game-button--dislike {
-  background-color: var(--color-accent);
+  background-color: var(--color-danger);
 }
 
 .quiz-game-button--skip {
@@ -2501,7 +2501,7 @@ html:has(.page[data-scene='quiz']) body {
 
 /* Their waves keep the white icon ≥ 3:1 (deep tones of the same colours). */
 .wave-layer--game-dislike {
-  background-color: var(--color-accent-deep);
+  background-color: var(--color-danger-deep);
   color: var(--color-on-accent);
 }
 
@@ -2765,7 +2765,7 @@ html:has(.page[data-scene='quiz']) body {
 
 .quiz-caption-icon {
   display: inline-flex;
-  color: var(--color-accent);
+  color: var(--color-accent-fill);
 }
 
 .quiz-caption-icon svg {
@@ -2939,8 +2939,8 @@ html:has(.page[data-scene='quiz']) body {
   margin: -100px 0 0 -100px;
   border-radius: 50%;
   box-shadow:
-    0 0 0 3px var(--color-coral),
-    0 0 18px 8px rgb(230 57 70 / 0.45);
+    0 0 0 3px var(--color-accent-soft),
+    0 0 18px 8px color-mix(in srgb, var(--color-accent) 45%, transparent);
   transform-origin: 50% 50%;
   will-change: transform, opacity;
 }

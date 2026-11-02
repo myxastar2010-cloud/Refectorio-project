@@ -1,6 +1,6 @@
-import { IconApple } from '@tabler/icons-react';
 import { AnimatePresence, m } from 'motion/react';
 import { memo, useCallback, useRef, type RefObject } from 'react';
+import { BrandLogo } from '../../components/BrandLogo';
 import { SoonLink } from '../../components/SoonLink';
 import { site } from '../../content/site.ru';
 import { DIALOG } from '../../motion/tokens';
@@ -69,7 +69,9 @@ export const ProjectDialog = memo(function ProjectDialog({
           revealAt={DIALOG.projectRevealAt}
           overlay={
             <div ref={dockApple} className="project-docked-apple" aria-hidden>
-              <IconApple className="project-tile-icon" stroke={2} />
+              <span className="project-tile-icon">
+                <BrandLogo sizes="(min-width: 80rem) 10vw, 96px" />
+              </span>
             </div>
           }
         >

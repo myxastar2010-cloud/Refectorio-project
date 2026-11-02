@@ -1,7 +1,6 @@
 /**
- * Food exactly as on mockup №1 (`?pose=design`), in 1920×1080 frame px. Centre, sprite edge and CSS rotation were
- * fitted by silhouette matching (refectorio-workspace/design/analysis/02_food_pose.py). The waffle from the mockup is
- * not in the resources — a donut takes its place (Figma frame of the waffle: centre 968.6 × 391.6).
+ * Food exactly as on the rebrand's landing mockup (`?pose=design`), in 1920×1080 frame px. Centre, sprite edge and CSS
+ * rotation are fitted by silhouette overlap, IoU 0.97–0.98 (scripts/fit-food-pose.mjs).
  */
 export type PoseItem = {
   readonly slug: string;
@@ -12,11 +11,10 @@ export type PoseItem = {
 };
 
 export const DESIGN_POSE: readonly PoseItem[] = [
-  { slug: 'strawberry', centerX: 505.5, centerY: 112.5, sizePx: 184.5, rotateDeg: 49.25 },
-  { slug: 'broccoli', centerX: 1662, centerY: 154, sizePx: 184.5, rotateDeg: -11.25 },
-  { slug: 'donut', centerX: 968.6, centerY: 391.6, sizePx: 162, rotateDeg: -15 },
-  { slug: 'hotdog', centerX: 1375, centerY: 547, sizePx: 172.5, rotateDeg: 68.25 },
-  { slug: 'salad', centerX: 692, centerY: 739, sizePx: 183, rotateDeg: 48 },
-  { slug: 'broccoli', centerX: 155, centerY: 744, sizePx: 162, rotateDeg: -4 },
-  { slug: 'burger', centerX: 1758, centerY: 786, sizePx: 186, rotateDeg: -33.75 },
+  { slug: 'avocado', centerX: 516.5, centerY: 96.5, sizePx: 143, rotateDeg: 23 },
+  { slug: 'croissant', centerX: 1264, centerY: 121.5, sizePx: 143, rotateDeg: 0 },
+  { slug: 'salad', centerX: 996.5, centerY: 363, sizePx: 143, rotateDeg: 38 },
+  { slug: 'apple', centerX: 659.5, centerY: 566, sizePx: 143, rotateDeg: 0 },
+  { slug: 'cheese', centerX: 1003.5, centerY: 748, sizePx: 144.5, rotateDeg: -53 },
+  { slug: 'corn', centerX: 193.5, centerY: 780.5, sizePx: 143, rotateDeg: 81 },
 ];

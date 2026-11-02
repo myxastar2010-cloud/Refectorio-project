@@ -1,0 +1,291 @@
+import { m } from 'motion/react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { whenIdle } from '../lib/idle';
+import { girlAssets } from '../lib/assets';
+import { setGirlPlace } from '../lib/girlPlace';
+import { useCalmMotion } from '../motion/hooks';
+import { GIRL } from '../motion/tokens';
+import { heroVariants, type Phase } from './choreography';
+import {
+  fitGirl,
+  GIRL_START,
+  isFirstFrame,
+  nextGirl,
+  pixelGrid,
+  shouldPlay,
+  type GirlEvent,
+} from './girlPlayback';
+
+type Props = {
+  readonly phase: Phase;
+  readonly instant: boolean;
+  /** Her place in part 1: an empty box of the scene, which lies above the food (HeroScene). */
+  readonly slotRef: RefObject<HTMLElement | null>;
+  /** Part 1 itself: it scrolls where it does not fit, and she scrolls with it. */
+  readonly scrollerRef: RefObject<HTMLElement | null>;
+  /** ?freeze=1: time stops for her too, so a screenshot is always the same picture. */
+  readonly frozen: boolean;
+};
+
+const FRAME_S = 1 / GIRL.fps;
+const FRAME_CALLBACKS =
+  typeof HTMLVideoElement !== 'undefined' &&
+  'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+
+/** The cascade of part 1: she comes with the lead and the button. */
+const CASCADE_INDEX = 2;
+
+/**
+ * The animated girl (stage 4, §1.5). Her video is white-backed and gets its white off by multiply, so she needs a backdrop
+ * of her own: a box painted in the page colour, below the food (a box above it would cut the food with its edges). She
+ * therefore lives under the scenes, and follows the empty slot that part 1 keeps for her.
+ *
+ * The still is the loop's first frame: it shows at once, and the video takes over in the frame in which its own first
+ * frame is presented. Reduced motion or Save-Data: the still, and the video is never requested.
+ */
+export const HeroGirl = memo(function HeroGirl({
+  phase,
+  instant,
+  slotRef,
+  scrollerRef,
+  frozen,
+}: Props) {
+  const calm = useCalmMotion();
+  const stillOnly = calm || frozen;
+  // The still is on the screen from the first paint; the video joins when the page is idle and competes with nothing.
+  const [videoReady, setVideoReady] = useState(false);
+  const placeRef = useRef<HTMLDivElement>(null);
+  const artRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const activeRef = useRef(phase === 'shown');
+  const syncRef = useRef<() => void>(() => undefined);
+
+  // Her box follows the slot: at the start, when the layout changes and while part 1 scrolls.
+  useLayoutEffect(() => {
+    const place = placeRef.current;
+    const slot = slotRef.current;
+    const scroller = scrollerRef.current;
+    if (!place || !slot || !scroller) return;
+    let scrollAtMeasure = 0;
+    let box = { left: 0, top: 0, width: 0, height: 0 };
+    // The food steers by her place: it is told at every move and never reads it back from the layout.
+    const tell = (shiftY: number) => {
+      setGirlPlace(
+        box.width > 0 && box.height > 0
+          ? {
+              left: box.left,
+              top: box.top + shiftY,
+              right: box.left + box.width,
+              bottom: box.top + shiftY + box.height,
+            }
+          : null,
+      );
+    };
+    const measure = () => {
+      const fitted = fitGirl(slot.getBoundingClientRect(), GIRL.width / GIRL.height);
+      scrollAtMeasure = scroller.scrollTop;
+      // On a grid that is whole in CSS and in device pixels: at a fractional box an image and a video are snapped
+      // differently, and the swap would shift her lines by a fraction of a pixel.
+      const step = pixelGrid(window.devicePixelRatio);
+      const snap = (px: number) => Math.round(px / step) * step;
+      box = {
+        left: snap(fitted.left),
+        top: snap(fitted.top),
+        width: snap(fitted.width),
+        height: snap(fitted.height),
+      };
+      place.style.left = `${String(box.left)}px`;
+      place.style.top = `${String(box.top)}px`;
+      place.style.width = `${String(box.width)}px`;
+      place.style.height = `${String(box.height)}px`;
+      place.style.transform = '';
+      tell(0);
+    };
+    const onScroll = () => {
+      const shiftY = scrollAtMeasure - scroller.scrollTop;
+      place.style.transform = `translate3d(0, ${String(shiftY)}px, 0)`;
+      tell(shiftY);
+    };
+    measure();
+    // The web font changes the height of the text above her on small screens, and her slot moves without resizing.
+    void document.fonts.ready.then(measure);
+    const observer = new ResizeObserver(measure);
+    observer.observe(slot);
+    observer.observe(scroller);
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      observer.disconnect();
+      scroller.removeEventListener('scroll', onScroll);
+      setGirlPlace(null);
+    };
+  }, [slotRef, scrollerRef]);
+
+  useEffect(() => {
+    if (stillOnly) return undefined;
+    return whenIdle(() => {
+      setVideoReady(true);
+    }, GIRL.videoAfterMs);
+  }, [stillOnly]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const art = artRef.current;
+    if (!video || !art || stillOnly) return;
+    let state = GIRL_START;
+    let onScreen = true;
+    let frameHandle = 0;
+    let stallTimer = 0;
+
+    const send = (event: GirlEvent) => {
+      state = nextGirl(state, event);
+    };
+    const presented = () => {
+      window.clearTimeout(stallTimer);
+      send('presented');
+      // In the frame callback itself: the still leaves in the frame in which the same picture arrives.
+      art.dataset.girl = 'video';
+    };
+    const blocked = () => {
+      window.clearTimeout(stallTimer);
+      send('blocked');
+    };
+
+    const watchFirstFrame = () => {
+      if (!FRAME_CALLBACKS) return;
+      video.cancelVideoFrameCallback(frameHandle);
+      const onFrame: VideoFrameRequestCallback = (_now, metadata) => {
+        if (state.phase === 'playing') return;
+        if (isFirstFrame(metadata.mediaTime, FRAME_S)) presented();
+        else frameHandle = video.requestVideoFrameCallback(onFrame);
+      };
+      frameHandle = video.requestVideoFrameCallback(onFrame);
+    };
+    /** Browsers without frame callbacks: the first time update of the loop's first moments. */
+    const onTimeUpdate = () => {
+      if (FRAME_CALLBACKS || state.phase === 'playing') return;
+      if (video.currentTime > 0 && isFirstFrame(video.currentTime, GIRL.lateFirstFrameS)) {
+        presented();
+      }
+    };
+
+    /** An AbortError is our own pause() overtaking a play() still under way, not the browser saying no. */
+    const refused = (error: unknown) => {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      blocked();
+    };
+    /** One try to show her video: the first one, or the one retry after a gesture. */
+    const attempt = () => {
+      window.clearTimeout(stallTimer);
+      stallTimer = window.setTimeout(blocked, GIRL.stallMs);
+      watchFirstFrame();
+      video.play().catch(refused);
+    };
+    const wanted = () =>
+      shouldPlay({ active: activeRef.current, onScreen, pageVisible: !document.hidden });
+    const sync = () => {
+      if (!wanted()) {
+        // Unseen: no decoding, and no stall counted while it waits.
+        window.clearTimeout(stallTimer);
+        if (!video.paused) video.pause();
+        return;
+      }
+      if (!video.paused) return;
+      if (state.phase === 'idle') send('start');
+      // A refused video waits for a gesture: asking again by itself would get the same answer.
+      if (state.phase === 'starting') attempt();
+      else if (state.phase === 'playing') video.play().catch(refused);
+    };
+    syncRef.current = sync;
+
+    // The retry needs a gesture that lets a page play media: a click (after a tap or a press) or a key, not a touch's
+    // start. Gestures before a refusal do not use it up.
+    const onGesture = (event: Event) => {
+      if (state.phase !== 'blocked' || (event instanceof KeyboardEvent && event.key === 'Escape')) {
+        return;
+      }
+      send('gesture');
+      window.removeEventListener('click', onGesture);
+      window.removeEventListener('keydown', onGesture);
+      if (wanted()) attempt();
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      onScreen = entry?.isIntersecting ?? true;
+      sync();
+    });
+    observer.observe(art);
+    video.addEventListener('error', blocked);
+    video.addEventListener('timeupdate', onTimeUpdate);
+    document.addEventListener('visibilitychange', sync);
+    window.addEventListener('click', onGesture);
+    window.addEventListener('keydown', onGesture);
+    sync();
+    return () => {
+      syncRef.current = () => undefined;
+      observer.disconnect();
+      window.clearTimeout(stallTimer);
+      if (FRAME_CALLBACKS) video.cancelVideoFrameCallback(frameHandle);
+      video.removeEventListener('error', blocked);
+      video.removeEventListener('timeupdate', onTimeUpdate);
+      document.removeEventListener('visibilitychange', sync);
+      window.removeEventListener('click', onGesture);
+      window.removeEventListener('keydown', onGesture);
+      video.pause();
+      // Reduced motion switched on while she played: the video leaves, the still must come back with it.
+      art.dataset.girl = 'still';
+    };
+  }, [videoReady, stillOnly]);
+
+  useEffect(() => {
+    activeRef.current = phase === 'shown';
+    syncRef.current();
+  }, [phase]);
+
+  const variants = useMemo(() => heroVariants(CASCADE_INDEX, calm), [calm]);
+  const { still, video } = girlAssets;
+
+  return (
+    <div ref={placeRef} className="hero-girl" aria-hidden>
+      <m.div
+        ref={artRef}
+        className="hero-girl-art"
+        data-girl="still"
+        variants={variants}
+        animate={phase}
+        {...(instant ? { initial: false as const } : {})}
+      >
+        <picture>
+          <source type="image/avif" srcSet={still.avif} media={GIRL.wideMedia} />
+          <source type="image/webp" srcSet={still.webp} media={GIRL.wideMedia} />
+          <source type="image/avif" srcSet={still.avifSmall} />
+          <img
+            className="hero-girl-still"
+            src={still.webpSmall}
+            width={GIRL.width}
+            height={GIRL.height}
+            alt=""
+            fetchPriority="high"
+            decoding="sync"
+            draggable={false}
+          />
+        </picture>
+        {videoReady && !stillOnly && (
+          <video
+            ref={videoRef}
+            className="hero-girl-video"
+            muted
+            playsInline
+            loop
+            preload="auto"
+            disablePictureInPicture
+            tabIndex={-1}
+          >
+            <source src={video.av1} type={GIRL.av1} media={GIRL.wideMedia} />
+            <source src={video.av1Small} type={GIRL.av1} />
+            <source src={video.h264} type={GIRL.h264} media={GIRL.wideMedia} />
+            <source src={video.h264Small} type={GIRL.h264} />
+          </video>
+        )}
+      </m.div>
+    </div>
+  );
+});

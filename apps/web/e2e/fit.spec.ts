@@ -124,6 +124,8 @@ test.describe('no step scrolls (4.11)', () => {
   // The other engines and phones: the densest steps at their own window.
   test('the densest steps fit in every engine', async ({ page, browserName, isMobile }) => {
     test.skip(browserName === 'chromium' && !isMobile, 'covered by the matrix above');
+    // Six steps, a page load each: 30 s in WebKit on an idle computer, over a minute on a busy one.
+    test.slow();
     expect(
       await checkAll(page, [
         'body',

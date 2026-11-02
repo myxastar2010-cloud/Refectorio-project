@@ -1,15 +1,14 @@
-// Compares the main page with the mockups (stage 1 brief, section 9.2).
+// Compares part 1 of the main page with the rebrand's mockup (stage 4, §1.4; the brief of stage 1, section 9.2).
 //
-// In ?pose=design&freeze=1&seed=1 mode it takes 1920×1080 screenshots of part 1, part 2 and the expanded team card and
-// compares them with the mockups by pixelmatch (diff image + 50/50 overlay; the 17 px white band on top of mockup №1
-// is cropped). Geometry of key elements is checked to ±4 px:
-// - boxes (buttons, cards, tiles, the dialog) — the element's box on the page against the Figma frame;
+// In ?pose=design&freeze=1&seed=1 mode it takes a 1920×1080 screenshot and compares it with the mockup scaled to that frame
+// by pixelmatch (diff image + 50/50 overlay). Geometry of key elements is checked to ±4 px:
+// - boxes (buttons, cards) — the element's box on the page against the measurements of the mockup
+//   (refectorio-workspace/design/analysis/20_landing_stage4.mjs);
 // - text and icons — by "ink": the same pixel measurement on the mockup and on a page screenshot without food
-//   (left edge, cap top, baseline). Ink width is reported but not judged: Open Runde ≠ SF Pro Rounded (allowed by the brief).
+//   (left edge, cap top, baseline). Ink width is reported but not judged: Open Runde ≠ SF Pro Rounded.
 //
 // Needs the built site served locally: npm run build && npm run preview, then
 //   npm run compare-design -- [--url http://localhost:4173/] [--mockups <dir>] [--out <dir>]
-// Defaults: mockups — ../Ресурсы для создания/Задача 1, report — ../refectorio-workspace/reports/stage-1/design-diff.
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,16 +22,17 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WIDTH = 1920;
 const HEIGHT = 1080;
 const TOLERANCE_PX = 4;
-/** The mockup's expanded card sits 13.5 px left of centre; the site centres it (decision of stage 0). */
-const DIALOG_SHIFT_PX = (WIDTH - 1401) / 2 - 246;
 
 const { values: args } = parseArgs({
   options: {
     url: { type: 'string', default: 'http://localhost:4173/' },
-    mockups: { type: 'string', default: path.join(ROOT, '..', 'Ресурсы для создания', 'Задача 1') },
+    mockups: {
+      type: 'string',
+      default: path.join(ROOT, '..', 'Ресурсы для создания', 'Задание 4', 'этап 2'),
+    },
     out: {
       type: 'string',
-      default: path.join(ROOT, '..', 'refectorio-workspace', 'reports', 'stage-1', 'design-diff'),
+      default: path.join(ROOT, '..', 'refectorio-workspace', 'reports', 'stage-4', 'design-diff'),
     },
   },
 });
@@ -41,100 +41,50 @@ const STATES = [
   {
     id: 'hero',
     title: 'Часть 1',
-    mockup: 'дизайн главной страницы №1.jpg',
-    offsetY: 17,
+    mockup: 'дизайн главной страницы.jpg',
     hash: '',
-    shiftX: 0,
-  },
-  {
-    id: 'about',
-    title: 'Часть 2',
-    mockup: 'дизайн главной страницы №2.jpg',
-    offsetY: 0,
-    hash: '#about',
-    shiftX: 0,
-  },
-  {
-    id: 'team',
-    title: 'Раскрытая карточка',
-    mockup: 'дизайн раскрытой команды.jpg',
-    offsetY: 0,
-    hash: '#about',
-    shiftX: DIALOG_SHIFT_PX,
-    openTeam: true,
   },
 ];
 
-// Boxes: [state, element, selector, index, Figma frame x, y, w, h, note]
+// Boxes: [state, element, selector, index, frame x, y, w, h]
 const BOXES = [
-  ['hero', '«О проекте»', '.about-pill', 0, 1675, 19, 189, 83],
-  ['hero', '«Создать меню»', '.cta', 0, 48, 595, 440, 83],
-  ['hero', 'Карточка «Наука»', '.feature-card', 0, 48, 833, 440, 161],
-  ['hero', 'Карточка «ИИ помощник»', '.feature-card', 1, 509, 833, 440, 161],
-  ['hero', 'Карточка «Персонализация»', '.feature-card', 2, 970, 833, 440, 161],
-  ['hero', 'Карточка «Гарантия»', '.feature-card', 3, 1431, 833, 440, 161],
-  ['about', 'Карточка «Команда»', '.info-card', 0, 104, 419, 754, 487],
-  ['about', 'Карточка «Проект»', '.info-card', 1, 1062, 419, 754, 487],
-  ['about', 'Плитка команды', '.info-tile', 0, 247, 557, 187, 187],
-  ['about', 'Плитка проекта', '.info-tile', 1, 1205, 557, 187, 187],
-  ['about', '«Ещё»', '.info-more', 0, 433, 795, 113, 62],
-  [
-    'team',
-    'Раскрытая карточка',
-    '.team-surface--dialog',
-    0,
-    246 + DIALOG_SHIFT_PX,
-    118,
-    1401,
-    844,
-    'по центру экрана; в макете сдвинута на 13,5 px влево',
-  ],
+  ['hero', '«Цены»', '.pricing-pill', 0, 1531.8, 19, 135.1, 79],
+  ['hero', '«О проекте»', '.about-pill', 0, 1683.1, 19, 179.8, 79],
+  ['hero', '«Создать меню»', '.cta', 0, 57.1, 585.1, 456.7, 86.6],
+  ['hero', 'Карточка «Исследования»', '.feature-card', 0, 46.6, 864.9, 447.2, 167.5],
+  ['hero', 'Карточка «ИИ-консультант»', '.feature-card', 1, 507.1, 864.9, 447.2, 167.5],
+  ['hero', 'Карточка «Комфорт в офисе»', '.feature-card', 2, 966.7, 864.9, 447.2, 167.5],
+  ['hero', 'Карточка «Честность»', '.feature-card', 3, 1426.2, 864.9, 447.2, 167.5],
 ];
 
-// Ink: [state, element, ink colour, region in mockup coordinates x0, y0, x1, y1, lines, min gap between lines]
+// Ink: [state, element, ink colour, region in frame coordinates x0, y0, x1, y1, lines, min gap between lines]
 const INKS = [
-  ['hero', 'Лого (яблоко)', 'accent', 10, 10, 122, 122, 1, 4],
-  ['hero', '«Refectorio»', 'dark', 120, 40, 430, 125, 1, 4],
-  ['hero', 'Текст «О проекте»', 'dark', 1700, 40, 1845, 82, 1, 4],
+  ['hero', 'Логотип', 'any', 40, 12, 168, 130, 1, 4],
+  ['hero', '«ПроЛанч»', 'dark', 172, 40, 410, 112, 1, 4],
+  ['hero', 'Текст «Цены»', 'dark', 1560, 40, 1640, 80, 1, 4],
+  ['hero', 'Текст «О проекте»', 'dark', 1705, 40, 1840, 80, 1, 4],
   // The breve of «й» floats above x-height letters: merge bands closer than 12 px in the big heading.
-  ['hero', 'Заголовок', 'dark', 40, 215, 700, 480, 3, 12],
-  ['hero', 'Подзаголовок', 'dark', 40, 497, 520, 562, 2, 4],
-  ['hero', 'Текст «Создать меню»', 'white', 150, 612, 345, 660, 1, 4],
-  ['hero', 'Карточка 1: заголовок', 'white', 95, 855, 340, 898, 1, 4],
-  ['hero', 'Карточка 1: текст', 'white', 95, 901, 360, 968, 2, 4],
-  ['hero', 'Карточка 2: заголовок', 'white', 556, 855, 820, 898, 1, 4],
-  ['hero', 'Карточка 2: текст', 'white', 556, 901, 830, 968, 2, 4],
-  ['hero', 'Карточка 3: заголовок', 'white', 1017, 855, 1290, 898, 1, 4],
-  ['hero', 'Карточка 3: текст', 'white', 1017, 901, 1290, 968, 2, 4],
-  ['hero', 'Карточка 4: заголовок', 'white', 1478, 855, 1740, 898, 1, 4],
-  ['hero', 'Карточка 4: текст', 'white', 1478, 901, 1750, 968, 2, 4],
-  ['about', 'Заголовок «О проекте»', 'accent', 770, 95, 1086, 172, 1, 4],
-  ['about', 'Шеврон', 'accent', 1086, 95, 1160, 172, 1, 4],
-  ['about', '«Команда:»', 'white', 400, 468, 590, 515, 1, 4],
-  ['about', '«Проект:»', 'white', 1360, 468, 1520, 515, 1, 4],
-  ['about', 'Название команды', 'white', 470, 555, 720, 670, 2, 4],
-  ['about', 'Подпись команды', 'white', 470, 680, 670, 740, 2, 4],
-  // The site has the real name «Refectorio» (one line) instead of the mockup's «Название Проекта»: first line only.
-  ['about', 'Название проекта, 1-я строка', 'white', 1428, 555, 1700, 615, 1, 4],
-  ['about', 'Текст «Ещё»', 'white', 455, 805, 525, 845, 1, 4],
-  ['about', '«Исходный код»', 'white', 1215, 795, 1375, 826, 1, 4],
-  ['about', '«Документация»', 'white', 1455, 795, 1618, 826, 1, 4],
-  ['team', '«Modern Manifesto»', 'white', 340, 420, 700, 560, 2, 4],
-  ['team', '«Учащиеся школы #2107»', 'white', 345, 578, 640, 655, 2, 4],
-  ['team', 'Участник 1', 'white', 600, 670, 900, 710, 1, 4],
-  ['team', 'Участник 2', 'white', 600, 755, 900, 795, 1, 4],
-  ['team', 'Участник 3', 'white', 600, 838, 900, 880, 1, 4],
-  ['team', 'Участник 4', 'white', 1055, 670, 1360, 710, 1, 4],
-  ['team', 'Участник 5', 'white', 1055, 755, 1360, 795, 1, 4],
+  ['hero', 'Заголовок', 'dark', 50, 270, 850, 440, 2, 12],
+  // Up to the apple of the mockup.
+  ['hero', 'Подзаголовок', 'dark', 50, 442, 596, 542, 3, 3],
+  ['hero', 'Текст «Создать меню»', 'white', 150, 600, 430, 660, 1, 4],
+  ['hero', 'Карточка 1: заголовок', 'dark', 90, 885, 370, 930, 1, 4],
+  ['hero', 'Карточка 1: текст', 'dark', 90, 932, 372, 1010, 3, 3],
+  ['hero', 'Карточка 2: заголовок', 'dark', 550, 885, 835, 930, 1, 4],
+  ['hero', 'Карточка 2: текст', 'dark', 550, 932, 835, 1010, 3, 3],
+  ['hero', 'Карточка 3: заголовок', 'dark', 1010, 885, 1295, 930, 1, 4],
+  ['hero', 'Карточка 3: текст', 'dark', 1010, 932, 1295, 1010, 3, 3],
+  ['hero', 'Карточка 4: заголовок', 'dark', 1470, 885, 1750, 930, 1, 4],
+  ['hero', 'Карточка 4: текст', 'dark', 1470, 932, 1750, 1010, 2, 3],
 ];
 
 const INK = {
   // Black or grey text on #FEF9F7.
   dark: (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b < 170,
-  // White text on red or on the dark team card.
+  // White text on the accent.
   white: (r, g, b) => r > 200 && g > 185 && b > 185,
-  // #E63946 on #FEF9F7.
-  accent: (r, g, b) => r > 170 && g < 120 && b < 130,
+  // Anything that is not the page.
+  any: (r, g, b) => Math.abs(r - 254) + Math.abs(g - 249) + Math.abs(b - 247) > 40,
 };
 
 /** Lines of ink in a region: left/right, cap top, baseline (last row denser than 30% of the densest), bottom. */
@@ -204,9 +154,9 @@ function measureInk(rgba, kind, x0, y0, x1, y1, minGap) {
 
 async function readMockup(state) {
   const file = await readFile(path.join(args.mockups, state.mockup));
-  const crop = sharp(file).extract({ left: 0, top: state.offsetY, width: WIDTH, height: HEIGHT });
-  const png = await crop.clone().png().toBuffer();
-  const raw = await crop.clone().ensureAlpha().raw().toBuffer();
+  const frame = sharp(file).resize(WIDTH, HEIGHT, { kernel: 'lanczos3' });
+  const png = await frame.clone().png().toBuffer();
+  const raw = await frame.clone().ensureAlpha().raw().toBuffer();
   return { png, rgba: raw };
 }
 
@@ -214,15 +164,6 @@ async function openState(page, state) {
   await page.goto(new URL(`?pose=design&freeze=1&seed=1${state.hash}`, args.url).href);
   await page.waitForSelector('.page[data-ready]');
   await page.evaluate('document.fonts.ready.then(() => true)');
-  if (state.openTeam) {
-    await page.getByRole('button', { name: /Ещё о команде/ }).click();
-    await page.getByRole('dialog').waitFor();
-    // Spring of the shared element plus the cascade of the content.
-    await page.waitForTimeout(2500);
-    await page.waitForFunction(
-      "[...document.querySelectorAll('.team-surface--dialog img')].every((img) => img.complete && img.naturalWidth > 0)",
-    );
-  }
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(400);
 }
@@ -284,14 +225,13 @@ for (const state of STATES) {
   const inks = [];
   for (const [inkState, name, kind, x0, y0, x1, y1, lines, minGap] of INKS) {
     if (inkState !== state.id) continue;
-    const dx = Math.round(state.shiftX);
     const expected = measureInk(mockup.rgba, kind, x0, y0, x1, y1, minGap);
-    const actual = measureInk(clean, kind, x0 + dx, y0, x1 + dx, y1, minGap);
+    const actual = measureInk(clean, kind, x0, y0, x1, y1, minGap);
     const rows = expected.map((line, i) => {
       const site = actual[i];
       if (!site) return { expected: line, missing: true, ok: false };
       const delta = {
-        left: site.left - state.shiftX - line.left,
+        left: site.left - line.left,
         top: site.top - line.top,
         baseline: site.baseline - line.baseline,
         width: site.width - line.width,
@@ -340,7 +280,7 @@ await browser.close();
 const md = [
   '# Сравнение с макетами (1920×1080, `?pose=design&freeze=1&seed=1`)',
   '',
-  `Допуск геометрии — ±${TOLERANCE_PX} px. Рамки — по Figma; текст и иконки — по «чернилам» одинаковым замером на макете`,
+  `Допуск геометрии — ±${TOLERANCE_PX} px. Рамки — по замерам макета; текст и иконки — по «чернилам» одинаковым замером на макете`,
   'и на скриншоте без еды: левый край, верх прописных, базовая линия. Ширина строк — для сведения (Open Runde ≠ SF Pro Rounded).',
   '',
 ];

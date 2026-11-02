@@ -94,10 +94,10 @@
     backdrop-filter: blur(12px);
   }
 
+  /* The two lines stay two lines, like on the mockup: the longer one fits a 360-px phone at this size. */
   .hero-title {
-    font-size: clamp(36px, 10.4vw, 44px);
+    font-size: clamp(24px, 7.6vw, 44px);
     line-height: 1.08;
-    text-wrap: balance;
   }
 
   .hero-lead {
@@ -112,7 +112,6 @@
     text-wrap: pretty;
   }
 
-  .hero-title .line,
   .hero-lead .line,
   .feature-text .line {
     display: inline;
@@ -137,10 +136,18 @@
     border-radius: 28px;
   }
 
-  /* White on #E63946 is 4.16:1: text must be "large" for WCAG (≥ 18.66 px bold or ≥ 24 px) — hence bold sizes ≥ 19 px. */
+  /* Her place under the button: as much as the free height allows, never a reason to scroll (HeroGirl fits her in). */
+  .hero-girl-slot {
+    flex: 0 1 calc((100vw - 32px) * var(--hero-girl-h) / var(--hero-girl-w));
+    min-height: 0;
+    max-height: 46svh;
+  }
+
+  /* White on the accent is 3.08:1: text must be "large" for WCAG (≥ 18.66 px bold or ≥ 24 px) — hence bold sizes ≥ 19 px. */
   .cta {
     gap: 8px;
     font-size: 21px;
+    font-weight: 700;
   }
 
   /* As tall as the longest text of the row (the grid stretches the others to it). */
@@ -346,6 +353,46 @@
     margin-bottom: 0;
   }
 
+  /* The title over the whole width; the lead and the button on the left, she on the right of them, the cards below. */
+  .scene--hero {
+    display: grid;
+    grid-template-rows: repeat(4, auto);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-content: safe center;
+    column-gap: 24px;
+  }
+
+  .hero-title {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+
+  .hero-lead {
+    grid-row: 2;
+    grid-column: 1;
+    align-self: end;
+  }
+
+  .cta-slot {
+    grid-row: 3;
+    grid-column: 1;
+    align-self: start;
+    width: 100%;
+  }
+
+  .hero-girl-slot {
+    grid-row: 2 / 4;
+    grid-column: 2;
+    max-height: none;
+    min-height: clamp(180px, 26svh, 340px);
+  }
+
+  .features {
+    grid-row: 4;
+    grid-column: 1 / -1;
+  }
+
   .scene--about {
     justify-content: center;
     gap: 32px;
@@ -376,13 +423,25 @@
 }
 
 @media (min-width: 48rem) and (orientation: landscape) and (not ((min-width: 80rem) and (hover: hover))) {
-  /* Tablets on their side: a slightly tighter part 1, so it fits without scrolling (e.g. 1180×820). */
+  /* Tablets on their side: a slightly tighter part 1, so it fits without scrolling (e.g. 1180×820). The title is short
+     enough for the left column here, and she stands beside the whole text block. */
   .scene--hero {
     --hero-top: calc(96px + env(safe-area-inset-top));
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
   }
 
   .hero-title {
-    font-size: clamp(40px, 6.8svh, 60px);
+    grid-column: 1;
+  }
+
+  .hero-girl-slot {
+    grid-row: 1 / 4;
+    min-height: 0;
+  }
+
+  /* On one line each in the left column, 1024×768 included. */
+  .hero-title {
+    font-size: clamp(40px, 6.6svh, 60px);
   }
 
   /* The lead in two lines and the cards' texts a little closer to their edges: part 1 fits 1024×768 too. */
@@ -543,7 +602,6 @@
     padding: 10px 64px 10px 20px;
   }
 
-  /* 19 px bold is still "large" text for white on #E63946. */
   .feature-title {
     font-size: 19px;
   }
@@ -559,27 +617,48 @@
   }
 }
 
-/* Phones on their side: no cards either — the text block in the middle, in one column. */
+/* Low windows with the cards in the second column have no room for her. */
+@media (orientation: landscape) and (max-height: 35rem) and (not ((min-width: 80rem) and (hover: hover))) {
+  .hero-girl-slot {
+    display: none;
+  }
+}
+
+/* Phones on their side: no cards either — the text block in the middle, she beside it. */
 @media (orientation: landscape) and (max-height: 35rem) and (pointer: coarse) {
   .features {
     display: none;
   }
 
   .scene--hero {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   }
 
   .cta-slot {
     max-width: 420px;
   }
+
+  .hero-girl-slot {
+    display: block;
+    grid-row: 1 / -1;
+    grid-column: 2;
+    flex: none;
+    min-height: 0;
+    max-height: none;
+  }
 }
 
 /* ── Phones: part 2 compact enough to fit one screen (a short swipe then works from anywhere) ── */
 
-/* Phones upright: the heading, the lead and the button a little above the middle (D-029). */
+/* Phones upright: the heading, the lead, the button and she one under another, the free height around them. */
 @media (max-width: 47.99rem) and (orientation: portrait) {
-  .scene--hero {
-    padding-bottom: calc(14svh + env(safe-area-inset-bottom));
+  .cta-slot {
+    margin-bottom: 0;
+  }
+
+  .hero-girl-slot {
+    margin-top: 8px;
+    margin-bottom: auto;
   }
 }
 

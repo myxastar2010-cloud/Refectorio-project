@@ -23,7 +23,7 @@
   width: fit-content;
   margin: 0 auto;
   border-radius: 12px;
-  color: var(--color-accent);
+  color: var(--color-accent-fill);
   font-weight: var(--type-about-title-weight);
   letter-spacing: var(--type-about-title-tracking);
   white-space: nowrap;
@@ -156,7 +156,7 @@
   cursor: default;
 }
 
-/* The mockup's red; on the light pill a deeper one, so the small figure reads (4.5:1). */
+/* The accent; on the light pill a deeper one, so the small figure reads (4.5:1). */
 .period-discount {
   color: var(--color-accent-deep);
   font-size: var(--discount-size);
