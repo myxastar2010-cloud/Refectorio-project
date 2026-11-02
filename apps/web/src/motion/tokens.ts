@@ -84,10 +84,6 @@ export const SCENE = {
   aboutCardsOut: { durationMs: 340, fadeMs: 260 },
 } as const;
 
-/**
- * «Цены» (#pricing): reached only by its button, left by its × or a scroll up. It comes and goes exactly like part 2
- * (SCENE.heroOut, aboutTitleIn, aboutCardsIn: the frame, then the two plans in cascade); the rest is its own.
- */
 /** The hero girl (§1.5): her video's own frame and rhythm, and what the browser needs to pick a file. */
 export const GIRL = {
   fps: 24,
@@ -104,6 +100,17 @@ export const GIRL = {
   h264: 'video/mp4; codecs="avc1.640028"',
 } as const;
 
+/** Layouts of the CSS (layout-responsive.css) that the food field follows too. */
+export const LAYOUT_MEDIA = {
+  /** Low landscape screens, phones on their side: the phone's composition. */
+  lowLandscape:
+    '(orientation: landscape) and (max-height: 35rem) and (not ((min-width: 80rem) and (hover: hover)))',
+} as const;
+
+/**
+ * «Цены» (#pricing): reached only by its button, left by its × or a scroll up. It comes and goes exactly like part 2
+ * (SCENE.heroOut, aboutTitleIn, aboutCardsIn: the frame, then the two plans in cascade); the rest is its own.
+ */
 export const PRICING = {
   /** The frame and the two plan cards come into focus in this order (aboutCardVariants). */
   cards: 3,

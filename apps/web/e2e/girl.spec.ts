@@ -41,10 +41,21 @@ test.describe('the girl', () => {
   }) => {
     test.skip(browserName === 'webkit', 'WebKit on Windows and Linux has no codecs for it');
     const errors = collectErrors(page);
-    await page.goto('./?seed=1');
+    // The video's bytes wait until the still is checked: in Firefox a video that joins before `load` holds the event
+    // back until its first frame, so `goto` could return after the swap.
+    let release = (): void => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route(/\.mp4(\?|$)/, async (route) => {
+      await gate;
+      await route.continue();
+    });
+    await page.goto('./?seed=1', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('.hero-girl-still')).toBeVisible();
     const before = await boxOf(page);
     expect(before.width).toBeGreaterThan(200);
+    release();
     await expect(art(page)).toHaveAttribute('data-girl', 'video', { timeout: 20_000 });
     const after = await boxOf(page);
     for (const key of ['x', 'y', 'width', 'height'] as const) {
@@ -101,6 +112,40 @@ test.describe('the girl', () => {
     expect(videos).toEqual([]);
   });
 
+  test('Save-Data: the still, and the video is never requested', async ({ page }) => {
+    const videos: string[] = [];
+    page.on('request', (request) => {
+      if (request.url().endsWith('.mp4')) videos.push(request.url());
+    });
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'connection', { value: { saveData: true } });
+    });
+    await page.goto('./?seed=1');
+    await expect(page.locator('.hero-girl-still')).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('.hero-girl-video')).toHaveCount(0);
+    expect(videos).toEqual([]);
+  });
+
+  test('she lies under the food: her page-coloured box never cuts an item', async ({ page }) => {
+    await page.goto('./?seed=1');
+    const layers = await page.evaluate(() => {
+      const girl = document.querySelector('.hero-girl');
+      const food = document.querySelector('.food-layer');
+      if (!girl || !food) throw new Error('no girl or no food');
+      return {
+        // The stage is a layer of its own above the food: inside it any z-index of hers is above the food too.
+        inStage: girl.closest('.stage') !== null,
+        sameParent: girl.parentElement === food.parentElement,
+        girl: Number(getComputedStyle(girl).zIndex),
+        food: Number(getComputedStyle(food).zIndex),
+      };
+    });
+    expect(layers.inStage).toBe(false);
+    expect(layers.sameParent).toBe(true);
+    expect(layers.girl).toBeLessThan(layers.food);
+  });
+
   test('she pauses when part 1 leaves and goes on when it comes back', async ({
     page,
     browserName,
@@ -123,15 +168,20 @@ test.describe('the girl', () => {
 for (const [name, screen] of [
   ['1920×1080', { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 }],
   ['the team’s laptop', { viewport: { width: 1536, height: 730 }, deviceScaleFactor: 1.25 }],
+  [
+    'a phone',
+    { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true },
+  ],
 ] as const) {
   test.describe(`the swap on ${name}`, () => {
+    // Firefox cannot even open a context with isMobile: decided before the page exists.
+    test.skip(({ browserName }) => browserName !== 'chromium', 'one engine is enough');
     test.use(screen);
 
-    test('the still and the video’s first frame are the same picture', async ({
-      page,
-      browserName,
-    }) => {
-      test.skip(browserName !== 'chromium', 'one engine is enough: a property of the two files');
+    test('the still and the video’s first frame are the same picture', async ({ page }) => {
+      // A property of the two files on each screen, which brings its own device: the desktop Chromium project only (a
+      // touch device of the mobile project at 1920 px and 1× would shrink her 2.35 times, a screen nobody has).
+      test.skip(test.info().project.name !== 'chromium', 'each screen brings its own device');
       await page.goto('./?seed=1');
       await hideFood(page);
       await expect(art(page)).toHaveAttribute('data-girl', 'video', { timeout: 20_000 });
@@ -162,6 +212,72 @@ for (const [name, screen] of [
   });
 }
 
+type FoodHook = {
+  snapshot: () => {
+    slug: string;
+    x: number;
+    y: number;
+    size: number;
+    scale: number;
+    angle: number;
+    hidden: boolean;
+  }[];
+};
+type Overlap = { frames: number; overlap: number; sawBox: boolean };
+
+/** After every frame of the engine: every opaque cell of every sprite against her silhouette where she is drawn. */
+async function watchOverlap(page: Page) {
+  await page.addInitScript(
+    ({ girl, food }) => {
+      const original = window.requestAnimationFrame.bind(window);
+      const set = (row: number, column: number) => {
+        const digit = Number.parseInt((girl.rows[row] ?? '').charAt(column >> 2) || '0', 16);
+        return ((digit >> (3 - (column & 3))) & 1) === 1;
+      };
+      const masks = new Map(food.items.map((item) => [item.slug, item.mask]));
+      const state: Overlap = { frames: 0, overlap: 0, sawBox: false };
+      (window as unknown as { __overlap: Overlap }).__overlap = state;
+      const check = () => {
+        const hook = (window as unknown as { __refectorioFood?: FoodHook }).__refectorioFood;
+        const box = document.querySelector('.hero-girl')?.getBoundingClientRect();
+        if (!hook || !box || box.width === 0) return;
+        state.sawBox = true;
+        state.frames += 1;
+        for (const item of hook.snapshot()) {
+          if (item.hidden) continue;
+          const rows = masks.get(item.slug) ?? [];
+          const edge = item.size * item.scale;
+          const cos = Math.cos((item.angle * Math.PI) / 180);
+          const sin = Math.sin((item.angle * Math.PI) / 180);
+          for (let row = 0; row < food.maskSize; row += 1) {
+            const bits = Number.parseInt(rows[row] ?? '0', 16);
+            for (let column = 0; column < food.maskSize; column += 1) {
+              if (!((bits >>> (food.maskSize - 1 - column)) & 1)) continue;
+              const u = ((column + 0.5) / food.maskSize - 0.5) * edge;
+              const v = ((row + 0.5) / food.maskSize - 0.5) * edge;
+              const x = item.x + u * cos - v * sin;
+              const y = item.y + u * sin + v * cos;
+              const gridX = Math.floor(((x - box.left) / box.width) * girl.grid);
+              const gridY = Math.floor(((y - box.top) / box.height) * girl.grid);
+              if (gridX < 0 || gridY < 0 || gridX >= girl.grid || gridY >= girl.grid) continue;
+              if (set(gridY, gridX)) state.overlap += 1;
+            }
+          }
+        }
+      };
+      window.requestAnimationFrame = (callback) =>
+        original((time) => {
+          callback(time);
+          check();
+        });
+    },
+    { girl: girlMask, food: manifest.food },
+  );
+}
+
+const readOverlap = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __overlap: Overlap }).__overlap);
+
 test.describe('the food goes around her', () => {
   const VIEWPORTS = [
     [1920, 1080],
@@ -179,77 +295,101 @@ test.describe('the food goes around her', () => {
       test.skip(browserName !== 'chromium', 'the engine is plain code: one browser is enough');
       await page.setViewportSize({ width, height });
       await page.clock.install();
-      // After every frame of the engine: every opaque cell of every sprite against her silhouette.
-      await page.addInitScript(
-        ({ girl, food }) => {
-          const original = window.requestAnimationFrame.bind(window);
-          const set = (row: number, column: number) => {
-            const digit = Number.parseInt((girl.rows[row] ?? '').charAt(column >> 2) || '0', 16);
-            return ((digit >> (3 - (column & 3))) & 1) === 1;
-          };
-          const masks = new Map(food.items.map((item) => [item.slug, item.mask]));
-          const state = { frames: 0, overlap: 0, sawBox: false };
-          (window as unknown as { __overlap: typeof state }).__overlap = state;
-          const check = () => {
-            const hook = (
-              window as unknown as {
-                __refectorioFood?: {
-                  snapshot: () => {
-                    slug: string;
-                    x: number;
-                    y: number;
-                    size: number;
-                    scale: number;
-                    angle: number;
-                    hidden: boolean;
-                  }[];
-                };
-              }
-            ).__refectorioFood;
-            const box = document.querySelector('.hero-girl')?.getBoundingClientRect();
-            if (!hook || !box || box.width === 0) return;
-            state.sawBox = true;
-            state.frames += 1;
-            for (const item of hook.snapshot()) {
-              if (item.hidden) continue;
-              const rows = masks.get(item.slug) ?? [];
-              const edge = item.size * item.scale;
-              const cos = Math.cos((item.angle * Math.PI) / 180);
-              const sin = Math.sin((item.angle * Math.PI) / 180);
-              for (let row = 0; row < food.maskSize; row += 1) {
-                const bits = Number.parseInt(rows[row] ?? '0', 16);
-                for (let column = 0; column < food.maskSize; column += 1) {
-                  if (!((bits >>> (food.maskSize - 1 - column)) & 1)) continue;
-                  const u = ((column + 0.5) / food.maskSize - 0.5) * edge;
-                  const v = ((row + 0.5) / food.maskSize - 0.5) * edge;
-                  const x = item.x + u * cos - v * sin;
-                  const y = item.y + u * sin + v * cos;
-                  const gridX = Math.floor(((x - box.left) / box.width) * girl.grid);
-                  const gridY = Math.floor(((y - box.top) / box.height) * girl.grid);
-                  if (gridX < 0 || gridY < 0 || gridX >= girl.grid || gridY >= girl.grid) continue;
-                  if (set(gridY, gridX)) state.overlap += 1;
-                }
-              }
-            }
-          };
-          window.requestAnimationFrame = (callback) =>
-            original((time) => {
-              callback(time);
-              check();
-            });
-        },
-        { girl: girlMask, food: manifest.food },
-      );
+      await watchOverlap(page);
       await page.goto('./?seed=7');
       await page.clock.runFor(2000 * 16);
-      const result = await page.evaluate(
-        () =>
-          (window as unknown as { __overlap: { frames: number; overlap: number; sawBox: boolean } })
-            .__overlap,
-      );
+      const result = await readOverlap(page);
       expect(result.sawBox).toBe(true);
       expect(result.frames).toBeGreaterThanOrEqual(1900);
       expect(result.overlap).toBe(0);
+    });
+  }
+
+  test('a window resized under her: she and the food move together, no sprite pixel on her', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== 'chromium', 'the engine is plain code: one browser is enough');
+    await page.setViewportSize({ width: 1536, height: 730 });
+    await page.clock.install();
+    await watchOverlap(page);
+    await page.goto('./?seed=11');
+    await page.clock.runFor(300 * 16);
+    // Every step a few frames apart, quicker than the field's own rebuild after a resize (200 ms).
+    for (const [width, height] of [
+      [1440, 720],
+      [1280, 720],
+      [1100, 760],
+      [1536, 730],
+      [390, 844],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      await page.clock.runFor(5 * 16);
+    }
+    await page.clock.runFor(120 * 16);
+    const result = await readOverlap(page);
+    expect(result.frames).toBeGreaterThanOrEqual(400);
+    expect(result.overlap).toBe(0);
+  });
+
+  // Her push used to meet a slow item's own speed and hold it beside her for half a minute (phase 1 motion review).
+  for (const [width, height, seed] of [
+    [1536, 730, 7],
+    [1536, 730, 11],
+    [1536, 730, 123],
+    [390, 844, 11],
+    [390, 844, 123],
+  ] as const) {
+    test(`60 s at ${String(width)}×${String(height)}, seed ${String(seed)}: nothing hangs beside her`, async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName !== 'chromium', 'the engine is plain code: one browser is enough');
+      test.setTimeout(120_000);
+      await page.setViewportSize({ width, height });
+      await page.clock.install();
+      await page.goto(`./?seed=${String(seed)}`);
+      await page.waitForFunction(
+        () =>
+          'snapshot' in
+          ((window as unknown as { __refectorioFood?: object }).__refectorioFood ?? {}),
+      );
+      // Items seen beside her: on the screen and near her box (texts hold slow items too — stage 1, not hers).
+      const snapshot = () =>
+        page.evaluate(() => {
+          const box = document.querySelector('.hero-girl')?.getBoundingClientRect();
+          return (window as unknown as { __refectorioFood: FoodHook }).__refectorioFood
+            .snapshot()
+            .map((item) => ({
+              x: item.x,
+              y: item.y,
+              beside:
+                !item.hidden &&
+                box !== undefined &&
+                item.x > 0 &&
+                item.x < window.innerWidth &&
+                item.y > 0 &&
+                item.y < window.innerHeight &&
+                Math.hypot(
+                  Math.max(box.left - item.x, 0, item.x - box.right),
+                  Math.max(box.top - item.y, 0, item.y - box.bottom),
+                ) < 200,
+            }));
+        });
+      let slowest = Number.POSITIVE_INFINITY;
+      let before = await snapshot();
+      for (let tenSeconds = 0; tenSeconds < 6; tenSeconds += 1) {
+        await page.clock.runFor(10_000);
+        const after = await snapshot();
+        after.forEach((item, index) => {
+          const was = before[index];
+          if (!was?.beside || !item.beside) return;
+          slowest = Math.min(slowest, Math.hypot(item.x - was.x, item.y - was.y));
+        });
+        before = after;
+      }
+      // The slowest item (10 px/s) drifts ≈ 100 px in 10 s; one held beside her moved a few.
+      expect(slowest).toBeGreaterThan(30);
     });
   }
 });

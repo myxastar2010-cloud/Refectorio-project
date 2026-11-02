@@ -223,15 +223,17 @@ function fieldAt(field: SilhouetteField, u: number, v: number): number {
   const row = Math.min(Math.floor(y), last - 1);
   const fx = x - column;
   const fy = y - row;
-  const at = (r: number, c: number) => field.distance[r * field.grid + c] ?? 0;
-  const top = at(row, column) * (1 - fx) + at(row, column + 1) * fx;
-  const bottom = at(row + 1, column) * (1 - fx) + at(row + 1, column + 1) * fx;
+  const { distance, grid } = field;
+  const at = row * grid + column;
+  const top = (distance[at] ?? 0) * (1 - fx) + (distance[at + 1] ?? 0) * fx;
+  const bottom = (distance[at + grid] ?? 0) * (1 - fx) + (distance[at + grid + 1] ?? 0) * fx;
   return top * (1 - fy) + bottom * fy;
 }
 
 /**
- * Distance from a point (CSS px) to the silhouette drawn in `box`, and the unit direction away from it. Beyond the box
- * the distance grows with the way to the box. No allocations: it runs for the items near her on every frame.
+ * Distance from a point (CSS px) to the silhouette drawn in `box`, and the unit direction away from it. It never reads
+ * as more room than there is: the hard guarantee of the food rests on it. No allocations: it runs for the items near
+ * her on every frame.
  */
 export function sampleSilhouette(
   field: SilhouetteField,
@@ -248,17 +250,21 @@ export function sampleSilhouette(
   const beyondX = x - inX;
   const beyondY = y - inY;
   const beyond = Math.hypot(beyondX, beyondY);
-  // Half a cell of bilinear smoothing must never read as more room than there is.
-  const margin = (Math.min(field.cellWidth, field.cellHeight) / 4) * scale;
-  out.distance = fieldAt(field, u, v) * scale + beyond - margin;
+  // Bilinear smoothing overstates the room at a convex corner of the cells by up to ≈ 0.3 of a cell.
+  const margin = ((0.35 * Math.hypot(field.cellWidth, field.cellHeight)) / Math.SQRT2) * scale;
+  const atEdge = fieldAt(field, u, v) * scale;
+  // Beyond the box her nearest point is past the box's nearest point and along its edge at least as far as the field
+  // there says (she touches the box at her head, back and desk): a lower bound. The sum of the two would overstate it.
+  out.distance = (beyond > 0 ? Math.hypot(beyond, Math.max(0, atEdge)) : atEdge) - margin;
   let nx = fieldAt(field, u + 0.5, v) - fieldAt(field, u - 0.5, v);
   let ny = fieldAt(field, u, v + 0.5) - fieldAt(field, u, v - 0.5);
-  const gradient = Math.hypot(nx, ny) || 1;
-  nx /= gradient;
-  ny /= gradient;
   if (beyond > 0) {
-    nx += beyondX / beyond;
-    ny += beyondY / beyond;
+    // The way the lower bound grows: straight out of the box, bent along its edge only as far as her outline under
+    // the edge leans, times how far it is. The field's slope across the edge is lost in the clamp: adding the bare
+    // field direction gave 45° pushes towards every dip of her outline, and items above her stuck in them.
+    const along = Math.max(0, atEdge);
+    nx = beyondX + (beyondX === 0 ? (along * nx) / field.cellWidth : 0);
+    ny = beyondY + (beyondY === 0 ? (along * ny) / field.cellHeight : 0);
   }
   const length = Math.hypot(nx, ny) || 1;
   out.nx = nx / length;

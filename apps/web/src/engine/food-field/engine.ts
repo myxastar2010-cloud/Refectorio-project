@@ -42,9 +42,23 @@ export const FIELD = {
   avoidReachPx: 70,
   avoidAccelPxS2: 260,
   avoidDragS: 0.9,
-  /** The girl (§1.6): how far her field reaches beyond an item's edge, and how fast the item's way bends along her. */
+  /**
+   * The girl (§1.6): how far her field reaches beyond an item's edge, and how fast the item's way bends along her —
+   * faster than the wander turns it back (≤ 0.23 rad/s), or a slow item would hang where her push meets its speed.
+   */
   girlReachPx: 150,
-  girlSteerRadS: 1.6,
+  /** Her width on the mockup (1920 px): the reach shrinks with her, or on a phone her field would fill the screen. */
+  girlReachAtWidthPx: 611,
+  girlSteerRadS: 2,
+  /** A drift along her outline the way the item goes round: beside her it always flows on, pressed or not. */
+  girlSwirlPxS2: 80,
+  /**
+   * An item held in place — its way against a push (a text, her, both) — moves at a fraction of its own pace; after a
+   * while it is turned aside, slowly, until it moves on: the field never parks an item.
+   */
+  stallPace: 0.25,
+  stallS: 1.5,
+  stallTurnRadS: 1.5,
   bounce: { stiffness: 180, damping: 12, kick: 3.2 },
   impulsePxS: [120, 180] as const,
   impulseDecayS: 0.5,
@@ -115,6 +129,10 @@ type Item = {
   sharp: HTMLElement;
   blur: HTMLElement | null;
   hidden: boolean;
+  /** The way round the girl it took when it came near her (±1), 0 away from her. */
+  girlSide: number;
+  /** How long it has been held in place. */
+  stalledS: number;
 };
 
 const sizesAttr = (px: number) => `${Math.round(px)}px`;
@@ -264,40 +282,58 @@ export function createFoodField(options: FieldOptions) {
 
   /** Its soft push away from her, and its way bending along her outline: natural arcs instead of a stop at the edge. */
   function steerAroundGirl(item: Item, heading: number, dt: number) {
-    if (!silhouette) return;
+    if (!silhouette) {
+      item.girlSide = 0;
+      return;
+    }
     const { field, box } = silhouette;
     const edge = item.reach * Math.max(1, item.bounce.value);
-    const reach = edge + FIELD.girlReachPx;
+    const reachPx =
+      FIELD.girlReachPx * Math.min(1, (box.right - box.left) / FIELD.girlReachAtWidthPx);
+    const reach = edge + reachPx;
     if (
       item.x < box.left - reach ||
       item.x > box.right + reach ||
       item.y < box.top - reach ||
       item.y > box.bottom + reach
     ) {
+      item.girlSide = 0;
       return;
     }
     sampleSilhouette(field, box, item.x, item.y, probeOfGirl);
-    if (probeOfGirl.distance >= reach) return;
+    if (probeOfGirl.distance >= reach) {
+      item.girlSide = 0;
+      return;
+    }
     const { distance, nx, ny } = probeOfGirl;
-    const closeness = (1 - Math.max(0, distance - edge) / FIELD.girlReachPx) ** 2;
+    const near = 1 - Math.max(0, distance - edge) / reachPx;
+    const closeness = near * near;
     item.pushX += nx * FIELD.avoidAccelPxS2 * closeness * dt;
     item.pushY += ny * FIELD.avoidAccelPxS2 * closeness * dt;
-    const towards = -(Math.cos(heading) * nx + Math.sin(heading) * ny);
-    if (towards > 0) {
-      const side = Math.cos(heading) * ny - Math.sin(heading) * nx >= 0 ? 1 : -1;
-      item.baseHeading += side * FIELD.girlSteerRadS * towards * closeness * dt;
+    // One way round her, chosen as it comes: the wander swinging across her normal must not turn it back and forth.
+    if (item.girlSide === 0) {
+      item.girlSide = Math.cos(heading) * ny - Math.sin(heading) * nx >= 0 ? 1 : -1;
     }
+    item.pushX += item.girlSide * ny * FIELD.girlSwirlPxS2 * closeness * dt;
+    item.pushY -= item.girlSide * nx * FIELD.girlSwirlPxS2 * closeness * dt;
+    const towards = -(Math.cos(heading) * nx + Math.sin(heading) * ny);
+    item.baseHeading += item.girlSide * FIELD.girlSteerRadS * Math.max(0, towards) * near * dt;
   }
 
-  /** The guarantee behind the soft field: an item that still reached her slides along her edge. */
+  /**
+   * The guarantee behind the soft field: an item that still reached her slides along her edge. A few steps: in a hollow
+   * of her outline (between the chair and her back) one step along the field falls short.
+   */
   function keepOffGirl(item: Item) {
     if (!silhouette) return;
     const edge = item.reach * Math.max(1, item.bounce.value);
-    sampleSilhouette(silhouette.field, silhouette.box, item.x, item.y, probeOfGirl);
-    if (probeOfGirl.distance >= edge) return;
-    const overlap = edge - probeOfGirl.distance;
-    item.x += probeOfGirl.nx * overlap;
-    item.y += probeOfGirl.ny * overlap;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      sampleSilhouette(silhouette.field, silhouette.box, item.x, item.y, probeOfGirl);
+      if (probeOfGirl.distance >= edge) return;
+      const overlap = edge - probeOfGirl.distance;
+      item.x += probeOfGirl.nx * overlap;
+      item.y += probeOfGirl.ny * overlap;
+    }
   }
 
   /** An item that has just wrapped around (fully off screen) may take a less-used sprite (math.ts rebalanceSprite). */
@@ -351,6 +387,8 @@ export function createFoodField(options: FieldOptions) {
       sharp,
       blur: null,
       hidden: false,
+      girlSide: 0,
+      stalledS: 0,
     };
   }
 
@@ -391,8 +429,16 @@ export function createFoodField(options: FieldOptions) {
       item.pushY *= decayPush;
       item.impulseY *= decayImpulse;
       item.spinKick *= decayImpulse;
-      item.x += (Math.cos(heading) * speed + item.pushX) * dt;
-      item.y += (Math.sin(heading) * speed + item.pushY + item.impulseY) * dt;
+      const vx = Math.cos(heading) * speed + item.pushX;
+      const vy = Math.sin(heading) * speed + item.pushY + item.impulseY;
+      item.x += vx * dt;
+      item.y += vy * dt;
+      item.stalledS = Math.hypot(vx, vy) < FIELD.stallPace * speed ? item.stalledS + dt : 0;
+      if (item.stalledS > FIELD.stallS) {
+        // Round her the way it already goes; elsewhere the way it spins.
+        const side = item.girlSide || Math.sign(item.spin) || 1;
+        item.baseHeading += side * FIELD.stallTurnRadS * dt;
+      }
       keepOffGirl(item);
       if (quality < 1) item.angle += (item.spin * speedFactor + item.spinKick) * dt;
       // Part 2 shows the pre-blurred copy, larger than the sprite (transparent padding for the blur): it must be off
@@ -489,6 +535,10 @@ export function createFoodField(options: FieldOptions) {
     /** Where the girl stands; null: she is not on this layout. */
     setSilhouette(next: { readonly field: SilhouetteField; readonly box: Rect } | null) {
       silhouette = next;
+      // Her new place must not land on the food even for one paint: she moves in the layout, after this frame's step
+      // (and without motion no frame moves the food again).
+      items.forEach(keepOffGirl);
+      items.forEach(render);
     },
     /** Part 2 (camera pulled back): items wrap around beyond its wider view; part 1 — beyond the screen. */
     setWideWrap(wide: boolean) {

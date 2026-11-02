@@ -377,14 +377,6 @@ function Page() {
             onPrefetch={prefetchQuiz}
             girlSlotRef={girlSlotRef}
           />
-          {/* After the scene: she reads its refs in her layout effect, and z-index puts her under the food. */}
-          <HeroGirl
-            phase={scene === 'hero' ? 'shown' : 'hidden'}
-            instant={instant}
-            slotRef={girlSlotRef}
-            scrollerRef={heroRef}
-            frozen={params.freeze}
-          />
           <div className="about-scroller" ref={aboutRef} inert={scene !== 'about'}>
             <AboutScene
               phase={scene === 'about' ? 'shown' : 'hidden'}
@@ -423,6 +415,15 @@ function Page() {
           )}
         </AnimatePresence>
       </div>
+      {/* Not in the stage, which lies above the food: her page-coloured box would cut the food (--z-girl). After the
+          scene in the tree: she reads its refs in her layout effect. */}
+      <HeroGirl
+        phase={scene === 'hero' ? 'shown' : 'hidden'}
+        instant={instant}
+        slotRef={girlSlotRef}
+        scrollerRef={heroRef}
+        frozen={params.freeze}
+      />
       <TeamDialog
         open={openCard === 'team'}
         onClose={closeCard}

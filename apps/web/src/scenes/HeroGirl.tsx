@@ -2,6 +2,7 @@ import { m } from 'motion/react';
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { whenIdle } from '../lib/idle';
 import { girlAssets } from '../lib/assets';
+import { setGirlPlace } from '../lib/girlPlace';
 import { useCalmMotion } from '../motion/hooks';
 import { GIRL } from '../motion/tokens';
 import { heroVariants, type Phase } from './choreography';
@@ -66,21 +67,44 @@ export const HeroGirl = memo(function HeroGirl({
     const scroller = scrollerRef.current;
     if (!place || !slot || !scroller) return;
     let scrollAtMeasure = 0;
+    let box = { left: 0, top: 0, width: 0, height: 0 };
+    // The food steers by her place: it is told at every move and never reads it back from the layout.
+    const tell = (shiftY: number) => {
+      setGirlPlace(
+        box.width > 0 && box.height > 0
+          ? {
+              left: box.left,
+              top: box.top + shiftY,
+              right: box.left + box.width,
+              bottom: box.top + shiftY + box.height,
+            }
+          : null,
+      );
+    };
     const measure = () => {
-      const box = fitGirl(slot.getBoundingClientRect(), GIRL.width / GIRL.height);
+      const fitted = fitGirl(slot.getBoundingClientRect(), GIRL.width / GIRL.height);
       scrollAtMeasure = scroller.scrollTop;
       // On a grid that is whole in CSS and in device pixels: at a fractional box an image and a video are snapped
       // differently, and the swap would shift her lines by a fraction of a pixel.
       const step = pixelGrid(window.devicePixelRatio);
-      const snap = (px: number) => `${String(Math.round(px / step) * step)}px`;
-      place.style.left = snap(box.left);
-      place.style.top = snap(box.top);
-      place.style.width = snap(box.width);
-      place.style.height = snap(box.height);
+      const snap = (px: number) => Math.round(px / step) * step;
+      box = {
+        left: snap(fitted.left),
+        top: snap(fitted.top),
+        width: snap(fitted.width),
+        height: snap(fitted.height),
+      };
+      place.style.left = `${String(box.left)}px`;
+      place.style.top = `${String(box.top)}px`;
+      place.style.width = `${String(box.width)}px`;
+      place.style.height = `${String(box.height)}px`;
       place.style.transform = '';
+      tell(0);
     };
     const onScroll = () => {
-      place.style.transform = `translate3d(0, ${String(scrollAtMeasure - scroller.scrollTop)}px, 0)`;
+      const shiftY = scrollAtMeasure - scroller.scrollTop;
+      place.style.transform = `translate3d(0, ${String(shiftY)}px, 0)`;
+      tell(shiftY);
     };
     measure();
     // The web font changes the height of the text above her on small screens, and her slot moves without resizing.
@@ -92,6 +116,7 @@ export const HeroGirl = memo(function HeroGirl({
     return () => {
       observer.disconnect();
       scroller.removeEventListener('scroll', onScroll);
+      setGirlPlace(null);
     };
   }, [slotRef, scrollerRef]);
 
@@ -105,7 +130,7 @@ export const HeroGirl = memo(function HeroGirl({
   useEffect(() => {
     const video = videoRef.current;
     const art = artRef.current;
-    if (!video || !art) return;
+    if (!video || !art || stillOnly) return;
     let state = GIRL_START;
     let onScreen = true;
     let frameHandle = 0;
@@ -127,6 +152,7 @@ export const HeroGirl = memo(function HeroGirl({
 
     const watchFirstFrame = () => {
       if (!FRAME_CALLBACKS) return;
+      video.cancelVideoFrameCallback(frameHandle);
       const onFrame: VideoFrameRequestCallback = (_now, metadata) => {
         if (state.phase === 'playing') return;
         if (isFirstFrame(metadata.mediaTime, FRAME_S)) presented();
@@ -142,36 +168,45 @@ export const HeroGirl = memo(function HeroGirl({
       }
     };
 
-    const play = () => {
-      send('start');
-      window.clearTimeout(stallTimer);
-      if (state.phase === 'starting') {
-        stallTimer = window.setTimeout(blocked, GIRL.stallMs);
-        watchFirstFrame();
-      }
-      video.play().catch(blocked);
+    /** An AbortError is our own pause() overtaking a play() still under way, not the browser saying no. */
+    const refused = (error: unknown) => {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      blocked();
     };
+    /** One try to show her video: the first one, or the one retry after a gesture. */
+    const attempt = () => {
+      window.clearTimeout(stallTimer);
+      stallTimer = window.setTimeout(blocked, GIRL.stallMs);
+      watchFirstFrame();
+      video.play().catch(refused);
+    };
+    const wanted = () =>
+      shouldPlay({ active: activeRef.current, onScreen, pageVisible: !document.hidden });
     const sync = () => {
-      const wanted = shouldPlay({
-        active: activeRef.current,
-        onScreen,
-        pageVisible: !document.hidden,
-      });
-      if (wanted && video.paused) play();
-      else if (!wanted && !video.paused) video.pause();
+      if (!wanted()) {
+        // Unseen: no decoding, and no stall counted while it waits.
+        window.clearTimeout(stallTimer);
+        if (!video.paused) video.pause();
+        return;
+      }
+      if (!video.paused) return;
+      if (state.phase === 'idle') send('start');
+      // A refused video waits for a gesture: asking again by itself would get the same answer.
+      if (state.phase === 'starting') attempt();
+      else if (state.phase === 'playing') video.play().catch(refused);
     };
     syncRef.current = sync;
 
-    const onGesture = () => {
-      window.removeEventListener('pointerdown', onGesture);
-      window.removeEventListener('keydown', onGesture);
-      const before = state.phase;
-      send('gesture');
-      if (before === 'blocked' && state.phase === 'starting') {
-        stallTimer = window.setTimeout(blocked, GIRL.stallMs);
-        watchFirstFrame();
-        video.play().catch(blocked);
+    // The retry needs a gesture that lets a page play media: a click (after a tap or a press) or a key, not a touch's
+    // start. Gestures before a refusal do not use it up.
+    const onGesture = (event: Event) => {
+      if (state.phase !== 'blocked' || (event instanceof KeyboardEvent && event.key === 'Escape')) {
+        return;
       }
+      send('gesture');
+      window.removeEventListener('click', onGesture);
+      window.removeEventListener('keydown', onGesture);
+      if (wanted()) attempt();
     };
     const observer = new IntersectionObserver(([entry]) => {
       onScreen = entry?.isIntersecting ?? true;
@@ -181,7 +216,7 @@ export const HeroGirl = memo(function HeroGirl({
     video.addEventListener('error', blocked);
     video.addEventListener('timeupdate', onTimeUpdate);
     document.addEventListener('visibilitychange', sync);
-    window.addEventListener('pointerdown', onGesture);
+    window.addEventListener('click', onGesture);
     window.addEventListener('keydown', onGesture);
     sync();
     return () => {
@@ -192,11 +227,13 @@ export const HeroGirl = memo(function HeroGirl({
       video.removeEventListener('error', blocked);
       video.removeEventListener('timeupdate', onTimeUpdate);
       document.removeEventListener('visibilitychange', sync);
-      window.removeEventListener('pointerdown', onGesture);
+      window.removeEventListener('click', onGesture);
       window.removeEventListener('keydown', onGesture);
       video.pause();
+      // Reduced motion switched on while she played: the video leaves, the still must come back with it.
+      art.dataset.girl = 'still';
     };
-  }, [videoReady]);
+  }, [videoReady, stillOnly]);
 
   useEffect(() => {
     activeRef.current = phase === 'shown';

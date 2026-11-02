@@ -5,9 +5,10 @@ import girlMask from '../../assets/generated/girl-mask.json';
 import { foodSprites } from '../../lib/assets';
 import type { TestParams } from '../../lib/params';
 import { useCalmMotion } from '../../motion/hooks';
-import { EASE_OUT_EXPO, QUIZ, SCENE } from '../../motion/tokens';
+import { EASE_OUT_EXPO, LAYOUT_MEDIA, QUIZ, SCENE } from '../../motion/tokens';
 import { createFoodField, type Device, type FoodField } from './engine';
 import { buildSilhouette, cameraVisibleArea, type Rect, type SilhouetteField } from './math';
+import { watchGirlPlace } from '../../lib/girlPlace';
 import { whenIdle } from '../../lib/idle';
 
 const RESIZE_DEBOUNCE_MS = 200;
@@ -38,8 +39,8 @@ declare global {
 
 function device(): Device {
   const width = window.innerWidth;
-  // A phone on its side too: 130-px food on a screen 390 px high leaves no composition around it.
-  if (width < 768 || window.innerHeight < 500) return 'phone';
+  // A phone on its side too, as the CSS lays it out: 130-px food on a screen 390 px high leaves no room around it.
+  if (width < 768 || window.matchMedia(LAYOUT_MEDIA.lowLandscape).matches) return 'phone';
   if (width < 1024) return 'tablet';
   return 'desktop';
 }
@@ -67,13 +68,6 @@ function obstacles(): Rect[] {
     .map((element) => element.getBoundingClientRect())
     .filter((rect) => rect.width > 0 && rect.height > 0)
     .map((rect) => ({ left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }));
-}
-
-/** Where the girl stands now (HeroGirl places her box); null where this layout has no room for her. */
-function girlBox(): Rect | null {
-  const rect = document.querySelector('.hero-girl')?.getBoundingClientRect();
-  if (!rect || rect.width === 0 || rect.height === 0) return null;
-  return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
 }
 
 /** The quiz's central column: the food drifts around it softly (ТЗ §7.9). */
@@ -167,11 +161,10 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
       });
       fieldRef.current = field;
       const silhouette: SilhouetteField = buildSilhouette(girlMask);
-      const placeGirl = () => {
-        const box = girlBox();
+      // HeroGirl tells where she is whenever she is placed: at the start, on a resize, a font, a scroll of part 1.
+      const unwatchGirl = watchGirlPlace((box) => {
         field.setSilhouette(box ? { field: silhouette, box } : null);
-      };
-      placeGirl();
+      });
       const startScene = sceneRef.current;
       const receded = startScene !== 'hero';
       /** The obstacles of a scene; part 1's are measured now and kept, a window changed elsewhere forgets them. */
@@ -202,14 +195,12 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
         window.clearTimeout(resizeTimer);
         resizeTimer = window.setTimeout(() => {
           field.setObstacles(obstaclesOf(sceneRef.current));
-          placeGirl();
           field.resize();
         }, RESIZE_DEBOUNCE_MS);
       };
       // Text boxes change once the web font arrives.
       void document.fonts.ready.then(() => {
         field.setObstacles(obstaclesOf(sceneRef.current));
-        placeGirl();
       });
       const cancelPreload = whenIdle(() => {
         field.ensureBlur();
@@ -232,13 +223,10 @@ export const FoodFieldLayer = memo(function FoodFieldLayer({ scene, params, card
         if (index >= 0) field.bounce(index);
       };
 
-      // Small screens scroll part 1, and she goes with it.
-      const hero = document.querySelector('.scene--hero');
-      hero?.addEventListener('scroll', placeGirl, { passive: true });
       window.addEventListener('resize', onResize);
       window.addEventListener('pointerdown', onPointerDown);
       return () => {
-        hero?.removeEventListener('scroll', placeGirl);
+        unwatchGirl();
         window.removeEventListener('resize', onResize);
         window.removeEventListener('pointerdown', onPointerDown);
         window.clearTimeout(resizeTimer);
