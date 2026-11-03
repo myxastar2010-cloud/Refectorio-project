@@ -352,7 +352,10 @@ export function assemble(input: AssembleInput): AssembleOutput {
     version: input.version,
     catalogVersion: catalog.version,
     nutrients: [...NUTRIENT_KEYS],
-    ingredients: used.map((id) => [id, input.ingredients.ingredients[id]?.nameRu ?? id]),
+    ingredients: used.map((id) => {
+      const row = input.ingredients.ingredients[id];
+      return [id, row?.nameRu ?? id, row?.category ?? 0];
+    }),
     items: drafts.map(({ ingredients: list, ...rest }) => ({
       ...rest,
       i: list.map(([id, g]) => [indexOf.get(id) ?? -1, g] as [number, number]),

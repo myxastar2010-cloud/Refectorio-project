@@ -193,8 +193,11 @@ export const foodCoreSchema = z.object({
   /** taste-core catalog version the game dishes refer to. */
   catalogVersion: z.string(),
   nutrients: z.array(z.string()).length(NUTRIENT_KEYS.length),
-  /** [id, Russian name]. */
-  ingredients: z.array(z.tuple([z.string(), z.string()])),
+  /**
+   * [id, Russian name, SR Legacy food_category_id (0 — label foods)]: the group lets menu-core sort ingredients into
+   * food groups (fish, red meat, vegetables…) without the build's English descriptions.
+   */
+  ingredients: z.array(z.tuple([z.string(), z.string(), z.number().int().nonnegative()])),
   items: z.array(foodCoreItemSchema),
 });
 export type FoodCoreFile = z.infer<typeof foodCoreSchema>;
