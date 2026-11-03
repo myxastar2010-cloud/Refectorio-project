@@ -13,7 +13,8 @@ import { daysBetween } from '../src/dates';
 import { generate } from '../src/generate';
 import { buildMenuProfile } from '../src/profile';
 import { rule } from '../src/rules';
-import { mealShares } from '../src/structure';
+import { mealShares, structureFromKinds } from '../src/structure';
+import type { MealKind } from '../src/types';
 import { likeProbability } from '../src/taste';
 import { randomAnswers, testFoods } from '../src/testing';
 import { hardViolations } from '../src/validate';
@@ -42,6 +43,12 @@ type Row = {
   flags: Record<string, number>;
   notes: string[];
   violations: number;
+  /** Property checks (ТЗ фаза 3 §10): days off by > 10 % without an energy flag, main or soup repeats within the week
+   * without the repeat flag, and — for every 50th person — the same plan from the same inputs and seed. */
+  unflaggedEnergy: number;
+  unflaggedRepeats: number;
+  deterministic: boolean | null;
+  structure: string;
   tasteCore: number;
   tasteAllowedMean: number;
   tasteAllowedTop: number;
@@ -153,6 +160,15 @@ function plausibility(
   };
 }
 
+/** Day structures the people pick (as in properties.test.ts): the default, three meals, two snacks, two meals. */
+const STRUCTURES: readonly (readonly MealKind[])[] = [
+  ['breakfast', 'lunch', 'snack', 'dinner'],
+  ['breakfast', 'lunch', 'dinner'],
+  ['breakfast', 'snack', 'lunch', 'snack', 'dinner'],
+  ['breakfast', 'lunch', 'snack', 'dinner'],
+  ['lunch', 'dinner'],
+];
+
 type Job = { seeds: number[]; iterations: number; today: string[] };
 
 const share = (xs: readonly boolean[]) =>
@@ -186,6 +202,10 @@ function runOne(seed: number, iterations: number, today: string): Row {
     flags: {},
     notes: [],
     violations: 0,
+    unflaggedEnergy: 0,
+    unflaggedRepeats: 0,
+    deterministic: null,
+    structure: '',
     tasteCore: 0,
     tasteAllowedMean: 0,
     tasteAllowedTop: 0,
@@ -211,7 +231,16 @@ function runOne(seed: number, iterations: number, today: string): Row {
   if (p.targets.energyKcal >= 3500) groups.push('energy3500plus');
   if (p.targets.energyKcal <= 1300) groups.push('energy1300minus');
   const started = performance.now();
-  const result = generate({ profile: p, foods, today, seed, iterationsPerDay: iterations });
+  const kinds = STRUCTURES[seed % STRUCTURES.length] ?? STRUCTURES[0] ?? [];
+  const request = {
+    profile: p,
+    foods,
+    today,
+    seed,
+    iterationsPerDay: iterations,
+    structure: structureFromKinds(kinds),
+  };
+  const result = generate(request);
   const ms = performance.now() - started;
   if (!result.ok)
     return {
@@ -225,6 +254,33 @@ function runOne(seed: number, iterations: number, today: string): Row {
   const t = plan.targets;
   const ctx = buildContext(p, foods, plan.structure, []);
   const violations = hardViolations(ctx, plan.days).length;
+  let unflaggedEnergy = 0;
+  let unflaggedRepeats = 0;
+  plan.days.forEach((day, d) => {
+    const codes = day.flags.map((f) => f.code);
+    const dev = (day.totals.energyKcal ?? 0) / t.energyKcal - 1;
+    if (
+      Math.abs(dev) > rule('S.energyToleranceRelaxedShare') &&
+      !codes.includes(dev < 0 ? 'energyLow' : 'energyHigh')
+    )
+      unflaggedEnergy += 1;
+    for (const [mealId, items] of Object.entries(day.meals))
+      for (const item of items.filter((i) => i.role === 'main' || i.role === 'soup')) {
+        const repeated = plan.days
+          .slice(0, d)
+          .some(
+            (q) =>
+              daysBetween(q.date, day.date) < rule('E19.repeatWindowDays') &&
+              (q.meals[mealId] ?? []).some((x) => x.itemId === item.itemId),
+          );
+        if (repeated && !codes.includes('repeatRelaxed')) unflaggedRepeats += 1;
+      }
+  });
+  let deterministic: boolean | null = null;
+  if (seed % 50 === 0) {
+    const again = generate(request);
+    deterministic = again.ok && JSON.stringify(again.value.plan) === JSON.stringify(plan);
+  }
   const devs = plan.days.map((d) => Math.abs((d.totals.energyKcal ?? 0) / t.energyKcal - 1));
   const val = (d: (typeof plan.days)[number], k: keyof (typeof d)['totals']) => d.totals[k];
   const flags: Record<string, number> = {};
@@ -344,6 +400,10 @@ function runOne(seed: number, iterations: number, today: string): Row {
     flags,
     notes: plan.notes.map((n) => n.code),
     violations,
+    unflaggedEnergy,
+    unflaggedRepeats,
+    deterministic,
+    structure: kinds.join('+'),
     tasteCore: round(cores.reduce((a, i) => a + like(i.itemId), 0) / Math.max(1, cores.length)),
     tasteAllowedMean: round(
       allowedMains.reduce((a, b) => a + b, 0) / Math.max(1, allowedMains.length),
@@ -426,6 +486,17 @@ function summarize(rows: readonly Row[], single: readonly number[]) {
     plans: ok.length,
     errors,
     violations: ok.reduce((s, r) => s + r.violations, 0),
+    properties: {
+      unflaggedEnergy: ok.reduce((s, r) => s + r.unflaggedEnergy, 0),
+      unflaggedRepeats: ok.reduce((s, r) => s + r.unflaggedRepeats, 0),
+      determinismChecked: ok.filter((r) => r.deterministic !== null).length,
+      determinismFailed: ok.filter((r) => r.deterministic === false).length,
+      structures: Object.fromEntries(
+        STRUCTURES.map((k) => k.join('+'))
+          .filter((k, i, all) => all.indexOf(k) === i)
+          .map((k) => [k, ok.filter((r) => r.structure === k).length]),
+      ),
+    },
     days: dayCount,
     energy: {
       within5: mean((r) => r.within5),
@@ -535,7 +606,11 @@ function report(
     } (отказ guardrails — экран теста, не ошибка движка).`,
   );
   lines.push(
-    `- **Нарушений жёстких правил: ${s.violations}** (валидатор по составу: аллергены, следы, диеты, беременность, кофеин, исключения).`,
+    `- **Нарушений жёстких правил: ${s.violations}** (валидатор по составу: аллергены, следы, диеты, беременность, недельный бюджет рыбы, кофеин, исключения).`,
+    `- Свойства: дней с энергией вне ±10 % без пометки — ${s.properties.unflaggedEnergy}; повторов основного блюда или супа в неделю без пометки — ${s.properties.unflaggedRepeats}; детерминизм — ${s.properties.determinismChecked - s.properties.determinismFailed} из ${s.properties.determinismChecked} повторных запусков дали то же меню байт в байт.`,
+    `- Структуры дня: ${Object.entries(s.properties.structures)
+      .map(([k, v]) => `${k} — ${v}`)
+      .join('; ')}.`,
     '',
   );
   lines.push('## Попадание в цели (доля дней)', '');
