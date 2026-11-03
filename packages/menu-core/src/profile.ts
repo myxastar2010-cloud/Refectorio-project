@@ -29,7 +29,13 @@ import {
 } from '@refectorio/nutrition-core';
 import type { FoodIndex } from './foods';
 import { rule } from './rules';
-import { createTermResolver, unmatchedWords, type CategoryId } from './taxonomy';
+import {
+  createTermResolver,
+  resolveAllergens,
+  unmatchedWords,
+  type CategoryId,
+  type TermMatch,
+} from './taxonomy';
 import { err, ok, type DayTargets, type Result } from './types';
 
 export type SafetyContext = {
@@ -68,7 +74,9 @@ export type MenuProfile = {
     readonly features: ReadonlyMap<string, { readonly mean: number; readonly variance: number }>;
   };
   /** Free text of dislikes and allergies that matched nothing (kept for Kiki, never guessed). */
-  readonly unmatchedText: readonly string[];
+  /** Dislike and allergy text the engine could not map exactly: Kiki asks, the UI shows it before the menu. */
+  readonly unmatchedDislikes: readonly string[];
+  readonly unmatchedAllergies: readonly string[];
 };
 
 export type ProfileError =
@@ -232,16 +240,33 @@ export function buildMenuProfile(
   const categories = new Set<CategoryId>();
   const ingredientIds = new Set<string>();
   const itemIds = new Set<string>();
-  const unmatchedText: string[] = [];
-  const texts = [answers.dislikesText ?? '', ...answers.allergies.custom].filter((t) => t.trim());
-  for (const text of texts) {
-    const matches = resolver(text);
-    for (const m of matches) {
+  const allergens = new Map(q.allergens.map((a) => [a.code, a.level] as const));
+  const LEVEL = { intolerance: 0, allergy: 1, severeAllergy: 2 } as const;
+  const unmatchedDislikes: string[] = [];
+  const unmatchedAllergies: string[] = [];
+  const texts = [
+    ...(answers.dislikesText?.trim() ? [{ text: answers.dislikesText, allergy: false }] : []),
+    ...answers.allergies.custom.filter((t) => t.trim()).map((text) => ({ text, allergy: true })),
+  ];
+  for (const { text, allergy } of texts) {
+    // Only exact words exclude: a typo match («корица» → курица) would exclude the wrong food and keep the right one
+    // (review of phase 3, C1). It stays unmatched — Kiki asks «вы имели в виду…?».
+    const matches: Pick<TermMatch, 'start' | 'end'>[] = [];
+    for (const m of resolver(text)) {
+      if (m.confidence < 0.8) continue;
+      matches.push(m);
       if (m.kind === 'category') categories.add(m.id as CategoryId);
       else if (m.kind === 'ingredient') ingredientIds.add(m.id);
       else itemIds.add(m.id);
     }
-    if (unmatchedWords(text, matches).length > 0) unmatchedText.push(text);
+    for (const a of resolveAllergens(text, !allergy)) {
+      matches.push(a);
+      const level = allergy ? 'allergy' : 'intolerance';
+      const now = allergens.get(a.code);
+      if (now === undefined || LEVEL[level] > LEVEL[now]) allergens.set(a.code, level);
+    }
+    if (unmatchedWords(text, matches).length > 0)
+      (allergy ? unmatchedAllergies : unmatchedDislikes).push(text);
   }
 
   const protectedMeals =
@@ -271,7 +296,7 @@ export function buildMenuProfile(
     safety: {
       ageYears: q.ageYears,
       weightKg: q.weightKg,
-      allergens: new Map(q.allergens.map((a) => [a.code, a.level])),
+      allergens,
       diet: q.diet,
       pregnant: q.pregnancy !== 'none',
       lactating: q.lactation !== 'none',
@@ -288,6 +313,7 @@ export function buildMenuProfile(
         answers.taste.features.map((f) => [f.id, { mean: f.mean, variance: f.variance }]),
       ),
     },
-    unmatchedText,
+    unmatchedDislikes,
+    unmatchedAllergies,
   });
 }

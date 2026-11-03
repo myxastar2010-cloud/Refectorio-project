@@ -1,13 +1,17 @@
 /**
  * The validator (ТЗ фаза 3 §3.4, algorithm-spec §6): re-checks every hard rule from the composition of the finished
  * plan — never trusting the planner's pools — and turns soft misses into honest day flags. A hard violation is a bug:
- * the property tests require zero.
+ * the property tests require zero. Eaten items are facts, not advice: they are never «violations», but they count in
+ * the day's and the week's limits (review of phase 3, C2).
  */
 import type { NutrientVector } from '@refectorio/food-data';
+import type { Diet } from '@refectorio/nutrition-core';
 import { allowedAt, fishBudgetShare, fishServings, weekKey, type PlanContext } from './context';
 import { checkFood, type HardReason } from './filter';
+import type { MenuFood } from './foods';
 import { repeatWindow } from './planner';
 import { rule } from './rules';
+import { ingredientCategories, withAncestors, type CategoryId } from './taxonomy';
 import { MAX_ITEMS_PER_MEAL } from './templates';
 import type { DayFlag, DayPlan, IsoDate, PlannedItem } from './types';
 import { daysBetween } from './dates';
@@ -19,21 +23,35 @@ export type HardViolation = {
   readonly code:
     | HardReason
     | 'unknownItem'
+    | 'unknownMeal'
     | 'ruleExclusion'
+    | 'dietByIngredients'
+    | 'servedWithout'
     | 'caffeineDay'
     | 'caffeineSingle'
+    | 'herbalTeaDay'
     | 'fishWeek'
     | 'tooManyItems';
 };
 
+/** An item the person already ate (meal id, item id on a date): a fact the plan has to live with. */
+export type IsFact = (date: IsoDate, mealId: string, itemId: string) => boolean;
+const NO_FACTS: IsFact = () => false;
+
+function foodOf(ctx: PlanContext, itemId: string): MenuFood | undefined {
+  const index = ctx.indexOf.get(itemId);
+  return index !== undefined ? ctx.foods[index] : undefined;
+}
+
 /**
  * R17 E9 in pregnancy and breastfeeding: each week's fish budget over the history and the planned days. A week breaks
- * the rule only if a planned day adds fish to it — past days cannot be changed.
+ * the rule only if the engine added fish to it — past days and eaten items cannot be changed.
  */
 function fishWeekViolations(
   ctx: PlanContext,
   days: readonly DayPlan[],
   history: readonly DayPlan[],
+  isFact: IsFact,
 ): HardViolation[] {
   if (!ctx.fishQ) return [];
   const planned = new Set(days.map((d) => d.date));
@@ -41,17 +59,16 @@ function fishWeekViolations(
   for (const day of [...history.filter((d) => !planned.has(d.date)), ...days]) {
     const week = weekKey(day.date);
     const acc = weeks.get(week) ?? { budget: 0, oily: 0, tuna: 0, fresh: false };
-    for (const items of Object.values(day.meals)) {
+    for (const [mealId, items] of Object.entries(day.meals)) {
       for (const item of items) {
-        const index = ctx.indexOf.get(item.itemId);
-        const food = index !== undefined ? ctx.foods[index] : undefined;
-        if (!food || food.groups.fishG <= 0) continue;
+        const food = foodOf(ctx, item.itemId);
+        if (!food || fishBudgetShare(food) <= 0) continue;
         const f = item.portion.factor;
         const servings = fishServings(food);
         acc.budget += f * fishBudgetShare(food);
         acc.oily += f * servings.oily;
         acc.tuna += f * servings.tuna;
-        if (planned.has(day.date)) acc.fresh = true;
+        if (planned.has(day.date) && !isFact(day.date, mealId, item.itemId)) acc.fresh = true;
       }
     }
     weeks.set(week, acc);
@@ -69,20 +86,55 @@ function fishWeekViolations(
   return out;
 }
 
-/** `history` — the plan's other days (weekly caps count them); only `days` are checked item by item. */
+/** Categories a diet never allows, as the ingredients say: a second path beside the item flags `checkFood` reads. */
+const DIET_BANS: Partial<Record<Diet, readonly CategoryId[]>> = {
+  vegan: ['meat', 'fish', 'seafood', 'eggs', 'dairy', 'honey'],
+  lentLay: ['meat', 'fish', 'seafood', 'eggs', 'dairy', 'honey'],
+  vegetarianLactoOvo: ['meat', 'fish', 'seafood'],
+  vegetarianLacto: ['meat', 'fish', 'seafood', 'eggs'],
+  vegetarianOvo: ['meat', 'fish', 'seafood', 'dairy'],
+  pescatarian: ['meat'],
+};
+
+function dietBroken(food: MenuFood, diet: Diet): boolean {
+  const banned = DIET_BANS[diet];
+  if (!banned) return false;
+  return food.item.ingredients.some((ingredient) =>
+    ingredientCategories(ingredient)
+      .flatMap((c) => withAncestors(c))
+      .some((c) => banned.includes(c)),
+  );
+}
+
+/**
+ * `history` — the plan's other days (weekly caps count them); only `days` are checked item by item. `isFact` — eaten
+ * items: skipped item by item, counted in the caps.
+ */
 export function hardViolations(
   ctx: PlanContext,
   days: readonly DayPlan[],
   history: readonly DayPlan[] = [],
+  isFact: IsFact = NO_FACTS,
 ): HardViolation[] {
-  const out: HardViolation[] = fishWeekViolations(ctx, days, history);
+  const out: HardViolation[] = fishWeekViolations(ctx, days, history, isFact);
   const targets = ctx.profile.targets;
+  const known = new Set(ctx.structure.map((m) => m.id));
+  const herbalMax = ctx.profile.safety.pregnant
+    ? rule('E21.herbalTeaMaxCupsDay')
+    : Number.POSITIVE_INFINITY;
   for (const day of days) {
+    for (const mealId of Object.keys(day.meals))
+      if (!known.has(mealId)) out.push({ date: day.date, meal: mealId, code: 'unknownMeal' });
     let caffeine = 0;
-    ctx.structure.forEach((meal, m) => {
+    let caffeineAdded = false;
+    let herbal = 0;
+    let herbalAdded = false;
+    for (const [m, meal] of ctx.structure.entries()) {
       const items = day.meals[meal.id] ?? [];
       if (items.length > MAX_ITEMS_PER_MEAL)
         out.push({ date: day.date, meal: meal.id, code: 'tooManyItems' });
+      let mealCaffeine = 0;
+      let mealCaffeineAdded = false;
       for (const item of items) {
         const index = ctx.indexOf.get(item.itemId);
         const food = index !== undefined ? ctx.foods[index] : undefined;
@@ -90,21 +142,44 @@ export function hardViolations(
           out.push({ date: day.date, meal: meal.id, itemId: item.itemId, code: 'unknownItem' });
           continue;
         }
+        const fact = isFact(day.date, meal.id, item.itemId);
+        // Caffeine from the composition and the portion, never from the stored numbers.
+        const mg = (food.item.perPortion.caffeineMg ?? 0) * item.portion.factor;
+        mealCaffeine += mg;
+        caffeine += mg;
+        if (mg > 0 && !fact) {
+          mealCaffeineAdded = true;
+          caffeineAdded = true;
+        }
+        if (food.categories.has('herbalTea')) {
+          herbal += 1;
+          if (!fact) herbalAdded = true;
+        }
+        if (fact) continue;
         const verdict = checkFood(food, ctx.profile.safety);
         if (!verdict.ok) {
           for (const code of verdict.reasons)
             out.push({ date: day.date, meal: meal.id, itemId: item.itemId, code });
-        }
+        } else if (verdict.servedWithout.some((a) => !(item.servedWithout ?? []).includes(a)))
+          out.push({ date: day.date, meal: meal.id, itemId: item.itemId, code: 'servedWithout' });
+        if (dietBroken(food, ctx.profile.safety.diet))
+          out.push({
+            date: day.date,
+            meal: meal.id,
+            itemId: item.itemId,
+            code: 'dietByIngredients',
+          });
         if (!allowedAt(ctx, index, day.date, m))
           out.push({ date: day.date, meal: meal.id, itemId: item.itemId, code: 'ruleExclusion' });
-        const mg = item.nutrients.caffeineMg ?? 0;
-        caffeine += mg;
-        if (mg > targets.caffeineSingleMaxMg + 1e-6)
-          out.push({ date: day.date, meal: meal.id, itemId: item.itemId, code: 'caffeineSingle' });
       }
-    });
-    if (caffeine > targets.caffeineMaxMg + 1e-6)
+      // R17 E11: the single dose is a meal's caffeine (tiramisu with a cappuccino), not one item's.
+      if (mealCaffeineAdded && mealCaffeine > targets.caffeineSingleMaxMg + 1e-6)
+        out.push({ date: day.date, meal: meal.id, code: 'caffeineSingle' });
+    }
+    if (caffeineAdded && caffeine > targets.caffeineMaxMg + 1e-6)
       out.push({ date: day.date, meal: '', code: 'caffeineDay' });
+    if (herbalAdded && herbal > herbalMax)
+      out.push({ date: day.date, meal: '', code: 'herbalTeaDay' });
   }
   return out;
 }

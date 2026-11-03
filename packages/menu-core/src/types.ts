@@ -121,6 +121,8 @@ export const PLAN_NOTE_CODES = [
   'sodiumWeekHigh',
   'macroProfileAdjusted',
   'dislikesUnmatched',
+  /** Allergy text the engine could not map exactly: the UI shows it before the menu, Kiki asks. */
+  'allergyUnmatched',
   'veganB12',
   'fewBreakfasts',
 ] as const;

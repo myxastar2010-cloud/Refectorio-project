@@ -397,7 +397,13 @@ export function replaceItem(
   refreshDay(ctx, state, day, true);
   const previous = plan.days.filter((d) => compareDates(d.date, slot.date) < 0);
   const replaced = toDayPlan(ctx, day, previous);
-  const violations = hardViolations(ctx, [replaced], plan.days);
+  const marks = options.tracking?.days[slot.date]?.eaten ?? {};
+  const violations = hardViolations(
+    ctx,
+    [replaced],
+    plan.days,
+    (_, mealId, itemId) => marks[markKey(mealId, itemId)] !== undefined,
+  );
   if (violations.length > 0) return err({ code: 'unsafe', violations });
   const updated: Plan = {
     ...plan,

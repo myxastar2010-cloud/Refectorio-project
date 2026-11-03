@@ -35,7 +35,7 @@ import {
   type PlannedItem,
   type Result,
 } from './types';
-import { hardViolations, type HardViolation } from './validate';
+import { hardViolations, type HardViolation, type IsFact } from './validate';
 
 export const DEFAULT_ITERATIONS_PER_DAY = 300;
 const HISTORY_DAYS = 14;
@@ -126,7 +126,10 @@ export function planRange(req: RangeRequest): Result<RangeResult, PlanError> {
     out.push(plan);
     previous.push(plan);
   }
-  const violations = hardViolations(ctx, out, req.history);
+  // Eaten items are facts: a new allergy or rule must not make re-planning fail on what was already eaten (C2).
+  const isFact: IsFact = (date, mealId, itemId) =>
+    (req.keep?.get(date)?.[mealId] ?? []).some((i) => i.itemId === itemId);
+  const violations = hardViolations(ctx, out, req.history, isFact);
   if (violations.length > 0) return err({ code: 'unsafe', violations });
   return ok({
     days: out,

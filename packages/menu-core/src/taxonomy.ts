@@ -3,6 +3,7 @@
  * кофе на чай» refer to. Ingredients are classified by their SR Legacy food group (food-core) and Russian name; items
  * inherit their ingredients' categories. Kiki resolves words through `resolveTerms` and never invents ids.
  */
+import type { AllergenCode } from '@refectorio/nutrition-core';
 import { normalize, stem, tokenize, withinOneEdit } from './text';
 
 export const CATEGORY_IDS = [
@@ -550,6 +551,8 @@ type Phrase = {
   readonly id: string;
   readonly words: readonly string[];
   readonly stems: readonly string[];
+  /** The first word of a longer ingredient name («корица» of «корица молотая»): an exact match, confidence 0.8. */
+  readonly head?: boolean;
 };
 
 /** Ingredient and item names that terms may also refer to («аллергия на киви» → the kiwi). */
@@ -576,8 +579,21 @@ function buildPhrases(vocabulary?: TermVocabulary): Phrase[] {
     const def = CATEGORIES[id];
     for (const synonym of [def.labelRu, ...def.synonyms]) push('category', id, synonym);
   }
-  for (const ingredient of vocabulary?.ingredients ?? [])
+  for (const ingredient of vocabulary?.ingredients ?? []) {
     push('ingredient', ingredient.id, ingredient.nameRu);
+    // People name an ingredient by its first word: without this, «корица» found no exact match and the typo pass
+    // turned it into «курица» (review of phase 3, C1).
+    const tokens = tokenize(ingredient.nameRu).filter((t) => /^[а-я]+$/.test(t.word));
+    const first = tokens[0];
+    if (tokens.length > 1 && first && first.word.length >= 3)
+      out.push({
+        kind: 'ingredient',
+        id: ingredient.id,
+        words: [first.word],
+        stems: [first.stem],
+        head: true,
+      });
+  }
   for (const item of vocabulary?.items ?? []) push('item', item.id, item.nameRu);
   // Longer phrases first («красное мясо» wins over «мясо»); then categories before ingredients before items.
   out.sort((a, b) => b.stems.length - a.stems.length || KIND_ORDER[a.kind] - KIND_ORDER[b.kind]);
@@ -633,7 +649,7 @@ function matchPhrases(phraseList: readonly Phrase[], text: string): TermMatch[] 
         out.push({
           kind: phrase.kind,
           id: phrase.id,
-          confidence: !exact ? 0.6 : sameWords ? 1 : 0.8,
+          confidence: !exact ? 0.6 : sameWords && !phrase.head ? 1 : 0.8,
           start: first.start,
           end: last.end,
         });
@@ -641,6 +657,106 @@ function matchPhrases(phraseList: readonly Phrase[], text: string): TermMatch[] 
     }
   }
   return out.sort((a, b) => a.start - b.start);
+}
+
+/**
+ * Allergens people type in words (the quiz's «другое»): words → codes of ТР ТС 022/2011. Exact stems only — a typo never
+ * decides an allergy (review of phase 3, M7). «Орехи» covers peanuts too: in everyday Russian it often does.
+ */
+const ALLERGEN_TERMS: Readonly<Record<AllergenCode, readonly string[]>> = {
+  GLUTEN: [
+    'глютен',
+    'клейковина',
+    'пшеница',
+    'пшеничный',
+    'рожь',
+    'ржаной',
+    'ячмень',
+    'ячменный',
+    'овёс',
+    'овсяный',
+    'полба',
+    'целиакия',
+  ],
+  CRUSTACEAN: [
+    'ракообразные',
+    'креветки',
+    'креветка',
+    'краб',
+    'крабы',
+    'раки',
+    'лобстер',
+    'омар',
+    'лангуст',
+  ],
+  MOLLUSC: [
+    'моллюски',
+    'мидии',
+    'устрицы',
+    'кальмар',
+    'кальмары',
+    'осьминог',
+    'гребешок',
+    'гребешки',
+  ],
+  FISH: ['рыба', 'рыбный', 'рыбу'],
+  EGG: ['яйцо', 'яйца', 'яичный'],
+  MILK: ['молоко', 'молочный', 'молочное', 'молочка', 'лактоза', 'казеин', 'сыворотка'],
+  TREE_NUT: [
+    'орехи',
+    'орех',
+    'фундук',
+    'миндаль',
+    'кешью',
+    'фисташки',
+    'грецкий',
+    'пекан',
+    'макадамия',
+  ],
+  PEANUT: ['арахис', 'арахисовый', 'орехи', 'орех'],
+  SOY: ['соя', 'соевый', 'сою'],
+  CELERY: ['сельдерей'],
+  MUSTARD: ['горчица', 'горчицу'],
+  SESAME: ['кунжут', 'кунжутный', 'тахини'],
+  SULPHITES: ['сульфиты', 'сульфит'],
+  LUPIN: ['люпин'],
+  ASPARTAME: ['аспартам'],
+};
+/** Substances, not foods: «не ем глютен» in the dislikes means the same as in allergies. */
+const SUBSTANCE_TERMS: ReadonlySet<string> = new Set(
+  ['глютен', 'клейковина', 'лактоза', 'казеин', 'сульфиты', 'сульфит', 'аспартам'].map(stem),
+);
+const ALLERGEN_BY_STEM: ReadonlyMap<string, readonly AllergenCode[]> = (() => {
+  const map = new Map<string, AllergenCode[]>();
+  for (const [code, words] of Object.entries(ALLERGEN_TERMS) as [
+    AllergenCode,
+    readonly string[],
+  ][]) {
+    for (const word of words) {
+      const key = stem(normalize(word));
+      const list = map.get(key) ?? [];
+      if (!list.includes(code)) list.push(code);
+      map.set(key, list);
+    }
+  }
+  return map;
+})();
+
+export type AllergenMatch = {
+  readonly code: AllergenCode;
+  readonly start: number;
+  readonly end: number;
+};
+
+/** Allergen codes named in a text, with spans; `substancesOnly` — for the dislikes (глютен, лактоза…). */
+export function resolveAllergens(text: string, substancesOnly = false): AllergenMatch[] {
+  const out: AllergenMatch[] = [];
+  for (const token of tokenize(text)) {
+    if (substancesOnly && !SUBSTANCE_TERMS.has(token.stem)) continue;
+    for (const code of ALLERGEN_BY_STEM.get(token.stem) ?? [])
+      out.push({ code, start: token.start, end: token.end });
+  }
+  return out;
 }
 
 /** Words that carry no food meaning in «не люблю…», «аллергия на…». */
@@ -715,7 +831,10 @@ const STOP_STEMS = new Set(
 );
 
 /** Words of the text that no match covers and that are not stop words: the part Kiki should ask about. */
-export function unmatchedWords(text: string, matches: readonly TermMatch[]): string[] {
+export function unmatchedWords(
+  text: string,
+  matches: readonly Pick<TermMatch, 'start' | 'end'>[],
+): string[] {
   return tokenize(text)
     .filter((t) => /^[а-я]+$/.test(t.word) && t.word.length > 1)
     .filter((t) => !matches.some((m) => t.start >= m.start && t.end <= m.end))

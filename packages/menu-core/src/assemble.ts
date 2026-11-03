@@ -76,7 +76,8 @@ export function planNotes(ctx: PlanContext, days: readonly DayState[]): PlanNote
   const notes: PlanNote[] = [];
   const p = ctx.profile;
   if (p.macroProfileAdjusted) notes.push({ code: 'macroProfileAdjusted' });
-  for (const text of p.unmatchedText) notes.push({ code: 'dislikesUnmatched', text });
+  for (const text of p.unmatchedDislikes) notes.push({ code: 'dislikesUnmatched', text });
+  for (const text of p.unmatchedAllergies) notes.push({ code: 'allergyUnmatched', text });
   if (p.safety.diet === 'vegan') notes.push({ code: 'veganB12' });
   if ((ctx.pools.breakfast.core?.length ?? 0) < rule('E19.repeatWindowDays'))
     notes.push({ code: 'fewBreakfasts' });

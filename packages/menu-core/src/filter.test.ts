@@ -233,12 +233,29 @@ describe('guardrail dish rules', () => {
     if (!rich) throw new Error('no vitamin K rich item');
     const verdict = checkFood(rich, safety);
     expect(verdict.ok && verdict.fixedPortion).toBe(true);
-    const plain = foods.foods.find((f) => (f.item.perPortion.vitaminKUg ?? 0) < 5);
+    const plain = foods.foods.find((f) => {
+      const k = f.item.perPortion.vitaminKUg;
+      return k !== null && k < 5 && checkFood(f, safety).ok;
+    });
     if (!plain) throw new Error('no plain item');
     const plainVerdict = checkFood(plain, safety);
     expect(plainVerdict.ok && plainVerdict.fixedPortion).toBe(false);
     const free = checkFood(rich, base.safety);
     expect(free.ok && free.fixedPortion).toBe(false);
+  });
+
+  it('keeps items with unknown vitamin K at a fixed portion on warfarin (unknown is not zero)', () => {
+    const { safety } = profileFor({
+      health: { flags: ['warfarin'], pregnancy: 'none', lactation: 'none', custom: [] },
+    });
+    const unknown = foods.foods.filter(
+      (f) => f.item.perPortion.vitaminKUg === null && checkFood(f, safety).ok,
+    );
+    expect(unknown.length).toBeGreaterThan(0);
+    for (const f of unknown) {
+      const verdict = checkFood(f, safety);
+      expect(verdict.ok && verdict.fixedPortion).toBe(true);
+    }
   });
 });
 

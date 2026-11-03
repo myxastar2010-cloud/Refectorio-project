@@ -223,10 +223,12 @@ function nutritionCost(p: DayProblem, w: Work): number {
  * Caffeine caps (R17 E11–E13) and the day caps are hard: a portion that breaks one is never taken. Only the caps the
  * item adds to are checked — the others do not move with it.
  */
-function capsOk(p: DayProblem, w: Work, item: DayItem, factor: number): boolean {
+function capsOk(p: DayProblem, w: Work, item: DayItem): boolean {
   const caffeine = at(item.q, Q.caffeine);
   if (caffeine > 0) {
-    if (caffeine * factor > p.targets.caffeineSingleMaxMg + 1e-9) return false;
+    // R17 E11: the single dose is the meal's caffeine, not one item's (tiramisu with a cappuccino).
+    if (at(w.mealQ, item.meal * w.width + Q.caffeine) > p.targets.caffeineSingleMaxMg + 1e-9)
+      return false;
     if (at(w.totals, Q.caffeine) > p.targets.caffeineMaxMg + 1e-9) return false;
   }
   for (const cap of p.caps ?? [])
@@ -360,7 +362,7 @@ export function solveDay(p: DayProblem, start?: readonly number[], full = false)
   );
   // A start that breaks a cap (a bigger coffee, more fish than the week has room for) steps down first.
   items.forEach((item, i) => {
-    while (!item.fixed && (idx[i] ?? 0) > 0 && !capsOk(p, w, item, factorOf(i))) {
+    while (!item.fixed && (idx[i] ?? 0) > 0 && !capsOk(p, w, item)) {
       const from = factorOf(i);
       idx[i] = (idx[i] ?? 0) - 1;
       change(w, item, from, factorOf(i));
@@ -383,7 +385,7 @@ export function solveDay(p: DayProblem, start?: readonly number[], full = false)
         if (j === current) continue;
         const to = item.grid[j] ?? 1;
         change(w, item, from, to);
-        if (capsOk(p, w, item, to)) {
+        if (capsOk(p, w, item)) {
           const c = nutritionCost(p, w);
           if (c < bestCost - 1e-12) {
             bestCost = c;
@@ -416,9 +418,7 @@ export function solveDay(p: DayProblem, start?: readonly number[], full = false)
           change(w, a, aFrom, aTo);
           change(w, b, bFrom, bTo);
           const c =
-            capsOk(p, w, a, aTo) && capsOk(p, w, b, bTo)
-              ? nutritionCost(p, w)
-              : Number.POSITIVE_INFINITY;
+            capsOk(p, w, a) && capsOk(p, w, b) ? nutritionCost(p, w) : Number.POSITIVE_INFINITY;
           if (c < cost - 1e-12) {
             idx[i] = ai + 1;
             idx[j] = bj - 1;

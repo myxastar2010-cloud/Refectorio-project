@@ -65,7 +65,6 @@ export type DayAgg = {
   readonly dairyServ: number;
   readonly desserts: number;
   readonly fried: number;
-  readonly herbalTea: number;
   readonly freq: readonly number[];
 };
 
@@ -306,7 +305,6 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
   let dairy = 0;
   let desserts = 0;
   let fried = 0;
-  let herbal = 0;
   let energy = 0;
   let sugars = 0;
   let satFat = 0;
@@ -338,7 +336,6 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
       dairy += f * g.dairyServings;
       if (food.role === 'dessert') desserts += 1;
       if (food.fried) fried += 1;
-      if (food.categories.has('herbalTea')) herbal += 1;
       ctx.rules.frequency.forEach((r, i) => {
         if (r.foods.has(slot.food)) freq[i] = (freq[i] ?? 0) + 1;
       });
@@ -361,7 +358,6 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
     dairyServ: dairy,
     desserts,
     fried,
-    herbalTea: herbal,
     freq,
   };
 }
@@ -371,8 +367,6 @@ function dayExtras(ctx: PlanContext, day: DayState, agg: DayAgg): number {
   let c = C.dessertDay * Math.max(0, agg.desserts - HOT.dessertMax);
   if (ctx.dairyAllowed) c += C.dairyDay * sq(under(agg.dairyServ, HOT.dairyMin));
   c += C.wholeGrainDay * sq(under(agg.wholeGrainServ, HOT.wholeGrainMin));
-  if (ctx.profile.safety.pregnant)
-    c += C.pregnancyFish * Math.max(0, agg.herbalTea - HOT.herbalTeaMax);
   // No same main protein at lunch and dinner (R17 §5).
   const proteins: string[] = [];
   day.meals.forEach((slots, m) => {
@@ -721,6 +715,32 @@ function minDayQ(ctx: PlanContext, day: DayState, q: number, except?: Slot): num
   return sum;
 }
 
+/** The same, for one meal. */
+function minMealQ(
+  ctx: PlanContext,
+  day: DayState,
+  mealIndex: number,
+  q: number,
+  except?: Slot,
+): number {
+  let sum = 0;
+  for (const slot of day.meals[mealIndex] ?? []) {
+    if (slot === except) continue;
+    const grid = ctx.grids[slot.food] ?? [1];
+    const factor = slot.frozen ? (grid[slot.fi] ?? 1) : (grid[0] ?? 1);
+    sum += (ctx.q[slot.food]?.[q] ?? 0) * factor;
+  }
+  return sum;
+}
+
+const herbalTeas = (ctx: PlanContext, day: DayState, except?: Slot): number =>
+  day.meals.reduce(
+    (n, slots) =>
+      n +
+      slots.filter((s) => s !== except && ctx.foods[s.food]?.categories.has('herbalTea')).length,
+    0,
+  );
+
 /**
  * Can `food` go into this meal (in place of `except`)? Rule exclusions and the caffeine cut-off, no item twice in a
  * meal, and room at its smallest portion under the hard caps: the day's caffeine (R17 E11–E13) and the week's fish
@@ -742,10 +762,21 @@ export function candidateOk(
   const targets = ctx.profile.targets;
   const caffeine = q?.[Q.caffeine] ?? 0;
   if (caffeine > 0) {
-    if (caffeine * minFactor > targets.caffeineSingleMaxMg + 1e-9) return false;
+    if (
+      minMealQ(ctx, day, mealIndex, Q.caffeine, except) + caffeine * minFactor >
+      targets.caffeineSingleMaxMg + 1e-9
+    )
+      return false;
     if (minDayQ(ctx, day, Q.caffeine, except) + caffeine * minFactor > targets.caffeineMaxMg + 1e-9)
       return false;
   }
+  // R17 E21: herbal tea in pregnancy — at most four cups a day.
+  if (
+    ctx.profile.safety.pregnant &&
+    ctx.foods[food]?.categories.has('herbalTea') === true &&
+    herbalTeas(ctx, day, except) + 1 > HOT.herbalTeaMax
+  )
+    return false;
   if (ctx.fishQ && (q?.[ctx.fishQ.budget] ?? 0) > 0) {
     for (const cap of capsFor(ctx, state, day)) {
       const own = q?.[cap.q] ?? 0;
@@ -762,7 +793,9 @@ const dayLimitsOk = (ctx: PlanContext, day: DayState): boolean =>
 
 /** Every hard cap holds for this day and its week after a change. */
 export const capsHold = (ctx: PlanContext, state: PlannerState, day: DayState): boolean =>
-  dayLimitsOk(ctx, day) && fishCapsOk(ctx, state, day);
+  dayLimitsOk(ctx, day) &&
+  fishCapsOk(ctx, state, day) &&
+  (!ctx.profile.safety.pregnant || herbalTeas(ctx, day) <= HOT.herbalTeaMax);
 
 // ---------------------------------------------------------------- construction
 

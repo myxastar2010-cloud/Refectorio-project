@@ -120,11 +120,13 @@ export function checkFood(food: MenuFood, safety: SafetyContext): Verdict {
     reasons.add('excludedByPerson');
   if (food.trackedSeparately) reasons.add('trackedSeparately');
   if (reasons.size > 0) return { ok: false, reasons: [...reasons] };
-  const vitaminK = item.perPortion.vitaminKUg ?? 0;
+  // Unknown is not zero (ADR 0015): an item without vitamin K data keeps its standard portion on warfarin too.
+  const vitaminK = item.perPortion.vitaminKUg;
   return {
     ok: true,
     servedWithout: [...new Set(servedWithout)].sort(),
     fixedPortion:
-      safety.dishRules.has('stableVitaminK') && vitaminK >= rule('G.vitaminKHighUgPerPortion'),
+      safety.dishRules.has('stableVitaminK') &&
+      (vitaminK === null || vitaminK >= rule('G.vitaminKHighUgPerPortion')),
   };
 }
