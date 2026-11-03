@@ -68,11 +68,13 @@ describe('allergens of an ingredient (research/R07)', () => {
 
 describe('traces of a bought ingredient (research/R07 §5, §7)', () => {
   it.each([
-    ['Nuts, almonds', 12, ['PEANUT', 'SESAME']],
+    ['Nuts, almonds', 12, ['PEANUT']],
     ['Nuts, coconut milk, raw', 12, []],
-    ['Peanuts, all types, dry-roasted, without salt', 16, ['TREE_NUT', 'SESAME']],
+    ['Peanuts, all types, dry-roasted, without salt', 16, ['TREE_NUT']],
     ['Seeds, sesame seeds, whole, dried', 12, ['PEANUT', 'TREE_NUT']],
-    ['Apricots, dried, sulfured, uncooked', 9, ['PEANUT', 'TREE_NUT']],
+    ['Seeds, pumpkin and squash seed kernels, dried', 12, ['PEANUT', 'TREE_NUT', 'SESAME']],
+    ['Cereals ready-to-eat, granola, homemade', 8, ['PEANUT', 'TREE_NUT']],
+    ['Apricots, dried, sulfured, uncooked', 9, []],
     ['Chocolate, dark, 45- 59% cacao solids', 19, ['MILK', 'PEANUT', 'TREE_NUT']],
     ['Buckwheat groats, roasted, dry', 20, ['GLUTEN']],
     ['Lentils, raw', 16, ['GLUTEN']],

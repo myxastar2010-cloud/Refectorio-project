@@ -73,23 +73,22 @@ export function ingredientAllergens(
 
 /**
  * Cross-contact risk of an ingredient as it is bought (research/R07 §7, the VITAL principle: only where the risk is real
- * and known, never on everything). Nuts and seeds share lines with peanuts and other nuts; dried fruit is packed on
- * nut lines; chocolate and cocoa share lines with milk and nuts; buckwheat, millet and lentils carry wheat or barley
- * grains (R07 §5: certified «без глютена» only); bread and crispbread share ovens with sesame; dry pasta shares lines
- * with egg pasta. Only `severeAllergy` excludes an item by its traces.
+ * and known, never on everything; checked in research/fact-check-food-data.md §6). Nuts share lines with peanuts and
+ * other nuts, seeds also with sesame; granola and muesli carry nuts and peanuts; chocolate and cocoa share lines with
+ * milk and nuts; buckwheat, millet, sorghum and lentils carry wheat or barley grains (R07 §5: certified «без глютена»
+ * only); bread and crispbread share ovens with sesame; dry pasta shares lines with egg pasta. Plain dried fruit is not
+ * on the list: no data shows a nut risk outside mixes. Only `severeAllergy` excludes an item by its traces.
  */
 const TRACE_RULES: readonly (readonly [
   readonly AllergenCode[],
   (d: string, category: number) => boolean,
 ])[] = [
   // Coconut is a «nut» of the SR food group only; its milk and flakes come from their own lines.
-  [
-    ['PEANUT', 'TREE_NUT', 'SESAME'],
-    (d, c) => (c === 12 && !d.includes('coconut')) || /^peanuts/.test(d),
-  ],
-  [['PEANUT', 'TREE_NUT'], (d, c) => c === 9 && /dried|prunes|raisins|^dates|^figs/.test(d)],
+  [['PEANUT', 'TREE_NUT'], (d, c) => (c === 12 && !d.includes('coconut')) || /^peanuts/.test(d)],
+  [['SESAME'], (d, c) => c === 12 && d.startsWith('seeds')],
+  [['PEANUT', 'TREE_NUT'], (d) => /granola|muesli/.test(d)],
   [['MILK', 'PEANUT', 'TREE_NUT'], (d) => /chocolate|^cocoa/.test(d)],
-  [['GLUTEN'], (d) => /buckwheat|millet|^lentils/.test(d)],
+  [['GLUTEN'], (d) => /buckwheat|millet|sorghum|^lentils/.test(d)],
   [['SESAME'], (d, c) => c === 18 && /^bread|crispbread|^rolls|^crackers|pita/.test(d)],
   [['EGG'], (d) => /^pasta|spaghetti|macaroni/.test(d)],
 ];

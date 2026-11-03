@@ -126,7 +126,9 @@ describe('allergens, traces and diets', () => {
 
   it('carries the traces of bought ingredients (research/R07 §5, §7)', () => {
     expect(item('d_almonds').allergens).toEqual(['TREE_NUT']);
-    expect(item('d_almonds').traces).toEqual(['PEANUT', 'SESAME']);
+    expect(item('d_almonds').traces).toEqual(['PEANUT']);
+    expect(item('d_pumpkin_seeds').traces).toEqual(['TREE_NUT', 'PEANUT', 'SESAME']);
+    expect(item('d_dried_fruits').traces).toEqual([]);
     expect(item('d_buckwheat_side').traces).toEqual(['GLUTEN']);
     expect(item('d_wheat_bread').traces).toEqual(['SESAME']);
     expect(item('d_pasta_side').traces).toEqual(['EGG']);
