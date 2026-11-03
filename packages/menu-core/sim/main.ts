@@ -39,6 +39,8 @@ type Row = {
   satFat: number;
   vegFruit: number;
   fishWeeks: number | null;
+  /** Full weeks whose average sodium is within the limit (+5 %): the engine holds the week, not the day (D-084). */
+  sodiumWeeks: number;
   redMeatWeeks: number;
   flags: Record<string, number>;
   notes: string[];
@@ -198,6 +200,7 @@ function runOne(seed: number, iterations: number, today: string): Row {
     satFat: 0,
     vegFruit: 0,
     fishWeeks: null,
+    sodiumWeeks: 0,
     redMeatWeeks: 0,
     flags: {},
     notes: [],
@@ -388,6 +391,15 @@ function runOne(seed: number, iterations: number, today: string): Row {
             ),
           )
         : null,
+    sodiumWeeks: round(
+      share(
+        full.map(
+          (w) =>
+            w.reduce((sum, d) => sum + (d.totals.sodiumMg ?? 0), 0) / w.length <=
+            t.sodiumMaxMg * 1.05,
+        ),
+      ),
+    ),
     redMeatWeeks: round(
       share(
         full.map(
@@ -533,6 +545,7 @@ function summarize(rows: readonly Row[], single: readonly number[]) {
       fishWeeks: mean((r) => r.fishWeeks ?? 0, fish),
       fishPersons: fish.length,
       redMeatWeeks: mean((r) => r.redMeatWeeks),
+      sodiumWeeks: mean((r) => r.sodiumWeeks),
     },
     variety: mean((r) => r.variety),
     plaus: {
@@ -626,7 +639,7 @@ function report(
   );
   lines.push(
     `| клетчатка ≥ 25 г | ${pct(s.nutrients.fibre)} |`,
-    `| натрий ≤ 2000 мг | ${pct(s.nutrients.sodium)} |`,
+    `| натрий ≤ 2000 мг за день (держится среднее за неделю, D-084) | ${pct(s.nutrients.sodium)} |`,
     `| свободные сахара ≤ 10 % | ${pct(s.nutrients.sugar)} |`,
   );
   lines.push(
@@ -643,6 +656,9 @@ function report(
     `- Рыба ≥ 227 г в неделю (у кого рыба разрешена, ${s.quotas.fishPersons} чел.): ${pct(s.quotas.fishWeeks)} недель.`,
   );
   lines.push(`- Красное мясо ≤ 500 г готового в неделю: ${pct(s.quotas.redMeatWeeks)} недель.`);
+  lines.push(
+    `- Натрий в среднем за неделю ≤ нормы ВОЗ (+5 %): ${pct(s.quotas.sodiumWeeks)} недель.`,
+  );
   lines.push(`- Разнообразие основных блюд (разных / всего): ${num(s.variety * 100, 1)} %.`);
   lines.push(
     `- Вкус (P(like) taste-core): в меню ${num(s.taste.planned, 3)}; среднее по разрешённым основным ${num(s.taste.allowedMean, 3)}; лучшие 10 разрешённых ${num(s.taste.allowedTop10, 3)}; вероятно нелюбимых (P < 0,4) в меню ${pct(s.taste.dislikedCore)} основных блюд при ${pct(s.taste.dislikedAllowed)} среди разрешённых.`,
