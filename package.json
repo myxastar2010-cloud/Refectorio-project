@@ -45,6 +45,7 @@
     "sim": "npm run sim -w @refectorio/taste-core --",
     "story": "node scripts/story/build.mjs",
     "dish-data": "node scripts/dish-data/build.mjs",
+    "food-data": "node packages/food-data/build/run.mjs",
     "secrets:check": "node scripts/secrets/check.mjs",
     "girl-video": "node scripts/girl-video/build.mjs"
   },

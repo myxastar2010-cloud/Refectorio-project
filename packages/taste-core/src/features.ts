@@ -1,4 +1,4 @@
-import { dietFlags, type Dish } from './catalog';
+import { dietFlags, visibleMeat, type Dish } from './catalog';
 
 /**
  * φ(dish): the dish as a sparse feature vector. Categories are one-hot or multi-hot (namespaced ids such as
@@ -53,7 +53,8 @@ export function dishFeatures(dish: Dish): [string, number][] {
   pairs.push(['trait:familiarity', centred(t.familiarityRu)]);
   pairs.push(['trait:popularity', centred(t.popularityRu)]);
   const flags = dietFlags(dish);
-  if (flags.meat) pairs.push([HAS_MEAT, 1]);
+  // What the card shows: a meat broth makes a dish non-vegetarian (a filter), but nobody sees it in a minestrone.
+  if (visibleMeat(dish)) pairs.push([HAS_MEAT, 1]);
   if (flags.fish || flags.seafood) pairs.push([HAS_FISH, 1]);
   return pairs;
 }

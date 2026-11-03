@@ -4,7 +4,7 @@ import {
   type TasteHint,
   type TasteProfileV1,
 } from '@refectorio/contracts';
-import { dietFlags, type CUISINES, type Dish } from './catalog';
+import { visibleMeat, type CUISINES, type Dish } from './catalog';
 import type { FeatureSpace, SparseVector } from './features';
 import { likeProbability, type Posterior } from './model';
 import { normalCdf } from './stats';
@@ -27,10 +27,10 @@ type HintRule = {
 
 /** Plain-language conclusions; the quiz shows likes* in «Запомнили: …» and uses avoidsMeat/avoidsFish to hint. */
 export const HINT_RULES: readonly HintRule[] = [
-  { hint: 'avoidsMeat', kind: 'avoids', members: (d) => dietFlags(d).meat },
+  { hint: 'avoidsMeat', kind: 'avoids', members: visibleMeat },
   { hint: 'avoidsFish', kind: 'avoids', members: (d) => d.proteins.includes('fish') },
   { hint: 'avoidsSeafood', kind: 'avoids', members: (d) => d.proteins.includes('seafood') },
-  { hint: 'likesMeat', kind: 'likes', members: (d) => dietFlags(d).meat },
+  { hint: 'likesMeat', kind: 'likes', members: visibleMeat },
   { hint: 'likesFish', kind: 'likes', members: (d) => d.proteins.includes('fish') },
   { hint: 'likesSoups', kind: 'likes', members: (d) => d.course === 'soup' },
   { hint: 'likesVegetables', kind: 'likes', members: (d) => d.traits.vegShare >= 0.6 },

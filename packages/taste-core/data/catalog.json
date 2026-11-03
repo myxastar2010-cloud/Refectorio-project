@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-09",
+  "version": "2026-11-02",
   "dishes": [
     {
       "id": "d_oatmeal",
@@ -598,6 +598,7 @@
         "popularityRu": 0.5
       },
       "allergens": ["GLUTEN", "CELERY"],
+      "extras": ["meatBroth"],
       "altRu": "Итальянский овощной суп с фасолью и мелкой пастой"
     },
     {
@@ -643,7 +644,7 @@
         "familiarityRu": 0.85,
         "popularityRu": 0.66
       },
-      "allergens": ["TREE_NUT"],
+      "allergens": ["MILK", "TREE_NUT"],
       "altRu": "Густой суп харчо с говядиной, рисом и кинзой"
     },
     {
@@ -827,7 +828,7 @@
         "familiarityRu": 0.9,
         "popularityRu": 0.65
       },
-      "allergens": ["FISH", "EGG", "MUSTARD"],
+      "allergens": ["FISH", "EGG", "MILK", "MUSTARD"],
       "altRu": "Слоёный салат мимоза с консервированной рыбой и яичным желтком"
     },
     {
@@ -988,7 +989,7 @@
         "familiarityRu": 0.45,
         "popularityRu": 0.55
       },
-      "allergens": ["EGG", "MUSTARD"],
+      "allergens": ["EGG", "MILK", "MUSTARD"],
       "altRu": "Салат из тонко нашинкованной капусты и моркови в сливочной заправке"
     },
     {
@@ -1080,7 +1081,7 @@
         "familiarityRu": 0.95,
         "popularityRu": 0.75
       },
-      "allergens": ["GLUTEN", "EGG"],
+      "allergens": ["GLUTEN", "EGG", "MILK"],
       "altRu": "Отбивная из свинины в золотистом кляре с овощами"
     },
     {
@@ -1126,7 +1127,7 @@
         "familiarityRu": 0.95,
         "popularityRu": 0.7
       },
-      "allergens": ["GLUTEN", "EGG"],
+      "allergens": ["GLUTEN", "EGG", "MILK"],
       "altRu": "Тефтели с рисом в томатной подливе"
     },
     {
@@ -1149,7 +1150,7 @@
         "familiarityRu": 0.85,
         "popularityRu": 0.75
       },
-      "allergens": [],
+      "allergens": ["MILK"],
       "altRu": "Стейк из говядины средней прожарки на деревянной доске"
     },
     {
@@ -1425,7 +1426,7 @@
         "familiarityRu": 0.9,
         "popularityRu": 0.72
       },
-      "allergens": ["MILK"],
+      "allergens": ["GLUTEN", "MILK"],
       "altRu": "Кусочки курицы, тушённые в сметанном соусе с чесноком"
     },
     {
@@ -1448,7 +1449,7 @@
         "familiarityRu": 0.85,
         "popularityRu": 0.75
       },
-      "allergens": ["MILK"],
+      "allergens": ["GLUTEN", "MILK"],
       "altRu": "Острые жареные куриные крылышки в красном соусе"
     },
     {
@@ -1540,7 +1541,7 @@
         "familiarityRu": 0.45,
         "popularityRu": 0.55
       },
-      "allergens": ["GLUTEN", "MILK"],
+      "allergens": ["GLUTEN", "EGG", "MILK"],
       "altRu": "Курица с грибами в белом сливочном соусе"
     },
     {
@@ -1586,7 +1587,7 @@
         "familiarityRu": 0.8,
         "popularityRu": 0.6
       },
-      "allergens": [],
+      "allergens": ["EGG", "MUSTARD"],
       "altRu": "Запечённая утка с печёными яблоками на праздничном блюде"
     },
     {
@@ -1655,7 +1656,7 @@
         "familiarityRu": 1,
         "popularityRu": 0.75
       },
-      "allergens": ["FISH"],
+      "allergens": ["FISH", "MILK"],
       "altRu": "Селёдка с луком и варёным картофелем с укропом"
     },
     {
@@ -1770,7 +1771,7 @@
         "familiarityRu": 0.45,
         "popularityRu": 0.5
       },
-      "allergens": ["FISH", "SESAME"],
+      "allergens": ["GLUTEN", "FISH", "SOY", "SESAME"],
       "altRu": "Обжаренный стейк тунца с розовой серединой и кунжутом"
     },
     {
@@ -1816,7 +1817,7 @@
         "familiarityRu": 0.8,
         "popularityRu": 0.45
       },
-      "allergens": ["FISH"],
+      "allergens": ["GLUTEN", "FISH", "SOY"],
       "altRu": "Филе трески на пару с брокколи и морковью"
     },
     {
@@ -1862,7 +1863,7 @@
         "familiarityRu": 0.7,
         "popularityRu": 0.75
       },
-      "allergens": ["CRUSTACEAN", "MILK"],
+      "allergens": ["CRUSTACEAN", "MILK", "SULPHITES"],
       "altRu": "Креветки, обжаренные в чесночно-сливочном соусе с зеленью"
     },
     {
@@ -1885,7 +1886,7 @@
         "familiarityRu": 0.6,
         "popularityRu": 0.5
       },
-      "allergens": ["MOLLUSC", "MILK"],
+      "allergens": ["MOLLUSC", "MILK", "SULPHITES"],
       "altRu": "Кастрюля мидий в ракушках в сливочном соусе"
     },
     {
@@ -2069,7 +2070,7 @@
         "familiarityRu": 0.55,
         "popularityRu": 0.55
       },
-      "allergens": ["SESAME"],
+      "allergens": ["GLUTEN", "SESAME"],
       "altRu": "Шарики фалафеля из нута с соусом тахини и зеленью"
     },
     {
@@ -2092,7 +2093,7 @@
         "familiarityRu": 0.2,
         "popularityRu": 0.35
       },
-      "allergens": [],
+      "allergens": ["MILK"],
       "altRu": "Густое индийское рагу из чечевицы со специями"
     },
     {
@@ -2253,7 +2254,7 @@
         "familiarityRu": 0.3,
         "popularityRu": 0.45
       },
-      "allergens": ["MILK"],
+      "allergens": ["GLUTEN", "MILK", "MUSTARD"],
       "altRu": "Шампиньоны в сметанном соусе по рецепту бефстроганова"
     },
     {
@@ -2368,7 +2369,7 @@
         "familiarityRu": 0.9,
         "popularityRu": 0.8
       },
-      "allergens": ["GLUTEN", "MILK", "CELERY"],
+      "allergens": ["GLUTEN", "MILK", "CELERY", "SULPHITES"],
       "altRu": "Спагетти с мясным соусом болоньезе и тёртым пармезаном"
     },
     {
@@ -2437,7 +2438,7 @@
         "familiarityRu": 1,
         "popularityRu": 0.75
       },
-      "allergens": ["GLUTEN"],
+      "allergens": ["GLUTEN", "MILK"],
       "altRu": "Макароны с обжаренным мясным фаршем и луком"
     },
     {
@@ -2483,7 +2484,8 @@
         "familiarityRu": 0.6,
         "popularityRu": 0.6
       },
-      "allergens": ["MILK"],
+      "allergens": ["MILK", "SULPHITES"],
+      "extras": ["meatBroth"],
       "altRu": "Сливочное ризотто с белыми грибами и пармезаном"
     },
     {
@@ -2538,7 +2540,7 @@
       "baseType": "pastaGrains",
       "course": "side",
       "mealTypes": ["lunch", "dinner"],
-      "cuisine": "middleEastern",
+      "cuisine": "mediterranean",
       "proteins": ["none"],
       "cookingMethods": ["steamed"],
       "carbBase": "grains",
@@ -2713,7 +2715,7 @@
         "familiarityRu": 0.5,
         "popularityRu": 0.5
       },
-      "allergens": ["FISH"],
+      "allergens": ["GLUTEN", "FISH", "SOY"],
       "extras": ["fishSauce"],
       "altRu": "Вьетнамский суп фо с говядиной, рисовой лапшой и зеленью"
     },
@@ -2738,7 +2740,7 @@
         "popularityRu": 0.5
       },
       "allergens": ["CRUSTACEAN", "FISH"],
-      "extras": ["fishSauce"],
+      "extras": ["fishSauce", "meatBroth"],
       "altRu": "Острый тайский суп том ям с креветками и грибами"
     },
     {
@@ -2785,7 +2787,7 @@
         "familiarityRu": 0.35,
         "popularityRu": 0.5
       },
-      "allergens": ["PEANUT", "SOY", "GLUTEN"],
+      "allergens": ["GLUTEN", "PEANUT", "SOY", "SESAME"],
       "altRu": "Кусочки курицы с арахисом и острым перцем в соусе"
     },
     {
@@ -2877,7 +2879,7 @@
         "familiarityRu": 0.7,
         "popularityRu": 0.6
       },
-      "allergens": ["GLUTEN", "SOY"],
+      "allergens": ["GLUTEN", "SOY", "SESAME"],
       "altRu": "Хрустящие жареные спринг-роллы с овощами и сладким соусом"
     },
     {
@@ -2969,7 +2971,7 @@
         "familiarityRu": 0.15,
         "popularityRu": 0.3
       },
-      "allergens": ["SOY", "FISH"],
+      "allergens": ["GLUTEN", "FISH", "SOY", "SESAME"],
       "extras": ["fishSauce"],
       "altRu": "Острый корейский суп из кимчи со свининой и тофу"
     },
@@ -3131,7 +3133,7 @@
         "familiarityRu": 0.75,
         "popularityRu": 0.65
       },
-      "allergens": ["GLUTEN"],
+      "allergens": ["GLUTEN", "CELERY"],
       "altRu": "Густой лагман с тянутой лапшой, говядиной и овощами"
     },
     {
@@ -3177,7 +3179,7 @@
         "familiarityRu": 0.85,
         "popularityRu": 0.7
       },
-      "allergens": ["GLUTEN", "SESAME", "EGG"],
+      "allergens": ["GLUTEN", "EGG", "MILK", "SESAME"],
       "altRu": "Треугольная слоёная самса с мясом и кунжутом"
     },
     {
@@ -3200,7 +3202,7 @@
         "familiarityRu": 0.6,
         "popularityRu": 0.6
       },
-      "allergens": [],
+      "allergens": ["MILK"],
       "altRu": "Курица, тушённая с томатами, луком и кинзой"
     },
     {
@@ -3269,7 +3271,7 @@
         "familiarityRu": 1,
         "popularityRu": 0.7
       },
-      "allergens": ["GLUTEN"],
+      "allergens": ["GLUTEN", "EGG"],
       "altRu": "Хрустящие чебуреки с мясной начинкой"
     },
     {
@@ -3315,7 +3317,7 @@
         "familiarityRu": 1,
         "popularityRu": 0.8
       },
-      "allergens": ["GLUTEN", "EGG", "MILK"],
+      "allergens": ["GLUTEN", "EGG", "MILK", "MUSTARD"],
       "altRu": "Шаурма с курицей и овощами в лаваше с чесночным соусом"
     },
     {
@@ -3439,7 +3441,7 @@
       "baseType": "baking",
       "course": "baking",
       "mealTypes": ["lunch", "dinner", "snack"],
-      "cuisine": "italian",
+      "cuisine": "american",
       "proteins": ["pork", "dairy"],
       "cookingMethods": ["baked"],
       "carbBase": "dough",
@@ -3730,7 +3732,7 @@
         "familiarityRu": 1,
         "popularityRu": 0.9
       },
-      "allergens": ["MILK"],
+      "allergens": ["EGG", "MILK"],
       "altRu": "Шарики белого пломбира в креманке"
     },
     {
@@ -3754,6 +3756,7 @@
         "popularityRu": 0.75
       },
       "allergens": ["GLUTEN", "EGG", "MILK"],
+      "extras": ["gelatin"],
       "altRu": "Кусок суфле-торта под шоколадной глазурью"
     },
     {
@@ -3984,7 +3987,7 @@
         "familiarityRu": 1,
         "popularityRu": 0.7
       },
-      "allergens": ["GLUTEN", "MUSTARD"],
+      "allergens": ["GLUTEN", "MILK", "MUSTARD"],
       "altRu": "Хот-дог с сосиской, горчицей и кетчупом"
     },
     {

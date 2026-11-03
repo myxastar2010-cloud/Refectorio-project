@@ -1,0 +1,473 @@
+{
+  "version": "2026-11-02",
+  "game": {
+    "d_oatmeal": { "cookMin": 15, "servingAllergens": ["TREE_NUT"] },
+    "d_buckwheat_porridge": { "cookMin": 25 },
+    "d_semolina_porridge": { "cookMin": 15 },
+    "d_millet_pumpkin_porridge": { "cookMin": 50 },
+    "d_syrniki": { "cookMin": 30 },
+    "d_oladyi": { "cookMin": 30 },
+    "d_blini": { "cookMin": 45 },
+    "d_omelette": { "cookMin": 15 },
+    "d_fried_eggs": { "cookMin": 10, "boxable": false },
+    "d_shakshuka": { "cookMin": 30 },
+    "d_tvorog_smetana": { "cookMin": 5 },
+    "d_granola_yogurt": { "cookMin": 5 },
+    "d_avocado_toast": { "cookMin": 10, "boxable": false, "assembled": true },
+    "d_pancakes": { "cookMin": 30 },
+    "d_cottage_cheese_casserole": { "cookMin": 60 },
+    "d_borscht": { "cookMin": 120 },
+    "d_shchi": { "cookMin": 90 },
+    "d_solyanka": { "cookMin": 75 },
+    "d_ukha": { "cookMin": 50 },
+    "d_rassolnik": { "cookMin": 90 },
+    "d_okroshka": { "cookMin": 40, "boxable": false, "heat": "boil-drain", "assembled": true },
+    "d_chicken_noodle_soup": { "cookMin": 60 },
+    "d_pea_soup": { "cookMin": 120 },
+    "d_mushroom_soup": { "cookMin": 50 },
+    "d_pumpkin_cream_soup": { "cookMin": 45 },
+    "d_minestrone": { "cookMin": 60 },
+    "d_gazpacho": { "cookMin": 20 },
+    "d_kharcho": { "cookMin": 120 },
+    "d_shurpa": { "cookMin": 150 },
+    "d_lentil_soup": { "cookMin": 45 },
+    "d_ramen": { "cookMin": 90, "boxable": false },
+    "d_pho_bo": { "cookMin": 180, "boxable": false },
+    "d_tom_yum": { "cookMin": 40 },
+    "d_kimchi_jjigae": { "cookMin": 40 },
+    "d_miso_soup": { "cookMin": 15 },
+    "d_olivier": { "cookMin": 50 },
+    "d_herring_under_fur_coat": { "cookMin": 70 },
+    "d_vinegret": { "cookMin": 60 },
+    "d_caesar_chicken": { "cookMin": 30, "rawEgg": true },
+    "d_greek_salad": { "cookMin": 15 },
+    "d_mimosa": { "cookMin": 45 },
+    "d_crab_stick_salad": { "cookMin": 25 },
+    "d_caprese": { "cookMin": 10 },
+    "d_nicoise": { "cookMin": 30 },
+    "d_beet_garlic_salad": { "cookMin": 60, "servingAllergens": ["TREE_NUT"] },
+    "d_cucumber_tomato_salad": { "cookMin": 10 },
+    "d_tabbouleh": { "cookMin": 25 },
+    "d_coleslaw": { "cookMin": 15 },
+    "d_korean_carrot": { "cookMin": 30 },
+    "d_beef_stroganoff": { "cookMin": 40 },
+    "d_kotlety": { "cookMin": 45 },
+    "d_pork_chop": { "cookMin": 30 },
+    "d_goulash": { "cookMin": 100 },
+    "d_tefteli": { "cookMin": 60 },
+    "d_beef_steak": { "cookMin": 25, "boxable": false },
+    "d_golubtsy": { "cookMin": 100 },
+    "d_stuffed_peppers": { "cookMin": 80 },
+    "d_pelmeni": { "cookMin": 15 },
+    "d_french_style_meat": { "cookMin": 70 },
+    "d_liver_onions": { "cookMin": 30 },
+    "d_pork_ribs": { "cookMin": 120 },
+    "d_burger": { "cookMin": 30, "boxable": false, "assembled": true },
+    "d_zharkoe": { "cookMin": 90 },
+    "d_kholodets": { "cookMin": 360 },
+    "d_chicken_kiev": { "cookMin": 50 },
+    "d_roast_chicken": { "cookMin": 90 },
+    "d_chicken_sour_cream": { "cookMin": 50 },
+    "d_chicken_wings": { "cookMin": 45, "servingAllergens": ["CELERY"] },
+    "d_turkey_vegetables": { "cookMin": 50 },
+    "d_chicken_curry": { "cookMin": 45 },
+    "d_chicken_teriyaki": { "cookMin": 30 },
+    "d_chicken_fricassee": { "cookMin": 45 },
+    "d_chicken_schnitzel": { "cookMin": 30 },
+    "d_duck_apples": { "cookMin": 150 },
+    "d_baked_salmon": { "cookMin": 30 },
+    "d_fried_pollock": { "cookMin": 25 },
+    "d_herring_potatoes": { "cookMin": 35, "assembled": true },
+    "d_fish_cakes": { "cookMin": 40 },
+    "d_smoked_mackerel": { "cookMin": 5, "heat": "bake", "curedFish": true },
+    "d_grilled_trout": { "cookMin": 30 },
+    "d_fish_and_chips": { "cookMin": 45, "boxable": false },
+    "d_tuna_steak": { "cookMin": 15, "boxable": false },
+    "d_zander_polish": { "cookMin": 45 },
+    "d_steamed_cod": { "cookMin": 25 },
+    "d_marinated_fish": { "cookMin": 60 },
+    "d_garlic_shrimp": { "cookMin": 15 },
+    "d_mussels": { "cookMin": 25, "boxable": false },
+    "d_fried_calamari": { "cookMin": 25, "boxable": false },
+    "d_seafood_paella": { "cookMin": 60 },
+    "d_grilled_octopus": { "cookMin": 90 },
+    "d_crab_cakes": { "cookMin": 35 },
+    "d_shrimp_tempura": { "cookMin": 30, "boxable": false },
+    "d_vegetable_stew": { "cookMin": 50 },
+    "d_ratatouille": { "cookMin": 70 },
+    "d_falafel": { "cookMin": 40 },
+    "d_dal": { "cookMin": 40 },
+    "d_draniki": { "cookMin": 35 },
+    "d_vegetable_lasagna": { "cookMin": 80 },
+    "d_tofu_vegetables": { "cookMin": 25 },
+    "d_chickpea_curry": { "cookMin": 40 },
+    "d_eggplant_parmigiana": { "cookMin": 75 },
+    "d_varenyky_potato": { "cookMin": 15 },
+    "d_mushroom_stroganoff": { "cookMin": 30 },
+    "d_veggie_burger": { "cookMin": 35, "boxable": false, "assembled": true },
+    "d_fried_potatoes_mushrooms": { "cookMin": 35 },
+    "d_grilled_vegetables": { "cookMin": 30 },
+    "d_mashed_potatoes": { "cookMin": 35 },
+    "d_spaghetti_bolognese": { "cookMin": 50 },
+    "d_carbonara": { "cookMin": 25 },
+    "d_pesto_pasta": { "cookMin": 20 },
+    "d_navy_pasta": { "cookMin": 30 },
+    "d_buckwheat_mushrooms": { "cookMin": 35 },
+    "d_mushroom_risotto": { "cookMin": 40 },
+    "d_lasagna": { "cookMin": 90 },
+    "d_mac_and_cheese": { "cookMin": 40 },
+    "d_couscous_vegetables": { "cookMin": 25 },
+    "d_egg_fried_rice": { "cookMin": 20 },
+    "d_bulgur_vegetables": { "cookMin": 30 },
+    "d_buckwheat_merchant": { "cookMin": 45 },
+    "d_chicken_mushroom_pasta": { "cookMin": 35 },
+    "d_sushi_rolls": { "cookMin": 60, "boxable": false, "assembled": true, "rawFish": true },
+    "d_pad_thai": { "cookMin": 30 },
+    "d_kung_pao_chicken": { "cookMin": 30 },
+    "d_sweet_sour_pork": { "cookMin": 40 },
+    "d_gyoza": { "cookMin": 15 },
+    "d_bibimbap": { "cookMin": 45 },
+    "d_spring_rolls": { "cookMin": 40, "boxable": false },
+    "d_wok_noodles": { "cookMin": 25 },
+    "d_poke": { "cookMin": 25, "boxable": false, "assembled": true, "rawFish": true },
+    "d_peking_duck": { "cookMin": 180, "boxable": false, "assembled": true },
+    "d_dim_sum": { "cookMin": 15 },
+    "d_khachapuri": { "cookMin": 60 },
+    "d_khinkali": { "cookMin": 20 },
+    "d_shashlik": { "cookMin": 40 },
+    "d_plov": { "cookMin": 90 },
+    "d_lagman": { "cookMin": 80 },
+    "d_manty": { "cookMin": 45 },
+    "d_samsa": { "cookMin": 60 },
+    "d_chakhokhbili": { "cookMin": 60 },
+    "d_dolma": { "cookMin": 90 },
+    "d_lobio": { "cookMin": 60 },
+    "d_chebureki": { "cookMin": 60 },
+    "d_beshbarmak": { "cookMin": 150 },
+    "d_shawarma": { "cookMin": 30, "assembled": true },
+    "d_ajapsandali": { "cookMin": 50 },
+    "d_lula_kebab": { "cookMin": 40 },
+    "d_meat_pirozhki": { "cookMin": 90 },
+    "d_cabbage_pie": { "cookMin": 90 },
+    "d_pizza_margherita": { "cookMin": 45, "role": "main" },
+    "d_pizza_pepperoni": { "cookMin": 45, "role": "main" },
+    "d_croissant": { "cookMin": 5 },
+    "d_kulebyaka": { "cookMin": 120, "role": "main" },
+    "d_vatrushka": { "cookMin": 90, "role": "dessert" },
+    "d_focaccia": { "cookMin": 120, "role": "bread" },
+    "d_quiche": { "cookMin": 75, "role": "main" },
+    "d_rasstegai": { "cookMin": 120 },
+    "d_cinnamon_bun": { "cookMin": 120, "role": "dessert" },
+    "d_napoleon": { "cookMin": 180 },
+    "d_medovik": { "cookMin": 180 },
+    "d_tiramisu": { "cookMin": 40 },
+    "d_cheesecake": { "cookMin": 90 },
+    "d_ice_cream": { "cookMin": 2, "boxable": false },
+    "d_bird_milk_cake": { "cookMin": 120 },
+    "d_panna_cotta": { "cookMin": 20 },
+    "d_sharlotka": { "cookMin": 60 },
+    "d_brownie": { "cookMin": 45 },
+    "d_chocolate_fondant": { "cookMin": 30, "boxable": false },
+    "d_eclairs": { "cookMin": 90 },
+    "d_pavlova": { "cookMin": 120, "boxable": false, "assembled": true },
+    "d_creme_brulee": { "cookMin": 60, "boxable": false },
+    "d_fruit_salad": { "cookMin": 10 },
+    "d_kartoshka_cake": { "cookMin": 30 },
+    "d_hot_dog": { "cookMin": 10, "assembled": true },
+    "d_nachos": { "cookMin": 15, "boxable": false, "assembled": true },
+    "d_hummus_pita": { "cookMin": 10, "assembled": true },
+    "d_bruschetta": { "cookMin": 15, "boxable": false, "assembled": true },
+    "d_french_fries": { "cookMin": 30, "boxable": false },
+    "d_deviled_eggs": { "cookMin": 25 },
+    "d_cheese_sandwich": { "cookMin": 5, "assembled": true },
+    "d_cheese_plate": { "cookMin": 10 },
+    "d_popcorn": { "cookMin": 10 },
+    "d_zucchini_caviar": { "cookMin": 60, "role": "side" },
+    "d_guacamole": { "cookMin": 10, "boxable": false },
+    "d_tacos": { "cookMin": 30, "boxable": false, "assembled": true, "role": "main" },
+    "d_salo": { "cookMin": 5 },
+    "d_sauerkraut": { "cookMin": 5, "role": "salad" }
+  },
+  "menu": {
+    "d_water": {
+      "nameRu": "Вода", "role": "drink", "mealTypes": ["breakfast", "lunch", "dinner", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": [], "carbBase": "none", "flavours": [], "textures": ["liquid"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.9 } },
+      "recipe": { "kind": "single", "parts": [[173647, 250]], "portion": { "grams": 250, "ml": 250, "pieces": null }, "whatRu": "стакан", "sources": ["USDA SR Legacy 173647", "стакан 250 мл — research/R17 E18 [практика]"] }
+    },
+    "d_black_tea": {
+      "nameRu": "Чай чёрный", "role": "drink", "mealTypes": ["breakfast", "lunch", "dinner", "snack"], "cookMin": 5, "boxable": false,
+      "taste": { "cuisine": "russian", "proteins": ["none"], "cookingMethods": [], "carbBase": "none", "flavours": [], "textures": ["liquid"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.85 } },
+      "recipe": { "kind": "single", "parts": [[173227, 250]], "portion": { "grams": 250, "ml": 250, "pieces": null }, "whatRu": "кружка без сахара", "sources": ["USDA SR Legacy 173227 (brewed, tap water)", "кружка 250 мл — research/R17 E18 [практика]"] }
+    },
+    "d_green_tea": {
+      "nameRu": "Чай зелёный", "role": "drink", "mealTypes": ["breakfast", "lunch", "dinner", "snack"], "cookMin": 5, "boxable": false,
+      "taste": { "cuisine": "chinese", "proteins": ["none"], "cookingMethods": [], "carbBase": "none", "flavours": ["herby"], "textures": ["liquid"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.9, "popularityRu": 0.6 } },
+      "recipe": { "kind": "single", "parts": [[171917, 250]], "portion": { "grams": 250, "ml": 250, "pieces": null }, "whatRu": "кружка без сахара", "sources": ["USDA SR Legacy 171917 (brewed, regular)", "кружка 250 мл — research/R17 E18 [практика]"] }
+    },
+    "d_herbal_tea": {
+      "nameRu": "Травяной чай", "role": "drink", "mealTypes": ["breakfast", "lunch", "dinner", "snack"], "cookMin": 5, "boxable": false,
+      "taste": { "proteins": ["none"], "cookingMethods": [], "carbBase": "none", "flavours": ["herby"], "textures": ["liquid"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.85, "popularityRu": 0.55 } },
+      "recipe": { "kind": "single", "parts": [[173232, 250]], "portion": { "grams": 250, "ml": 250, "pieces": null }, "whatRu": "кружка без сахара", "sources": ["USDA SR Legacy 173232 (herb, other than chamomile, brewed)", "кружка 250 мл — research/R17 E18 [практика]"] }
+    },
+    "d_espresso": {
+      "nameRu": "Эспрессо", "role": "drink", "mealTypes": ["breakfast", "lunch", "snack"], "cookMin": 3, "boxable": false,
+      "taste": { "cuisine": "italian", "proteins": ["none"], "cookingMethods": [], "carbBase": "none", "flavours": [], "textures": ["liquid"], "traits": { "richness": 0.1, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.85, "popularityRu": 0.45 } },
+      "recipe": { "kind": "single", "parts": [[171891, 30]], "portion": { "grams": 30, "ml": 30, "pieces": null }, "whatRu": "чашка эспрессо", "sources": ["USDA SR Legacy 171891 (restaurant-prepared)", "порция 1 fl oz = 29,6 г — USDA food_portion 171891"] }
+    },
+    "d_milk": {
+      "nameRu": "Молоко", "role": "drink", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["dairy"], "cookingMethods": [], "carbBase": "none", "flavours": ["creamy"], "textures": ["liquid"], "traits": { "richness": 0.3, "spiciness": 0, "sweetness": 0.15, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.6 } },
+      "recipe": { "kind": "single", "parts": [[172217, 206]], "portion": { "grams": 206, "ml": 200, "pieces": null }, "whatRu": "стакан 3,2 %", "sources": ["USDA SR Legacy 172217 (3,25 %, without added vitamin A and D): SR has no 2,5 % milk", "200 мл × 1,03 г/мл (USDA food_portion 172217: 1 cup = 244 г)"] }
+    },
+    "d_kefir": {
+      "nameRu": "Кефир", "role": "drink", "mealTypes": ["breakfast", "dinner", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "cuisine": "russian", "proteins": ["dairy"], "cookingMethods": [], "carbBase": "none", "flavours": ["sour"], "textures": ["liquid"], "traits": { "richness": 0.25, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.6 } },
+      "recipe": { "kind": "single", "parts": [["ru:kefir-2.5", 208]], "portion": { "grams": 208, "ml": 200, "pieces": null }, "whatRu": "стакан 2,5 %", "sources": ["Open Food Facts: медиана этикеток кефира 2,5 % (этап 3)", "200 мл × 1,04 г/мл как у молока"] }
+    },
+    "d_ryazhenka": {
+      "nameRu": "Ряженка", "role": "drink", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "cuisine": "russian", "proteins": ["dairy"], "cookingMethods": [], "carbBase": "none", "flavours": ["creamy"], "textures": ["liquid"], "traits": { "richness": 0.35, "spiciness": 0, "sweetness": 0.15, "vegShare": 0, "familiarityRu": 0.95, "popularityRu": 0.55 } },
+      "recipe": { "kind": "single", "parts": [["ru:ryazhenka-4", 208]], "portion": { "grams": 208, "ml": 200, "pieces": null }, "whatRu": "стакан 4 %", "sources": ["Open Food Facts: медиана 5 этикеток ряженки 4 % (research/stage-4-food-data/batch-9)", "200 мл × 1,04 г/мл как у молока"] }
+    },
+    "d_orange_juice": {
+      "nameRu": "Апельсиновый сок", "role": "drink", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": [], "carbBase": "none", "flavours": ["sweet", "sour"], "textures": ["liquid"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.6, "vegShare": 0.7, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "single", "parts": [[169100, 210]], "portion": { "grams": 210, "ml": 200, "pieces": null }, "whatRu": "стакан", "sources": ["USDA SR Legacy 169100 (chilled, includes from concentrate)", "200 мл × 1,05 г/мл (USDA food_portion 169100: 1 cup = 249 г)"] }
+    },
+    "d_apple_juice": {
+      "nameRu": "Яблочный сок", "role": "drink", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": [], "carbBase": "none", "flavours": ["sweet"], "textures": ["liquid"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.6, "vegShare": 0.7, "familiarityRu": 1, "popularityRu": 0.7 } },
+      "recipe": { "kind": "single", "parts": [[173933, 210]], "portion": { "grams": 210, "ml": 200, "pieces": null }, "whatRu": "стакан", "sources": ["USDA SR Legacy 173933 (unsweetened, without added ascorbic acid)", "200 мл × 1,05 г/мл"] }
+    },
+    "d_wheat_bread": {
+      "nameRu": "Хлеб пшеничный", "role": "bread", "mealTypes": ["breakfast", "lunch", "dinner"], "cookMin": 0, "boxable": true,
+      "taste": { "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["baked"], "carbBase": "bread", "flavours": [], "textures": ["soft"], "traits": { "richness": 0.2, "spiciness": 0, "sweetness": 0.1, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.85 } },
+      "recipe": { "kind": "single", "parts": [[174924, 30]], "portion": { "grams": 30, "ml": null, "pieces": 1 }, "whatRu": "ломтик", "sources": ["USDA SR Legacy 174924 (white, commercially prepared; без американского обогащения)", "ломтик 29–30 г — USDA food_portion 174924"] }
+    },
+    "d_rye_bread": {
+      "nameRu": "Хлеб ржаной", "role": "bread", "mealTypes": ["breakfast", "lunch", "dinner"], "cookMin": 0, "boxable": true,
+      "taste": { "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["baked"], "carbBase": "bread", "flavours": ["sour"], "textures": ["soft", "chewy"], "traits": { "richness": 0.2, "spiciness": 0, "sweetness": 0.1, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "single", "parts": [[172684, 30]], "portion": { "grams": 30, "ml": null, "pieces": 1 }, "whatRu": "ломтик", "sources": ["USDA SR Legacy 172684 (rye; без американского обогащения)", "ломтик 25–32 г — USDA food_portion 172684"] }
+    },
+    "d_wholegrain_bread": {
+      "nameRu": "Хлеб цельнозерновой", "role": "bread", "mealTypes": ["breakfast", "lunch", "dinner"], "cookMin": 0, "boxable": true,
+      "taste": { "cuisine": "european", "proteins": ["none"], "cookingMethods": ["baked"], "carbBase": "bread", "flavours": [], "textures": ["soft", "chewy"], "traits": { "richness": 0.2, "spiciness": 0, "sweetness": 0.1, "vegShare": 0, "familiarityRu": 0.85, "popularityRu": 0.6 } },
+      "recipe": { "kind": "single", "parts": [[172688, 30]], "portion": { "grams": 30, "ml": null, "pieces": 1 }, "whatRu": "ломтик", "sources": ["USDA SR Legacy 172688 (whole-wheat, commercially prepared)", "ломтик 32 г — USDA food_portion 172688"] }
+    },
+    "d_crispbread": {
+      "nameRu": "Хлебцы цельнозерновые", "role": "bread", "mealTypes": ["breakfast", "lunch", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "cuisine": "european", "proteins": ["none"], "cookingMethods": ["baked"], "carbBase": "bread", "flavours": [], "textures": ["crispy", "crunchy"], "traits": { "richness": 0.1, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.8, "popularityRu": 0.45 } },
+      "recipe": { "kind": "single", "parts": [[172739, 20]], "portion": { "grams": 20, "ml": null, "pieces": 2 }, "whatRu": "2 хлебца", "sources": ["USDA SR Legacy 172739 (crispbread, rye)", "1 хлебец = 10 г — USDA food_portion 172739"] }
+    },
+    "d_apple": {
+      "nameRu": "Яблоко", "role": "fruit", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet", "sour"], "textures": ["crunchy", "juicy"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.5, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.85 } },
+      "recipe": { "kind": "single", "parts": [[171688, 182]], "portion": { "grams": 182, "ml": null, "pieces": 1 }, "whatRu": "1 яблоко", "sources": ["USDA SR Legacy 171688 (raw, with skin)", "1 medium = 182 г — USDA food_portion 171688"] }
+    },
+    "d_banana": {
+      "nameRu": "Банан", "role": "fruit", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet"], "textures": ["soft"], "traits": { "richness": 0.1, "spiciness": 0, "sweetness": 0.6, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.8 } },
+      "recipe": { "kind": "single", "parts": [[173944, 118]], "portion": { "grams": 118, "ml": null, "pieces": 1 }, "whatRu": "1 банан", "sources": ["USDA SR Legacy 173944 (raw)", "1 medium = 118 г — USDA food_portion 173944"] }
+    },
+    "d_orange": {
+      "nameRu": "Апельсин", "role": "fruit", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet", "sour"], "textures": ["juicy"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.5, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "single", "parts": [[169097, 131]], "portion": { "grams": 131, "ml": null, "pieces": 1 }, "whatRu": "1 апельсин", "sources": ["USDA SR Legacy 169097 (raw, all commercial varieties)", "1 fruit (2-5/8\" dia) = 131 г — USDA food_portion 169097"] }
+    },
+    "d_pear": {
+      "nameRu": "Груша", "role": "fruit", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet"], "textures": ["juicy", "soft"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.6, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.7 } },
+      "recipe": { "kind": "single", "parts": [[169118, 178]], "portion": { "grams": 178, "ml": null, "pieces": 1 }, "whatRu": "1 груша", "sources": ["USDA SR Legacy 169118 (raw)", "1 medium = 178 г — USDA food_portion 169118"] }
+    },
+    "d_mandarin": {
+      "nameRu": "Мандарины", "role": "fruit", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet", "sour"], "textures": ["juicy"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.55, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.85 } },
+      "recipe": { "kind": "single", "parts": [[169105, 176]], "portion": { "grams": 176, "ml": null, "pieces": 2 }, "whatRu": "2 мандарина", "sources": ["USDA SR Legacy 169105 (tangerines, raw)", "1 medium = 88 г — USDA food_portion 169105"] }
+    },
+    "d_kiwi": {
+      "nameRu": "Киви", "role": "fruit", "mealTypes": ["breakfast", "snack"], "cookMin": 2, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet", "sour"], "textures": ["juicy", "soft"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.45, "vegShare": 1, "familiarityRu": 0.95, "popularityRu": 0.65 } },
+      "recipe": { "kind": "single", "parts": [[168153, 138]], "portion": { "grams": 138, "ml": null, "pieces": 2 }, "whatRu": "2 киви", "sources": ["USDA SR Legacy 168153 (green, raw)", "1 fruit (2\" dia) = 69 г — USDA food_portion 168153"] }
+    },
+    "d_grapes": {
+      "nameRu": "Виноград", "role": "fruit", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet"], "textures": ["juicy"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.7, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "single", "parts": [[174683, 150]], "portion": { "grams": 150, "ml": null, "pieces": null }, "whatRu": "гроздь", "sources": ["USDA SR Legacy 174683 (red or green, raw)", "1 cup = 151 г — USDA food_portion 174683"] }
+    },
+    "d_dried_fruits": {
+      "nameRu": "Курага и чернослив", "role": "fruit", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet"], "textures": ["chewy"], "traits": { "richness": 0.1, "spiciness": 0, "sweetness": 0.8, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.55 } },
+      "recipe": { "kind": "mix", "parts": [[173941, 15], [168162, 15]], "portion": { "grams": 30, "ml": null, "pieces": null }, "whatRu": "горсть", "sources": ["USDA SR Legacy 173941 (apricots, dried, sulfured)", "USDA SR Legacy 168162 (prunes, uncooked)", "горсть 30 г: по 15 г — практика"] }
+    },
+    "d_natural_yogurt": {
+      "nameRu": "Йогурт натуральный", "role": "dairy", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "proteins": ["dairy"], "cookingMethods": [], "carbBase": "none", "flavours": ["sour", "creamy"], "textures": ["creamy"], "traits": { "richness": 0.3, "spiciness": 0, "sweetness": 0.05, "vegShare": 0, "familiarityRu": 0.95, "popularityRu": 0.6 } },
+      "recipe": { "kind": "single", "parts": [[171284, 150]], "portion": { "grams": 150, "ml": null, "pieces": null }, "whatRu": "стаканчик без сахара", "sources": ["USDA SR Legacy 171284 (plain, whole milk)", "стаканчик 150 г (USDA food_portion 171284: 4–8 oz = 113–227 г)"] }
+    },
+    "d_tvorog_5": {
+      "nameRu": "Творог 5 %", "role": "dairy", "mealTypes": ["breakfast", "snack"], "cookMin": 0, "boxable": true,
+      "taste": { "cuisine": "russian", "proteins": ["dairy"], "cookingMethods": [], "carbBase": "none", "flavours": ["creamy"], "textures": ["soft"], "traits": { "richness": 0.3, "spiciness": 0, "sweetness": 0.05, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.6 } },
+      "recipe": { "kind": "single", "parts": [["ru:tvorog-5", 150]], "portion": { "grams": 150, "ml": null, "pieces": null }, "whatRu": "порция без сахара", "sources": ["Open Food Facts: медиана 16 этикеток творога 5 % (research/stage-4-food-data/batch-9)", "порция 150 г — практика"] }
+    },
+    "d_cheese_slice": {
+      "nameRu": "Сыр", "role": "dairy", "mealTypes": ["breakfast", "snack"], "cookMin": 2, "boxable": true,
+      "taste": { "proteins": ["dairy"], "cookingMethods": [], "carbBase": "none", "flavours": ["salty", "creamy"], "textures": ["soft"], "traits": { "richness": 0.6, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "single", "parts": [[171241, 20]], "portion": { "grams": 20, "ml": null, "pieces": 1 }, "whatRu": "ломтик полутвёрдого сыра", "sources": ["USDA SR Legacy 171241 (gouda)", "ломтик 20 г — практика (USDA food_portion: 1 oz = 28 г)"] }
+    },
+    "d_boiled_egg": {
+      "nameRu": "Яйцо варёное", "role": "snack", "mealTypes": ["breakfast", "snack"], "cookMin": 12, "boxable": true,
+      "taste": { "course": "snack", "proteins": ["eggs"], "cookingMethods": ["boiled"], "carbBase": "none", "flavours": [], "textures": ["soft"], "traits": { "richness": 0.35, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "single", "parts": [[173424, 50]], "portion": { "grams": 50, "ml": null, "pieces": 1 }, "whatRu": "1 яйцо вкрутую", "sources": ["USDA SR Legacy 173424 (whole, hard-boiled)", "1 large = 50 г — USDA food_portion 173424"] }
+    },
+    "d_walnuts": {
+      "nameRu": "Грецкие орехи", "role": "snack", "mealTypes": ["snack"], "cookMin": 0, "boxable": true,
+      "taste": { "course": "snack", "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": [], "textures": ["crunchy"], "traits": { "richness": 0.7, "spiciness": 0, "sweetness": 0.05, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.6 } },
+      "recipe": { "kind": "single", "parts": [[170187, 25]], "portion": { "grams": 25, "ml": null, "pieces": null }, "whatRu": "горсть", "sources": ["USDA SR Legacy 170187 (english)", "горсть 25 г (USDA food_portion 170187: 7 орехов = 28 г)"] }
+    },
+    "d_almonds": {
+      "nameRu": "Миндаль", "role": "snack", "mealTypes": ["snack"], "cookMin": 0, "boxable": true,
+      "taste": { "course": "snack", "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": [], "textures": ["crunchy"], "traits": { "richness": 0.65, "spiciness": 0, "sweetness": 0.05, "vegShare": 0, "familiarityRu": 0.9, "popularityRu": 0.6 } },
+      "recipe": { "kind": "single", "parts": [[170567, 25]], "portion": { "grams": 25, "ml": null, "pieces": null }, "whatRu": "горсть", "sources": ["USDA SR Legacy 170567 (almonds)", "горсть 25 г (USDA food_portion 170567: 23 ядра = 28 г)"] }
+    },
+    "d_pumpkin_seeds": {
+      "nameRu": "Тыквенные семечки", "role": "snack", "mealTypes": ["snack"], "cookMin": 0, "boxable": true,
+      "taste": { "course": "snack", "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": [], "textures": ["crunchy"], "traits": { "richness": 0.6, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.8, "popularityRu": 0.45 } },
+      "recipe": { "kind": "single", "parts": [[170556, 25]], "portion": { "grams": 25, "ml": null, "pieces": null }, "whatRu": "горсть очищенных", "sources": ["USDA SR Legacy 170556 (kernels, dried)", "горсть 25 г (USDA food_portion 170556: 1 oz = 28 г)"] }
+    },
+    "d_carrot_sticks": {
+      "nameRu": "Морковные палочки", "role": "snack", "mealTypes": ["lunch", "snack"], "cookMin": 5, "boxable": true,
+      "taste": { "course": "snack", "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet"], "textures": ["crunchy"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.35, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.5 } },
+      "recipe": { "kind": "single", "parts": [[170393, 80]], "portion": { "grams": 80, "ml": null, "pieces": null }, "whatRu": "горсть палочек", "sources": ["USDA SR Legacy 170393 (carrots, raw)", "порция овощей 80 г (research/R17: ВОЗ ≥ 400 г овощей и фруктов в день)"] }
+    },
+    "d_americano": {
+      "nameRu": "Американо", "role": "drink", "mealTypes": ["breakfast", "lunch", "snack"], "boxable": false,
+      "taste": { "cuisine": "american", "proteins": ["none"], "cookingMethods": [], "carbBase": "none", "flavours": [], "textures": ["liquid"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.9, "popularityRu": 0.6 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_cappuccino": {
+      "nameRu": "Капучино", "role": "drink", "mealTypes": ["breakfast", "snack"], "boxable": false,
+      "taste": { "cuisine": "italian", "proteins": ["dairy"], "cookingMethods": [], "carbBase": "none", "flavours": ["creamy"], "textures": ["liquid", "creamy"], "traits": { "richness": 0.3, "spiciness": 0, "sweetness": 0.1, "vegShare": 0, "familiarityRu": 0.9, "popularityRu": 0.7 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_latte": {
+      "nameRu": "Латте", "role": "drink", "mealTypes": ["breakfast", "snack"], "boxable": false,
+      "taste": { "cuisine": "italian", "proteins": ["dairy"], "cookingMethods": [], "carbBase": "none", "flavours": ["creamy"], "textures": ["liquid", "creamy"], "traits": { "richness": 0.35, "spiciness": 0, "sweetness": 0.1, "vegShare": 0, "familiarityRu": 0.9, "popularityRu": 0.7 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_cocoa_milk": {
+      "nameRu": "Какао на молоке", "role": "drink", "mealTypes": ["breakfast", "snack"], "boxable": false,
+      "taste": { "cuisine": "russian", "proteins": ["dairy"], "cookingMethods": ["boiled"], "carbBase": "none", "flavours": ["sweet", "creamy"], "textures": ["liquid"], "traits": { "richness": 0.45, "spiciness": 0, "sweetness": 0.6, "vegShare": 0, "familiarityRu": 0.95, "popularityRu": 0.65 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_dried_fruit_compote": {
+      "nameRu": "Компот из сухофруктов", "role": "drink", "mealTypes": ["lunch", "dinner", "snack"], "boxable": true,
+      "taste": { "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "none", "flavours": ["sweet"], "textures": ["liquid"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.55, "vegShare": 0.2, "familiarityRu": 1, "popularityRu": 0.7 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_cranberry_mors": {
+      "nameRu": "Клюквенный морс", "role": "drink", "mealTypes": ["lunch", "dinner", "snack"], "boxable": true,
+      "taste": { "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "none", "flavours": ["sweet", "sour"], "textures": ["liquid"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.5, "vegShare": 0.2, "familiarityRu": 0.95, "popularityRu": 0.7 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_bread_butter": {
+      "nameRu": "Хлеб с маслом", "role": "bread", "mealTypes": ["breakfast", "snack"], "boxable": true,
+      "taste": { "cuisine": "russian", "proteins": ["dairy"], "cookingMethods": ["baked"], "carbBase": "bread", "flavours": ["creamy", "salty"], "textures": ["soft"], "traits": { "richness": 0.45, "spiciness": 0, "sweetness": 0.1, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_rice_side": {
+      "nameRu": "Рис отварной", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "rice", "flavours": [], "textures": ["soft"], "traits": { "richness": 0.2, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_brown_rice_side": {
+      "nameRu": "Бурый рис", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "european", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "rice", "flavours": [], "textures": ["chewy"], "traits": { "richness": 0.2, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.6, "popularityRu": 0.35 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_buckwheat_side": {
+      "nameRu": "Гречка отварная", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "buckwheat", "flavours": [], "textures": ["soft"], "traits": { "richness": 0.2, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_bulgur_side": {
+      "nameRu": "Булгур отварной", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "middleEastern", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "grains", "flavours": [], "textures": ["chewy"], "traits": { "richness": 0.2, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.55, "popularityRu": 0.4 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_pearl_barley_side": {
+      "nameRu": "Перловка отварная", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "grains", "flavours": [], "textures": ["chewy"], "traits": { "richness": 0.2, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.9, "popularityRu": 0.3 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_boiled_potatoes": {
+      "nameRu": "Картофель отварной", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "potato", "flavours": ["herby"], "textures": ["soft"], "traits": { "richness": 0.25, "spiciness": 0, "sweetness": 0, "vegShare": 0.1, "familiarityRu": 1, "popularityRu": 0.85 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_pasta_side": {
+      "nameRu": "Макароны отварные", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "pasta", "flavours": [], "textures": ["soft"], "traits": { "richness": 0.25, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 1, "popularityRu": 0.8 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_wholegrain_pasta_side": {
+      "nameRu": "Цельнозерновые макароны", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "italian", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "pasta", "flavours": [], "textures": ["chewy"], "traits": { "richness": 0.25, "spiciness": 0, "sweetness": 0, "vegShare": 0, "familiarityRu": 0.6, "popularityRu": 0.35 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_steamed_vegetables": {
+      "nameRu": "Овощи на пару", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "european", "proteins": ["none"], "cookingMethods": ["steamed"], "carbBase": "none", "flavours": [], "textures": ["soft"], "traits": { "richness": 0.1, "spiciness": 0, "sweetness": 0.1, "vegShare": 1, "familiarityRu": 0.85, "popularityRu": 0.45 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_cucumbers_tomatoes": {
+      "nameRu": "Огурцы и помидоры", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": [], "textures": ["juicy", "crunchy"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.1, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.85 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_beans_side": {
+      "nameRu": "Фасоль отварная", "role": "side", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "side", "proteins": ["legumes"], "cookingMethods": ["boiled"], "carbBase": "none", "flavours": [], "textures": ["soft"], "traits": { "richness": 0.2, "spiciness": 0, "sweetness": 0, "vegShare": 0.2, "familiarityRu": 0.7, "popularityRu": 0.4 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_berries": {
+      "nameRu": "Ягоды", "role": "fruit", "mealTypes": ["breakfast", "snack"], "boxable": true,
+      "taste": { "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sweet", "sour"], "textures": ["juicy", "soft"], "traits": { "richness": 0, "spiciness": 0, "sweetness": 0.45, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.75 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_hummus_vegetables": {
+      "nameRu": "Хумус с овощами", "role": "snack", "mealTypes": ["lunch", "snack"], "boxable": true,
+      "taste": { "course": "snack", "cuisine": "middleEastern", "proteins": ["legumes"], "cookingMethods": ["boiled", "raw"], "carbBase": "none", "flavours": ["garlicky", "creamy"], "textures": ["creamy", "crunchy"], "traits": { "richness": 0.45, "spiciness": 0.05, "sweetness": 0.05, "vegShare": 0.5, "familiarityRu": 0.6, "popularityRu": 0.45 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_tofu_scramble": {
+      "nameRu": "Тофу-скрамбл", "role": "main", "mealTypes": ["breakfast"], "boxable": true,
+      "taste": { "course": "breakfast", "proteins": ["tofu"], "cookingMethods": ["fried"], "carbBase": "none", "flavours": ["umami", "herby"], "textures": ["soft"], "traits": { "richness": 0.4, "spiciness": 0.05, "sweetness": 0, "vegShare": 0.35, "familiarityRu": 0.25, "popularityRu": 0.2 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_chickpeas_vegetables": {
+      "nameRu": "Нут с овощами", "role": "main", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "main", "cuisine": "middleEastern", "proteins": ["legumes"], "cookingMethods": ["stewed"], "carbBase": "none", "flavours": ["herby", "umami"], "textures": ["soft"], "traits": { "richness": 0.35, "spiciness": 0.1, "sweetness": 0.05, "vegShare": 0.5, "familiarityRu": 0.5, "popularityRu": 0.35 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_lentils_vegetables": {
+      "nameRu": "Чечевица с овощами", "role": "main", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "main", "cuisine": "russian", "proteins": ["legumes"], "cookingMethods": ["stewed"], "carbBase": "none", "flavours": ["herby", "umami"], "textures": ["soft"], "traits": { "richness": 0.35, "spiciness": 0.05, "sweetness": 0.05, "vegShare": 0.4, "familiarityRu": 0.6, "popularityRu": 0.35 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_oatmeal_plant_milk": {
+      "nameRu": "Овсянка на растительном молоке", "role": "main", "mealTypes": ["breakfast"], "boxable": true,
+      "taste": { "course": "breakfast", "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["boiled"], "carbBase": "grains", "flavours": ["creamy", "sweet"], "textures": ["soft", "creamy"], "traits": { "richness": 0.3, "spiciness": 0, "sweetness": 0.3, "vegShare": 0.05, "familiarityRu": 0.7, "popularityRu": 0.35 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_bean_salad": {
+      "nameRu": "Фасолевый салат", "role": "salad", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "salad", "cuisine": "russian", "proteins": ["legumes"], "cookingMethods": ["boiled", "raw"], "carbBase": "none", "flavours": ["herby", "sour"], "textures": ["soft", "crunchy"], "traits": { "richness": 0.3, "spiciness": 0.05, "sweetness": 0.05, "vegShare": 0.5, "familiarityRu": 0.75, "popularityRu": 0.45 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    },
+    "d_cabbage_carrot_salad": {
+      "nameRu": "Салат из капусты с морковью", "role": "salad", "mealTypes": ["lunch", "dinner"], "boxable": true,
+      "taste": { "course": "salad", "cuisine": "russian", "proteins": ["none"], "cookingMethods": ["raw"], "carbBase": "none", "flavours": ["sour"], "textures": ["crunchy", "juicy"], "traits": { "richness": 0.15, "spiciness": 0, "sweetness": 0.15, "vegShare": 1, "familiarityRu": 1, "popularityRu": 0.6 } },
+      "recipe": { "kind": "batch", "batch": 9 }
+    }
+  }
+}

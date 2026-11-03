@@ -15,6 +15,7 @@ export default defineConfig({
       nodePackage('nutrition-core'),
       nodePackage('contracts'),
       nodePackage('taste-core'),
+      nodePackage('food-data'),
       {
         // The build flag of vite.config.ts (ADR 0011): unit tests see the default build.
         define: { __PHOTO_HOSTING__: JSON.stringify('self'), __TEST_HOOKS__: 'true' },
@@ -42,6 +43,7 @@ export default defineConfig({
         'packages/nutrition-core/src/**/*.ts',
         'packages/contracts/src/**/*.ts',
         'packages/taste-core/src/**/*.ts',
+        'packages/food-data/src/**/*.ts',
         'apps/web/src/**/*.{ts,tsx}',
       ],
       exclude: [
