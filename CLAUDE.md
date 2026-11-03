@@ -50,6 +50,7 @@
 | `npm run sim -- --users 5000 --out <папка>` | симуляция игры «Выберите блюдо» (taste-core) |
 | `npm run photos:curate` → `photos:sheets` → `photos:finalize` | подбор фото блюд (нужен ключ Unsplash в `UNSPLASH_ACCESS_KEY` или `.secrets/`), см. `docs/photo-licensing.md` |
 | `npm run photos:runtime` | пересобрать облегчённую копию манифеста фото для сайта |
+| `npm run food-data` | пересобрать данные блюд меню (`packages/food-data`, ADR 0015): USDA из `.cache/usda` + рецепты исследований → `data/`, отчёт `refectorio-workspace/reports/stage-4/food-data-report.md`; без изменений содержимого файлы не меняются |
 
 Перед коммитом husky запускает lint-staged (ESLint + Prettier на изменённых файлах).
 
