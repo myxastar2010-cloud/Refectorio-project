@@ -137,7 +137,10 @@ export function TasteStep() {
     (answer: TasteAnswer, velocity = { vx: 0, vy: 0 }): boolean => {
       if (!current || !present || complete || blocked) return false;
       const now = performance.now();
-      if (now - lastAnswerAt.current < TINDER.answerGapMs) return false;
+      // The gap keeps one gesture from answering two cards. A card «Вернуться» brought back is a new decision: its
+      // first answer counts however soon it comes (CI pressed S 160 ms after the answer before the undo, and lost it).
+      const returned = typeof enter === 'object';
+      if (!returned && now - lastAnswerAt.current < TINDER.answerGapMs) return false;
       lastAnswerAt.current = now;
       setFling(velocity);
       tasteAnswer({ dishId: current.id, answer });
@@ -157,6 +160,7 @@ export function TasteStep() {
       present,
       complete,
       blocked,
+      enter,
       tasteAnswer,
       decisive,
       session,
