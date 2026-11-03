@@ -8,3 +8,5 @@ playwright-report/
 test-results/
 .lighthouseci/
 *.md
+# Food data: the build's compact rows and the authored sources in the same layout (ADR 0015).
+packages/food-data/data/

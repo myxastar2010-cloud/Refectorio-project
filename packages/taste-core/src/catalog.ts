@@ -175,10 +175,14 @@ export const photoQueriesSchema = z.record(
 
 const MEAT = new Set<string>(['beef', 'pork', 'lamb', 'poultry']);
 
+/** Meat the card shows. A meat broth is a diet fact, not a look: the taste hints go by this. */
+export function visibleMeat(dish: Dish): boolean {
+  return dish.proteins.some((p) => MEAT.has(p));
+}
+
 /** Diet flags derived from the protein list, allergens and extras (never stored separately). */
 export function dietFlags(dish: Dish) {
-  const meat =
-    dish.proteins.some((p) => MEAT.has(p)) || dish.extras?.includes('meatBroth') === true;
+  const meat = visibleMeat(dish) || dish.extras?.includes('meatBroth') === true;
   const fish =
     dish.proteins.includes('fish') ||
     dish.allergens.includes('FISH') ||
