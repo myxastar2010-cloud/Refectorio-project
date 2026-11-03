@@ -32,6 +32,7 @@ import { buildFoodIndex, type FoodIndex } from './foods';
 
 let cachedFoods: FoodIndex | null = null;
 let cachedCatalog: Catalog | null = null;
+let cachedPrepared: ReturnType<typeof prepareCatalog> | null = null;
 
 export function testCatalog(): Catalog {
   cachedCatalog ??= catalogSchema.parse(catalogJson);
@@ -52,7 +53,8 @@ export function tasteProfile(
   answers: readonly (readonly [string, TasteAnswer])[] = [],
 ): TasteProfileV1 {
   const catalog = testCatalog();
-  const prepared = prepareCatalog(catalog);
+  cachedPrepared ??= prepareCatalog(catalog);
+  const prepared = cachedPrepared;
   let state = initialState(prepared);
   for (const [dishId, answer] of answers) {
     const index = prepared.indexOf.get(dishId);
