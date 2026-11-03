@@ -919,41 +919,53 @@ export function localSearch(
 
 // ---------------------------------------------------------------- state from and to plans
 
-export function stateFromHistory(ctx: PlanContext, history: readonly DayPlan[]): DayState[] {
-  return history.map((plan): DayState => {
-    const meals = ctx.structure.map((meal) => {
-      const items = plan.meals[meal.id] ?? [];
-      return items.flatMap((item): Slot[] => {
-        const food = ctx.indexOf.get(item.itemId);
-        const grid = food !== undefined ? ctx.grids[food] : undefined;
-        if (food === undefined || !grid) return [];
-        const fi = grid.reduce(
-          (best, f, i) =>
-            Math.abs(f - item.portion.factor) < Math.abs((grid[best] ?? 1) - item.portion.factor)
-              ? i
-              : best,
-          0,
-        );
-        const spec = MEAL_SLOTS[meal.kind].find((s) => s.roles.includes(item.role));
-        return [
-          { kind: spec?.slot ?? 'extra', food, fi, frozen: true, pinnedBy: item.pinnedBy ?? null },
-        ];
-      });
+/**
+ * Days of a plan as planner days. History days are frozen and only counted; an editable day keeps the items
+ * `frozen` says (eaten ones) and lets the planner move the rest.
+ */
+export function dayStateFrom(
+  ctx: PlanContext,
+  plan: Pick<DayPlan, 'date' | 'meals'>,
+  options: {
+    readonly history: boolean;
+    readonly frozen?: (mealId: string, itemId: string) => boolean;
+  },
+): DayState {
+  const meals = ctx.structure.map((meal) => {
+    const items = plan.meals[meal.id] ?? [];
+    return items.flatMap((item): Slot[] => {
+      const food = ctx.indexOf.get(item.itemId);
+      const grid = food !== undefined ? ctx.grids[food] : undefined;
+      if (food === undefined || !grid) return [];
+      const fi = grid.reduce(
+        (best, f, i) =>
+          Math.abs(f - item.portion.factor) < Math.abs((grid[best] ?? 1) - item.portion.factor)
+            ? i
+            : best,
+        0,
+      );
+      const frozen = options.history || options.frozen?.(meal.id, item.itemId) === true;
+      return [{ kind: item.slot, food, fi, frozen, pinnedBy: item.pinnedBy ?? null }];
     });
-    const day: DayState = {
-      date: plan.date,
-      week: weekKey(plan.date),
-      weekday: isWeekday(plan.date),
-      history: true,
-      meals,
-      solution: null,
-      agg: null,
-      dayCost: 0,
-    };
-    day.agg = aggregate(ctx, day);
-    return day;
   });
+  const day: DayState = {
+    date: plan.date,
+    week: weekKey(plan.date),
+    weekday: isWeekday(plan.date),
+    history: options.history,
+    meals,
+    solution: null,
+    agg: null,
+    dayCost: 0,
+  };
+  day.agg = aggregate(ctx, day);
+  return day;
 }
+
+export const stateFromHistory = (
+  ctx: PlanContext,
+  history: readonly Pick<DayPlan, 'date' | 'meals'>[],
+): DayState[] => history.map((plan) => dayStateFrom(ctx, plan, { history: true }));
 
 export const emptyDay = (ctx: PlanContext, date: IsoDate): DayState => ({
   date,

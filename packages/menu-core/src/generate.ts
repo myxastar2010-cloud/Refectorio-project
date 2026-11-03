@@ -6,11 +6,12 @@
 import { createRandom } from '@refectorio/taste-core';
 import { toDayPlan, planNotes } from './assemble';
 import { buildContext, type PlanContext } from './context';
-import { dateRange, endOfNextWeek, isIsoDate, type IsoDate } from './dates';
+import { addDays, dateRange, endOfNextWeek, isIsoDate, type IsoDate } from './dates';
 import type { Rule, RuleConflict } from './dsl';
 import type { FoodIndex } from './foods';
 import {
   constructDay,
+  dayStateFrom,
   emptyDay,
   localSearch,
   polish,
@@ -37,6 +38,7 @@ import {
 import { hardViolations, type HardViolation } from './validate';
 
 export const DEFAULT_ITERATIONS_PER_DAY = 300;
+const HISTORY_DAYS = 14;
 
 export type PlanError =
   | { readonly code: 'invalidDate' }
@@ -86,19 +88,22 @@ export function planRange(req: RangeRequest): Result<RangeResult, PlanError> {
   }
 
   const planned = new Set(req.dates);
+  // Two weeks of history are enough for every window and weekly quota.
+  const first = [...req.dates].sort()[0] ?? '';
+  const horizonStart = addDays(first, -HISTORY_DAYS);
   const history = stateFromHistory(
     ctx,
-    req.history.filter((d) => !planned.has(d.date)),
+    req.history.filter((d) => !planned.has(d.date) && d.date >= horizonStart),
   );
   const fresh = req.dates.map((date): DayState => {
     const day = emptyDay(ctx, date);
     const kept = req.keep?.get(date);
-    if (kept) {
-      const [frozen] = stateFromHistory(ctx, [
-        { date, meals: kept, totals: emptyTotals(), flags: [] },
-      ]);
-      if (frozen) day.meals = frozen.meals;
-    }
+    if (kept)
+      day.meals = dayStateFrom(
+        ctx,
+        { date, meals: kept },
+        { history: false, frozen: () => true },
+      ).meals;
     return day;
   });
   const days = [...history, ...fresh].sort((a, b) =>
@@ -129,10 +134,6 @@ export function planRange(req: RangeRequest): Result<RangeResult, PlanError> {
     stats: { ...stats, breakdown: costBreakdown(ctx, state) },
     context: ctx,
   });
-}
-
-function emptyTotals(): DayPlan['totals'] {
-  return {} as DayPlan['totals'];
 }
 
 export type GenerateRequest = {

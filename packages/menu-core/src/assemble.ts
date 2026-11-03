@@ -49,6 +49,7 @@ export function plannedItems(ctx: PlanContext, day: DayState, mealIndex: number)
       {
         itemId: food.id,
         role: food.role,
+        slot: slot.kind,
         portion,
         grams: food.item.portion.grams * factor,
         nutrients: scaleNutrients(food.item.perPortion, factor),

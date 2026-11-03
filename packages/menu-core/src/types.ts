@@ -6,6 +6,7 @@ import type { NutrientKey, NutrientVector, Role } from '@refectorio/food-data';
 import type { AllergenCode } from '@refectorio/nutrition-core';
 import type { IsoDate } from './dates';
 import type { Rule } from './dsl';
+import type { SlotKind } from './templates';
 
 export type { IsoDate };
 
@@ -64,6 +65,8 @@ export type ReasonCode = (typeof REASON_CODES)[number];
 export type PlannedItem = {
   readonly itemId: string;
   readonly role: Role;
+  /** Its place in the meal (core dish, soup, side, drink…): keeps edits and re-plans exact. */
+  readonly slot: SlotKind;
   readonly portion: Portion;
   readonly grams: number;
   readonly nutrients: NutrientVector;

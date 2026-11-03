@@ -16,6 +16,8 @@ export type QuizParams = {
   readonly revealDemo: boolean;
   /** ?debug=answers — the validated JSON of the answers on the final screen. */
   readonly debugAnswers: boolean;
+  /** ?debug=menu — the menu engine's result on the final screen (status, timing, the first day). */
+  readonly debugMenu: boolean;
   /** Test builds only: ?step=<id>&state=<name> opens a step in a known sub-state (flow/testStates.ts). */
   readonly step: string | null;
   readonly state: string | null;
@@ -32,6 +34,7 @@ export function readQuizParams(search: string): QuizParams {
     demo: params.has('demo'),
     revealDemo: params.get('reveal') === 'demo',
     debugAnswers: params.get('debug') === 'answers',
+    debugMenu: params.get('debug') === 'menu',
     step: params.get('step'),
     state: params.get('state'),
     story: params.get('story'),

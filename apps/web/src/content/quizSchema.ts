@@ -317,6 +317,7 @@ export const quizContentSchema = z.object({
     }),
     revealPlaceholder: text,
     debugTitle: text,
+    debugMenuTitle: text,
   }),
 });
 

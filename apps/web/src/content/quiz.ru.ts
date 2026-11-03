@@ -402,5 +402,6 @@ export const quiz = {
     },
     revealPlaceholder: 'Меню появится на следующем этапе',
     debugTitle: 'Ответы (проверенный JSON)',
+    debugMenuTitle: 'Меню (проверка генерации)',
   },
 } satisfies QuizContent;
