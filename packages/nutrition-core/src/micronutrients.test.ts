@@ -43,6 +43,22 @@ describe('micronutrientNorms (МР 2.3.1.0253-21)', () => {
     expect(boy.ironMg).toBeUndefined();
   });
 
+  it('upper limits follow the NASEM bands: 51+, over 70, pregnancy, 14–18 (Appendix J)', () => {
+    expect(person({}).calciumMg?.ul).toBe(2500);
+    expect(person({ ageYears: 51 }).calciumMg?.ul).toBe(2000);
+    expect(person({ ageYears: 70 }).phosphorusMg?.ul).toBe(4000);
+    expect(person({ ageYears: 71 }).phosphorusMg?.ul).toBe(3000);
+    const pregnant = person({ sex: 'female', pregnancy: 'trimester1' });
+    expect(pregnant.phosphorusMg?.ul).toBe(3500);
+    expect(person({ sex: 'female', lactation: 'months0to6' }).phosphorusMg?.ul).toBe(4000);
+    // 18-year-olds belong to NASEM's 14–18 band: its own zinc and iodine limits, no adult limit elsewhere.
+    const eighteen = person({ ageYears: 18 });
+    expect(eighteen.zincMg?.ul).toBe(34);
+    expect(eighteen.iodineUg?.ul).toBe(900);
+    expect(eighteen.calciumMg?.ul).toBeUndefined();
+    expect(person({ ageYears: 18, sex: 'female', pregnancy: 'trimester2' }).zincMg?.ul).toBe(34);
+  });
+
   it('unspecified sex takes the higher norm of the two', () => {
     expect(person({ sex: 'unspecified' }).ironMg?.norm).toBe(18);
   });

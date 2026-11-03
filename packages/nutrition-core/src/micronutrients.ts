@@ -32,7 +32,7 @@ export type MicronutrientKey = (typeof MICRONUTRIENT_KEYS)[number];
 
 export type MicronutrientNorm = {
   readonly norm: number;
-  /** NASEM tolerable upper intake level for adults; `scope` says what it counts. */
+  /** NASEM tolerable upper intake level for the person's band (`upperLimit`); `scope` says what it counts. */
   readonly ul?: number;
   readonly ulScope?: 'total' | 'supplementsOnly' | 'preformedOnly';
 };
@@ -50,12 +50,37 @@ function pick(values: readonly Values[], key: MicronutrientKey): number | null {
   return best;
 }
 
+type Person = Pick<Questionnaire, 'ageYears' | 'sex' | 'pregnancy' | 'lactation'>;
+
+/**
+ * The NASEM upper limit for this person (Appendix J): `value` is for 19–50, `differences` names the other bands the
+ * table gives (51+, > 70, pregnancy and lactation 19–50, 14–18). Under 19 only a stated 14–18 value counts — no
+ * limit rather than the adult one, which is higher for zinc, iodine, vitamins A, E, B6, folate.
+ */
+function upperLimit(limit: unknown, q: Person): number | null {
+  if (!limit || typeof limit !== 'object') return null;
+  const { value, differences } = limit as { value?: unknown; differences?: unknown };
+  const d = valuesOf(differences);
+  const stated = (key: string) => {
+    const v = d[key];
+    return typeof v === 'number' ? v : null;
+  };
+  if (q.ageYears < 19) return q.ageYears >= 14 ? stated('pregnancy/lactation 14-18') : null;
+  if (q.pregnancy !== 'none' && stated('pregnancy 19-50') !== null)
+    return stated('pregnancy 19-50');
+  if (q.lactation !== 'none' && stated('lactation 19-50') !== null)
+    return stated('lactation 19-50');
+  if (q.ageYears > 70 && stated('>70') !== null) return stated('>70');
+  if (q.ageYears >= 51 && stated('51+') !== null) return stated('51+');
+  return typeof value === 'number' ? value : null;
+}
+
 type Band = { readonly fromAgeYears: number; readonly toAgeYears: number };
 const inBand = <T extends Band>(bands: readonly T[], age: number): T | undefined =>
   bands.find((b) => age >= b.fromAgeYears && age < b.toAgeYears);
 
 export function micronutrientNorms(
-  q: Pick<Questionnaire, 'ageYears' | 'sex' | 'pregnancy' | 'lactation'>,
+  q: Person,
 ): Partial<Record<MicronutrientKey, MicronutrientNorm>> {
   const tables: Values[] = [];
   const adult = q.ageYears >= 18;
@@ -84,8 +109,7 @@ export function micronutrientNorms(
     const norm = pick(source, key);
     if (norm === null) continue;
     const limit = limits[key];
-    const ulValue =
-      adult && limit && typeof limit === 'object' ? (limit as { value?: unknown }).value : null;
+    const ulValue = upperLimit(limit, q);
     const scope =
       limit && typeof limit === 'object' ? (limit as { appliesTo?: unknown }).appliesTo : undefined;
     out[key] =
