@@ -186,7 +186,8 @@ export function dayFlags(ctx: PlanContext, day: DayPlan, previous: readonly DayP
       mealProtein < t.mealProteinMinG * (1 - 4 * margin)
     )
       add({ code: 'mealProteinLow', meal: meal.id, nutrient: 'proteinG' });
-    if (items.length === 0) add({ code: 'fewCandidates', meal: meal.id });
+    if (items.length === 0 || ctx.relaxedCore.has(meal.kind))
+      add({ code: 'fewCandidates', meal: meal.id });
   });
   if (t.vegFruitMinG > 0 && vegFruit < t.vegFruitMinG * (1 - 4 * margin))
     add({ code: 'vegFruitLow' });

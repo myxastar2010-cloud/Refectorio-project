@@ -6,7 +6,7 @@ import { generate } from './generate';
 import { buildMenuProfile, type MenuProfile } from './profile';
 import { rule } from './rules';
 import { DEFAULT_STRUCTURE, structureFromKinds } from './structure';
-import { quizAnswers, testFoods, type AnswersOverrides } from './testing';
+import { quizAnswers, randomAnswers, testFoods, type AnswersOverrides } from './testing';
 import type { Plan, PlannedItem } from './types';
 import { hardViolations } from './validate';
 
@@ -268,5 +268,31 @@ describe('generate (ТЗ фаза 3 §3, §8)', () => {
     const text = JSON.stringify(officePlan);
     expect(text).not.toContain('Infinity');
     expect(JSON.parse(text)).toEqual(JSON.parse(JSON.stringify(officePlan)));
+  });
+
+  it('bends the template, not safety, when a meal has no safe dish of its own type', () => {
+    // A vegan with several allergies (the 5 000-person simulation): no safe lunch or dinner main of those meal types.
+    const answers = randomAnswers(35771123);
+    const profile = buildMenuProfile(answers, { foods });
+    if (!profile.ok) throw new Error(JSON.stringify(profile.error));
+    const result = generate({
+      profile: profile.value,
+      foods,
+      today: TODAY,
+      seed: 3,
+      iterationsPerDay: 40,
+    });
+    if (!result.ok) throw new Error(JSON.stringify(result.error));
+    const plan = result.value.plan;
+    const ctx = buildContext(profile.value, foods, plan.structure, []);
+    expect(ctx.relaxedCore.size).toBeGreaterThan(0);
+    expect(hardViolations(ctx, plan.days)).toEqual([]);
+    for (const day of plan.days) {
+      for (const meal of plan.structure) {
+        expect((day.meals[meal.id] ?? []).length).toBeGreaterThan(0);
+        if (ctx.relaxedCore.has(meal.kind))
+          expect(day.flags).toContainEqual({ code: 'fewCandidates', meal: meal.id });
+      }
+    }
   });
 });

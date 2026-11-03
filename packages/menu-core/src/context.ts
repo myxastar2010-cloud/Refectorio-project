@@ -178,6 +178,11 @@ export type PlanContext = {
   readonly nutsAllowed: boolean;
   readonly dairyAllowed: boolean;
   readonly pregnantOrLactating: boolean;
+  /**
+   * Meal kinds whose core comes from safe dishes of any meal type: nothing safe of the meal's own type exists (a vegan
+   * with several allergies at breakfast). The template bends, safety does not (ТЗ фаза 3 §3.4); the day says so.
+   */
+  readonly relaxedCore: ReadonlySet<MealKind>;
   /** Columns of the weekly fish budget in `q` (R17 E9), for a pregnant or breastfeeding person only. */
   readonly fishQ: FishColumns | null;
 };
@@ -409,6 +414,7 @@ export function buildContext(
   );
   const pLike = new Float64Array(foods.map((f) => likeProbability(f, profile.taste)));
   const pools = {} as Record<MealKind, Partial<Record<SlotKind, number[]>>>;
+  const relaxedCore = new Set<MealKind>();
   for (const kind of MEAL_KINDS) {
     const bySlot: Partial<Record<SlotKind, number[]>> = {};
     for (const spec of MEAL_SLOTS[kind]) {
@@ -421,6 +427,14 @@ export function buildContext(
             f.item.mealTypes.includes(kind),
         )
         .map(([, i]) => i);
+    }
+    if ((bySlot.core?.length ?? 0) === 0) {
+      const roles = MEAL_SLOTS[kind].find((s) => s.slot === 'core')?.roles ?? [];
+      bySlot.core = foods
+        .map((f, i) => [f, i] as const)
+        .filter(([f, i]) => verdicts[i]?.ok === true && roles.includes(f.role))
+        .map(([, i]) => i);
+      if (bySlot.core.length > 0) relaxedCore.add(kind);
     }
     pools[kind] = bySlot;
   }
@@ -469,6 +483,7 @@ export function buildContext(
       s.diet !== 'vegan' && s.diet !== 'lentLay' && s.diet !== 'vegetarianOvo' && !allergic('MILK'),
     pregnantOrLactating: s.pregnant || s.lactating,
     fishQ,
+    relaxedCore,
   };
 }
 
