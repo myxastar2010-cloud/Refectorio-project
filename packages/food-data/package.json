@@ -1,0 +1,23 @@
+{
+  "name": "@refectorio/food-data",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ПроЛанч — данные блюд меню: роли, аллергены, порции, нутриенты на порцию и на 100 г (USDA SR Legacy + потери при готовке), тексты. Только из скриптов и источников.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./data/food-core.json": "./data/food-core.json",
+    "./data/food-text.json": "./data/food-text.json"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:data": "node build/run.mjs"
+  },
+  "dependencies": {
+    "@refectorio/contracts": "*",
+    "@refectorio/nutrition-core": "*",
+    "@refectorio/taste-core": "*",
+    "zod": "^4.6.5"
+  }
+}
