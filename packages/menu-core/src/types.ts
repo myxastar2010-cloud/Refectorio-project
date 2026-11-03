@@ -118,6 +118,7 @@ export const PLAN_NOTE_CODES = [
   'redMeatWeekHigh',
   'freeSugarsWeekHigh',
   'satFatWeekHigh',
+  'sodiumWeekHigh',
   'macroProfileAdjusted',
   'dislikesUnmatched',
   'veganB12',

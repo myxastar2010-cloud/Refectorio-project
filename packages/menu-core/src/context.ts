@@ -53,10 +53,15 @@ export type CostWeights = {
   readonly includeRule: number;
   readonly prefer: number;
   readonly replaceTo: number;
+  /** Extra cost of a dish the person probably dislikes (P(like) below `DISLIKE_BELOW`), on top of the linear taste. */
+  readonly dislike: number;
 };
 
+/** Below this P(like) a dish reads as «I said I don't like it» — the most visible miss a menu can make. */
+export const DISLIKE_BELOW = 0.4;
+
 export const BASE_COST_WEIGHTS: CostWeights = {
-  taste: 2.5,
+  taste: 15,
   habit: 1,
   boxable: 0.8,
   cookTime: 0.6,
@@ -83,6 +88,7 @@ export const BASE_COST_WEIGHTS: CostWeights = {
   includeRule: 20,
   prefer: 0.8,
   replaceTo: 0.5,
+  dislike: 8,
 };
 
 /** How much taste counts by slot: the core dish most (whatever its role), bread and drinks little. */
@@ -150,6 +156,11 @@ export type PlanContext = {
   readonly grids: readonly (readonly number[])[];
   readonly portions: readonly (readonly Portion[])[];
   readonly pLike: Float64Array;
+  /**
+   * The mean P(like) of each slot's pool: taste counts against it, so a dish of average appeal costs nothing and the
+   * planner has no reason to leave a slot (soup at lunch) empty just to avoid a taste cost.
+   */
+  readonly tasteRef: Readonly<Record<MealKind, Readonly<Partial<Record<SlotKind, number>>>>>;
   /** Allowed foods per meal kind and slot (hard filter, meal type), ascending by index. */
   readonly pools: Readonly<
     Record<MealKind, Readonly<Partial<Record<SlotKind, readonly number[]>>>>
@@ -413,6 +424,15 @@ export function buildContext(
     }
     pools[kind] = bySlot;
   }
+  const tasteRef = {} as Record<MealKind, Partial<Record<SlotKind, number>>>;
+  for (const kind of MEAL_KINDS) {
+    const refs: Partial<Record<SlotKind, number>> = {};
+    for (const [slot, pool] of Object.entries(pools[kind]) as [SlotKind, number[]][]) {
+      if (pool.length > 0)
+        refs[slot] = pool.reduce((sum, i) => sum + (pLike[i] ?? 0), 0) / pool.length;
+    }
+    tasteRef[kind] = refs;
+  }
   const sharesMap = mealShares(structure);
   const hoursMap = mealHours(structure);
   const s = profile.safety;
@@ -428,6 +448,7 @@ export function buildContext(
     grids,
     portions,
     pLike,
+    tasteRef,
     pools,
     structure,
     shares: structure.map((m) => sharesMap.get(m.id) ?? 0),

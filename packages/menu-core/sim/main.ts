@@ -13,6 +13,7 @@ import { daysBetween } from '../src/dates';
 import { generate } from '../src/generate';
 import { buildMenuProfile } from '../src/profile';
 import { rule } from '../src/rules';
+import { mealShares } from '../src/structure';
 import { likeProbability } from '../src/taste';
 import { randomAnswers, testFoods } from '../src/testing';
 import { hardViolations } from '../src/validate';
@@ -44,9 +45,113 @@ type Row = {
   tasteCore: number;
   tasteAllowedMean: number;
   tasteAllowedTop: number;
+  /** Planned core mains / allowed mains the person probably dislikes (P(like) < 0,4). */
+  dislikedCore: number;
+  dislikedAllowed: number;
   variety: number;
+  /** How a person would read the meals (ТЗ фаза 3 §3.2 templates): see `plausibility`. */
+  plaus: Plausibility;
   ms: number;
 };
+
+type Plausibility = {
+  /** Core mains half a portion or more away from the person's scale (target ÷ 2200 kcal, 0,5–1,5). */
+  oddCore: number;
+  /** Lunches with a soup. */
+  soupLunch: number;
+  /** Sweet drinks (free sugars ≥ P.sweetDrinkFreeSugarsG) a day. */
+  sweetDrinks: number;
+  /** Meals with bread next to a starchy core or side and no soup. */
+  breadStarch: number;
+  /** Mean |meal share − target|, percentage points. */
+  shareDevPp: number;
+  itemsPerMeal: number;
+};
+
+const NO_PLAUS: Plausibility = {
+  oddCore: 0,
+  soupLunch: 0,
+  sweetDrinks: 0,
+  breadStarch: 0,
+  shareDevPp: 0,
+  itemsPerMeal: 0,
+};
+
+function plausibility(
+  targetKcal: number,
+  plan: {
+    days: readonly {
+      meals: Readonly<
+        Record<
+          string,
+          readonly {
+            itemId: string;
+            slot: string;
+            role: string;
+            portion: { factor: number };
+            nutrients: { energyKcal: number | null };
+          }[]
+        >
+      >;
+    }[];
+    structure: readonly { id: string; kind: string }[];
+  },
+  foods: ReturnType<typeof testFoods>,
+): Plausibility {
+  const shares = mealShares(plan.structure as Parameters<typeof mealShares>[0]);
+  const scale = Math.min(1.5, Math.max(0.5, targetKcal / 2200));
+  let cores = 0;
+  let odd = 0;
+  let lunches = 0;
+  let soups = 0;
+  let sweet = 0;
+  let meals = 0;
+  let breadStarch = 0;
+  let dev = 0;
+  let items = 0;
+  for (const day of plan.days) {
+    const dayKcal = Object.values(day.meals)
+      .flat()
+      .reduce((sum, i) => sum + (i.nutrients.energyKcal ?? 0), 0);
+    for (const meal of plan.structure) {
+      const list = day.meals[meal.id] ?? [];
+      meals += 1;
+      items += list.length;
+      const kcal = list.reduce((sum, i) => sum + (i.nutrients.energyKcal ?? 0), 0);
+      if (dayKcal > 0) dev += Math.abs(kcal / dayKcal - (shares.get(meal.id) ?? 0)) * 100;
+      if (meal.kind === 'lunch') {
+        lunches += 1;
+        if (list.some((i) => i.role === 'soup')) soups += 1;
+      }
+      let starch = false;
+      for (const i of list) {
+        const f = foods.byId.get(i.itemId);
+        if (!f) continue;
+        if (i.slot === 'core' && i.role === 'main') {
+          cores += 1;
+          if (Math.abs(i.portion.factor - scale) >= 0.5 - 1e-9) odd += 1;
+        }
+        if (
+          i.role === 'drink' &&
+          (f.item.perPortion.freeSugarsG ?? 0) >= rule('P.sweetDrinkFreeSugarsG')
+        )
+          sweet += 1;
+        if ((i.slot === 'core' || i.slot === 'side') && f.features.carbBase !== 'none')
+          starch = true;
+      }
+      if (starch && list.some((i) => i.role === 'bread') && !list.some((i) => i.role === 'soup'))
+        breadStarch += 1;
+    }
+  }
+  return {
+    oddCore: round(cores ? odd / cores : 0),
+    soupLunch: round(lunches ? soups / lunches : 0),
+    sweetDrinks: round(plan.days.length ? sweet / plan.days.length : 0, 2),
+    breadStarch: round(meals ? breadStarch / meals : 0),
+    shareDevPp: round(meals ? dev / meals : 0, 2),
+    itemsPerMeal: round(meals ? items / meals : 0, 2),
+  };
+}
 
 type Job = { seeds: number[]; iterations: number; today: string[] };
 
@@ -84,7 +189,10 @@ function runOne(seed: number, iterations: number, today: string): Row {
     tasteCore: 0,
     tasteAllowedMean: 0,
     tasteAllowedTop: 0,
+    dislikedCore: 0,
+    dislikedAllowed: 0,
     variety: 0,
+    plaus: NO_PLAUS,
     ms: 0,
   };
   if (!profile.ok) return { ...base, error: `profile:${profile.error.code}` };
@@ -244,7 +352,14 @@ function runOne(seed: number, iterations: number, today: string): Row {
       allowedMains.slice(0, 10).reduce((a, b) => a + b, 0) /
         Math.max(1, Math.min(10, allowedMains.length)),
     ),
+    dislikedCore: round(
+      cores.filter((i) => like(i.itemId) < 0.4).length / Math.max(1, cores.length),
+    ),
+    dislikedAllowed: round(
+      allowedMains.filter((x) => x < 0.4).length / Math.max(1, allowedMains.length),
+    ),
     variety: round(new Set(cores.map((i) => i.itemId)).size / Math.max(1, cores.length)),
+    plaus: plausibility(t.energyKcal, plan, foods),
     ms: round(ms, 1),
   };
 }
@@ -349,10 +464,20 @@ function summarize(rows: readonly Row[], single: readonly number[]) {
       redMeatWeeks: mean((r) => r.redMeatWeeks),
     },
     variety: mean((r) => r.variety),
+    plaus: {
+      oddCore: mean((r) => r.plaus.oddCore),
+      soupLunch: mean((r) => r.plaus.soupLunch),
+      sweetDrinks: mean((r) => r.plaus.sweetDrinks),
+      breadStarch: mean((r) => r.plaus.breadStarch),
+      shareDevPp: mean((r) => r.plaus.shareDevPp),
+      itemsPerMeal: mean((r) => r.plaus.itemsPerMeal),
+    },
     taste: {
       planned: mean((r) => r.tasteCore),
       allowedMean: mean((r) => r.tasteAllowedMean),
       allowedTop10: mean((r) => r.tasteAllowedTop),
+      dislikedCore: mean((r) => r.dislikedCore),
+      dislikedAllowed: mean((r) => r.dislikedAllowed),
     },
     flags: Object.fromEntries(
       Object.entries(flagTotals)
@@ -445,7 +570,16 @@ function report(
   lines.push(`- Красное мясо ≤ 500 г готового в неделю: ${pct(s.quotas.redMeatWeeks)} недель.`);
   lines.push(`- Разнообразие основных блюд (разных / всего): ${num(s.variety * 100, 1)} %.`);
   lines.push(
-    `- Вкус (P(like) taste-core): в меню ${num(s.taste.planned, 3)}; среднее по разрешённым основным ${num(s.taste.allowedMean, 3)}; лучшие 10 разрешённых ${num(s.taste.allowedTop10, 3)}.`,
+    `- Вкус (P(like) taste-core): в меню ${num(s.taste.planned, 3)}; среднее по разрешённым основным ${num(s.taste.allowedMean, 3)}; лучшие 10 разрешённых ${num(s.taste.allowedTop10, 3)}; вероятно нелюбимых (P < 0,4) в меню ${pct(s.taste.dislikedCore)} основных блюд при ${pct(s.taste.dislikedAllowed)} среди разрешённых.`,
+    '',
+  );
+  lines.push('## Правдоподобие приёмов', '');
+  lines.push(
+    `- Основное блюдо на полпорции и больше от «своей» порции человека (цель ÷ 2200 ккал): ${pct(s.plaus.oddCore)} основных блюд.`,
+    `- Суп на обед: ${pct(s.plaus.soupLunch)} обедов.`,
+    `- Сладких напитков в день: ${num(s.plaus.sweetDrinks, 2)}.`,
+    `- Хлеб к крахмальному блюду или гарниру без супа: ${pct(s.plaus.breadStarch)} приёмов.`,
+    `- Отклонение доли приёма от цели R17 E17: в среднем ${num(s.plaus.shareDevPp, 1)} п. п.; блюд в приёме: ${num(s.plaus.itemsPerMeal, 2)}.`,
     '',
   );
   lines.push('## Честные пометки дней', '');

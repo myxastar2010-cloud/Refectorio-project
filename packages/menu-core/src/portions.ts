@@ -85,8 +85,8 @@ export type Weights = {
 export const BASE_WEIGHTS: Weights = {
   energy: 300,
   energyBand: 3000,
-  share: 30,
-  shareSoft: 2,
+  share: 400,
+  shareSoft: 10,
   protein: 30,
   proteinMax: 10,
   fatBand: 15,
@@ -95,7 +95,7 @@ export const BASE_WEIGHTS: Weights = {
   carbTarget: 3,
   fibre: 8,
   fibreTarget: 2,
-  sodium: 20,
+  sodium: 5,
   sugar: 20,
   sugarGoal: 2,
   satFat: 20,
@@ -123,6 +123,8 @@ export type DayItem = {
   /** For a fixed item: its grid index (an eaten portion stays as it was); absent — the standard portion. */
   readonly fixedAt?: number;
   readonly meal: number;
+  /** How much a step away from the standard portion costs (a main dish more than its side); default 1. */
+  readonly portionWeight?: number;
 };
 
 /** A hard cap on a day total of a tracked quantity (the day's share of a weekly safety budget, R17 E9). */
@@ -244,7 +246,7 @@ function add(w: Work, item: DayItem, d: number): void {
 function change(w: Work, item: DayItem, from: number, to: number): void {
   if (from === to) return;
   add(w, item, to - from);
-  w.reg += sq(to - 1) - sq(from - 1);
+  w.reg += (item.portionWeight ?? 1) * (sq(to - 1) - sq(from - 1));
 }
 
 function makeWork(p: DayProblem, factors: readonly number[]): Work {
@@ -261,7 +263,7 @@ function makeWork(p: DayProblem, factors: readonly number[]): Work {
   p.items.forEach((item, i) => {
     const f = factors[i] ?? 1;
     add(w, item, f);
-    w.reg += sq(f - 1);
+    w.reg += (item.portionWeight ?? 1) * sq(f - 1);
   });
   return w;
 }
@@ -304,8 +306,8 @@ function continuousStart(p: DayProblem): number[] {
     p.items.forEach((item, i) => {
       if (item.fixed || item.grid.length < 2) return;
       const fi = f[i] ?? 1;
-      let num = lambda;
-      let den = lambda;
+      let num = lambda * (item.portionWeight ?? 1);
+      let den = lambda * (item.portionWeight ?? 1);
       goals.forEach((g, k) => {
         const a = at(item.q, g.q) / g.target;
         const rest = ((totals[k] ?? 0) - fi * at(item.q, g.q)) / g.target - 1;

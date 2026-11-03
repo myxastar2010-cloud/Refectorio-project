@@ -10,6 +10,7 @@ import type { Random } from '@refectorio/taste-core';
 import type { IsoDate } from './dates';
 import {
   allowedAt,
+  DISLIKE_BELOW,
   fishBudgetShare,
   fishServings,
   isWeekday,
@@ -25,9 +26,12 @@ import {
   ASIAN_SIDE_BASES,
   BREAD_WITH,
   COHERENCE,
+  LEGUME_SIDE_BASES,
   MAX_ITEMS_PER_MEAL,
   MEAL_SLOTS,
+  PORTION_WEIGHT,
   SIDE_HABIT,
+  SWEET_CORE,
   type SlotKind,
   type SlotSpec,
 } from './templates';
@@ -47,6 +51,7 @@ export type DayAgg = {
   readonly energy: number;
   readonly freeSugars: number;
   readonly satFat: number;
+  readonly sodium: number;
   readonly fishG: number;
   /** Share of the weekly pregnancy fish budget (R17 E9, `fishBudgetShare`). */
   readonly fishBudget: number;
@@ -95,7 +100,11 @@ export function slotCost(ctx: PlanContext, day: DayState, mealIndex: number, slo
   const meal = ctx.structure[mealIndex];
   if (!food || !meal) return 0;
   const C = ctx.costs;
-  let c = C.taste * SLOT_TASTE[slot.kind] * (1 - (ctx.pLike[slot.food] ?? 0.5));
+  const ref = ctx.tasteRef[meal.kind][slot.kind] ?? 0.5;
+  const like = ctx.pLike[slot.food] ?? ref;
+  let c = C.taste * SLOT_TASTE[slot.kind] * (ref - like);
+  if (like < DISLIKE_BELOW)
+    c += (C.dislike * SLOT_TASTE[slot.kind] * (DISLIKE_BELOW - like)) / DISLIKE_BELOW;
   // A breakfast or snack core is usually a dish (porridge, eggs) or fruit/dairy at a snack — a pastry less so.
   if (slot.kind === 'core' && meal.kind === 'breakfast' && food.role !== 'main') c += C.habit * 0.3;
   if (slot.kind === 'core' && food.role === 'main') {
@@ -123,7 +132,7 @@ export function slotCost(ctx: PlanContext, day: DayState, mealIndex: number, slo
     food.role === 'drink' &&
     (food.item.perPortion.freeSugarsG ?? 0) >= rule('P.sweetDrinkFreeSugarsG')
   )
-    c += C.habit * 0.3;
+    c += C.habit * 0.5;
   c += C.processedItem * (food.groups.processedMeatG / rule('P.serving.processedMeatG'));
   for (const p of ctx.rules.prefer) {
     if (p.foods.has(slot.food) && p.appliesTo(day.date, meal.kind)) c += p.sign * C.prefer;
@@ -151,23 +160,37 @@ function mealHabitCost(ctx: PlanContext, mealIndex: number, slots: readonly Slot
       c += present.has('salad') ? SIDE_HABIT.saladInstead : SIDE_HABIT.missing;
     const side = slots.find((s) => s.kind === 'side');
     const sideFood = side ? ctx.foods[side.food] : undefined;
+    const base = sideFood?.features.carbBase;
     if (
-      sideFood &&
-      coreFood.cuisine &&
-      ASIAN_CUISINES.has(coreFood.cuisine) &&
-      !ASIAN_SIDE_BASES.has(sideFood.features.carbBase)
+      base !== undefined &&
+      ((coreFood.cuisine !== null &&
+        ASIAN_CUISINES.has(coreFood.cuisine) &&
+        !ASIAN_SIDE_BASES.has(base)) ||
+        (coreFood.mainProtein === 'legumes' && !LEGUME_SIDE_BASES.has(base)))
     )
       c += COHERENCE.sidePairing;
     if (!coreFood.needsSide && present.has('side')) c += SIDE_HABIT.needless;
   }
+  // Bread next to a starchy dish or side (porridge, pasta, buckwheat) — unless it comes with the soup.
+  const starchy = slots.some(
+    (s) =>
+      (s.kind === 'core' || s.kind === 'side') &&
+      (ctx.foods[s.food]?.features.carbBase ?? 'none') !== 'none',
+  );
+  if (present.has('bread') && starchy && !present.has('soup')) c += COHERENCE.doubleStarch;
   if (
-    (meal.kind === 'lunch' || meal.kind === 'dinner') &&
+    meal.kind === 'breakfast' &&
     present.has('bread') &&
-    coreFood &&
-    coreFood.features.carbBase !== 'none' &&
-    !present.has('soup')
+    (coreFood?.features.traits.sweetness ?? 0) >= SWEET_CORE
   )
-    c += COHERENCE.doubleStarch;
+    c += COHERENCE.sweetWithBread;
+  const fruits = slots.filter((s) => {
+    const f = ctx.foods[s.food];
+    return (
+      f !== undefined && (f.role === 'fruit' || (s.kind === 'core' && f.categories.has('fruit')))
+    );
+  }).length;
+  if (fruits > 1) c += COHERENCE.doubleFruit * (fruits - 1);
   if (present.has('bread')) {
     const withSoup = meal.kind === 'lunch' && present.has('soup');
     const sideless = meal.kind === 'breakfast' && coreFood?.needsSide === true;
@@ -195,6 +218,7 @@ function dayProblemItems(ctx: PlanContext, day: DayState): { items: DayItem[]; r
         fixed: slot.frozen || fixedPortion,
         ...(slot.frozen ? { fixedAt: slot.fi } : {}),
         meal: m,
+        portionWeight: PORTION_WEIGHT[slot.kind],
       });
       refs.push(slot);
     }
@@ -265,6 +289,7 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
   let energy = 0;
   let sugars = 0;
   let satFat = 0;
+  let sodium = 0;
   const freq = ctx.rules.frequency.map(() => 0);
   for (const slots of day.meals) {
     for (const slot of slots) {
@@ -276,6 +301,7 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
       energy += f * (n.energyKcal ?? 0);
       sugars += f * (n.freeSugarsG ?? 0);
       satFat += f * (n.satFatG ?? 0);
+      sodium += f * (n.sodiumMg ?? 0);
       fishG += f * g.fishG;
       if (g.fishG > 0) {
         const servings = fishServings(food);
@@ -301,6 +327,7 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
     energy,
     freeSugars: sugars,
     satFat,
+    sodium,
     fishG,
     fishBudget,
     oilyFishServ: oily,
@@ -346,6 +373,14 @@ function dayExtras(ctx: PlanContext, day: DayState, agg: DayAgg): number {
     }
   });
   if (new Set(starches).size < starches.length) c += C.habit * COHERENCE.sameStarchDay;
+  const drinks: number[] = [];
+  for (const slots of day.meals)
+    for (const s of slots) if (ctx.foods[s.food]?.role === 'drink') drinks.push(s.food);
+  const sweet = drinks.filter(
+    (d) => (ctx.foods[d]?.item.perPortion.freeSugarsG ?? 0) >= rule('P.sweetDrinkFreeSugarsG'),
+  ).length;
+  if (sweet > 1) c += C.habit * COHERENCE.secondSweetDrink * (sweet - 1);
+  c += C.habit * COHERENCE.sameDrinkDay * (drinks.length - new Set(drinks).size);
   // includeItem: the rule's foods appear in a covered meal of this day.
   for (const inc of ctx.rules.includes) {
     const covered = ctx.structure
@@ -424,6 +459,13 @@ export function weekCosts(ctx: PlanContext, days: readonly DayState[]): number {
       c +=
         C.weeklyHard *
         sq(Math.max(0, sfaShare - rule('E5.satFatMaxShare')) / rule('E5.satFatMaxShare'));
+    }
+    // R17 E4: WHO's sodium limit is about habitual intake — the week's average is held, a day may vary (D-084).
+    const limit = ctx.profile.targets.sodiumMaxMg;
+    if (limit > 0) {
+      const average = sum('sodium') / aggs.length;
+      const weight = ctx.profile.safety.dishRules.has('limitSodium') ? 3 : 1;
+      c += C.weeklyHard * weight * sq(Math.max(0, average - limit) / limit);
     }
     ctx.rules.frequency.forEach((r, i) => {
       const n = aggs.reduce((s, a) => s + (a.freq[i] ?? 0), 0);

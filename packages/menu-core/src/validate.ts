@@ -136,7 +136,11 @@ export function dayFlags(ctx: PlanContext, day: DayPlan, previous: readonly DayP
       fibre < t.fibreG.min * (1 - 2 * margin))
   )
     add({ code: 'fibreLow', nutrient: 'fibreG' });
-  if (known(totals, 'sodiumMg') && value(totals, 'sodiumMg') > t.sodiumMaxMg * (1 + margin))
+  // Sodium is held on the week's average (D-084): a day is flagged only well above the limit.
+  if (
+    known(totals, 'sodiumMg') &&
+    value(totals, 'sodiumMg') > t.sodiumMaxMg * (1 + rule('S.sodiumDayFlagShare'))
+  )
     add({ code: 'sodiumHigh', nutrient: 'sodiumMg' });
   if (
     t.freeSugarsMaxG > 0 &&
@@ -187,9 +191,11 @@ export function dayFlags(ctx: PlanContext, day: DayPlan, previous: readonly DayP
   if (t.vegFruitMinG > 0 && vegFruit < t.vegFruitMinG * (1 - 4 * margin))
     add({ code: 'vegFruitLow' });
 
-  // Repeats within the strict windows (R17 E19) mean the window had to be relaxed.
+  // A main dish or soup again within R17 E19's week in the same meal means the window had to be relaxed; sides,
+  // salads, fruit and dairy have short practice windows that are preferences, not promises.
   for (const meal of ctx.structure) {
     for (const item of day.meals[meal.id] ?? []) {
+      if (item.role !== 'main' && item.role !== 'soup') continue;
       const window = repeatWindow(item.role);
       if (window <= 0) continue;
       const repeated = previous.some(

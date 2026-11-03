@@ -105,6 +105,7 @@ export const RULE_IDS = [
   'P.quickMaxMin',
   'P.spicyTrait',
   'S.flagMarginShare',
+  'S.sodiumDayFlagShare',
   'X.tasteMatchMin',
   'X.vegetablesMinG',
   'X.fibreRichMinG',

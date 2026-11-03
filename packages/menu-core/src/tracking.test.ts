@@ -230,7 +230,12 @@ describe('dayStatus', () => {
   });
 
   it('is partial when everything is eaten but the water is short', () => {
-    expect(dayStatus(plan, DAY, eatAll(EMPTY_TRACKING), LATER)).toBe('partial');
+    // A water need the day's food and planned drinks cannot cover, whatever the planner put on the day.
+    const thirsty: Plan = {
+      ...plan,
+      targets: { ...plan.targets, waterTotalMl: plan.targets.waterTotalMl + 3000 },
+    };
+    expect(dayStatus(thirsty, DAY, eatAll(EMPTY_TRACKING), LATER)).toBe('partial');
   });
 
   it('is done when all is eaten, energy is within 90-110 % and the water is drunk', () => {

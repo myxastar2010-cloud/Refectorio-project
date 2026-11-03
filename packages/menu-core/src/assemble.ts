@@ -89,7 +89,7 @@ export function planNotes(ctx: PlanContext, days: readonly DayState[]): PlanNote
   for (const [week, list] of weeks) {
     if (list.length < 4) continue;
     const share = list.length / 7;
-    const sum = (key: 'fishG' | 'redMeatRawG' | 'freeSugars' | 'satFat' | 'energy') =>
+    const sum = (key: 'fishG' | 'redMeatRawG' | 'freeSugars' | 'satFat' | 'energy' | 'sodium') =>
       list.reduce((s, d) => s + (d.agg?.[key] ?? 0), 0);
     if (ctx.fishAllowed && sum('fishG') < rule('E10.fishTargetGWeek') * share * 0.5)
       notes.push({ code: 'fishWeekLow', week });
@@ -103,6 +103,9 @@ export function planNotes(ctx: PlanContext, days: readonly DayState[]): PlanNote
       notes.push({ code: 'freeSugarsWeekHigh', week });
     if (energy > 0 && (sum('satFat') * 9) / energy > rule('E5.satFatMaxShare') * 1.05)
       notes.push({ code: 'satFatWeekHigh', week });
+    const limit = ctx.profile.targets.sodiumMaxMg;
+    if (limit > 0 && sum('sodium') / list.length > limit * 1.05)
+      notes.push({ code: 'sodiumWeekHigh', week });
   }
   return notes;
 }
