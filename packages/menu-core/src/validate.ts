@@ -4,7 +4,7 @@
  * the property tests require zero.
  */
 import type { NutrientVector } from '@refectorio/food-data';
-import { allowedAt, type PlanContext } from './context';
+import { allowedAt, fishBudgetShare, fishServings, weekKey, type PlanContext } from './context';
 import { checkFood, type HardReason } from './filter';
 import { repeatWindow } from './planner';
 import { rule } from './rules';
@@ -22,11 +22,60 @@ export type HardViolation = {
     | 'ruleExclusion'
     | 'caffeineDay'
     | 'caffeineSingle'
+    | 'fishWeek'
     | 'tooManyItems';
 };
 
-export function hardViolations(ctx: PlanContext, days: readonly DayPlan[]): HardViolation[] {
+/**
+ * R17 E9 in pregnancy and breastfeeding: each week's fish budget over the history and the planned days. A week breaks
+ * the rule only if a planned day adds fish to it — past days cannot be changed.
+ */
+function fishWeekViolations(
+  ctx: PlanContext,
+  days: readonly DayPlan[],
+  history: readonly DayPlan[],
+): HardViolation[] {
+  if (!ctx.fishQ) return [];
+  const planned = new Set(days.map((d) => d.date));
+  const weeks = new Map<IsoDate, { budget: number; oily: number; tuna: number; fresh: boolean }>();
+  for (const day of [...history.filter((d) => !planned.has(d.date)), ...days]) {
+    const week = weekKey(day.date);
+    const acc = weeks.get(week) ?? { budget: 0, oily: 0, tuna: 0, fresh: false };
+    for (const items of Object.values(day.meals)) {
+      for (const item of items) {
+        const index = ctx.indexOf.get(item.itemId);
+        const food = index !== undefined ? ctx.foods[index] : undefined;
+        if (!food || food.groups.fishG <= 0) continue;
+        const f = item.portion.factor;
+        const servings = fishServings(food);
+        acc.budget += f * fishBudgetShare(food);
+        acc.oily += f * servings.oily;
+        acc.tuna += f * servings.tuna;
+        if (planned.has(day.date)) acc.fresh = true;
+      }
+    }
+    weeks.set(week, acc);
+  }
   const out: HardViolation[] = [];
+  for (const [week, acc] of weeks) {
+    if (
+      acc.fresh &&
+      (acc.budget > 1 + 1e-6 ||
+        acc.oily > rule('E9.oilyFishMaxServingsWeek') + 1e-6 ||
+        acc.tuna > rule('E9.tunaMaxServingsWeek') + 1e-6)
+    )
+      out.push({ date: week, meal: '', code: 'fishWeek' });
+  }
+  return out;
+}
+
+/** `history` — the plan's other days (weekly caps count them); only `days` are checked item by item. */
+export function hardViolations(
+  ctx: PlanContext,
+  days: readonly DayPlan[],
+  history: readonly DayPlan[] = [],
+): HardViolation[] {
+  const out: HardViolation[] = fishWeekViolations(ctx, days, history);
   const targets = ctx.profile.targets;
   for (const day of days) {
     let caffeine = 0;

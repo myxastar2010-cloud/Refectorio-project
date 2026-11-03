@@ -167,7 +167,30 @@ export type PlanContext = {
   readonly nutsAllowed: boolean;
   readonly dairyAllowed: boolean;
   readonly pregnantOrLactating: boolean;
+  /** Columns of the weekly fish budget in `q` (R17 E9), for a pregnant or breastfeeding person only. */
+  readonly fishQ: FishColumns | null;
 };
+
+export type FishColumns = { readonly budget: number; readonly oily: number; readonly tuna: number };
+
+/**
+ * One portion's share of the weekly fish budget in pregnancy and breastfeeding (R17 E9): «best» fish against 340 g,
+ * anything else — «good» or an unknown species — against the stricter 113 g.
+ */
+export function fishBudgetShare(food: MenuFood): number {
+  const fish = food.groups.fishG;
+  if (fish <= 0) return 0;
+  return (
+    fish /
+    (food.item.fishMercury === 'best' ? rule('E9.bestFishMaxGWeek') : rule('E9.goodFishMaxGWeek'))
+  );
+}
+
+/** The other two weekly caps of R17 E9, in servings: oily fish and tuna. */
+export const fishServings = (food: MenuFood): { oily: number; tuna: number } => ({
+  oily: food.groups.oilyFishG / rule('E9.fishServingG'),
+  tuna: food.groups.tunaG / rule('E9.fishServingG'),
+});
 
 /** Per-person adjustments of the nutrition weights (extra goals, guardrail dish rules). */
 export function weightsFor(profile: MenuProfile): Weights {
@@ -350,7 +373,22 @@ export function buildContext(
   const foods = index.foods;
   const verdicts = foods.map((f) => checkFood(f, profile.safety));
   const compiled = compileRules(rules, foods, verdicts);
-  const q = foods.map((f) => trackedVector(f, compiled.extraNutrients));
+  const width = QN + compiled.extraNutrients.length;
+  const fishQ: FishColumns | null =
+    profile.safety.pregnant || profile.safety.lactating
+      ? { budget: width, oily: width + 1, tuna: width + 2 }
+      : null;
+  const q = foods.map((f) => {
+    const v = trackedVector(f, compiled.extraNutrients);
+    if (!fishQ) return v;
+    const out = new Float64Array(width + 3);
+    out.set(v);
+    const servings = fishServings(f);
+    out[fishQ.budget] = fishBudgetShare(f);
+    out[fishQ.oily] = servings.oily;
+    out[fishQ.tuna] = servings.tuna;
+    return out;
+  });
   const portions = foods.map((f, i) => {
     const v = verdicts[i];
     return portionGrid(f.item, v?.ok === true && v.fixedPortion);
@@ -409,6 +447,7 @@ export function buildContext(
     dairyAllowed:
       s.diet !== 'vegan' && s.diet !== 'lentLay' && s.diet !== 'vegetarianOvo' && !allergic('MILK'),
     pregnantOrLactating: s.pregnant || s.lactating,
+    fishQ,
   };
 }
 

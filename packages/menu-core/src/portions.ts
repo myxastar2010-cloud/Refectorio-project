@@ -125,6 +125,9 @@ export type DayItem = {
   readonly meal: number;
 };
 
+/** A hard cap on a day total of a tracked quantity (the day's share of a weekly safety budget, R17 E9). */
+export type DayCap = { readonly q: number; readonly max: number };
+
 export type DayProblem = {
   readonly items: readonly DayItem[];
   readonly mealShare: readonly number[];
@@ -132,6 +135,8 @@ export type DayProblem = {
   readonly targets: DayTargets;
   readonly weights: Weights;
   readonly limits: readonly NutrientLimit[];
+  /** Hard caps besides caffeine; a portion that breaks one is never taken. */
+  readonly caps?: readonly DayCap[];
 };
 
 export type DaySolution = {
@@ -210,10 +215,19 @@ function nutritionCost(p: DayProblem, w: Work): number {
   return c + W.portion * w.reg;
 }
 
-/** Caffeine caps (R17 E11–E13) are hard: a portion that breaks them is never taken. */
-function caffeineOk(p: DayProblem, w: Work, item: DayItem, factor: number): boolean {
-  if (at(item.q, Q.caffeine) * factor > p.targets.caffeineSingleMaxMg + 1e-9) return false;
-  return at(w.totals, Q.caffeine) <= p.targets.caffeineMaxMg + 1e-9;
+/**
+ * Caffeine caps (R17 E11–E13) and the day caps are hard: a portion that breaks one is never taken. Only the caps the
+ * item adds to are checked — the others do not move with it.
+ */
+function capsOk(p: DayProblem, w: Work, item: DayItem, factor: number): boolean {
+  const caffeine = at(item.q, Q.caffeine);
+  if (caffeine > 0) {
+    if (caffeine * factor > p.targets.caffeineSingleMaxMg + 1e-9) return false;
+    if (at(w.totals, Q.caffeine) > p.targets.caffeineMaxMg + 1e-9) return false;
+  }
+  for (const cap of p.caps ?? [])
+    if (at(item.q, cap.q) > 0 && at(w.totals, cap.q) > cap.max + 1e-9) return false;
+  return true;
 }
 
 function add(w: Work, item: DayItem, d: number): void {
@@ -340,13 +354,9 @@ export function solveDay(p: DayProblem, start?: readonly number[], full = false)
     p,
     idx.map((_, i) => factorOf(i)),
   );
-  // A start that breaks a caffeine cap (a bigger coffee) steps down first.
+  // A start that breaks a cap (a bigger coffee, more fish than the week has room for) steps down first.
   items.forEach((item, i) => {
-    while (
-      (idx[i] ?? 0) > 0 &&
-      at(item.q, Q.caffeine) > 0 &&
-      !caffeineOk(p, w, item, factorOf(i))
-    ) {
+    while (!item.fixed && (idx[i] ?? 0) > 0 && !capsOk(p, w, item, factorOf(i))) {
       const from = factorOf(i);
       idx[i] = (idx[i] ?? 0) - 1;
       change(w, item, from, factorOf(i));
@@ -369,7 +379,7 @@ export function solveDay(p: DayProblem, start?: readonly number[], full = false)
         if (j === current) continue;
         const to = item.grid[j] ?? 1;
         change(w, item, from, to);
-        if (caffeineOk(p, w, item, to)) {
+        if (capsOk(p, w, item, to)) {
           const c = nutritionCost(p, w);
           if (c < bestCost - 1e-12) {
             bestCost = c;
@@ -402,7 +412,7 @@ export function solveDay(p: DayProblem, start?: readonly number[], full = false)
           change(w, a, aFrom, aTo);
           change(w, b, bFrom, bTo);
           const c =
-            caffeineOk(p, w, a, aTo) && caffeineOk(p, w, b, bTo)
+            capsOk(p, w, a, aTo) && capsOk(p, w, b, bTo)
               ? nutritionCost(p, w)
               : Number.POSITIVE_INFINITY;
           if (c < cost - 1e-12) {

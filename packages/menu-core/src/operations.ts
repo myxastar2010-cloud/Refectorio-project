@@ -11,6 +11,7 @@ import type { FoodIndex } from './foods';
 import { planRange, type PlanError } from './generate';
 import {
   candidateOk,
+  capsHold,
   dayStateFrom,
   refreshDay,
   sideAllowed,
@@ -315,7 +316,7 @@ function setupSlot(
     (s) => ctx.foods[s.food]?.id === item.itemId,
   );
   if (slotIndex < 0) return err({ code: 'noSuchSlot' });
-  refreshDay(ctx, day, true);
+  refreshDay(ctx, state, day, true);
   return ok({ ctx, state, dayIndex, mealIndex, slotIndex });
 }
 
@@ -339,11 +340,12 @@ export function alternatives(
   const pool = ctx.pools[meal.kind][target.kind] ?? [];
   const scored: { food: number; delta: number; alternative: Alternative }[] = [];
   for (const food of pool) {
-    if (food === original.food || !candidateOk(ctx, day, mealIndex, food, target)) continue;
+    if (food === original.food || !candidateOk(ctx, state, day, mealIndex, food, target)) continue;
     if (target.kind === 'side' && !sideAllowed(ctx, day.meals[mealIndex] ?? [])) continue;
     target.food = food;
     target.fi = (ctx.grids[food] ?? [1]).indexOf(1);
-    refreshDay(ctx, day, true);
+    refreshDay(ctx, state, day, true);
+    if (!capsHold(ctx, state, day)) continue;
     const delta = totalCost(ctx, state) - base;
     const dayPlan = toDayPlan(ctx, day, []);
     const planned = dayPlan.meals[meal.id]?.find((i) => i.itemId === ctx.foods[food]?.id);
@@ -388,14 +390,14 @@ export function replaceItem(
     return err({ code: 'notAllowed', reasons: verdict ? verdict.reasons : ['unknownItem'] });
   const meal = ctx.structure[mealIndex];
   const roleFits = meal ? (ctx.pools[meal.kind][target.kind] ?? []).includes(food) : false;
-  if (!roleFits || !candidateOk(ctx, day, mealIndex, food, target))
+  if (!roleFits || !candidateOk(ctx, state, day, mealIndex, food, target))
     return err({ code: 'notAllowed', reasons: ['slot'] });
   target.food = food;
   target.fi = (ctx.grids[food] ?? [1]).indexOf(1);
-  refreshDay(ctx, day, true);
+  refreshDay(ctx, state, day, true);
   const previous = plan.days.filter((d) => compareDates(d.date, slot.date) < 0);
   const replaced = toDayPlan(ctx, day, previous);
-  const violations = hardViolations(ctx, [replaced]);
+  const violations = hardViolations(ctx, [replaced], plan.days);
   if (violations.length > 0) return err({ code: 'unsafe', violations });
   const updated: Plan = {
     ...plan,

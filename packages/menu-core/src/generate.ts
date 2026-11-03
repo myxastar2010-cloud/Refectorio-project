@@ -117,7 +117,7 @@ export function planRange(req: RangeRequest): Result<RangeResult, PlanError> {
   const iterations = (req.iterationsPerDay ?? DEFAULT_ITERATIONS_PER_DAY) * fresh.length;
   const stats = localSearch(ctx, state, createRandom((req.seed ^ 0x5bd1e995) >>> 0), iterations);
   polish(ctx, state);
-  for (const day of fresh) refreshDay(ctx, day, true);
+  for (const day of fresh) refreshDay(ctx, state, day, true);
 
   const out: DayPlan[] = [];
   const previous: DayPlan[] = [...req.history];
@@ -126,7 +126,7 @@ export function planRange(req: RangeRequest): Result<RangeResult, PlanError> {
     out.push(plan);
     previous.push(plan);
   }
-  const violations = hardViolations(ctx, out);
+  const violations = hardViolations(ctx, out, req.history);
   if (violations.length > 0) return err({ code: 'unsafe', violations });
   return ok({
     days: out,

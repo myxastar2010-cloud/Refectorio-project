@@ -8,8 +8,17 @@
  */
 import type { Random } from '@refectorio/taste-core';
 import type { IsoDate } from './dates';
-import { allowedAt, isWeekday, limitsFor, weekKey, SLOT_TASTE, type PlanContext } from './context';
-import { solveDay, type DayItem, type DaySolution } from './portions';
+import {
+  allowedAt,
+  fishBudgetShare,
+  fishServings,
+  isWeekday,
+  limitsFor,
+  weekKey,
+  SLOT_TASTE,
+  type PlanContext,
+} from './context';
+import { Q, solveDay, type DayCap, type DayItem, type DaySolution } from './portions';
 import { rule } from './rules';
 import {
   ASIAN_CUISINES,
@@ -39,8 +48,8 @@ export type DayAgg = {
   readonly freeSugars: number;
   readonly satFat: number;
   readonly fishG: number;
-  readonly bestFishG: number;
-  readonly goodFishG: number;
+  /** Share of the weekly pregnancy fish budget (R17 E9, `fishBudgetShare`). */
+  readonly fishBudget: number;
   readonly oilyFishServ: number;
   readonly tunaServ: number;
   readonly redMeatRawG: number;
@@ -193,7 +202,32 @@ function dayProblemItems(ctx: PlanContext, day: DayState): { items: DayItem[]; r
   return { items, refs };
 }
 
-export function solveDayState(ctx: PlanContext, day: DayState, full: boolean): DaySolution {
+/** The day's room in its week's fish budget (R17 E9): each cap less what the week's other days already hold. */
+function capsFor(ctx: PlanContext, state: PlannerState, day: DayState): DayCap[] {
+  const fq = ctx.fishQ;
+  if (!fq) return [];
+  let budget = 0;
+  let oily = 0;
+  let tuna = 0;
+  for (const d of state.days) {
+    if (d === day || d.week !== day.week || !d.agg) continue;
+    budget += d.agg.fishBudget;
+    oily += d.agg.oilyFishServ;
+    tuna += d.agg.tunaServ;
+  }
+  return [
+    { q: fq.budget, max: 1 - budget },
+    { q: fq.oily, max: rule('E9.oilyFishMaxServingsWeek') - oily },
+    { q: fq.tuna, max: rule('E9.tunaMaxServingsWeek') - tuna },
+  ];
+}
+
+export function solveDayState(
+  ctx: PlanContext,
+  state: PlannerState,
+  day: DayState,
+  full: boolean,
+): DaySolution {
   const { items, refs } = dayProblemItems(ctx, day);
   const solution = solveDay(
     {
@@ -203,6 +237,7 @@ export function solveDayState(ctx: PlanContext, day: DayState, full: boolean): D
       targets: ctx.profile.targets,
       weights: ctx.weights,
       limits: limitsFor(ctx, day.date),
+      caps: capsFor(ctx, state, day),
     },
     refs.map((s) => s.fi),
     full,
@@ -215,8 +250,7 @@ export function solveDayState(ctx: PlanContext, day: DayState, full: boolean): D
 
 export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
   let fishG = 0;
-  let bestFishG = 0;
-  let goodFishG = 0;
+  let fishBudget = 0;
   let oily = 0;
   let tuna = 0;
   let red = 0;
@@ -232,7 +266,6 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
   let sugars = 0;
   let satFat = 0;
   const freq = ctx.rules.frequency.map(() => 0);
-  const serving = rule('E9.fishServingG');
   for (const slots of day.meals) {
     for (const slot of slots) {
       const food = ctx.foods[slot.food];
@@ -244,10 +277,12 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
       sugars += f * (n.freeSugarsG ?? 0);
       satFat += f * (n.satFatG ?? 0);
       fishG += f * g.fishG;
-      if (food.item.fishMercury === 'best') bestFishG += f * g.fishG;
-      if (food.item.fishMercury === 'good') goodFishG += f * g.fishG;
-      oily += (f * g.oilyFishG) / serving;
-      tuna += (f * g.tunaG) / serving;
+      if (g.fishG > 0) {
+        const servings = fishServings(food);
+        fishBudget += f * fishBudgetShare(food);
+        oily += f * servings.oily;
+        tuna += f * servings.tuna;
+      }
       red += f * g.redMeatRawG;
       processed += (f * g.processedMeatG) / rule('P.serving.processedMeatG');
       legumes += (f * g.legumesG) / rule('P.serving.legumesG');
@@ -267,8 +302,7 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
     freeSugars: sugars,
     satFat,
     fishG,
-    bestFishG,
-    goodFishG,
+    fishBudget,
     oilyFishServ: oily,
     tunaServ: tuna,
     redMeatRawG: red,
@@ -326,8 +360,13 @@ function dayExtras(ctx: PlanContext, day: DayState, agg: DayAgg): number {
   return c;
 }
 
-export function refreshDay(ctx: PlanContext, day: DayState, full = false): void {
-  const solution = solveDayState(ctx, day, full);
+export function refreshDay(
+  ctx: PlanContext,
+  state: PlannerState,
+  day: DayState,
+  full = false,
+): void {
+  const solution = solveDayState(ctx, state, day, full);
   const agg = aggregate(ctx, day);
   let c = solution.cost + dayExtras(ctx, day, agg);
   day.meals.forEach((slots, m) => {
@@ -386,26 +425,12 @@ export function weekCosts(ctx: PlanContext, days: readonly DayState[]): number {
         C.weeklyHard *
         sq(Math.max(0, sfaShare - rule('E5.satFatMaxShare')) / rule('E5.satFatMaxShare'));
     }
-    if (ctx.pregnantOrLactating) c += C.pregnancyFish * fishCapExcess(sum);
     ctx.rules.frequency.forEach((r, i) => {
       const n = aggs.reduce((s, a) => s + (a.freq[i] ?? 0), 0);
       c += C.frequencyRule * (Math.max(0, r.min * share - n) + Math.max(0, n - r.max * share));
     });
   }
   return c;
-}
-
-/** R17 E9: «best» fish ≤ 340 g OR «good» ≤ 113 g a week (as one budget), oily fish ≤ 2, tuna ≤ 2 servings. */
-function fishCapExcess(
-  sum: (key: 'bestFishG' | 'goodFishG' | 'oilyFishServ' | 'tunaServ') => number,
-): number {
-  const budget =
-    sum('bestFishG') / rule('E9.bestFishMaxGWeek') + sum('goodFishG') / rule('E9.goodFishMaxGWeek');
-  return (
-    Math.max(0, budget - 1) +
-    Math.max(0, sum('oilyFishServ') - rule('E9.oilyFishMaxServingsWeek')) +
-    Math.max(0, sum('tunaServ') - rule('E9.tunaMaxServingsWeek'))
-  );
 }
 
 // ---------------------------------------------------------------- variety
@@ -538,20 +563,41 @@ export function totalCost(ctx: PlanContext, state: PlannerState): number {
 
 // ---------------------------------------------------------------- hard checks for a candidate
 
-/** Pregnancy fish caps over the candidate's week, with the candidate in place (R17 E9). */
+/** The week's fish caps (R17 E9) hold with the day as it is now (its aggregate is fresh after `refreshDay`). */
 function fishCapsOk(ctx: PlanContext, state: PlannerState, day: DayState): boolean {
-  if (!ctx.pregnantOrLactating) return true;
-  const week = state.days.filter((d) => d.week === day.week);
-  const aggs = week
-    .map((d) => (d === day ? aggregate(ctx, d) : d.agg))
-    .filter((a): a is DayAgg => a !== null);
-  const sum = (key: 'bestFishG' | 'goodFishG' | 'oilyFishServ' | 'tunaServ') =>
-    aggs.reduce((s, a) => s + a[key], 0);
-  return fishCapExcess(sum) <= 1e-9;
+  if (!ctx.fishQ) return true;
+  const caps = capsFor(ctx, state, day);
+  const agg = day.agg ?? aggregate(ctx, day);
+  const [budget, oily, tuna] = caps.map((c) => c.max);
+  return (
+    agg.fishBudget <= (budget ?? 0) + 1e-9 &&
+    agg.oilyFishServ <= (oily ?? 0) + 1e-9 &&
+    agg.tunaServ <= (tuna ?? 0) + 1e-9
+  );
 }
 
+/** A tracked quantity of the day with every other movable item at its smallest portion (eaten ones as they are). */
+function minDayQ(ctx: PlanContext, day: DayState, q: number, except?: Slot): number {
+  let sum = 0;
+  for (const slots of day.meals) {
+    for (const slot of slots) {
+      if (slot === except) continue;
+      const grid = ctx.grids[slot.food] ?? [1];
+      const factor = slot.frozen ? (grid[slot.fi] ?? 1) : (grid[0] ?? 1);
+      sum += (ctx.q[slot.food]?.[q] ?? 0) * factor;
+    }
+  }
+  return sum;
+}
+
+/**
+ * Can `food` go into this meal (in place of `except`)? Rule exclusions and the caffeine cut-off, no item twice in a
+ * meal, and room at its smallest portion under the hard caps: the day's caffeine (R17 E11–E13) and the week's fish
+ * budget (E9) — so neither the construction nor a move can ever start from a broken cap.
+ */
 export function candidateOk(
   ctx: PlanContext,
+  state: PlannerState,
   day: DayState,
   mealIndex: number,
   food: number,
@@ -560,11 +606,32 @@ export function candidateOk(
   if (!allowedAt(ctx, food, day.date, mealIndex)) return false;
   const slots = day.meals[mealIndex] ?? [];
   if (slots.some((s) => s !== except && s.food === food)) return false;
-  const caffeine = ctx.foods[food]?.caffeineMg ?? 0;
+  const q = ctx.q[food];
   const minFactor = ctx.grids[food]?.[0] ?? 1;
-  if (caffeine * minFactor > ctx.profile.targets.caffeineSingleMaxMg + 1e-9) return false;
+  const targets = ctx.profile.targets;
+  const caffeine = q?.[Q.caffeine] ?? 0;
+  if (caffeine > 0) {
+    if (caffeine * minFactor > targets.caffeineSingleMaxMg + 1e-9) return false;
+    if (minDayQ(ctx, day, Q.caffeine, except) + caffeine * minFactor > targets.caffeineMaxMg + 1e-9)
+      return false;
+  }
+  if (ctx.fishQ && (q?.[ctx.fishQ.budget] ?? 0) > 0) {
+    for (const cap of capsFor(ctx, state, day)) {
+      const own = q?.[cap.q] ?? 0;
+      if (own > 0 && minDayQ(ctx, day, cap.q, except) + own * minFactor > cap.max + 1e-9)
+        return false;
+    }
+  }
   return true;
 }
+
+/** Hard day limits after a change: caffeine (R17 E11–E13) as solved. */
+const dayLimitsOk = (ctx: PlanContext, day: DayState): boolean =>
+  (day.solution?.totals[Q.caffeine] ?? 0) <= ctx.profile.targets.caffeineMaxMg + 1e-9;
+
+/** Every hard cap holds for this day and its week after a change. */
+export const capsHold = (ctx: PlanContext, state: PlannerState, day: DayState): boolean =>
+  dayLimitsOk(ctx, day) && fishCapsOk(ctx, state, day);
 
 // ---------------------------------------------------------------- construction
 
@@ -672,7 +739,7 @@ function rankCandidates(
   if (!day || !meal) return [];
   const pool = ctx.pools[meal.kind][kind] ?? [];
   return pool
-    .filter((food) => candidateOk(ctx, day, mealIndex, food))
+    .filter((food) => candidateOk(ctx, state, day, mealIndex, food))
     .map((food) => [food, heuristic(ctx, state, dayIndex, mealIndex, kind, food)] as const)
     .sort((a, b) => a[1] - b[1] || a[0] - b[0])
     .map(([food]) => food);
@@ -743,7 +810,7 @@ export function constructDay(
     for (const inc of ctx.rules.includes) {
       if (!inc.meals?.includes(meal.kind) || !inc.appliesTo(day.date, meal.kind)) continue;
       if (slots.some((s) => inc.foods.has(s.food))) continue;
-      const choice = [...inc.foods].find((food) => candidateOk(ctx, day, m, food));
+      const choice = [...inc.foods].find((food) => candidateOk(ctx, state, day, m, food));
       const f = choice !== undefined ? ctx.foods[choice] : undefined;
       if (choice === undefined || !f) continue;
       const kind = MEAL_SLOTS[meal.kind].find(
@@ -781,7 +848,7 @@ export function constructDay(
     }
     normalizeMeal(ctx, day, m);
   });
-  refreshDay(ctx, day);
+  refreshDay(ctx, state, day);
 }
 
 // ---------------------------------------------------------------- local search
@@ -848,7 +915,7 @@ export function localSearch(
       const pool = slot ? (ctx.pools[meal.kind][slot.kind] ?? []) : [];
       if (!slot || pool.length < 2) continue;
       const food = pool[rng.int(pool.length)];
-      if (food === undefined || food === slot.food || !candidateOk(ctx, day, m, food, slot))
+      if (food === undefined || food === slot.food || !candidateOk(ctx, state, day, m, food, slot))
         continue;
       touched = [snapshot(day)];
       const index = slots.indexOf(slot);
@@ -872,7 +939,7 @@ export function localSearch(
         if (slots.length >= MAX_ITEMS_PER_MEAL) continue;
         if (spec.slot === 'side' && !sideAllowed(ctx, slots)) continue;
         const pool = (ctx.pools[meal.kind][spec.slot] ?? []).filter((f) =>
-          candidateOk(ctx, day, m, f),
+          candidateOk(ctx, state, day, m, f),
         );
         const food = pool[rng.int(pool.length)];
         if (food === undefined) continue;
@@ -898,8 +965,8 @@ export function localSearch(
       day.meals[m] = otherSlots.map((s) => ({ ...s }));
       other.meals[m] = slots.map((s) => ({ ...s }));
     }
-    for (const t of touched) refreshDay(ctx, t.day);
-    if (!touched.every((t) => fishCapsOk(ctx, state, t.day))) {
+    for (const t of touched) refreshDay(ctx, state, t.day);
+    if (!touched.every((t) => capsHold(ctx, state, t.day))) {
       touched.forEach(restore);
       continue;
     }
@@ -993,9 +1060,9 @@ export function polish(ctx: PlanContext, state: PlannerState, candidatesPerSlot 
   const tryChange = (touched: DayState[], apply: () => void): boolean => {
     const saved = touched.map(snapshot);
     apply();
-    for (const d of touched) refreshDay(ctx, d);
+    for (const d of touched) refreshDay(ctx, state, d);
     const next = totalCost(ctx, state);
-    if (next < cost - 1e-9 && touched.every((d) => fishCapsOk(ctx, state, d))) {
+    if (next < cost - 1e-9 && touched.every((d) => capsHold(ctx, state, d))) {
       cost = next;
       changes += 1;
       return true;
