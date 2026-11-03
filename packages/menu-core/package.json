@@ -1,0 +1,23 @@
+{
+  "name": "@refectorio/menu-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ПроЛанч — движок недельного меню: фильтры безопасности, планировщик, подбор порций, проверка, правила, учёт съеденного, поиск. Чистый TypeScript без интерфейса, сети и ИИ.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./data/rules.json": "./data/rules.json"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "sim": "node sim/run.mjs"
+  },
+  "dependencies": {
+    "@refectorio/contracts": "*",
+    "@refectorio/food-data": "*",
+    "@refectorio/nutrition-core": "*",
+    "@refectorio/taste-core": "*",
+    "zod": "^4.6.5"
+  }
+}

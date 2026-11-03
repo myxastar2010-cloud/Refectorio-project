@@ -1,0 +1,952 @@
+{
+  "version": "2026-11-03",
+  "research": "refectorio-workspace/research/R17-menu-rules.md v0.4 (таблица правил E1–E28), R17-tables.md, R08-safety-ethics.md, stage-2-mappings.md; фактчек — research/fact-check-stage4.md",
+  "legend": "kind: hard — фильтр или жёсткое ограничение, никогда не ослабляется; soft — цель или штраф оценки; check — только проверка правдоподобия. confidence: high | medium | low ([практика] — без первоисточника).",
+  "rules": [
+    {
+      "id": "E1.vegFruitMinG",
+      "value": 400,
+      "unit": "г/сут",
+      "kind": "soft",
+      "population": "с 10 лет",
+      "source": "R17 E1; ВОЗ 2023, углеводы (S18, strong), ВОЗ Healthy diet (S1); без картофеля и крахмалистых корнеплодов",
+      "confidence": "high"
+    },
+    {
+      "id": "E1.vegFruitMinGAge6to9",
+      "value": 350,
+      "unit": "г/сут",
+      "kind": "soft",
+      "population": "6–9 лет",
+      "source": "R17 §1; ВОЗ 2023 (S18, conditional)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E1.vegFruitMinGAge2to5",
+      "value": 250,
+      "unit": "г/сут",
+      "kind": "soft",
+      "population": "2–5 лет",
+      "source": "R17 §1; ВОЗ 2023 (S18, conditional)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E2.fibreMinG",
+      "value": 25,
+      "unit": "г/сут",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E2; ВОЗ 2023 (S18), EFSA DRV 2017 (S15)",
+      "confidence": "high"
+    },
+    {
+      "id": "E2.fibreFloorG",
+      "value": 20,
+      "unit": "г/сут",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E2; МР 2.3.1.0253-21 (S23): 20–25 г/сут — допустимый минимум",
+      "confidence": "high"
+    },
+    {
+      "id": "E3.freeSugarsMaxShare",
+      "value": 0.1,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "все",
+      "source": "R17 E3; ВОЗ 2015, сахара (S12, strong): день — предупреждение, неделя — жёстко",
+      "confidence": "high"
+    },
+    {
+      "id": "E3.freeSugarsGoalShare",
+      "value": 0.05,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "все",
+      "source": "R17 E3; ВОЗ 2015 (S12, conditional)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E4.sodiumMaxMg",
+      "value": 2000,
+      "unit": "мг/сут",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E4; ВОЗ 2012, натрий (S13): соль < 5 г/сут",
+      "confidence": "high"
+    },
+    {
+      "id": "E5.satFatMaxShare",
+      "value": 0.1,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "с 2 лет",
+      "source": "R17 E5; ВОЗ 2023, НЖК и транс (S16): день — предупреждение, неделя — жёстко",
+      "confidence": "high"
+    },
+    {
+      "id": "E6.fatShareMin",
+      "value": 0.2,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E6; EFSA DRV 2017 (S15)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E6.fatShareMax",
+      "value": 0.3,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E6 — решение проекта (верх по ВОЗ 2023, S17)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E6.fatShareLimit",
+      "value": 0.35,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "EFSA DRV 2017 (S15), AMDR IOM 2005 (R02): верхняя граница допуска",
+      "confidence": "high"
+    },
+    {
+      "id": "E7.carbShareMin",
+      "value": 0.45,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "взрослые, кроме кето",
+      "source": "R17 E7; EFSA DRV 2017 (S15)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E7.carbShareMax",
+      "value": 0.6,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E7, §8; EFSA DRV 2017 (S15)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E8.excludeHighMercury",
+      "value": 1,
+      "unit": "да",
+      "kind": "hard",
+      "population": "все (FDA адресует беременным, кормящим, тем, кто может забеременеть, и детям)",
+      "source": "R17 E8; FDA/EPA Advice about eating fish (S6)",
+      "confidence": "high"
+    },
+    {
+      "id": "E9.bestFishMaxGWeek",
+      "value": 340,
+      "unit": "г сырой рыбы/нед",
+      "kind": "hard",
+      "population": "беременность, лактация",
+      "source": "R17 E9; FDA (S6): «лучшие» 2–3 порции по 4 унции (227–340 г) ИЛИ «хорошие» 1 порция",
+      "confidence": "high"
+    },
+    {
+      "id": "E9.goodFishMaxGWeek",
+      "value": 113,
+      "unit": "г сырой рыбы/нед",
+      "kind": "hard",
+      "population": "беременность, лактация",
+      "source": "R17 E9; FDA (S6): «хорошие» 1 порция 4 унции",
+      "confidence": "high"
+    },
+    {
+      "id": "E9.oilyFishMaxServingsWeek",
+      "value": 2,
+      "unit": "порц./нед",
+      "kind": "hard",
+      "population": "беременность, лактация",
+      "source": "R17 E9, T4; NHS Foods to avoid in pregnancy (S26)",
+      "confidence": "high"
+    },
+    {
+      "id": "E9.tunaMaxServingsWeek",
+      "value": 2,
+      "unit": "порц./нед",
+      "kind": "hard",
+      "population": "беременность, лактация",
+      "source": "R17 E9, T4; NHS (S26): 2 стейка или 4 банки",
+      "confidence": "high"
+    },
+    {
+      "id": "E9.fishServingG",
+      "value": 113,
+      "unit": "г сырой рыбы",
+      "kind": "hard",
+      "population": "беременность, лактация",
+      "source": "FDA (S6): порция взрослого — 4 унции до готовки",
+      "confidence": "high"
+    },
+    {
+      "id": "E10.fishTargetGWeek",
+      "value": 227,
+      "unit": "г сырой рыбы/нед",
+      "kind": "soft",
+      "population": "взрослые, кроме вегетарианцев и аллергии на рыбу",
+      "source": "R17 E10, §1; FDA (S6), DGA 2020–2025 (S30): 8 унций/нед при 2000 ккал",
+      "confidence": "medium"
+    },
+    {
+      "id": "E11.caffeineDayMaxMg",
+      "value": 400,
+      "unit": "мг/сут",
+      "kind": "hard",
+      "population": "взрослые",
+      "source": "R17 E11; EFSA 2015, кофеин (S4)",
+      "confidence": "high"
+    },
+    {
+      "id": "E11.caffeineSingleMaxMg",
+      "value": 200,
+      "unit": "мг за приём",
+      "kind": "hard",
+      "population": "взрослые",
+      "source": "R17 E11; EFSA 2015 (S4)",
+      "confidence": "high"
+    },
+    {
+      "id": "E12.caffeinePregnancyDayMaxMg",
+      "value": 200,
+      "unit": "мг/сут",
+      "kind": "hard",
+      "population": "беременность, лактация",
+      "source": "R17 E12; EFSA 2015 (S4), NHS (S26)",
+      "confidence": "high"
+    },
+    {
+      "id": "E13.caffeineMinorMgPerKgDay",
+      "value": 3,
+      "unit": "мг/кг/сут",
+      "kind": "hard",
+      "population": "подростки",
+      "source": "R17 E13; EFSA 2015 (S4)",
+      "confidence": "high"
+    },
+    {
+      "id": "E13.caffeineNoneUnderAgeYears",
+      "value": 14,
+      "unit": "лет",
+      "kind": "hard",
+      "population": "дети до 14 лет",
+      "source": "[практика]: детям кофеин в меню не предлагаем — строже EFSA (3 мг/кг)",
+      "confidence": "low"
+    },
+    {
+      "id": "E14.caffeineSmallDoseMg",
+      "value": 107,
+      "unit": "мг",
+      "kind": "soft",
+      "population": "цель «сон»",
+      "source": "R17 E14; Gardiner 2023 (S21): чашка кофе 107 мг",
+      "confidence": "medium"
+    },
+    {
+      "id": "E14.caffeineCutoffHoursSmall",
+      "value": 9,
+      "unit": "ч до сна",
+      "kind": "soft",
+      "population": "цель «сон»",
+      "source": "R17 E14; Gardiner 2023 (S21): 8,8 ч",
+      "confidence": "medium"
+    },
+    {
+      "id": "E14.caffeineCutoffHoursLarge",
+      "value": 13,
+      "unit": "ч до сна",
+      "kind": "soft",
+      "population": "цель «сон»",
+      "source": "R17 E14; Gardiner 2023 (S21): 217,5 мг — 13,2 ч",
+      "confidence": "medium"
+    },
+    {
+      "id": "E14.bedtimeHour",
+      "value": 23,
+      "unit": "ч",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: отбой в 23:00 — допущение для офисных сотрудников",
+      "confidence": "low"
+    },
+    {
+      "id": "E14.mealHour.breakfast",
+      "value": 8,
+      "unit": "ч",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: обычное время завтрака офисного сотрудника",
+      "confidence": "low"
+    },
+    {
+      "id": "E14.mealHour.lunch",
+      "value": 13,
+      "unit": "ч",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: обеденный перерыв",
+      "confidence": "low"
+    },
+    {
+      "id": "E14.mealHour.snack",
+      "value": 16,
+      "unit": "ч",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: полдник",
+      "confidence": "low"
+    },
+    {
+      "id": "E14.mealHour.dinner",
+      "value": 19,
+      "unit": "ч",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: ужин",
+      "confidence": "low"
+    },
+    {
+      "id": "E15.proteinPerMealMinGPerKg",
+      "value": 0.25,
+      "unit": "г/кг на основной приём",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E15; ISSN 2017 (S8, S9)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E16.minMainMealsProtected",
+      "value": 3,
+      "unit": "основных приёма",
+      "kind": "hard",
+      "population": "до 18 лет, беременность, лактация, СД 2 типа, РПП, ИМТ < 18,5, запрет интервального голодания",
+      "source": "R17 E16 [практика]",
+      "confidence": "low"
+    },
+    {
+      "id": "E16.minMainMeals",
+      "value": 2,
+      "unit": "основных приёма",
+      "kind": "hard",
+      "population": "остальные взрослые",
+      "source": "[практика]: анкета допускает 2 приёма (nutrition-core input.ts)",
+      "confidence": "low"
+    },
+    {
+      "id": "E16.maxMeals",
+      "value": 6,
+      "unit": "приёмов",
+      "kind": "hard",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 4 §6 — не больше 6 приёмов",
+      "confidence": "low"
+    },
+    {
+      "id": "E17.share.breakfast",
+      "value": 0.25,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E17; аналог СанПиН 2.3/2.4.3590-20 (S24), algorithm-spec §7 [практика для взрослых]",
+      "confidence": "low"
+    },
+    {
+      "id": "E17.share.lunch",
+      "value": 0.35,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E17; S24, algorithm-spec §7 [практика]",
+      "confidence": "low"
+    },
+    {
+      "id": "E17.share.dinner",
+      "value": 0.25,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E17; S24, algorithm-spec §7 [практика]",
+      "confidence": "low"
+    },
+    {
+      "id": "E17.share.snacks",
+      "value": 0.15,
+      "unit": "доля ккал на все перекусы",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E17; S24, algorithm-spec §7 [практика]",
+      "confidence": "low"
+    },
+    {
+      "id": "E17.shareTolerance",
+      "value": 0.05,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E17; СанПиН (S24, п. 8.1.2.3): ±5 % по дням",
+      "confidence": "low"
+    },
+    {
+      "id": "E18.glassMl",
+      "value": 250,
+      "unit": "мл",
+      "kind": "soft",
+      "population": "все",
+      "source": "R17 E18 [практика]: стакан ≈ 250 мл",
+      "confidence": "low"
+    },
+    {
+      "id": "E19.repeatWindowDays",
+      "value": 7,
+      "unit": "дней",
+      "kind": "soft",
+      "population": "все: основные блюда и супы",
+      "source": "R17 E19 [практика]: блюдо не чаще 1 раза в 7 дней в приёме и не два дня подряд",
+      "confidence": "low"
+    },
+    {
+      "id": "E19.proteinBaseMaxPerWeekPerMeal",
+      "value": 2,
+      "unit": "раз/нед в одном приёме",
+      "kind": "soft",
+      "population": "все",
+      "source": "R17 §5 [практика]",
+      "confidence": "low"
+    },
+    {
+      "id": "E21.herbalTeaMaxCupsDay",
+      "value": 4,
+      "unit": "чашек/сут",
+      "kind": "hard",
+      "population": "беременность",
+      "source": "R17 E21; NHS (S26)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E22.redMeatMaxCookedGWeek",
+      "value": 500,
+      "unit": "г готового/нед",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E22; WCRF (S25)",
+      "confidence": "high"
+    },
+    {
+      "id": "E22.redMeatCookedPerRawG",
+      "value": 0.69,
+      "unit": "г готового на 1 г сырого",
+      "kind": "soft",
+      "population": "все",
+      "source": "R17 §1; WCRF (S25): 500 г готового ≈ 700–750 г сырого",
+      "confidence": "medium"
+    },
+    {
+      "id": "E23.processedMeatMaxServingsWeek",
+      "value": 1,
+      "unit": "порц./нед",
+      "kind": "soft",
+      "population": "все",
+      "source": "R17 E23; WCRF (S25): «очень мало, если вообще»; число — [практика]",
+      "confidence": "low"
+    },
+    {
+      "id": "E24.potassiumMinMg",
+      "value": 3510,
+      "unit": "мг/сут",
+      "kind": "soft",
+      "population": "взрослые",
+      "source": "R17 E24; ВОЗ 2012, калий (S14, conditional)",
+      "confidence": "medium"
+    },
+    {
+      "id": "E25.mealWeightTolerance",
+      "value": 0.3,
+      "unit": "доля",
+      "kind": "check",
+      "population": "взрослые",
+      "source": "R17 E25 [практика]: ±30 % от объёмов СанПиН 12+",
+      "confidence": "low"
+    },
+    {
+      "id": "E25.mealWeightG.breakfast",
+      "value": 550,
+      "unit": "г",
+      "kind": "check",
+      "population": "12+",
+      "source": "R17 §10, T3; СанПиН 2.3/2.4.3590-20, прил. 9 (S24) — минимум для детских организаций",
+      "confidence": "low"
+    },
+    {
+      "id": "E25.mealWeightG.lunch",
+      "value": 800,
+      "unit": "г",
+      "kind": "check",
+      "population": "12+",
+      "source": "R17 §10, T3; S24",
+      "confidence": "low"
+    },
+    {
+      "id": "E25.mealWeightG.dinner",
+      "value": 600,
+      "unit": "г",
+      "kind": "check",
+      "population": "12+",
+      "source": "R17 §10, T3; S24",
+      "confidence": "low"
+    },
+    {
+      "id": "E25.mealWeightG.snack",
+      "value": 350,
+      "unit": "г",
+      "kind": "check",
+      "population": "12+",
+      "source": "R17 §10, T3; S24 (полдник)",
+      "confidence": "low"
+    },
+    {
+      "id": "G.vitaminKHighUgPerPortion",
+      "value": 60,
+      "unit": "мкг на порцию",
+      "kind": "hard",
+      "population": "варфарин (stableVitaminK)",
+      "source": "[практика]: ≈ половина AI NASEM (90–120 мкг); R08 S4 — важна стабильность, а не исключение: порция таких блюд фиксируется 1,0×",
+      "confidence": "low"
+    },
+    {
+      "id": "G.limitAddedSugarFreeSugarsMaxShare",
+      "value": 0.05,
+      "unit": "доля ккал",
+      "kind": "soft",
+      "population": "инсулинорезистентность, СД 2 типа (limitAddedSugar)",
+      "source": "stage-2-mappings §3.2; ВОЗ 2015 (S12, conditional)",
+      "confidence": "medium"
+    },
+    {
+      "id": "P.portionFactorMin",
+      "value": 0.5,
+      "unit": "× стандартной порции",
+      "kind": "hard",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 3 §1",
+      "confidence": "low"
+    },
+    {
+      "id": "P.portionFactorMax",
+      "value": 1.5,
+      "unit": "× стандартной порции",
+      "kind": "hard",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 3 §1",
+      "confidence": "low"
+    },
+    {
+      "id": "P.portionFactorStep",
+      "value": 0.25,
+      "unit": "×",
+      "kind": "hard",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 3 §1",
+      "confidence": "low"
+    },
+    {
+      "id": "P.drinkVolumeMinMl",
+      "value": 200,
+      "unit": "мл",
+      "kind": "hard",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 3 §1 — напитки 200/250/300 мл",
+      "confidence": "low"
+    },
+    {
+      "id": "P.drinkVolumeMaxMl",
+      "value": 300,
+      "unit": "мл",
+      "kind": "hard",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 3 §1",
+      "confidence": "low"
+    },
+    {
+      "id": "P.drinkVolumeStepMl",
+      "value": 50,
+      "unit": "мл",
+      "kind": "hard",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 3 §1",
+      "confidence": "low"
+    },
+    {
+      "id": "P.dessertMaxPerDay",
+      "value": 1,
+      "unit": "десерт/сут",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: свободные сахара ограничивает E3",
+      "confidence": "low"
+    },
+    {
+      "id": "P.friedMaxPerWeek",
+      "value": 3,
+      "unit": "блюда/нед",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: у R17 числа для жареного нет (§1)",
+      "confidence": "low"
+    },
+    {
+      "id": "P.legumesMinServingsWeek",
+      "value": 1,
+      "unit": "порц./нед",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика] по приказу Минздрава № 614 (R17 T1): бобовые 77 г сухих/нед",
+      "confidence": "low"
+    },
+    {
+      "id": "P.wholeGrainMinServingsDay",
+      "value": 1,
+      "unit": "порц./сут",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика] по DGA 2025–2030 (S7, вторично): цельные злаки 2–4 порции/сут",
+      "confidence": "low"
+    },
+    {
+      "id": "P.dairyMinServingsDay",
+      "value": 1,
+      "unit": "порц./сут",
+      "kind": "soft",
+      "population": "кто ест молочное",
+      "source": "[практика] по приказу № 614 (R17 T1): молочные продукты ежедневно",
+      "confidence": "low"
+    },
+    {
+      "id": "P.nutsMinServingsWeek",
+      "value": 2,
+      "unit": "порц./нед",
+      "kind": "soft",
+      "population": "без аллергии на орехи",
+      "source": "R17 §1: DGA 2020–2025 (S30) — орехи 5 унц-экв/нед ≈ 70 г; порция 25–30 г",
+      "confidence": "medium"
+    },
+    {
+      "id": "P.cuisineStreakMax",
+      "value": 3,
+      "unit": "основных блюда подряд",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: разнообразие (R17 §5)",
+      "confidence": "low"
+    },
+    {
+      "id": "P.weekdayCookMaxMin",
+      "value": 40,
+      "unit": "мин на блюдо",
+      "kind": "soft",
+      "population": "будни",
+      "source": "R17 §6 [практика]: будни ≤ 30–40 мин на блюдо",
+      "confidence": "low"
+    },
+    {
+      "id": "P.repeatWindowDays.salad",
+      "value": 3,
+      "unit": "дней",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: салаты повторяются чаще основных блюд",
+      "confidence": "low"
+    },
+    {
+      "id": "P.repeatWindowDays.side",
+      "value": 2,
+      "unit": "дней",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: гарнир не два дня подряд в одном приёме",
+      "confidence": "low"
+    },
+    {
+      "id": "P.repeatWindowDays.snack",
+      "value": 2,
+      "unit": "дней",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]",
+      "confidence": "low"
+    },
+    {
+      "id": "P.repeatWindowDays.dessert",
+      "value": 3,
+      "unit": "дней",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]",
+      "confidence": "low"
+    },
+    {
+      "id": "S.doneEnergyMinShare",
+      "value": 0.9,
+      "unit": "доля цели",
+      "kind": "check",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 3 §6 — день закрыт при 90–110 % энергии",
+      "confidence": "low"
+    },
+    {
+      "id": "S.doneEnergyMaxShare",
+      "value": 1.1,
+      "unit": "доля цели",
+      "kind": "check",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 3 §6",
+      "confidence": "low"
+    },
+    {
+      "id": "S.editablePastDays",
+      "value": 7,
+      "unit": "дней",
+      "kind": "hard",
+      "population": "все",
+      "source": "[практика]: ТЗ этапа 4, фаза 3 §6 — отмечать можно сегодня и 7 прошлых дней",
+      "confidence": "low"
+    },
+    {
+      "id": "S.energyToleranceShare",
+      "value": 0.05,
+      "unit": "доля цели",
+      "kind": "soft",
+      "population": "все",
+      "source": "algorithm-spec §6: энергия за день ±5 % (СанПиН S24 — ±5 % по дням)",
+      "confidence": "medium"
+    },
+    {
+      "id": "S.energyToleranceRelaxedShare",
+      "value": 0.1,
+      "unit": "доля цели",
+      "kind": "soft",
+      "population": "все",
+      "source": "algorithm-spec §6: смягчение ±5 % → ±10 %",
+      "confidence": "medium"
+    },
+    {
+      "id": "S.repeatWindowRelaxedDays",
+      "value": 3,
+      "unit": "дней",
+      "kind": "soft",
+      "population": "все",
+      "source": "algorithm-spec §6: окно повторов смягчается первым (10 → 5); у нас 7 → 3 [практика]",
+      "confidence": "low"
+    },
+    {
+      "id": "P.dryLegumeToCooked",
+      "value": 2.5,
+      "unit": "× массы",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: сухие бобовые при варке набирают воду ≈ в 2,5 раза (оценка для подсчёта порций)",
+      "confidence": "low"
+    },
+    {
+      "id": "P.serving.legumesG",
+      "value": 80,
+      "unit": "г готовых",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика] по DGA 2020–2025 (S30): ½ чашки готовых бобовых ≈ 90 г",
+      "confidence": "low"
+    },
+    {
+      "id": "P.serving.wholeGrainG",
+      "value": 30,
+      "unit": "г сухой крупы или хлеба",
+      "kind": "soft",
+      "population": "все",
+      "source": "DGA 2020–2025 (S30): 1 унц.-экв. злаков = 28 г сухого продукта [практика: 30 г]",
+      "confidence": "medium"
+    },
+    {
+      "id": "P.serving.nutsG",
+      "value": 25,
+      "unit": "г",
+      "kind": "soft",
+      "population": "все",
+      "source": "R17 §1: порция орехов 25–30 г",
+      "confidence": "medium"
+    },
+    {
+      "id": "P.serving.processedMeatG",
+      "value": 50,
+      "unit": "г",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: типичная порция колбасы или ветчины",
+      "confidence": "low"
+    },
+    {
+      "id": "P.serving.dairyLiquidG",
+      "value": 200,
+      "unit": "г молока или кефира",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: стакан; DGA (S30): 1 чашка-экв. = 1 чашка молока",
+      "confidence": "low"
+    },
+    {
+      "id": "P.serving.dairyCheeseG",
+      "value": 30,
+      "unit": "г сыра",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика] по DGA (S30): 1½ унции сыра = 1 чашка-экв.; у нас ломтик 30 г",
+      "confidence": "low"
+    },
+    {
+      "id": "P.serving.dairyTvorogG",
+      "value": 100,
+      "unit": "г творога",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: порция творога",
+      "confidence": "low"
+    },
+    {
+      "id": "P.highProteinShare",
+      "value": 0.25,
+      "unit": "доля ккал из белка",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: метка «высокобелковое» — ≥ 25 % ккал и ≥ 20 г белка на порцию",
+      "confidence": "low"
+    },
+    {
+      "id": "P.highProteinMinG",
+      "value": 20,
+      "unit": "г белка на порцию",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: R17 E15 — 20–40 г белка на приём",
+      "confidence": "low"
+    },
+    {
+      "id": "P.quickMaxMin",
+      "value": 20,
+      "unit": "мин",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: метка «быстро»",
+      "confidence": "low"
+    },
+    {
+      "id": "P.spicyTrait",
+      "value": 0.5,
+      "unit": "доля шкалы остроты",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: метка «острое» по признаку остроты каталога (taste-core)",
+      "confidence": "low"
+    },
+    {
+      "id": "S.flagMarginShare",
+      "value": 0.05,
+      "unit": "доля",
+      "kind": "check",
+      "population": "все",
+      "source": "[практика]: честная пометка дня появляется, только когда отклонение больше 5 % — дискретные порции дают мелкие недоборы",
+      "confidence": "low"
+    },
+    {
+      "id": "X.tasteMatchMin",
+      "value": 0.65,
+      "unit": "P(like)",
+      "kind": "check",
+      "population": "все",
+      "source": "[практика]: причина «по вашему вкусу» — вероятность «понравится» модели taste-core ≥ 0,65",
+      "confidence": "low"
+    },
+    {
+      "id": "X.vegetablesMinG",
+      "value": 150,
+      "unit": "г овощей и фруктов в порции",
+      "kind": "check",
+      "population": "все",
+      "source": "[практика]: причина «овощи» — больше трети дневной нормы ВОЗ 400 г (R17 E1)",
+      "confidence": "low"
+    },
+    {
+      "id": "X.fibreRichMinG",
+      "value": 6,
+      "unit": "г клетчатки в порции",
+      "kind": "check",
+      "population": "все",
+      "source": "[практика]: причина «клетчатка» — около четверти цели 25 г (R17 E2)",
+      "confidence": "low"
+    },
+    {
+      "id": "X.lowSaltMaxMg",
+      "value": 300,
+      "unit": "мг натрия в порции",
+      "kind": "check",
+      "population": "повышенное давление (limitSodium)",
+      "source": "[практика]: причина «мало соли» — 15 % дневного предела 2000 мг (R17 E4)",
+      "confidence": "low"
+    },
+    {
+      "id": "X.wholeGrainMinG",
+      "value": 15,
+      "unit": "г цельных злаков в порции",
+      "kind": "check",
+      "population": "все",
+      "source": "[практика]: причина «цельные злаки» — половина порции 30 г (P.serving.wholeGrainG)",
+      "confidence": "low"
+    },
+    {
+      "id": "X.lightDinnerRichnessMax",
+      "value": 0.45,
+      "unit": "доля шкалы сытности",
+      "kind": "check",
+      "population": "цель «сон»",
+      "source": "[практика]: причина «лёгкий ужин» по признаку richness каталога taste-core",
+      "confidence": "low"
+    },
+    {
+      "id": "P.repeatWindowDays.component",
+      "value": 2,
+      "unit": "дней",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: фрукт или молочный продукт не в том же приёме два дня подряд",
+      "confidence": "low"
+    },
+    {
+      "id": "P.repeatAnyMealDays",
+      "value": 3,
+      "unit": "дней",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика]: одно основное блюдо или суп не чаще раза в 3 дня в любом приёме (R17 E19 считает повторы внутри приёма)",
+      "confidence": "low"
+    },
+    {
+      "id": "P.weekdayCookFlagMin",
+      "value": 60,
+      "unit": "мин",
+      "kind": "check",
+      "population": "будни",
+      "source": "[практика]: пометка дня «дольше обычного» — блюдо дольше часа в будний день",
+      "confidence": "low"
+    },
+    {
+      "id": "P.sweetDrinkFreeSugarsG",
+      "value": 10,
+      "unit": "г свободных сахаров в порции",
+      "kind": "soft",
+      "population": "все",
+      "source": "[практика] по ВОЗ 2015 (S12): соки и сладкие напитки — главный источник свободных сахаров; к еде по привычке чай, кофе, вода",
+      "confidence": "low"
+    }
+  ]
+}

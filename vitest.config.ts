@@ -16,6 +16,7 @@ export default defineConfig({
       nodePackage('contracts'),
       nodePackage('taste-core'),
       nodePackage('food-data'),
+      nodePackage('menu-core'),
       {
         // The build flag of vite.config.ts (ADR 0011): unit tests see the default build.
         define: { __PHOTO_HOSTING__: JSON.stringify('self'), __TEST_HOOKS__: 'true' },
@@ -44,12 +45,14 @@ export default defineConfig({
         'packages/contracts/src/**/*.ts',
         'packages/taste-core/src/**/*.ts',
         'packages/food-data/src/**/*.ts',
+        'packages/menu-core/src/**/*.ts',
         'apps/web/src/**/*.{ts,tsx}',
       ],
       exclude: [
         '**/*.test.{ts,tsx}',
         '**/*.d.ts',
         'packages/nutrition-core/src/testing.ts',
+        'packages/menu-core/src/testing.ts',
         'apps/web/src/assets/generated/**',
       ],
       reporter: ['text-summary', 'html', 'json-summary'],
@@ -64,6 +67,8 @@ export default defineConfig({
           functions: 100,
         },
         'packages/contracts/src/**': { lines: 100, branches: 100, functions: 100 },
+        // Stage 4 (ТЗ фаза 3 §10): the menu engine.
+        'packages/menu-core/src/**': { lines: 90, statements: 90, functions: 90 },
       },
     },
   },
