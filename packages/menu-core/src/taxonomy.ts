@@ -533,7 +533,7 @@ export function ingredientCategories({ nameRu, group }: IngredientFacts): Catego
 
 /** Ingredients with no category on purpose: water, salt, leavening, gelatine, vinegar, ground spices, coconut milk. */
 export const UNCATEGORISED_INGREDIENTS =
-  /^(вода|соль|разрыхлитель|сода|свежие дрожжи|сухие дрожжи|желатин|уксус|винный уксус|бальзамический уксус|ванильный экстракт|кокосовое молоко|паста тамаринда)$|молот|порошок|зира|карри|мускатный|куркума|имбирь|кукурузные чипсы/;
+  /^(вода|соль|разрыхлитель|сода|свежие дрожжи|сухие дрожжи|желатин|уксус( \d+)?|винный уксус|бальзамический уксус|ванильный экстракт|кокосовое молоко|паста тамаринда)$|молот|порошок|зира|карри|мускатный|куркума|имбирь|кукурузные чипсы/;
 
 export type TermMatch = {
   readonly kind: 'category' | 'ingredient' | 'item';
