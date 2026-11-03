@@ -150,6 +150,10 @@ export type DaySolution = {
   readonly mealEnergy: readonly number[];
 };
 
+/** Read on every evaluation of the solver (the rules table is static). */
+const ENERGY_TOLERANCE = rule('S.energyToleranceShare');
+const SHARE_TOLERANCE = rule('E17.shareTolerance');
+
 const sq = (x: number) => x * x;
 /** Typed-array read; indices are always in range here, the fallback only satisfies the type checker. */
 const at = (a: ArrayLike<number>, i: number): number => a[i] ?? 0;
@@ -175,10 +179,8 @@ function nutritionCost(p: DayProblem, w: Work): number {
   const T = w.totals;
   const eT = t.energyKcal;
   const dE = (at(T, Q.energy) - eT) / eT;
-  let c =
-    W.energy * dE * dE +
-    W.energyBand * sq(Math.max(0, Math.abs(dE) - rule('S.energyToleranceShare')));
-  const shareTol = rule('E17.shareTolerance');
+  let c = W.energy * dE * dE + W.energyBand * sq(Math.max(0, Math.abs(dE) - ENERGY_TOLERANCE));
+  const shareTol = SHARE_TOLERANCE;
   for (let m = 0; m < p.mealShare.length; m += 1) {
     const s = at(w.mealEnergy, m) / eT;
     const d = s - (p.mealShare[m] ?? 0);

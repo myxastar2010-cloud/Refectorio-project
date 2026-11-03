@@ -85,6 +85,30 @@ export type PlannerState = {
   readonly days: DayState[];
 };
 
+/** Rule values read on every move of the search (the rules table is static). */
+const HOT = {
+  cookMax: rule('P.weekdayCookMaxMin'),
+  sweetDrink: rule('P.sweetDrinkFreeSugarsG'),
+  servingProcessed: rule('P.serving.processedMeatG'),
+  servingLegumes: rule('P.serving.legumesG'),
+  servingNuts: rule('P.serving.nutsG'),
+  servingWholeGrain: rule('P.serving.wholeGrainG'),
+  dessertMax: rule('P.dessertMaxPerDay'),
+  dairyMin: rule('P.dairyMinServingsDay'),
+  wholeGrainMin: rule('P.wholeGrainMinServingsDay'),
+  herbalTeaMax: rule('E21.herbalTeaMaxCupsDay'),
+  fishTarget: rule('E10.fishTargetGWeek'),
+  redCookedPerRaw: rule('E22.redMeatCookedPerRawG'),
+  redMaxWeek: rule('E22.redMeatMaxCookedGWeek'),
+  processedMaxWeek: rule('E23.processedMeatMaxServingsWeek'),
+  legumesMinWeek: rule('P.legumesMinServingsWeek'),
+  nutsMinWeek: rule('P.nutsMinServingsWeek'),
+  friedMaxWeek: rule('P.friedMaxPerWeek'),
+  sugarMaxLimited: rule('G.limitAddedSugarFreeSugarsMaxShare'),
+  sugarMax: rule('E3.freeSugarsMaxShare'),
+  satFatMax: rule('E5.satFatMaxShare'),
+} as const;
+
 const sq = (x: number) => x * x;
 const under = (value: number, min: number) => (min > 0 && value < min ? (min - value) / min : 0);
 
@@ -119,7 +143,7 @@ export function slotCost(ctx: PlanContext, day: DayState, mealIndex: number, slo
     !food.item.flags.has('boxable')
   )
     c += C.boxable;
-  const cap = rule('P.weekdayCookMaxMin');
+  const cap = HOT.cookMax;
   if (day.weekday && food.item.cookMin > cap)
     c += C.cookTime * Math.min(1, (food.item.cookMin - cap) / cap);
   if (meal.kind === 'dinner' && slot.kind === 'core' && ctx.profile.extraGoals.has('sleep')) {
@@ -128,12 +152,9 @@ export function slotCost(ctx: PlanContext, day: DayState, mealIndex: number, slo
   }
   if ((meal.kind === 'dinner' || (ctx.hours[mealIndex] ?? 0) >= 17) && food.caffeineMg >= 1)
     c += C.eveningCaffeine;
-  if (
-    food.role === 'drink' &&
-    (food.item.perPortion.freeSugarsG ?? 0) >= rule('P.sweetDrinkFreeSugarsG')
-  )
+  if (food.role === 'drink' && (food.item.perPortion.freeSugarsG ?? 0) >= HOT.sweetDrink)
     c += C.habit * 0.5;
-  c += C.processedItem * (food.groups.processedMeatG / rule('P.serving.processedMeatG'));
+  c += C.processedItem * (food.groups.processedMeatG / HOT.servingProcessed);
   for (const p of ctx.rules.prefer) {
     if (p.foods.has(slot.food) && p.appliesTo(day.date, meal.kind)) c += p.sign * C.prefer;
   }
@@ -310,10 +331,10 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
         tuna += f * servings.tuna;
       }
       red += f * g.redMeatRawG;
-      processed += (f * g.processedMeatG) / rule('P.serving.processedMeatG');
-      legumes += (f * g.legumesG) / rule('P.serving.legumesG');
-      nuts += (f * g.nutsG) / rule('P.serving.nutsG');
-      wholeGrain += (f * g.wholeGrainG) / rule('P.serving.wholeGrainG');
+      processed += (f * g.processedMeatG) / HOT.servingProcessed;
+      legumes += (f * g.legumesG) / HOT.servingLegumes;
+      nuts += (f * g.nutsG) / HOT.servingNuts;
+      wholeGrain += (f * g.wholeGrainG) / HOT.servingWholeGrain;
       dairy += f * g.dairyServings;
       if (food.role === 'dessert') desserts += 1;
       if (food.fried) fried += 1;
@@ -347,11 +368,11 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
 
 function dayExtras(ctx: PlanContext, day: DayState, agg: DayAgg): number {
   const C = ctx.costs;
-  let c = C.dessertDay * Math.max(0, agg.desserts - rule('P.dessertMaxPerDay'));
-  if (ctx.dairyAllowed) c += C.dairyDay * sq(under(agg.dairyServ, rule('P.dairyMinServingsDay')));
-  c += C.wholeGrainDay * sq(under(agg.wholeGrainServ, rule('P.wholeGrainMinServingsDay')));
+  let c = C.dessertDay * Math.max(0, agg.desserts - HOT.dessertMax);
+  if (ctx.dairyAllowed) c += C.dairyDay * sq(under(agg.dairyServ, HOT.dairyMin));
+  c += C.wholeGrainDay * sq(under(agg.wholeGrainServ, HOT.wholeGrainMin));
   if (ctx.profile.safety.pregnant)
-    c += C.pregnancyFish * Math.max(0, agg.herbalTea - rule('E21.herbalTeaMaxCupsDay'));
+    c += C.pregnancyFish * Math.max(0, agg.herbalTea - HOT.herbalTeaMax);
   // No same main protein at lunch and dinner (R17 §5).
   const proteins: string[] = [];
   day.meals.forEach((slots, m) => {
@@ -377,7 +398,7 @@ function dayExtras(ctx: PlanContext, day: DayState, agg: DayAgg): number {
   for (const slots of day.meals)
     for (const s of slots) if (ctx.foods[s.food]?.role === 'drink') drinks.push(s.food);
   const sweet = drinks.filter(
-    (d) => (ctx.foods[d]?.item.perPortion.freeSugarsG ?? 0) >= rule('P.sweetDrinkFreeSugarsG'),
+    (d) => (ctx.foods[d]?.item.perPortion.freeSugarsG ?? 0) >= HOT.sweetDrink,
   ).length;
   if (sweet > 1) c += C.habit * COHERENCE.secondSweetDrink * (sweet - 1);
   c += C.habit * COHERENCE.sameDrinkDay * (drinks.length - new Set(drinks).size);
@@ -428,37 +449,27 @@ export function weekCosts(ctx: PlanContext, days: readonly DayState[]): number {
   for (const aggs of weeks.values()) {
     const share = aggs.length / 7;
     const sum = (key: keyof Omit<DayAgg, 'freq'>) => aggs.reduce((s, a) => s + a[key], 0);
-    if (ctx.fishAllowed)
-      c += C.fishWeek * sq(under(sum('fishG'), rule('E10.fishTargetGWeek') * share));
+    if (ctx.fishAllowed) c += C.fishWeek * sq(under(sum('fishG'), HOT.fishTarget * share));
     c +=
       C.redMeatWeek *
       sq(
-        Math.max(
-          0,
-          sum('redMeatRawG') * rule('E22.redMeatCookedPerRawG') -
-            rule('E22.redMeatMaxCookedGWeek') * share,
-        ) /
-          (rule('E22.redMeatMaxCookedGWeek') * share),
+        Math.max(0, sum('redMeatRawG') * HOT.redCookedPerRaw - HOT.redMaxWeek * share) /
+          (HOT.redMaxWeek * share),
       );
-    c +=
-      C.processedWeek *
-      Math.max(0, sum('processedServ') - rule('E23.processedMeatMaxServingsWeek') * share);
-    c += C.legumesWeek * sq(under(sum('legumesServ'), rule('P.legumesMinServingsWeek') * share));
-    if (ctx.nutsAllowed)
-      c += C.nutsWeek * sq(under(sum('nutsServ'), rule('P.nutsMinServingsWeek') * share));
-    c += C.friedWeek * Math.max(0, sum('fried') - rule('P.friedMaxPerWeek') * share);
+    c += C.processedWeek * Math.max(0, sum('processedServ') - HOT.processedMaxWeek * share);
+    c += C.legumesWeek * sq(under(sum('legumesServ'), HOT.legumesMinWeek * share));
+    if (ctx.nutsAllowed) c += C.nutsWeek * sq(under(sum('nutsServ'), HOT.nutsMinWeek * share));
+    c += C.friedWeek * Math.max(0, sum('fried') - HOT.friedMaxWeek * share);
     // R17 E3, E5: free sugars and saturated fat — hard on the weekly average (soft hints without numbers for E28).
     const energy = sum('energy');
     if (energy > 0) {
       const sugarShare = (sum('freeSugars') * 4) / energy;
       const sfaShare = (sum('satFat') * 9) / energy;
       const sugarMax = ctx.profile.safety.dishRules.has('limitAddedSugar')
-        ? rule('G.limitAddedSugarFreeSugarsMaxShare')
-        : rule('E3.freeSugarsMaxShare');
+        ? HOT.sugarMaxLimited
+        : HOT.sugarMax;
       c += C.weeklyHard * sq(Math.max(0, sugarShare - sugarMax) / sugarMax);
-      c +=
-        C.weeklyHard *
-        sq(Math.max(0, sfaShare - rule('E5.satFatMaxShare')) / rule('E5.satFatMaxShare'));
+      c += C.weeklyHard * sq(Math.max(0, sfaShare - HOT.satFatMax) / HOT.satFatMax);
     }
     // R17 E4: WHO's sodium limit is about habitual intake — the week's average is held, a day may vary (D-084).
     const limit = ctx.profile.targets.sodiumMaxMg;
@@ -502,98 +513,176 @@ export function repeatWindow(role: string): number {
   }
 }
 
+/**
+ * Per-food facts the variety cost reads on every move, as numbers (no strings, no maps in the hot loop), plus scratch
+ * buffers reused between calls. One per context.
+ */
+type VarietyIndex = {
+  readonly kindOf: Int8Array;
+  /** 1 — main or soup, 2 — fruit or dairy (components), 3 — other repeat roles, 0 — not counted. */
+  readonly cls: Int8Array;
+  readonly window: Int16Array;
+  readonly protein: Int16Array;
+  readonly starch: Int16Array;
+  readonly cuisine: Int16Array;
+  readonly isMain: Uint8Array;
+  readonly proteins: number;
+  readonly starches: number;
+  readonly anyMealDays: number;
+  readonly proteinMax: number;
+  readonly cuisineStreakMax: number;
+  readonly lastSeen: Int32Array;
+  readonly lastAny: Int32Array;
+  readonly stamp: Int32Array;
+  readonly lastStarch: Int32Array;
+  readonly proteinCount: Int32Array;
+};
+
+const KIND_INDEX = { breakfast: 0, lunch: 1, dinner: 2, snack: 3 } as const;
+const NEVER = -1_000_000;
+const varietyIndexes = new WeakMap<PlanContext, VarietyIndex>();
+
+/** Small integer ids for the values of one field (`none` and null get −1). */
+function idsOf(
+  values: readonly (string | null)[],
+  none: string,
+): { ids: Int16Array; count: number } {
+  const seen = new Map<string, number>();
+  const ids = Int16Array.from(values, (value) => {
+    if (value === null || value === none) return -1;
+    let id = seen.get(value);
+    if (id === undefined) {
+      id = seen.size;
+      seen.set(value, id);
+    }
+    return id;
+  });
+  return { ids, count: seen.size };
+}
+
+function varietyIndex(ctx: PlanContext): VarietyIndex {
+  const known = varietyIndexes.get(ctx);
+  if (known) return known;
+  const n = ctx.foods.length;
+  const protein = idsOf(
+    ctx.foods.map((f) => f.mainProtein),
+    'none',
+  );
+  const starch = idsOf(
+    ctx.foods.map((f) => f.features.carbBase),
+    'none',
+  );
+  const cuisine = idsOf(
+    ctx.foods.map((f) => f.cuisine),
+    '',
+  );
+  const index: VarietyIndex = {
+    kindOf: Int8Array.from(ctx.structure, (m) => KIND_INDEX[m.kind]),
+    cls: Int8Array.from(ctx.foods, (f) =>
+      f.role === 'main' || f.role === 'soup'
+        ? 1
+        : COMPONENT_ROLES.has(f.role)
+          ? 2
+          : REPEAT_ROLES.has(f.role)
+            ? 3
+            : 0,
+    ),
+    window: Int16Array.from(ctx.foods, (f) => repeatWindow(f.role)),
+    protein: protein.ids,
+    starch: starch.ids,
+    cuisine: cuisine.ids,
+    isMain: Uint8Array.from(ctx.foods, (f) => (f.role === 'main' ? 1 : 0)),
+    proteins: protein.count,
+    starches: starch.count,
+    anyMealDays: rule('P.repeatAnyMealDays'),
+    proteinMax: rule('E19.proteinBaseMaxPerWeekPerMeal'),
+    cuisineStreakMax: rule('P.cuisineStreakMax'),
+    lastSeen: new Int32Array(4 * n),
+    lastAny: new Int32Array(n),
+    stamp: new Int32Array(n),
+    lastStarch: new Int32Array(Math.max(1, ctx.structure.length * starch.count)),
+    proteinCount: new Int32Array(Math.max(1, 4 * protein.count)),
+  };
+  varietyIndexes.set(ctx, index);
+  return index;
+}
+
+/**
+ * Variety over the days in time order: the same item in the same meal kind within its window (R17 E19 for mains and
+ * soups); a main or soup on two days running in any meal; the same dish twice a day; the same starch for the same
+ * meal on consecutive days; a protein base too often in a week's meal kind; cuisine streaks of main dishes. One pass
+ * with typed arrays — it runs on every move of the search (`variety.test.ts` keeps the plain reference it must equal).
+ */
 export function varietyCost(ctx: PlanContext, days: readonly DayState[]): number {
   const C = ctx.costs;
+  const v = varietyIndex(ctx);
+  const n = ctx.foods.length;
+  v.lastSeen.fill(NEVER);
+  v.lastAny.fill(NEVER);
+  v.stamp.fill(NEVER);
+  v.lastStarch.fill(NEVER);
+  v.proteinCount.fill(0);
   let c = 0;
-  // Same item in the same meal kind within its window; mains and soups also not on two days in a row.
-  const seen = new Map<string, number[]>();
-  const byFood = new Map<number, number[]>();
-  const proteinWeek = new Map<string, number>();
-  days.forEach((day, d) => {
-    const today = new Set<number>();
-    day.meals.forEach((slots, m) => {
-      const kind = ctx.structure[m]?.kind ?? 'snack';
-      for (const slot of slots) {
-        const food = ctx.foods[slot.food];
-        if (!food) continue;
-        const component = COMPONENT_ROLES.has(food.role);
-        if (!component && !REPEAT_ROLES.has(food.role)) continue;
-        // The same dish twice in one day (pasta at lunch and at dinner).
-        if (today.has(slot.food)) c += C.repeat * (component ? 0.15 : 0.5);
-        today.add(slot.food);
-        const key = `${kind}|${slot.food}`;
-        const list = seen.get(key) ?? [];
-        list.push(d);
-        seen.set(key, list);
-        if (food.role === 'main' || food.role === 'soup') {
-          const any = byFood.get(slot.food) ?? [];
-          any.push(d);
-          byFood.set(slot.food, any);
-        }
-        if (slot.kind === 'core' && food.mainProtein !== 'none') {
-          const pk = `${day.week}|${kind}|${food.mainProtein}`;
-          proteinWeek.set(pk, (proteinWeek.get(pk) ?? 0) + 1);
-        }
-      }
-    });
-  });
-  for (const [key, list] of seen) {
-    const food = ctx.foods[Number(key.slice(key.indexOf('|') + 1))];
-    const window = food ? repeatWindow(food.role) : 0;
-    for (let i = 1; i < list.length; i += 1) {
-      if ((list[i] ?? 0) - (list[i - 1] ?? 0) < window)
-        c +=
-          C.repeat *
-          (food?.role === 'main' || food?.role === 'soup'
-            ? 1
-            : food && COMPONENT_ROLES.has(food.role)
-              ? 0.1
-              : 0.5);
-    }
-  }
-  const anyMeal = rule('P.repeatAnyMealDays');
-  for (const list of byFood.values()) {
-    const unique = [...new Set(list)];
-    for (let i = 1; i < unique.length; i += 1)
-      if ((unique[i] ?? 0) - (unique[i - 1] ?? 0) < anyMeal) c += C.consecutive;
-  }
-  // The same starch for the same meal on consecutive days (pasta, pasta).
-  const starchByMeal = new Map<string, number[]>();
-  days.forEach((day, d) => {
-    day.meals.forEach((slots, m) => {
-      const core = slots.find((s) => s.kind === 'core');
-      const base = core ? ctx.foods[core.food]?.features.carbBase : undefined;
-      if (!base || base === 'none') return;
-      const key = `${m}|${base}`;
-      const list = starchByMeal.get(key) ?? [];
-      list.push(d);
-      starchByMeal.set(key, list);
-    });
-  });
-  for (const list of starchByMeal.values()) {
-    for (let i = 1; i < list.length; i += 1)
-      if ((list[i] ?? 0) - (list[i - 1] ?? 0) === 1) c += C.habit * 0.3;
-  }
-  for (const n of proteinWeek.values())
-    c += C.proteinWeek * Math.max(0, n - rule('E19.proteinBaseMaxPerWeekPerMeal'));
-  // Cuisine streaks of main dishes in time order.
-  let last: string | null = null;
+  let week: IsoDate | null = null;
+  const flushProteins = () => {
+    for (const count of v.proteinCount)
+      if (count > v.proteinMax) c += C.proteinWeek * (count - v.proteinMax);
+    v.proteinCount.fill(0);
+  };
+  let lastCuisine = -2;
   let run = 0;
-  for (const day of days) {
-    day.meals.forEach((slots) => {
-      const core = slots.find((s) => s.kind === 'core');
-      const food = core ? ctx.foods[core.food] : undefined;
-      if (!food || food.role !== 'main') return;
-      const cuisine = food.cuisine;
-      if (cuisine && cuisine === last) {
-        run += 1;
-        if (run > rule('P.cuisineStreakMax')) c += C.cuisineStreak;
-      } else {
-        last = cuisine;
-        run = 1;
+  days.forEach((day, d) => {
+    if (day.week !== week) {
+      flushProteins();
+      week = day.week;
+    }
+    day.meals.forEach((slots, m) => {
+      const kind = v.kindOf[m] ?? KIND_INDEX.snack;
+      let core = -1;
+      for (const slot of slots) {
+        const food = slot.food;
+        if (slot.kind === 'core' && core < 0) core = food;
+        const cls = v.cls[food] ?? 0;
+        if (cls === 0) continue;
+        if (v.stamp[food] === d) c += C.repeat * (cls === 2 ? 0.15 : 0.5);
+        v.stamp[food] = d;
+        const key = kind * n + food;
+        if (d - (v.lastSeen[key] ?? NEVER) < (v.window[food] ?? 0))
+          c += C.repeat * (cls === 1 ? 1 : cls === 2 ? 0.1 : 0.5);
+        v.lastSeen[key] = d;
+        if (cls === 1) {
+          const any = v.lastAny[food] ?? NEVER;
+          if (any !== d) {
+            if (d - any < v.anyMealDays) c += C.consecutive;
+            v.lastAny[food] = d;
+          }
+        }
+        const protein = v.protein[food] ?? -1;
+        if (slot.kind === 'core' && protein >= 0) {
+          const pk = kind * v.proteins + protein;
+          v.proteinCount[pk] = (v.proteinCount[pk] ?? 0) + 1;
+        }
+      }
+      if (core < 0) return;
+      const starch = v.starch[core] ?? -1;
+      if (starch >= 0) {
+        const sk = m * v.starches + starch;
+        if (d - (v.lastStarch[sk] ?? NEVER) === 1) c += C.habit * 0.3;
+        v.lastStarch[sk] = d;
+      }
+      if (v.isMain[core] === 1) {
+        const cuisine = v.cuisine[core] ?? -1;
+        if (cuisine >= 0 && cuisine === lastCuisine) {
+          run += 1;
+          if (run > v.cuisineStreakMax) c += C.cuisineStreak;
+        } else {
+          lastCuisine = cuisine;
+          run = 1;
+        }
       }
     });
-  }
+  });
+  flushProteins();
   return c;
 }
 
@@ -726,16 +815,13 @@ function heuristic(
   const sum = (key: 'fishG' | 'redMeatRawG' | 'legumesServ' | 'fried') =>
     weekDays.reduce((s, d) => s + (d.agg?.[key] ?? 0), 0);
   const left = 7 - weekDays.length;
-  if (ctx.fishAllowed && f.groups.fishG > 0 && sum('fishG') < rule('E10.fishTargetGWeek'))
+  if (ctx.fishAllowed && f.groups.fishG > 0 && sum('fishG') < HOT.fishTarget)
     h -= (C.fishWeek * 0.3 * 7) / (left + 4);
-  if (
-    f.groups.redMeatRawG > 0 &&
-    sum('redMeatRawG') * rule('E22.redMeatCookedPerRawG') >= rule('E22.redMeatMaxCookedGWeek') * 0.8
-  )
+  if (f.groups.redMeatRawG > 0 && sum('redMeatRawG') * HOT.redCookedPerRaw >= HOT.redMaxWeek * 0.8)
     h += C.redMeatWeek * 0.5;
-  if (f.groups.legumesG > 0 && sum('legumesServ') < rule('P.legumesMinServingsWeek'))
+  if (f.groups.legumesG > 0 && sum('legumesServ') < HOT.legumesMinWeek)
     h -= (C.legumesWeek * 0.4 * 7) / (left + 4);
-  if (f.fried && sum('fried') >= rule('P.friedMaxPerWeek')) h += C.friedWeek;
+  if (f.fried && sum('fried') >= HOT.friedMaxWeek) h += C.friedWeek;
   if (
     f.role === 'dessert' &&
     day.meals.some((ss) => ss.some((s) => ctx.foods[s.food]?.role === 'dessert'))
