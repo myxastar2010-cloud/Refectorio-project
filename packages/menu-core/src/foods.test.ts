@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { fishBudgetShare } from './context';
 import { buildFoodIndex, portionGrid, scaleNutrients } from './foods';
 import { rule } from './rules';
+import { ingredientCategories, withAncestors } from './taxonomy';
 import { testCatalog, testFoods } from './testing';
 
 const foods = testFoods();
@@ -219,5 +220,42 @@ describe('shellfish in the pregnancy fish budget (R17 E9, review of phase 3 m1)'
       expect(fishBudgetShare(f)).toBeCloseTo((f.groups.fishG + f.groups.seafoodG) / cap, 9);
     }
     expect(seafood.some((f) => f.groups.fishG === 0 && fishBudgetShare(f) > 0)).toBe(true);
+  });
+});
+
+describe('allergen labels against the ingredients (review of phase 3, M4)', () => {
+  /** A plain reading of the ingredients; corn, rice and buckwheat flours are gluten-free. */
+  const IMPLIED: readonly (readonly [string, (c: ReadonlySet<string>, name: string) => boolean])[] =
+    [
+      ['MILK', (c) => c.has('dairy')],
+      ['EGG', (c) => c.has('eggs')],
+      ['FISH', (c) => c.has('fish')],
+      ['CRUSTACEAN', (c) => c.has('shrimp')],
+      ['PEANUT', (c) => c.has('peanuts')],
+      ['TREE_NUT', (c) => c.has('nuts') && !c.has('peanuts')],
+      ['SOY', (c) => c.has('soy')],
+      [
+        'GLUTEN',
+        (c, name) =>
+          ['flour', 'bread', 'pasta', 'semolina', 'bulgur', 'barley'].some((x) => c.has(x)) &&
+          !/кукуруз|рисов|гречн/.test(name),
+      ],
+    ];
+
+  it('labels every allergen an ingredient implies (as a contained or a serving allergen)', () => {
+    const missing: string[] = [];
+    for (const f of testFoods().foods) {
+      const labels = new Set<string>([...f.item.allergens, ...f.item.servingAllergens]);
+      for (const ingredient of f.item.ingredients) {
+        const c = new Set<string>(
+          ingredientCategories(ingredient).flatMap((x) => withAncestors(x)),
+        );
+        const name = ingredient.nameRu.toLowerCase();
+        for (const [code, implied] of IMPLIED)
+          if (implied(c, name) && !labels.has(code))
+            missing.push(`${f.id} ${code} ${ingredient.nameRu}`);
+      }
+    }
+    expect(missing).toEqual([]);
   });
 });

@@ -107,6 +107,45 @@ function dietBroken(food: MenuFood, diet: Diet): boolean {
   );
 }
 
+const PREGNANCY_NEVER = ['rawFish', 'rawEgg', 'unpasteurised', 'curedFish', 'curedMeat'] as const;
+
+/**
+ * A second, deliberately plain reading of the hard filter (review of phase 3, M4): the item's labels and its
+ * ingredients, without `checkFood`'s code, so a bug in one shows up here instead of passing both. It may see less
+ * than the filter (dish-level categories), never more — any extra finding is a filter bug.
+ */
+function plainReasons(food: MenuFood, ctx: PlanContext): HardReason[] {
+  const s = ctx.profile.safety;
+  const item = food.item;
+  const out: HardReason[] = [];
+  for (const [code, level] of s.allergens) {
+    if (item.allergens.includes(code)) out.push('allergen');
+    if (level === 'severeAllergy' && item.traces.includes(code)) out.push('allergenTrace');
+    if (level === 'severeAllergy' && item.servingAllergens.includes(code))
+      out.push('allergenServing');
+  }
+  if (item.fishMercury === 'avoid') out.push('highMercury');
+  if (s.pregnant && (PREGNANCY_NEVER.some((f) => item.flags.has(f)) || item.flags.has('alcohol')))
+    out.push('pregnancy');
+  if ((s.lactating || s.ageYears < 18) && item.flags.has('alcohol')) out.push('alcohol');
+  if (
+    s.ageYears < rule('E13.caffeineNoneUnderAgeYears') &&
+    food.role === 'drink' &&
+    (item.perPortion.caffeineMg ?? 0) >= 1
+  )
+    out.push('minorCaffeine');
+  const ex = s.excluded;
+  const own = item.ingredients.some(
+    (i) =>
+      ex.ingredientIds.has(i.id) ||
+      ingredientCategories(i)
+        .flatMap((c) => withAncestors(c))
+        .some((c) => ex.categories.has(c)),
+  );
+  if (own || ex.itemIds.has(food.id)) out.push('excludedByPerson');
+  return out;
+}
+
 /**
  * `history` — the plan's other days (weekly caps count them); only `days` are checked item by item. `isFact` — eaten
  * items: skipped item by item, counted in the caps.
@@ -158,10 +197,22 @@ export function hardViolations(
         }
         if (fact) continue;
         const verdict = checkFood(food, ctx.profile.safety);
-        if (!verdict.ok) {
-          for (const code of verdict.reasons)
-            out.push({ date: day.date, meal: meal.id, itemId: item.itemId, code });
-        } else if (verdict.servedWithout.some((a) => !(item.servedWithout ?? []).includes(a)))
+        const reasons = new Set([
+          ...(verdict.ok ? [] : verdict.reasons),
+          ...plainReasons(food, ctx),
+        ]);
+        for (const code of reasons)
+          out.push({ date: day.date, meal: meal.id, itemId: item.itemId, code });
+        // A serving add-on the person may not have (nuts on porridge) is left out, by the labels themselves.
+        const leftOut = item.servedWithout ?? [];
+        if (
+          [...ctx.profile.safety.allergens.keys()].some(
+            (code) =>
+              food.item.servingAllergens.includes(code) &&
+              !food.item.allergens.includes(code) &&
+              !leftOut.includes(code),
+          )
+        )
           out.push({ date: day.date, meal: meal.id, itemId: item.itemId, code: 'servedWithout' });
         if (dietBroken(food, ctx.profile.safety.diet))
           out.push({

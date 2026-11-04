@@ -337,9 +337,11 @@ export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
       satFat += f * (n.satFatG ?? 0);
       sodium += f * (n.sodiumMg ?? 0);
       fishG += f * g.fishG;
-      if (g.fishG > 0) {
+      // Shellfish-only dishes share the budget too (m1): gate on the share, not on fish grams.
+      const share = fishBudgetShare(food);
+      if (share > 0) {
         const servings = fishServings(food);
-        fishBudget += f * fishBudgetShare(food);
+        fishBudget += f * share;
         oily += f * servings.oily;
         tuna += f * servings.tuna;
       }
