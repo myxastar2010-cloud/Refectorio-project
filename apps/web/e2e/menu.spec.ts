@@ -181,4 +181,36 @@ test.describe('the menu', () => {
     await expect(details).toHaveCount(0);
     await expect(title(page)).toBeVisible();
   });
+
+  test('search: «/» opens it, results by day and meal, arrows and Enter, Esc restores the dishes', async ({
+    page,
+  }) => {
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    const names = () => page.locator('.dish-row .dish-open').allTextContents();
+    const before = await names();
+    const word = (before[0] ?? '').split(' ')[0]?.toLowerCase() ?? '';
+    await page.locator('body').press('/');
+    const field = page.getByRole('combobox', { name: 'Поиск по меню' });
+    await expect(field).toBeFocused();
+    await field.fill('абракадабра');
+    await expect(page.getByRole('status').filter({ hasText: 'Ничего не нашли' })).toBeVisible();
+    await field.fill(word);
+    const list = page.getByRole('listbox', { name: 'Найдено в меню' });
+    const options = list.getByRole('option');
+    await expect(options.first()).toBeVisible();
+    await expect(options.first().locator('mark')).toHaveCount(1);
+    await expect(list.getByRole('group').first()).toHaveAttribute('aria-label', /^Сегодня · /);
+    await field.press('ArrowDown');
+    await expect(options.first()).toHaveAttribute('aria-selected', 'true');
+    await field.press('Enter');
+    const details = page.getByRole('dialog');
+    await expect(details).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(details).toHaveCount(0);
+    await expect(field).toBeFocused();
+    await field.press('Escape');
+    await expect(field).toHaveCount(0);
+    await expect.poll(names).toEqual(before);
+  });
 });

@@ -61,6 +61,13 @@ const STATES = {
     await firstDish(page).locator('.dish-open').click();
     await page.getByRole('dialog').waitFor();
   },
+  search: async (page) => {
+    const name = (await firstDish(page).locator('.dish-open').textContent()) ?? '';
+    await page.getByRole('button', { name: 'Поиск по меню' }).click();
+    await page.getByRole('combobox').fill(name.split(' ')[0] ?? '');
+    await page.getByRole('option').first().waitFor();
+    await page.getByRole('combobox').press('ArrowDown');
+  },
   'details-kbju': async (page) => {
     await STATES.details(page);
     await page.getByRole('tab', { name: 'КБЖУ' }).click();

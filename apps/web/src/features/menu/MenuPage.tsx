@@ -12,7 +12,7 @@ import {
   type TrackingError,
 } from '@refectorio/menu-core';
 import { AnimatePresence, m, type Variants } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { menu } from '../../content/menu.ru';
 import { useCalmMotion } from '../../motion/hooks';
 import { MENU } from '../../motion/tokens';
@@ -33,6 +33,8 @@ import { menuStore, useMenu } from './store/store';
 import { TopBar } from './top/TopBar';
 import { DayCard } from './week/DayCard';
 import { dayKind } from './week/dates';
+import { SearchResults } from './search/SearchResults';
+import { optionId, useSearch, type SearchEntry } from './search/useSearch';
 import { WeekStrip } from './week/WeekStrip';
 import { Widgets } from './widgets/Widgets';
 
@@ -46,6 +48,8 @@ type Props = {
   readonly onHome: () => void;
   readonly onNotify: Notify;
 };
+
+const SEARCH_LIST = 'menu-search-results';
 
 const TRACKING_ERRORS: Partial<Record<TrackingError['code'], string>> = {
   futureDay: menu.dish.futureDay,
@@ -92,6 +96,87 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const [dishMenu, setDishMenu] = useState<DishTarget | null>(null);
   const [replacing, setReplacing] = useState<DishTarget | null>(null);
   const [details, setDetails] = useState<DetailsTarget | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const found = useSearch(plan, query, today);
+  const searching = searchOpen && query.trim() !== '';
+  const foundEntries = useMemo(
+    () => found.result?.groups.flatMap((g) => g.entries) ?? [],
+    [found.result],
+  );
+  /** Where the main column was scrolled when the search opened: closing it brings the view back exactly. */
+  const scrollBefore = useRef(0);
+
+  const openSearch = useCallback(() => {
+    scrollBefore.current = document.querySelector('.menu-main')?.scrollTop ?? 0;
+    setSearchOpen(true);
+  }, []);
+  const closeSearch = useCallback(() => {
+    setSearchOpen(false);
+    setQuery('');
+    setActiveKey(null);
+    requestAnimationFrame(() => {
+      const main = document.querySelector('.menu-main');
+      if (main) main.scrollTop = scrollBefore.current;
+    });
+  }, []);
+  const moveFound = useCallback(
+    (delta: 1 | -1) => {
+      if (foundEntries.length === 0) return;
+      const at = foundEntries.findIndex((e) => e.key === activeKey);
+      const next =
+        at < 0
+          ? delta > 0
+            ? 0
+            : foundEntries.length - 1
+          : (at + delta + foundEntries.length) % foundEntries.length;
+      setActiveKey(foundEntries[next]?.key ?? null);
+    },
+    [foundEntries, activeKey],
+  );
+  const openFound = useCallback((entry: SearchEntry, element: HTMLElement) => {
+    setActiveKey(entry.key);
+    setDetails({
+      card: element,
+      slot: { date: entry.date, meal: entry.meal, index: entry.index },
+      itemId: entry.itemId,
+      returnFocus: document.querySelector<HTMLElement>('.menu-search input'),
+    });
+  }, []);
+
+  // «/» or Ctrl+K open the search from anywhere on the page but a field; a press outside it and its results closes it.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const typing = (event.target as Element | null)?.closest(
+        'input, textarea, [contenteditable]',
+      );
+      const shortcut =
+        (event.key === '/' && !typing) ||
+        ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k');
+      if (!shortcut || document.querySelector('[aria-modal="true"]')) return;
+      event.preventDefault();
+      if (searchOpen) document.querySelector<HTMLElement>('.menu-search input')?.focus();
+      else openSearch();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [searchOpen, openSearch]);
+  useEffect(() => {
+    if (!searchOpen) return undefined;
+    const onDown = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (target?.closest('.menu-search, .search-results, .details-layer, .popover, .toast-region'))
+        return;
+      closeSearch();
+    };
+    window.addEventListener('pointerdown', onDown, true);
+    return () => {
+      window.removeEventListener('pointerdown', onDown, true);
+    };
+  }, [searchOpen, closeSearch]);
   const day = plan.days.find((d) => d.date === date) ?? null;
   const kind = dayKind(plan, date, today);
   const structure = useStructure(plan, answers, today, onNotify);
@@ -231,7 +316,24 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
             answers={answers}
             unread={unread}
             onGoal={soon}
-            onSearch={soon}
+            search={{
+              open: searchOpen,
+              query,
+              listId: SEARCH_LIST,
+              activeId: activeKey ? optionId({ key: activeKey }) : null,
+              onOpen: openSearch,
+              onQuery: (next) => {
+                setQuery(next);
+                setActiveKey(null);
+              },
+              onClose: closeSearch,
+              onMove: moveFound,
+              onEnter: () => {
+                const entry = foundEntries.find((e) => e.key === activeKey) ?? foundEntries[0];
+                const element = entry ? document.getElementById(optionId(entry)) : null;
+                if (entry && element) openFound(entry, element);
+              },
+            }}
             onMore={soon}
             onBell={soon}
             onKiki={() => {
@@ -285,11 +387,26 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         <m.section
           id="menu-dishes"
           className="dishes"
-          aria-label={meals.find((meal) => meal.id === mealId)?.titleRu}
+          aria-label={
+            searching ? menu.search.results : meals.find((meal) => meal.id === mealId)?.titleRu
+          }
           data-extending={extending || replacement.busy || undefined}
+          data-search={searching || undefined}
           {...group(6)}
         >
-          {kind === 'beforeMenu' || !day ? (
+          {searching ? (
+            <SearchResults
+              id={SEARCH_LIST}
+              query={query}
+              result={found.result}
+              searching={found.searching}
+              plan={plan}
+              catalog={catalog}
+              today={today}
+              activeKey={activeKey}
+              onOpen={openFound}
+            />
+          ) : kind === 'beforeMenu' || !day ? (
             <p className="dishes-note">
               {kind === 'beforeMenu' ? menu.week.beforeMenu : menu.week.extending}
             </p>

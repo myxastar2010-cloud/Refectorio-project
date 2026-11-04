@@ -1,0 +1,203 @@
+/* ——— Search (ТЗ фаза 4 §9): the field in the top bar, the results in place of the dishes ——— */
+
+.menu-search {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--m));
+  width: min(calc(460 * var(--m)), 42vw);
+  height: calc(56 * var(--m));
+  padding: 0 calc(8 * var(--m)) 0 calc(20 * var(--m));
+  border: var(--menu-border) solid var(--color-accent);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-ink-deep);
+}
+.menu-search > svg {
+  flex: none;
+  width: calc(24 * var(--m));
+  height: calc(24 * var(--m));
+  color: var(--color-accent);
+}
+.menu-search input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: calc(20 * var(--m));
+  font-weight: 600;
+  outline: none;
+}
+.menu-search input::placeholder {
+  color: var(--color-ink-muted);
+  font-weight: 500;
+}
+.menu-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.menu-search-clear {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: calc(40 * var(--m));
+  height: calc(40 * var(--m));
+  min-width: 32px;
+  min-height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-surface-beige);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.menu-search-clear svg {
+  width: 60%;
+  height: 60%;
+}
+.menu-search-clear:focus-visible {
+  outline: none;
+  background: var(--color-ink);
+  color: #fff;
+}
+@media (hover: hover) {
+  .menu-search-clear:hover {
+    background: var(--color-ink);
+    color: #fff;
+  }
+}
+
+.dishes[data-search] {
+  overflow: hidden;
+}
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+.search-status {
+  font-size: 15px;
+  font-weight: 700;
+}
+.search-hints,
+.search-past {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+}
+.search-past {
+  margin-top: 6px;
+  font-weight: 700;
+}
+.search-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.search-group-label {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ink-muted);
+}
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+.search-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 8px 14px 8px 8px;
+  border: 2px solid var(--color-accent);
+  border-radius: 24px;
+  background: var(--color-bg);
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+}
+.search-card[aria-selected='true'] {
+  background: color-mix(in srgb, var(--color-accent) 16%, var(--color-bg));
+}
+@media (hover: hover) {
+  .search-card:hover {
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
+    transform: translateY(-2px);
+  }
+}
+.search-thumb {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--color-surface-beige);
+}
+.search-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.search-thumb svg {
+  width: 26px;
+  height: 26px;
+  color: var(--color-ink-muted);
+}
+.search-name {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.search-name mark {
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--color-accent) 32%, transparent);
+  color: inherit;
+}
+
+@media (max-width: 1023.98px) {
+  .menu-top[data-search] .menu-goal {
+    display: none;
+  }
+  .menu-top[data-search] .menu-top-actions {
+    flex: 1;
+    min-width: 0;
+  }
+  .menu-search {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    height: 44px;
+    padding-left: 14px;
+  }
+  .menu-search > svg {
+    width: 20px;
+    height: 20px;
+  }
+  .menu-search input {
+    font-size: 16px;
+  }
+  .search-results {
+    height: auto;
+    overflow: visible;
+  }
+  .dishes[data-search] {
+    overflow: visible;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .search-card {
+    transition: none;
+  }
+}

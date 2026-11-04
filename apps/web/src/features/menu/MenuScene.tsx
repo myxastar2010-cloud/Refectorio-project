@@ -1,5 +1,6 @@
 import '../../styles/menu.css';
 import '../../styles/menu-details.css';
+import '../../styles/menu-search.css';
 import { m } from 'motion/react';
 import { useEffect, useMemo } from 'react';
 import type { Notify } from './notify';

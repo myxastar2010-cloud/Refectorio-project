@@ -31,6 +31,8 @@ export type DetailsTarget = {
   readonly card: HTMLElement;
   readonly slot: SlotRef;
   readonly itemId: string;
+  /** Where focus goes back (default: the card's title button). */
+  readonly returnFocus?: HTMLElement | null;
 };
 
 type Props = {
@@ -110,7 +112,8 @@ function DetailsBody({
     open: present,
     containerRef: panelRef,
     onClose,
-    returnFocusTo: target.card.querySelector<HTMLElement>('.dish-open') ?? target.card,
+    returnFocusTo:
+      target.returnFocus ?? target.card.querySelector<HTMLElement>('.dish-open') ?? target.card,
     background: '.menu-app, .menu-kiki-fab',
     fallbackFocusId: 'menu-title',
   });

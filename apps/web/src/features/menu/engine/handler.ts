@@ -35,6 +35,8 @@ type Post = (response: MenuResponse) => void;
 let foods: FoodIndex | null = null;
 const texts = foodTextSchema.parse(foodText);
 const profiles = new Map<string, MenuProfile>();
+/** The search index of the last plan: typing asks again every 120 ms, the plan rarely changes meanwhile. */
+let searchIndex: { key: string; index: ReturnType<typeof buildSearchIndex> } | null = null;
 
 function loadFoods(): FoodIndex {
   foods ??= buildFoodIndex({
@@ -87,8 +89,11 @@ export function handle(request: MenuRequest, post: Post): void {
       return;
     }
     if (request.type === 'search') {
-      const index = buildSearchIndex(request.plan, loadFoods(), texts);
-      post({ id, type: 'search', hits: search(index, request.query) });
+      const { plan } = request;
+      const key = [plan.createdAt, plan.seed, plan.revision, plan.horizonEnd].join(':');
+      if (searchIndex?.key !== key)
+        searchIndex = { key, index: buildSearchIndex(plan, loadFoods(), texts) };
+      post({ id, type: 'search', hits: search(searchIndex.index, request.query) });
       return;
     }
     post({ id, type: 'progress', stage: 'profile', share: 0.05 });
