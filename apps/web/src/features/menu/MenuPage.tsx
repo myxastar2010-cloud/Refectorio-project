@@ -29,7 +29,11 @@ import { KikiPanel } from './kiki/KikiPanel';
 import { MealTabs } from './meals/MealTabs';
 import { useStructure } from './meals/useStructure';
 import type { Notify } from './notify';
+import { AccountMenu } from './shell/AccountMenu';
 import { Nav } from './shell/Nav';
+import { Notices } from './shell/Notices';
+import { noticesFor } from './shell/noticeRules';
+import { readTestParams } from '../../lib/params';
 import { menuStore, parseBackup, useMenu } from './store/store';
 import { newLetters } from './news/letters';
 import { NewsPanel } from './news/NewsPanel';
@@ -59,6 +63,8 @@ type Props = {
 };
 
 const SEARCH_LIST = 'menu-search-results';
+/** `?demo=week`: the account menu says the synthetic history is on. */
+const DEMO_HISTORY = readTestParams(window.location.search).weekDemo;
 
 const TRACKING_ERRORS: Partial<Record<TrackingError['code'], string>> = {
   futureDay: menu.dish.futureDay,
@@ -86,7 +92,11 @@ const introVariants = (calm: boolean): Variants => ({
 export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNotify }: Props) {
   const calm = useCalmMotion();
   const answers = useMenu((s) => s.answers);
-  const avatar = useMenu((s) => s.settings.avatar);
+  const settings = useMenu((s) => s.settings);
+  const durable = useMenu((s) => s.durable);
+  const { avatar } = settings;
+  const [accountAt, setAccountAt] = useState<HTMLElement | null>(null);
+  const [wipeAt, setWipeAt] = useState<HTMLElement | null>(null);
   const letters = useMenu((s) => s.letters);
   const deemphasizeNumbers = answers?.guardrails.deemphasizeNumbers ?? false;
   const meals = useMemo(
@@ -361,6 +371,9 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
     : null;
   const unread = letters.some((letter) => !letter.read);
 
+  const closeAccount = useCallback(() => {
+    setAccountAt(null);
+  }, []);
   const closeMore = useCallback(() => {
     setMoreAt(null);
   }, []);
@@ -431,7 +444,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   return (
     <div className="menu-app" data-kiki-open={kikiOpen || undefined}>
       <m.div className="menu-nav-slot" {...group(0)}>
-        <Nav avatar={avatar} onHome={onHome} onNotify={onNotify} onAccount={soon} />
+        <Nav avatar={avatar} onHome={onHome} onNotify={onNotify} onAccount={setAccountAt} />
       </m.div>
       <main className="menu-main" aria-labelledby="menu-title">
         <m.div className="menu-top-slot" {...group(1)}>
@@ -483,6 +496,23 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         <m.h1 id="menu-title" className="menu-title" {...group(2)}>
           {menu.title}
         </m.h1>
+        <m.div className="menu-notices-slot" {...group(2)}>
+          <Notices
+            notices={noticesFor(answers, plan, settings, durable)}
+            onDownload={() => {
+              download('json');
+            }}
+            onClose={(id) => {
+              menuStore().update((d) => ({
+                ...d,
+                settings:
+                  id === 'storage'
+                    ? { ...d.settings, noticeSeen: true }
+                    : { ...d.settings, dismissedNotes: [...d.settings.dismissedNotes, id] },
+              }));
+            }}
+          />
+        </m.div>
         <m.div className="menu-week-slot" {...group(3)}>
           <WeekStrip
             plan={plan}
@@ -681,6 +711,79 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         }}
         onRecipe={soon}
       />
+      <AccountMenu
+        anchor={accountAt}
+        avatar={avatar}
+        dailyDigest={settings.dailyDigest}
+        demoHistory={DEMO_HISTORY}
+        onClose={closeAccount}
+        onAvatar={(index) => {
+          menuStore().update((d) => ({ ...d, settings: { ...d.settings, avatar: index } }));
+        }}
+        onNotifications={() => {
+          const bell = document.querySelector<HTMLElement>('.menu-bell');
+          closeAccount();
+          if (bell) setNews({ anchor: bell, pinned: true, keys: true });
+        }}
+        onDigest={(on) => {
+          menuStore().update((d) => ({ ...d, settings: { ...d.settings, dailyDigest: on } }));
+        }}
+        onSupport={() => {
+          closeAccount();
+          setKikiOpen(true);
+        }}
+        onDownload={() => {
+          closeAccount();
+          download('json');
+        }}
+        onWipe={() => {
+          const anchor = accountAt;
+          closeAccount();
+          setWipeAt(anchor);
+        }}
+        onLogin={() => {
+          closeAccount();
+          onNotify(menu.demoSoon);
+        }}
+      />
+      <Popover
+        anchor={wipeAt}
+        label={menu.account.wipe}
+        role="alertdialog"
+        onClose={() => {
+          setWipeAt(null);
+        }}
+      >
+        <div className="meal-confirm">
+          <p>{menu.account.wipeConfirm}</p>
+          <div className="meal-confirm-actions">
+            <button
+              type="button"
+              className="menu-pill menu-pill--danger"
+              onClick={() => {
+                setWipeAt(null);
+                void menuStore()
+                  .wipe()
+                  .then(() => {
+                    onNotify(menu.account.wipeDone);
+                    onHome();
+                  });
+              }}
+            >
+              {menu.account.wipeYes}
+            </button>
+            <button
+              type="button"
+              className="menu-pill menu-pill--ghost"
+              onClick={() => {
+                setWipeAt(null);
+              }}
+            >
+              {menu.meals.confirmNo}
+            </button>
+          </div>
+        </div>
+      </Popover>
       <NewsPanel
         anchor={news?.anchor ?? null}
         focusFirst={news?.keys ?? false}

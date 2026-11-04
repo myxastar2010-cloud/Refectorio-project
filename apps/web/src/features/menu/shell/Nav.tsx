@@ -14,7 +14,7 @@ type Props = {
   readonly avatar: number | null;
   readonly onHome: () => void;
   readonly onNotify: (text: string) => void;
-  readonly onAccount: () => void;
+  readonly onAccount: (button: HTMLElement) => void;
 };
 
 type Tab = {
@@ -79,7 +79,9 @@ export function Nav({ avatar, onHome, onNotify, onAccount }: Props) {
             className="menu-nav-avatar"
             aria-label={menu.nav.account}
             aria-haspopup="menu"
-            onClick={onAccount}
+            onClick={(event) => {
+              onAccount(event.currentTarget);
+            }}
           >
             {picture ? <Pic picture={picture} alt="" eager /> : null}
           </button>

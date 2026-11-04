@@ -142,6 +142,8 @@ export const settingsSchema = z.object({
   dailyDigest: z.boolean(),
   /** The day the last daily letter was written (at most one a day). */
   lastLetterDay: isoDate.nullable(),
+  /** The menu's notes the person closed with «Понятно» (health, allergy); older files have none. */
+  dismissedNotes: z.array(z.string()).default([]),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
@@ -150,6 +152,7 @@ export const DEFAULT_SETTINGS: Settings = {
   noticeSeen: false,
   dailyDigest: true,
   lastLetterDay: null,
+  dismissedNotes: [],
 };
 
 export const profileSchema = z.object({ answers: quizAnswersV1Schema });

@@ -75,6 +75,13 @@ const STATES = {
     else await item.hover();
     await page.getByRole('menuitem', { name: 'PDF' }).waitFor();
   },
+  account: async (page, touch) => {
+    await page.getByRole('button', { name: 'Аккаунт' }).first().click();
+    const item = page.getByRole('menuitem', { name: 'Сменить аватар' });
+    if (touch) await item.click();
+    else await item.hover();
+    await page.getByRole('menuitemradio').first().waitFor();
+  },
   news: async (page) => {
     await page.getByRole('button', { name: /^Новости от Кики/ }).click();
     await page.getByRole('dialog', { name: 'Новости от Кики' }).waitFor();

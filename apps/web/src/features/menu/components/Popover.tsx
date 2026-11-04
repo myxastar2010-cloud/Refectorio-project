@@ -28,7 +28,8 @@ type Props = {
 
 const MARGIN = 8;
 const SUB_GAP = 6;
-const FOCUSABLE_ITEM = '[role="menuitem"]:not(:disabled)';
+/** Items of a menu: plain, checkbox and radio items (`menuitem`, `menuitemcheckbox`, `menuitemradio`). */
+const FOCUSABLE_ITEM = '[role^="menuitem"]:not(:disabled)';
 
 /** An open submenu tells its popover how to close it: Esc closes the submenu first, then the menu. */
 const PopoverContext = createContext<{ setSub: (close: (() => void) | null) => void } | null>(null);

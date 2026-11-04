@@ -96,10 +96,11 @@
   grid-template-areas:
     'top top'
     'title widgets'
+    'notice widgets'
     'week widgets'
     'meals widgets'
     'dishes dishes';
-  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
   column-gap: calc(32 * var(--m));
   min-width: 0;
   min-height: 0;

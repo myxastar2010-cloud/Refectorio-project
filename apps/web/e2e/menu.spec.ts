@@ -280,6 +280,41 @@ test.describe('the menu', () => {
     await expect(page.getByRole('button', { name: 'Новости от Кики', exact: true })).toBeFocused();
   });
 
+  test('the storage notice stays closed; the account: avatar, digest, delete my data', async ({
+    page,
+  }) => {
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    const notes = page.getByRole('region', { name: 'Важно о меню' });
+    await expect(notes).toContainText('хранятся только в этом браузере');
+    await notes.getByRole('button', { name: 'Понятно' }).click();
+    await expect(notes).not.toContainText('хранятся только');
+    await page.reload();
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    await expect(notes).not.toContainText('хранятся только');
+    // The account menu: a new avatar from the grid, the daily digest off.
+    await page.getByRole('button', { name: 'Аккаунт' }).first().click();
+    const account = page.getByRole('menu', { name: 'Аккаунт' });
+    await expect(account).toContainText('Гость');
+    await account.getByRole('menuitem', { name: 'Сменить аватар' }).click();
+    await page.getByRole('menuitemradio', { name: 'Аватар 3' }).click();
+    await expect(page.getByRole('menuitemradio', { name: 'Аватар 3' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    const digest = account.getByRole('menuitemcheckbox', { name: 'Ежедневная сводка' });
+    await expect(digest).toHaveAttribute('aria-checked', 'true');
+    await digest.click();
+    await expect(digest).toHaveAttribute('aria-checked', 'false');
+    await account.getByRole('menuitem', { name: 'Удалить мои данные' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Удалить' }).click();
+    await expect(page.getByText('Данные удалены из этого браузера')).toBeVisible();
+    await page.goto('./#menu');
+    await expect(page.getByRole('heading', { name: 'Меню ещё нет' })).toBeVisible({
+      timeout: 30_000,
+    });
+  });
+
   test('search: «/» opens it, results by day and meal, arrows and Enter, Esc restores the dishes', async ({
     page,
   }) => {
