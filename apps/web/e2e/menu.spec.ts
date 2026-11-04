@@ -254,6 +254,32 @@ test.describe('the menu', () => {
     await expect(page.getByRole('button', { name: /^Цель: [−+]/ })).toBeVisible();
   });
 
+  test('news from Kiki: hover opens, a click pins, a letter opens and is read, «Прочитать все»', async ({
+    page,
+  }) => {
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    const bell = page.getByRole('button', { name: 'Новости от Кики — есть непрочитанные' });
+    await bell.hover();
+    const panel = page.getByRole('dialog', { name: 'Новости от Кики' });
+    await expect(panel).toBeVisible();
+    await expect(panel.locator('.news-item')).toHaveCount(2);
+    await page.mouse.move(5, 5);
+    await expect(panel).toHaveCount(0);
+    // Keyboard: Enter pins it with the focus on the first letter.
+    await bell.focus();
+    await page.keyboard.press('Enter');
+    await expect(panel.locator('.news-item').first()).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(panel.getByRole('heading', { level: 3 })).toBeVisible();
+    await panel.getByRole('button', { name: 'Назад' }).click();
+    await panel.getByRole('button', { name: 'Прочитать все' }).click();
+    await expect(panel.locator('.news-item[data-unread]')).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(panel).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Новости от Кики', exact: true })).toBeFocused();
+  });
+
   test('search: «/» opens it, results by day and meal, arrows and Enter, Esc restores the dishes', async ({
     page,
   }) => {

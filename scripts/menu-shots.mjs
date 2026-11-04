@@ -75,6 +75,15 @@ const STATES = {
     else await item.hover();
     await page.getByRole('menuitem', { name: 'PDF' }).waitFor();
   },
+  news: async (page) => {
+    await page.getByRole('button', { name: /^Новости от Кики/ }).click();
+    await page.getByRole('dialog', { name: 'Новости от Кики' }).waitFor();
+  },
+  letter: async (page) => {
+    await STATES.news(page);
+    await page.locator('.news-item').nth(1).click();
+    await page.locator('.news-letter').waitFor();
+  },
   goal: async (page) => {
     await page.getByRole('button', { name: /^Цель:/ }).click();
     await page.getByRole('dialog', { name: 'Цель' }).waitFor();

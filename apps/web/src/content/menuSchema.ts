@@ -6,6 +6,7 @@ import { z } from 'zod';
 const text = z.string().trim().min(1);
 const plural = z.object({ one: text, few: text, many: text });
 const seven = z.array(text).length(7);
+const letterText = z.object({ title: text, preview: text, body: text });
 
 export const menuContentSchema = z.object({
   docTitle: text,
@@ -114,6 +115,34 @@ export const menuContentSchema = z.object({
     replaceUnsafe: text,
     empty: text,
     photoBy: text,
+  }),
+  news: z.object({
+    title: text,
+    titleName: text,
+    label: text,
+    readAll: text,
+    empty: text,
+    back: text,
+    unread: text,
+    openMenu: text,
+    askKiki: text,
+    download: text,
+    digest: text,
+    today: text,
+    yesterday: text,
+    letters: z.object({
+      welcome: letterText,
+      localOnly: letterText,
+      recap: letterText.extend({
+        bodyCalm: text,
+        short: text,
+        status: z.object({ done: text, partial: text, missed: text }),
+      }),
+      tipFibre: letterText,
+      tipWater: letterText,
+      tipBreakfast: letterText,
+      change: letterText.extend({ goal: text, regenerate: text }),
+    }),
   }),
   more: z.object({
     label: text,

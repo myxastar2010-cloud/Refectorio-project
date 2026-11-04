@@ -12,7 +12,10 @@ type Props = {
   readonly onGoal: (pill: HTMLElement) => void;
   readonly search: SearchFieldProps;
   readonly onMore: (button: HTMLElement) => void;
-  readonly onBell: (button: HTMLElement) => void;
+  /** A click (detail 0 — from the keyboard) pins the news; hover opens them with intent. */
+  readonly onBell: (button: HTMLElement, keyboard: boolean) => void;
+  readonly onBellHover: (button: HTMLElement | null) => void;
+  readonly newsOpen: boolean;
   /** Below 1280 px Kiki lives in a sheet: its button sits in the top bar. */
   readonly onKiki: () => void;
 };
@@ -21,7 +24,17 @@ type Props = {
  * The top bar (ТЗ фаза 4 §3): the goal pill on the left; «Поиск», ⋯ and the bell on the right — in the mockup's order
  * (the brief put the bell left of ⋯; the mockup wins).
  */
-export function TopBar({ answers, unread, onGoal, search, onMore, onBell, onKiki }: Props) {
+export function TopBar({
+  answers,
+  unread,
+  onGoal,
+  search,
+  onMore,
+  onBell,
+  onBellHover,
+  newsOpen,
+  onKiki,
+}: Props) {
   return (
     <div className="menu-top" data-search={search.open || undefined}>
       <button
@@ -52,8 +65,16 @@ export function TopBar({ answers, unread, onGoal, search, onMore, onBell, onKiki
           type="button"
           className="menu-round menu-bell"
           aria-label={unread ? menu.top.bellUnread : menu.top.bell}
+          aria-expanded={newsOpen}
+          aria-controls={newsOpen ? 'menu-news' : undefined}
           onClick={(event) => {
-            onBell(event.currentTarget);
+            onBell(event.currentTarget, event.detail === 0);
+          }}
+          onPointerEnter={(event) => {
+            if (event.pointerType === 'mouse') onBellHover(event.currentTarget);
+          }}
+          onPointerLeave={(event) => {
+            if (event.pointerType === 'mouse') onBellHover(null);
           }}
         >
           <IconBell stroke={2} aria-hidden />

@@ -2,6 +2,8 @@ import type { QuizAnswersV1 } from '@refectorio/contracts';
 import type { Plan } from '@refectorio/menu-core';
 import { useCallback, useState } from 'react';
 import { menu } from '../../../content/menu.ru';
+import { fill } from '../../../lib/format';
+import { changeLetter } from '../news/letters';
 import { menuClient } from '../engine/client';
 import { opErrorCode } from '../engine/opError';
 import type { Notify } from '../notify';
@@ -19,7 +21,13 @@ export function usePlanOps(plan: Plan, today: string, notify: Notify) {
   const [busy, setBusy] = useState(false);
 
   const run = useCallback(
-    (answers: QuizAnswersV1, seed: number | undefined, done: string, onDone?: () => void) => {
+    (
+      answers: QuizAnswersV1,
+      seed: number | undefined,
+      done: string,
+      receipt: string,
+      onDone?: () => void,
+    ) => {
       const store = menuStore();
       const { tracking, answers: before } = store.get();
       setBusy(true);
@@ -35,7 +43,14 @@ export function usePlanOps(plan: Plan, today: string, notify: Notify) {
         })
         .then((answer) => {
           if (answer.type !== 'plan') return;
-          store.commitPlan(answer.plan, () => ({ answers }));
+          // A receipt in «Новости от Кики» (already read: the person did it).
+          store.commitPlan(answer.plan, (data) => ({
+            answers,
+            letters: [
+              ...data.letters,
+              changeLetter(data.letters, receipt, new Date(), Math.random),
+            ],
+          }));
           onDone?.();
           notify(done, {
             label: menu.meals.undo,
@@ -59,14 +74,23 @@ export function usePlanOps(plan: Plan, today: string, notify: Notify) {
 
   const changeGoal = useCallback(
     (answers: QuizAnswersV1, onDone?: () => void) => {
-      run(answers, undefined, menu.goalSheet.applied, onDone);
+      run(
+        answers,
+        undefined,
+        menu.goalSheet.applied,
+        fill(menu.news.letters.change.goal, {
+          goal: menu.goalSheet.options[answers.goal.goal].toLowerCase(),
+        }),
+        onDone,
+      );
     },
     [run],
   );
 
   const regenerate = useCallback(() => {
     const { answers } = menuStore().get();
-    if (answers) run(answers, freshSeed(), menu.more.regenerated);
+    if (answers)
+      run(answers, freshSeed(), menu.more.regenerated, menu.news.letters.change.regenerate);
   }, [run]);
 
   return { busy, changeGoal, regenerate };

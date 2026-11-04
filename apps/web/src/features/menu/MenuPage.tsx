@@ -31,6 +31,8 @@ import { useStructure } from './meals/useStructure';
 import type { Notify } from './notify';
 import { Nav } from './shell/Nav';
 import { menuStore, parseBackup, useMenu } from './store/store';
+import { newLetters } from './news/letters';
+import { NewsPanel } from './news/NewsPanel';
 import { GoalSheet } from './top/GoalSheet';
 import { MoreMenu } from './top/MoreMenu';
 import { RestoreSheet } from './top/RestoreSheet';
@@ -113,6 +115,43 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const ops = usePlanOps(plan, today, onNotify);
+  const [news, setNews] = useState<{ anchor: HTMLElement; pinned: boolean; keys: boolean } | null>(
+    null,
+  );
+  const newsTimer = useRef<number | undefined>(undefined);
+  const newsLater = useCallback((run: () => void, ms: number) => {
+    window.clearTimeout(newsTimer.current);
+    newsTimer.current = window.setTimeout(run, ms);
+  }, []);
+  const closeNews = useCallback(() => {
+    window.clearTimeout(newsTimer.current);
+    setNews(null);
+  }, []);
+
+  // Letters are written on opening the app: the welcome pair once, then at most one a day (ТЗ фаза 4 §11).
+  useEffect(() => {
+    const store = menuStore();
+    const data = store.get();
+    if (!data.plan) return;
+    const { letters: added, lastLetterDay } = newLetters(
+      {
+        plan: data.plan,
+        tracking: data.tracking,
+        letters: data.letters,
+        settings: data.settings,
+        today,
+        deemphasizeNumbers: data.answers?.guardrails.deemphasizeNumbers ?? false,
+      },
+      new Date(),
+      Math.random,
+    );
+    if (added.length === 0) return;
+    store.update((d) => ({
+      ...d,
+      letters: [...d.letters, ...added],
+      settings: { ...d.settings, lastLetterDay },
+    }));
+  }, [today]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -419,7 +458,23 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
               },
             }}
             onMore={setMoreAt}
-            onBell={soon}
+            newsOpen={news !== null}
+            onBell={(bell, keyboard) => {
+              window.clearTimeout(newsTimer.current);
+              setNews((now) =>
+                now?.pinned ? null : { anchor: bell, pinned: true, keys: keyboard },
+              );
+            }}
+            onBellHover={(bell) => {
+              if (bell)
+                newsLater(() => {
+                  setNews((now) => now ?? { anchor: bell, pinned: false, keys: false });
+                }, MENU.hoverIntentMs);
+              else
+                newsLater(() => {
+                  setNews((now) => (now?.pinned ? now : null));
+                }, MENU.popover.submenuCloseMs);
+            }}
             onKiki={() => {
               setKikiOpen(true);
             }}
@@ -625,6 +680,37 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           else setReplacing(target);
         }}
         onRecipe={soon}
+      />
+      <NewsPanel
+        anchor={news?.anchor ?? null}
+        focusFirst={news?.keys ?? false}
+        letters={letters}
+        plan={plan}
+        today={today}
+        deemphasizeNumbers={deemphasizeNumbers}
+        onClose={closeNews}
+        onPointerEnter={() => {
+          window.clearTimeout(newsTimer.current);
+        }}
+        onPointerLeave={() => {
+          newsLater(() => {
+            setNews((now) => (now?.pinned ? now : null));
+          }, MENU.popover.submenuCloseMs);
+        }}
+        onRead={(ids) => {
+          menuStore().update((d) => ({
+            ...d,
+            letters: d.letters.map((l) => (ids.includes(l.id) ? { ...l, read: true } : l)),
+          }));
+        }}
+        onAskKiki={() => {
+          closeNews();
+          setKikiOpen(true);
+        }}
+        onDownload={() => {
+          closeNews();
+          download('json');
+        }}
       />
       <MoreMenu
         anchor={moreAt}
