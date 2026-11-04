@@ -514,9 +514,10 @@ test.describe('the whole path', () => {
     await expect(page.locator('.quiz-finale-debug pre')).toContainText('"version": 1');
   });
 
-  test('the endless finale offers a fresh start and the privacy sheet after the honest line', async ({
+  test('the whole quiz ends in the menu; Back from it leads to the landing, which now opens it', async ({
     page,
   }) => {
+    // The whole way plus the story (≈ 25 s) up to the end of the pot scene, where the reveal starts.
     test.slow();
     await openQuiz(page);
     await throughGoal(page);
@@ -528,30 +529,16 @@ test.describe('the whole path', () => {
     await choose(page, 'Я не занимаюсь спортом', 'lifestyle');
     await choose(page, 'В основном сидя', 'extraGoals');
     await skipExtraGoals(page);
-    // The honest line comes after 40 s: the page clock jumps over them. A jump, not runFor: running 45 s of animation
-    // frames one by one took WebKit most of the test's budget (a timeout under load in the stage-3 baseline).
-    await page.clock.install();
     await page.getByRole('button', { name: 'Готово' }).click();
     await onScreen(page, 'finale');
-    // Jumps of 5 s until the line is there: the finale's chunk and timers may come a little later under load, and a
-    // jump fires only the timers that exist by then.
-    const honest = page.locator('.quiz-finale-after').getByText(/мы дорабатываем генерацию/);
-    await expect
-      .poll(
-        async () => {
-          await page.clock.fastForward(5_000);
-          return honest.isVisible();
-        },
-        { timeout: 40_000 },
-      )
-      .toBe(true);
-    await expect(
-      page.getByRole('button', { name: 'Как мы используем ваши данные?' }),
-    ).toBeVisible();
-    await page.getByRole('button', { name: 'Пройти тест заново' }).click();
-    await page.clock.fastForward(5_000);
-    await onScreen(page, 'taste', 'Выберите блюдо');
-    await expect.poll(async () => (await draft(page))?.answers.tasteDecisions.length ?? 0).toBe(0);
+    await expect(page.getByRole('heading', { name: 'Моё меню на неделю:' })).toBeVisible({
+      timeout: 60_000,
+    });
+    await expect(page).toHaveURL(/#menu$/);
+    await page.goBack();
+    await expect(page.getByRole('link', { name: 'Открыть моё меню' })).toBeVisible();
+    await page.getByRole('link', { name: 'Открыть моё меню' }).click();
+    await expect(page.getByRole('heading', { name: 'Моё меню на неделю:' })).toBeVisible();
   });
 });
 

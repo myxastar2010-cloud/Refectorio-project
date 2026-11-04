@@ -10,7 +10,7 @@ export type QuizParams = {
   readonly seed: number | null;
   /** ?taste=debug — after the game: the posterior and the top-12 predicted liked/disliked dishes. */
   readonly tasteDebug: boolean;
-  /** ?demo — the finale hides its honest line (screenshots, videos). */
+  /** ?demo — the finale's story plays on and never reveals the menu (screenshots, videos, story tests). */
   readonly demo: boolean;
   /** ?reveal=demo — the finale plays the reveal wave after ≈ 6 s. */
   readonly revealDemo: boolean;
@@ -63,6 +63,10 @@ export type QuizApi = {
   readonly restart: () => void;
   /** Screen readers: a polite announcement (the dish game, the finale). */
   readonly announce: (text: string) => void;
+  /** The menu's chunk (the finale waits for it before the story ends). */
+  readonly prepareMenu: () => Promise<unknown>;
+  /** The story's pulse: the menu page is uncovered from there (phase 4 §1). */
+  readonly revealMenu: (origin: { readonly x: number; readonly y: number }) => void;
 };
 
 export const QuizContext = createContext<QuizApi | null>(null);
@@ -73,20 +77,4 @@ export function useQuiz(): QuizApi {
   return api;
 }
 
-/** «{n} год|года|лет» with Intl.PluralRules('ru'). */
-const pluralRules = new Intl.PluralRules('ru');
-export function pluralRu(n: number, forms: { one: string; few: string; many: string }): string {
-  const rule = pluralRules.select(n);
-  return rule === 'one' ? forms.one : rule === 'few' ? forms.few : forms.many;
-}
-
-/** Fills «{slot}» placeholders of a quiz text. */
-export function fill(template: string, values: Readonly<Record<string, string | number>>): string {
-  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
-    key in values ? String(values[key]) : match,
-  );
-}
-
-/** Russian number formatting with a decimal comma (70,5). */
-export const formatNumber = (value: number) =>
-  new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 }).format(value);
+export { fill, formatNumber, pluralRu } from '../../lib/format';

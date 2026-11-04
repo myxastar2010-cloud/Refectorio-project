@@ -33,6 +33,8 @@ type Props = {
   readonly scrollerRef: Ref<HTMLElement>;
   readonly onScrolled: (scrolled: boolean) => void;
   readonly onCreateMenu: (event: MouseEvent<HTMLAnchorElement>) => void;
+  /** A menu is stored here: the CTA opens it instead of the quiz. */
+  readonly hasMenu: boolean;
   /** Hover, focus or touch on «Создать меню» starts loading the quiz chunk. */
   readonly onPrefetch: () => void;
   /** The empty box that keeps her place in the layout (HeroGirl draws her under the scenes). */
@@ -50,11 +52,13 @@ export const HeroScene = memo(function HeroScene({
   scrollerRef,
   onScrolled,
   onCreateMenu,
+  hasMenu,
   onPrefetch,
   girlSlotRef,
 }: Props) {
   const calm = useCalmMotion();
   const hidden = phase === 'hidden';
+  const cta = hasMenu ? site.hero.ctaOpen : site.hero.cta;
   const {
     setHost: ctaRef,
     handlers: ctaWave,
@@ -105,7 +109,7 @@ export const HeroScene = memo(function HeroScene({
         <TiltGlare maxDeg={TILT.ctaMaxDeg} className="cta-tilt">
           <m.a
             ref={ctaRef}
-            href={site.hero.cta.href}
+            href={cta.href}
             variants={heroFadeVariants(2, calm)}
             className="cta wave-host"
             onClick={(event) => {
@@ -126,10 +130,10 @@ export const HeroScene = memo(function HeroScene({
             }}
           >
             <span className="wave-content">
-              <span>{site.hero.cta.label}</span>
+              <span>{cta.label}</span>
             </span>
             <WaveLayer clipPath={ctaClip} className="wave-layer--ink">
-              <span>{site.hero.cta.label}</span>
+              <span>{cta.label}</span>
             </WaveLayer>
           </m.a>
         </TiltGlare>

@@ -10,6 +10,7 @@ import type { SearchHit } from './search';
 import type { Tracking } from './tracking';
 import type { Meal, Plan, SlotRef } from './types';
 import type { ProfileError } from './profile';
+import type { ItemView } from './view';
 import type { PlanError } from './generate';
 
 export type GenerateMessage = {
@@ -52,7 +53,15 @@ export type SearchMessage = {
 };
 
 export type MenuRequest = { readonly id: number } & (
-  { readonly type: 'init' } | GenerateMessage | ApplyMessage | AlternativesMessage | SearchMessage
+  | { readonly type: 'init' }
+  /** What the page shows about every item (names, allergens, portions, nutrients, ingredients). */
+  | { readonly type: 'catalog' }
+  /** The person's structure limits (the fewest main meals), so the page offers only allowed edits. */
+  | { readonly type: 'limits'; readonly answers: unknown }
+  | GenerateMessage
+  | ApplyMessage
+  | AlternativesMessage
+  | SearchMessage
 );
 
 export type MenuStage = 'loading' | 'profile' | 'planning' | 'polishing' | 'done';
@@ -83,4 +92,6 @@ export type MenuResponse =
       readonly alternatives: readonly Alternative[];
     }
   | { readonly id: number; readonly type: 'search'; readonly hits: readonly SearchHit[] }
+  | { readonly id: number; readonly type: 'catalog'; readonly items: readonly ItemView[] }
+  | { readonly id: number; readonly type: 'limits'; readonly minMainMeals: number }
   | { readonly id: number; readonly type: 'error'; readonly error: MenuError };

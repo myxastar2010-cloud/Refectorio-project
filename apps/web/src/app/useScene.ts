@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type Scene = 'hero' | 'about' | 'pricing' | 'quiz';
+export type Scene = 'hero' | 'about' | 'pricing' | 'quiz' | 'menu';
 
 export const ABOUT_HASH = '#about';
 export const PRICING_HASH = '#pricing';
 export const QUIZ_HASH = '#quiz';
+export const MENU_HASH = '#menu';
 
 const HASH_SCENES: Readonly<Record<string, Scene>> = {
   [ABOUT_HASH]: 'about',
@@ -12,7 +13,11 @@ const HASH_SCENES: Readonly<Record<string, Scene>> = {
   [QUIZ_HASH]: 'quiz',
 };
 
-const sceneFromHash = (hash: string): Scene => HASH_SCENES[hash] ?? 'hero';
+/** The menu app owns #menu, #recipes, #recipes/<id> and #kiki (its own routes, phase 4 §2). */
+const MENU_ROUTE = /^#(menu|kiki|recipes(\/[\w-]+)?)$/;
+
+const sceneFromHash = (hash: string): Scene =>
+  HASH_SCENES[hash] ?? (MENU_ROUTE.test(hash) ? 'menu' : 'hero');
 
 /**
  * History entries the site writes. Inside the quiz every step and every dish answer is an entry of its own (`quiz` =
@@ -64,8 +69,8 @@ export function useScene() {
   const go = useCallback((next: Scene) => {
     if (sceneRef.current === next) return;
     const state = window.history.state as HistoryState;
-    if (next === 'about' || next === 'pricing') {
-      const hash = next === 'about' ? ABOUT_HASH : PRICING_HASH;
+    if (next === 'about' || next === 'pricing' || next === 'menu') {
+      const hash = next === 'about' ? ABOUT_HASH : next === 'pricing' ? PRICING_HASH : MENU_HASH;
       window.history.pushState({ scene: next } satisfies HistoryState, '', hash);
     } else if (next === 'quiz') {
       window.history.pushState(
@@ -73,8 +78,8 @@ export function useScene() {
         '',
         QUIZ_HASH,
       );
-    } else if (state?.scene === 'about' || state?.scene === 'pricing') {
-      // We added the #about / #pricing entry ourselves: going back keeps the history short and Back predictable.
+    } else if (state?.scene === 'about' || state?.scene === 'pricing' || state?.scene === 'menu') {
+      // We added the #about / #pricing / #menu entry ourselves: going back keeps the history short and Back predictable.
       window.history.back();
     } else {
       const { pathname, search } = window.location;
@@ -86,22 +91,27 @@ export function useScene() {
   }, []);
 
   /**
-   * Leaves the quiz for the landing in one action, rewinding the quiz's own history entries so Back on the landing
-   * never re-enters it (ТЗ §7.4). A quiz opened directly (no landing entry before it) replaces its entry instead.
+   * Leaves the quiz for the landing — or, after the reveal, for the menu — in one action, rewinding the quiz's own
+   * history entries so Back never re-enters it (ТЗ §7.4): Back from the menu leads to the landing. A quiz opened
+   * directly (no landing entry before it) replaces its entry instead.
    */
-  const leaveQuiz = useCallback(() => {
+  const leaveQuiz = useCallback((to: 'hero' | 'menu' = 'hero') => {
     if (sceneRef.current !== 'quiz') return;
     const state = window.history.state as HistoryState;
     const depth = state?.quiz ?? 0;
     const fromLanding = state?.fromLanding === true;
     const { pathname, search } = window.location;
-    sceneRef.current = 'hero';
+    sceneRef.current = to;
     setInstant(false);
-    setScene('hero');
+    setScene(to);
     const finish = () => {
       leavingRef.current = false;
       leavingQuizNow = false;
-      if (!fromLanding) {
+      if (to === 'menu') {
+        const entry = { scene: 'menu' } satisfies HistoryState;
+        if (fromLanding) window.history.pushState(entry, '', MENU_HASH);
+        else window.history.replaceState(entry, '', pathname + search + MENU_HASH);
+      } else if (!fromLanding) {
         window.history.replaceState(
           { scene: 'hero' } satisfies HistoryState,
           '',

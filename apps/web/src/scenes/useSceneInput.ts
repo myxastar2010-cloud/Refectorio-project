@@ -65,8 +65,8 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
     // (inertia included); only a gesture that starts at the edge switches scenes.
     let nativeUntilMs = Number.NEGATIVE_INFINITY;
 
-    // The quiz owns all input while it is open (ТЗ §7.1): scene gestures never switch scenes there.
-    const inQuiz = () => sceneRef.current === 'quiz';
+    // The quiz owns all input while it is open (ТЗ §7.1), the menu likewise: scene gestures never switch scenes there.
+    const inQuiz = () => sceneRef.current === 'quiz' || sceneRef.current === 'menu';
 
     const onWheel = (event: WheelEvent) => {
       if (inQuiz()) return;

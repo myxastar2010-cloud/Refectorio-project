@@ -13,6 +13,7 @@ import {
   buildMenuProfile,
   buildSearchIndex,
   canonicalJson,
+  catalogView,
   extendHorizon,
   generate,
   regenerate,
@@ -81,6 +82,10 @@ export function handle(request: MenuRequest, post: Post): void {
       post({ id, type: 'ready' });
       return;
     }
+    if (request.type === 'catalog') {
+      post({ id, type: 'catalog', items: catalogView(loadFoods(), texts) });
+      return;
+    }
     if (request.type === 'search') {
       const index = buildSearchIndex(request.plan, loadFoods(), texts);
       post({ id, type: 'search', hits: search(index, request.query) });
@@ -90,6 +95,10 @@ export function handle(request: MenuRequest, post: Post): void {
     const profile = profileFor(request.answers);
     if (!profile.ok) {
       post({ id, type: 'error', error: { code: 'profile', error: profile.error } });
+      return;
+    }
+    if (request.type === 'limits') {
+      post({ id, type: 'limits', minMainMeals: profile.value.safety.minMainMeals });
       return;
     }
     const engine = { profile: profile.value, foods: loadFoods() };

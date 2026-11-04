@@ -14,8 +14,8 @@ import { tasteProfileOf } from '../tinder/tasteSession';
 import { Captions } from './Captions';
 import { captionsFor } from './captionPlan';
 import { Handoff, type Box, type Point } from './Handoff';
-import { RevealWave } from './RevealWave';
 import { Story } from './Story';
+import type { MenuClientError } from '../../menu/engine/client';
 import { useMenuGeneration, type MenuGeneration } from '../../menu/engine/useMenuGeneration';
 
 /** `?debug=answers`: the validated JSON of the answers. */
@@ -57,14 +57,90 @@ function coreSize(): number {
   );
 }
 
+/** The step a failed generation sends back to: the diet, from where allergies and dislikes follow (phase 4 §1). */
+const CONFLICT_STEP = 'foodStyle';
+
+/** Our own failures (worker, timeout) — the others come from the answers. */
+const ownFailure = (error: MenuClientError) =>
+  error.code === 'worker' ||
+  error.code === 'timeout' ||
+  error.code === 'cancelled' ||
+  error.code === 'internal';
+
+/** The menu could not be made: a calm screen in the finale's style (ТЗ фаза 4 §1). */
+function GenerationFailed({
+  error,
+  onRetry,
+}: {
+  readonly error: MenuClientError;
+  readonly onRetry: () => void;
+}) {
+  const { state, backBy, calm } = useQuiz();
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    focusQuietly(titleRef.current);
+  }, []);
+  const steps = (() => {
+    const at = state.history.lastIndexOf(CONFLICT_STEP);
+    return at >= 0 ? state.history.length - at : 1;
+  })();
+  return (
+    <m.div
+      className="quiz-finale-failed"
+      role="alert"
+      initial={calm ? { opacity: 0 } : { opacity: 0, y: 8 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        transition: { duration: DURATION.fade * 3, ease: EASE_OUT_SOFT },
+      }}
+    >
+      <h2 ref={titleRef} tabIndex={-1} className="quiz-finale-failed-title">
+        {quiz.finale.failed.title}
+      </h2>
+      <p className="quiz-finale-honest">
+        {ownFailure(error) ? quiz.finale.failed.broken : quiz.finale.failed.infeasible}
+      </p>
+      <div className="quiz-refused-actions">
+        <PillButton tone="accent" onClick={onRetry}>
+          {quiz.finale.failed.retry}
+        </PillButton>
+        <PillButton
+          tone="outline"
+          onClick={() => {
+            backBy(steps);
+          }}
+        >
+          {quiz.finale.failed.change}
+        </PillButton>
+      </div>
+    </m.div>
+  );
+}
+
+function RestartButton() {
+  const { restart } = useQuiz();
+  return (
+    <button type="button" className="quiz-finale-again" onClick={restart}>
+      {quiz.finale.again}
+    </button>
+  );
+}
+
 /**
- * «Готовим меню» (ТЗ §12, stage 3 §7): the bar fills to 100 % with a shimmer, detaches, becomes a red dot and glides to
- * the centre, where it becomes the pencil's tip of the generation story; the captions follow its scenes. The food keeps
- * drifting, blurred, as in the other steps. Generation never ends yet — after ≈ 40 s an honest line says so (hidden by
- * `?demo`).
+ * «Готовим меню» (ТЗ §12, stage 3 §7, stage 4 phase 4 §1): the bar fills to 100 % with a shimmer, detaches, becomes a
+ * dot and glides to the centre, where it becomes the pencil's tip of the generation story. The menu is made in the
+ * worker meanwhile; once it is stored and the menu's code is here, the story ends at the end of the pot scene in a
+ * bright pulse (from the dots loop at once, if it took longer) and the reveal wave uncovers the menu from there.
  */
-function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
-  const { safety, calm, params, announce, detachBar, restart } = useQuiz();
+function Generating({
+  result,
+  onRetry,
+}: {
+  readonly result: QuizAnswersV1 | null;
+  readonly onRetry: () => void;
+}) {
+  const { safety, calm, params, announce, detachBar, prepareMenu, revealMenu } = useQuiz();
   const captions = useMemo(
     () => captionsFor(safety.decision.deemphasizeNumbers),
     [safety.decision.deemphasizeNumbers],
@@ -75,13 +151,31 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
   const [handoff, setHandoff] = useState<{ from: Box; to: Point } | null>(null);
   const [grown, setGrown] = useState(calm);
   const [captionIndex, setCaptionIndex] = useState(-1);
-  const [honest, setHonest] = useState(false);
-  const [revealAt, setRevealAt] = useState<Point | null>(null);
   const [dotPx, setDotPx] = useState(24);
-  // A health text the menu cannot follow: the honest line says so too (review-health-synonyms.md B.4, 3).
-  const unmatchedHealth = safety.decision.reasons.includes('OTHER_CHRONIC');
-  // The menu is generated while the story plays (ТЗ фаза 3 §9; the reveal comes in phase 4).
   const generation = useMenuGeneration(result, params.seed);
+  const [chunk, setChunk] = useState<'loading' | 'ready' | 'failed'>('loading');
+  useEffect(() => {
+    let alive = true;
+    prepareMenu().then(
+      () => {
+        if (alive) setChunk('ready');
+      },
+      () => {
+        if (alive) setChunk('failed');
+      },
+    );
+    return () => {
+      alive = false;
+    };
+  }, [prepareMenu]);
+  // `?demo` holds the story (screenshots, videos, the story's own tests).
+  const ready = generation.status === 'ready' && chunk === 'ready' && !params.demo;
+  const failure: MenuClientError | null =
+    generation.status === 'error'
+      ? generation.error
+      : chunk === 'failed'
+        ? { code: 'worker' }
+        : null;
 
   useEffect(() => {
     focusQuietly(titleRef.current);
@@ -126,42 +220,23 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
     [captions, announce],
   );
 
-  // The honest line and the reveal demo.
-  useEffect(() => {
-    const timers = [
-      params.demo
-        ? 0
-        : window.setTimeout(() => {
-            setHonest(true);
-            // The line and its two buttons appear: screen readers hear the line too (WCAG 4.1.3).
-            announce(
-              unmatchedHealth
-                ? `${quiz.finale.honest} ${quiz.finale.unmatchedHealth}`
-                : quiz.finale.honest,
-            );
-          }, FINALE.honestAfterMs),
-    ];
-    if (params.revealDemo) {
-      timers.push(
-        window.setTimeout(() => {
-          setRevealAt(center());
-        }, FINALE.revealDemoAfterMs),
-      );
-    }
-    return () => {
-      for (const timer of timers) window.clearTimeout(timer);
-    };
-  }, [params.demo, params.revealDemo, center, announce, unmatchedHealth]);
+  const onPulse = useCallback(() => {
+    revealMenu(center() ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  }, [center, revealMenu]);
 
   const onArrived = useCallback(() => {
     setGrown(true);
     setHandoff(null);
   }, []);
 
+  // `?reveal=demo`: the story starts at the pot, so the reveal comes within seconds.
+  const startAt = params.story ?? (params.revealDemo ? 'pot' : null);
+
   return (
     <div
       className="quiz-finale"
-      data-paused={honest || undefined}
+      data-paused={failure ? true : undefined}
+      data-menu={generation.status}
       style={{ '--core-size': `${size}px` } as CSSProperties}
     >
       <h2 ref={titleRef} id="quiz-step-title" className="visually-hidden" tabIndex={-1}>
@@ -173,19 +248,21 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
           sizePx={size}
           dotPx={dotPx}
           calm={calm}
-          paused={honest}
+          paused={failure !== null}
           seed={params.seed ?? 0}
           onCaption={onCaption}
-          startAt={params.story}
+          ready={ready}
+          onPulse={onPulse}
+          startAt={startAt}
         />
       </div>
       <div className="quiz-finale-captions">
-        {captionIndex >= 0 ? (
+        {captionIndex >= 0 && !failure ? (
           <Captions captions={captions} index={captionIndex} calm={calm} />
         ) : null}
       </div>
       <AnimatePresence>
-        {honest || !result ? (
+        {result ? null : (
           <m.div
             className="quiz-finale-after"
             initial={{ opacity: 0 }}
@@ -194,26 +271,18 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
               transition: { duration: DURATION.fade * 3, ease: EASE_OUT_SOFT },
             }}
           >
-            <p className="quiz-finale-honest">
-              {result ? quiz.finale.honest : quiz.finale.notSaved}
-            </p>
-            {result && unmatchedHealth ? (
-              <p className="quiz-finale-honest">{quiz.finale.unmatchedHealth}</p>
-            ) : null}
-            {/* The generation never ends in stage 2: a way to start over and to the privacy sheet (delete answers). */}
+            <p className="quiz-finale-honest">{quiz.finale.notSaved}</p>
             <div className="quiz-finale-actions">
               <PrivacyLabel />
-              <button type="button" className="quiz-finale-again" onClick={restart}>
-                {quiz.finale.again}
-              </button>
+              <RestartButton />
             </div>
           </m.div>
-        ) : null}
+        )}
       </AnimatePresence>
+      {failure ? <GenerationFailed error={failure} onRetry={onRetry} /> : null}
       {params.debugAnswers ? <DebugAnswers result={result} /> : null}
       {params.debugMenu ? <DebugMenu generation={generation} /> : null}
       {handoff ? <Handoff from={handoff.from} to={handoff.to} onDone={onArrived} /> : null}
-      {revealAt ? <RevealWave origin={revealAt} calm={calm} /> : null}
     </div>
   );
 }
@@ -274,9 +343,14 @@ export function Finale() {
   useEffect(() => {
     if (result) saveResult(result);
   }, [result]);
+  // «Попробовать снова» starts the generation afresh (a new instance: its own worker request and story).
+  const [attempt, setAttempt] = useState(0);
+  const retry = useCallback(() => {
+    setAttempt((n) => n + 1);
+  }, []);
   return safety.decision.status === 'refused' ? (
     <RefusedScreen result={result} />
   ) : (
-    <Generating result={result} />
+    <Generating key={attempt} result={result} onRetry={retry} />
   );
 }

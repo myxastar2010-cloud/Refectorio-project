@@ -42,6 +42,7 @@ export const siteContentSchema = z.object({
     titleSpoken: text,
     leadLines: lines,
     cta: z.object({ label: text, href: z.string().startsWith('#') }),
+    ctaOpen: z.object({ label: text, href: z.string().startsWith('#') }),
     featuresLabel: text,
     features: z.array(z.object({ title: text, textLines: lines, icon: featureIcon })).length(4),
   }),

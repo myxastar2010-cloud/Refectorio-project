@@ -634,6 +634,10 @@ html[data-modality='keyboard']
 }
 
 .toast {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: calc(100vw - 32px);
   margin: 0;
   padding: 14px 24px;
   border-radius: 9999px;
@@ -641,7 +645,30 @@ html[data-modality='keyboard']
   color: var(--color-on-accent);
   font-size: 18px;
   font-weight: 600;
-  white-space: nowrap;
+}
+
+.toast p {
+  margin: 0;
+}
+
+/* «Отменить»: the toast takes clicks only where its button is. */
+.toast-action {
+  flex: none;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9999px;
+  background-color: rgb(255 255 255 / 0.14);
+  color: var(--color-accent-soft);
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.toast-action:hover,
+.toast-action:focus-visible {
+  outline: none;
+  background-color: rgb(255 255 255 / 0.24);
 }
 
 /* ── Food layer ──────────────────────────────────────────────────────────────────────────── */

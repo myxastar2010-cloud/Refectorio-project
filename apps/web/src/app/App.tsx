@@ -9,18 +9,20 @@ import {
   useState,
   type MouseEvent,
 } from 'react';
-import { Toast, type ToastMessage } from '../components/Toast';
+import { Toast, type ToastAction, type ToastMessage } from '../components/Toast';
 import { site } from '../content/site.ru';
 import { FoodFieldLayer } from '../engine/food-field/FoodFieldLayer';
 import { loadQuiz } from '../features/quiz/loadQuiz';
 import { ProjectDialog } from '../features/team-dialog/ProjectDialog';
 import { TeamDialog } from '../features/team-dialog/TeamDialog';
 import { whenIdle } from '../lib/idle';
+import { hasStoredMenu } from '../lib/menuFlag';
 import { readTestParams } from '../lib/params';
 import { focusQuietly, trackInputModality } from '../lib/quietFocus';
 import { useCalmMotion } from '../motion/hooks';
+import type { Point } from '../features/menu/reveal/RevealWave';
 import type { PlanPictures } from '../features/pricing/pictures';
-import { DURATION, PRICING, QUIZ, SCENE } from '../motion/tokens';
+import { DURATION, MENU, PRICING, QUIZ, SCENE } from '../motion/tokens';
 import { AboutScene } from '../scenes/AboutScene';
 import { HeroGirl } from '../scenes/HeroGirl';
 import { HeroScene } from '../scenes/HeroScene';
@@ -46,6 +48,21 @@ const prefetchPricing = () => {
   void loadPricing().catch(() => {
     pricingRequested = false;
   });
+};
+
+/** The menu app (ТЗ фаза 4): a chunk of its own, fetched during the quiz so the reveal never waits for it. */
+const loadMenu = () => import('../features/menu');
+const lazyMenu = () => lazy(() => loadMenu().then((module) => ({ default: module.MenuScene })));
+let menuRequested: Promise<unknown> | null = null;
+const prefetchMenu = (): Promise<unknown> => {
+  menuRequested ??= loadMenu().catch((error: unknown) => {
+    menuRequested = null;
+    throw error;
+  });
+  return menuRequested;
+};
+const prefetchMenuQuietly = () => {
+  void prefetchMenu().catch(noop);
 };
 
 /** A fresh lazy component: after a failed load the next «Создать меню» must try again, not rethrow. */
@@ -88,10 +105,18 @@ function Page() {
   const pricingRef = useRef<HTMLButtonElement>(null);
   const pricingScrollRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
-  const notify = useCallback((text: string) => {
-    setToast({ text, id: performance.now() });
+  const notify = useCallback((text: string, action?: ToastAction) => {
+    setToast({ text, id: performance.now(), action });
+  }, []);
+  const toastDone = useCallback(() => {
+    setToast(null);
   }, []);
   const [QuizScene, setQuizScene] = useState(lazyQuiz);
+  const [MenuScene, setMenuScene] = useState(lazyMenu);
+  /** The story's pulse: the menu page is uncovered from there (phase 4 §1). */
+  const [menuReveal, setMenuReveal] = useState<Point | null>(null);
+  // Read again whenever the scene changes: the quiz or «Удалить мои данные» may have changed it.
+  const hasMenu = useMemo(() => scene === 'hero' && hasStoredMenu(), [scene]);
   const lockedUntil = useRef(0);
   const busyTimer = useRef(0);
   const aboutTitleRef = useRef<HTMLButtonElement>(null);
@@ -138,6 +163,26 @@ function Page() {
     leaveQuiz();
   }, [calm, leaveQuiz, lockFor]);
 
+  const menuFailed = useCallback(() => {
+    menuRequested = null;
+    setMenuScene(() => lazyMenu());
+    setMenuReveal(null);
+    goScene('hero');
+    notify(site.notices.loadError);
+  }, [goScene, notify]);
+
+  /** The story ends in its pulse: the menu page is uncovered over the quiz, then the quiz leaves the history. */
+  const revealMenu = useCallback((origin: Point) => {
+    setMenuReveal(origin);
+  }, []);
+  const menuRevealed = useCallback(() => {
+    setMenuReveal(null);
+    leaveQuiz('menu');
+  }, [leaveQuiz]);
+  const leaveMenu = useCallback(() => {
+    goScene('hero');
+  }, [goScene]);
+
   const quizFailed = useCallback(() => {
     quizRequested = false;
     setQuizScene(() => lazyQuiz());
@@ -153,7 +198,7 @@ function Page() {
     const from = previousScene.current;
     previousScene.current = scene;
     if (scene === 'about') focusQuietly(aboutTitleRef.current);
-    else if (scene === 'hero' && from === 'quiz') {
+    else if (scene === 'hero' && (from === 'quiz' || from === 'menu')) {
       focusQuietly(document.querySelector<HTMLAnchorElement>('.cta'));
     } else if (scene === 'hero' && from === 'pricing') focusQuietly(pricingRef.current);
     else if (scene === 'hero')
@@ -184,8 +229,12 @@ function Page() {
     // A direct visit to #quiz needs the chunk at once; otherwise it is fetched when the page is idle.
     if (scene === 'quiz') {
       prefetchQuiz();
-      return undefined;
+      // The menu chunk while the person answers (an idle moment): the reveal must never wait for it.
+      return whenIdle(() => {
+        void prefetchMenu().catch(noop);
+      }, QUIZ.prefetchAfterMs);
     }
+    if (scene === 'menu') return undefined;
     let cancel = noop;
     // The two chunks in two idle periods: run in one, they made one long frame (performance audit, F6).
     const timer = window.setTimeout(() => {
@@ -202,9 +251,13 @@ function Page() {
 
   useEffect(() => {
     if (!toast) return;
-    const timer = window.setTimeout(() => {
-      setToast(null);
-    }, TOAST_MS);
+    // A toast with «Отменить» stays longer: there must be time to change one's mind.
+    const timer = window.setTimeout(
+      () => {
+        setToast(null);
+      },
+      toast.action ? MENU.undoToastMs : TOAST_MS,
+    );
     return () => {
       window.clearTimeout(timer);
     };
@@ -214,9 +267,9 @@ function Page() {
   const onCreateMenu = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
-      goScene('quiz');
+      goScene(hasMenu ? 'menu' : 'quiz');
     },
-    [goScene],
+    [goScene, hasMenu],
   );
   const openAbout = useCallback(() => {
     goScene('about');
@@ -353,10 +406,12 @@ function Page() {
   }, [goScene, notify]);
 
   const inQuiz = scene === 'quiz';
+  const inMenu = scene === 'menu';
   return (
     <div ref={pageRef} className="page" data-scene={scene} data-card-open={cardOpen || undefined}>
-      <FoodFieldLayer scene={scene} params={params} cardOpen={cardOpen} />
-      <div className="stage" inert={cardOpen}>
+      {/* The menu has no flying food: the engine stops while it is open (and starts afresh on the landing). */}
+      {inMenu ? null : <FoodFieldLayer scene={scene} params={params} cardOpen={cardOpen} />}
+      <div className="stage" inert={cardOpen || inMenu}>
         <SiteHeader
           phase={scene === 'hero' ? 'shown' : inQuiz ? 'quiz' : 'hidden'}
           instant={instant}
@@ -374,7 +429,8 @@ function Page() {
             scrollerRef={heroRef}
             onScrolled={setHeroScrolled}
             onCreateMenu={onCreateMenu}
-            onPrefetch={prefetchQuiz}
+            hasMenu={hasMenu}
+            onPrefetch={hasMenu ? prefetchMenuQuietly : prefetchQuiz}
             girlSlotRef={girlSlotRef}
           />
           <div className="about-scroller" ref={aboutRef} inert={scene !== 'about'}>
@@ -409,12 +465,30 @@ function Page() {
           {inQuiz && (
             <ChunkBoundary key="quiz" onError={quizFailed}>
               <Suspense fallback={<QuizLoading />}>
-                <QuizScene instant={instant} onExit={exitQuiz} params={params} />
+                <QuizScene
+                  instant={instant}
+                  onExit={exitQuiz}
+                  params={params}
+                  prepareMenu={prefetchMenu}
+                  onMenuReady={revealMenu}
+                />
               </Suspense>
             </ChunkBoundary>
           )}
         </AnimatePresence>
       </div>
+      {inMenu || menuReveal ? (
+        <ChunkBoundary key="menu" onError={menuFailed}>
+          <Suspense fallback={null}>
+            <MenuScene
+              reveal={menuReveal}
+              onRevealed={menuRevealed}
+              onHome={leaveMenu}
+              onNotify={notify}
+            />
+          </Suspense>
+        </ChunkBoundary>
+      ) : null}
       {/* Not in the stage, which lies above the food: her page-coloured box would cut the food (--z-girl). After the
           scene in the tree: she reads its refs in her layout effect. */}
       <HeroGirl
@@ -437,7 +511,7 @@ function Page() {
         onLanded={projectLanded}
         onNotify={notify}
       />
-      <Toast message={toast} />
+      <Toast message={toast} onAction={toastDone} />
     </div>
   );
 }

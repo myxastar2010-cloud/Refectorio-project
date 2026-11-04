@@ -13,6 +13,10 @@ type Props = {
   readonly paused: boolean;
   readonly seed: number;
   readonly onCaption: (index: number) => void;
+  /** The menu is ready: the story ends in a pulse (at the end of the pot, or from the dots at once). */
+  readonly ready: boolean;
+  /** The pulse is at its peak: the reveal wave starts from the centre. */
+  readonly onPulse: () => void;
   /** Test builds: start at this scene. */
   readonly startAt: string | null;
 };
@@ -22,7 +26,18 @@ type Props = {
  * of points — notebook, planet, … — then dots forever. The engine and the drawings are a lazy chunk of their own.
  * Decorative: the captions are the live region.
  */
-export function Story({ started, sizePx, dotPx, calm, paused, seed, onCaption, startAt }: Props) {
+export function Story({
+  started,
+  sizePx,
+  dotPx,
+  calm,
+  paused,
+  seed,
+  onCaption,
+  ready,
+  onPulse,
+  startAt,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const handle = useRef<StoryHandle | null>(null);
   const captionRef = useRef(onCaption);
@@ -30,6 +45,11 @@ export function Story({ started, sizePx, dotPx, calm, paused, seed, onCaption, s
     captionRef.current = onCaption;
   }, [onCaption]);
   const pausedRef = useRef(paused);
+  const pulseRef = useRef(onPulse);
+  useEffect(() => {
+    pulseRef.current = onPulse;
+  }, [onPulse]);
+  const readyRef = useRef(ready);
 
   useEffect(() => {
     if (!started) return undefined;
@@ -51,12 +71,16 @@ export function Story({ started, sizePx, dotPx, calm, paused, seed, onCaption, s
           onCaption: (index) => {
             captionRef.current(index);
           },
+          onPulse: () => {
+            pulseRef.current();
+          },
           startAt:
             __TEST_HOOKS__ && startAt
               ? module.STORY_SCENES.find((id) => id === startAt)
               : undefined,
         });
         handle.current?.setPaused(pausedRef.current);
+        if (readyRef.current) handle.current?.finish();
       },
     );
     return () => {
@@ -70,6 +94,11 @@ export function Story({ started, sizePx, dotPx, calm, paused, seed, onCaption, s
     pausedRef.current = paused;
     handle.current?.setPaused(paused);
   }, [paused]);
+
+  useEffect(() => {
+    readyRef.current = ready;
+    if (ready) handle.current?.finish();
+  }, [ready]);
 
   return (
     <div className="quiz-story" style={{ width: sizePx, height: sizePx }} aria-hidden>

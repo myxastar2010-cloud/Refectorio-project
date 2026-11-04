@@ -399,6 +399,32 @@ export const FINALE = {
   dprMax: 2,
 } as const;
 
+/** The menu page (ТЗ этапа 4, фаза 4 §14). Seconds unless the name says otherwise. */
+export const MENU = {
+  /** Reduced motion: the still pot cross-fades to the menu. */
+  calmRevealMs: 300,
+  /** The menu's content as the wave uncovers it: a short blur-in, groups in a stagger. */
+  intro: { blurPx: 8, durationS: 0.5, staggerS: 0.06, delayS: 0.25 },
+  /** Meal tabs: the cards cross-fade and slide 12 px, 30 ms apart. */
+  tab: { slidePx: 12, durationS: 0.32, staggerS: 0.03 },
+  /** Day change: the cards slide from the side of the new date. */
+  day: { slidePx: 24, durationS: 0.34 },
+  /** Context menus: scale from the origin 0.96 → 1 with a fade; submenus slide 8 px. */
+  popover: { scaleFrom: 0.96, durationS: 0.14, submenuSlidePx: 8 },
+  /** Week paging: one week per gesture; the wheel's inertia tail is ignored for this long. */
+  week: { wheelQuietMs: 420, swipeMinPx: 48, rubberBand: 0.35 },
+  spring: { type: 'spring', stiffness: 420, damping: 38, mass: 0.9 },
+  /** Long press on a day pill (touch): its delay and the movement that cancels it. */
+  longPressMs: 450,
+  longPressSlopPx: 8,
+  /** Search: the typing pause before the engine looks. */
+  searchDebounceMs: 120,
+  /** Hover intent before the notifications panel opens. */
+  hoverIntentMs: 150,
+  /** A toast with «Отменить» stays this long. */
+  undoToastMs: 6000,
+} as const;
+
 /**
  * The generation story (stage 3, §7; ADR 0012): scene lengths, the transformation between drawings (a cloud of points
  * on arcs) and the dots that loop forever. Seconds.
@@ -429,6 +455,25 @@ export const STORY = {
     revealS: 0.4,
   },
   dotR: 2.6,
+  /**
+   * The menu is ready (phase 4 §1): at the end of the pot scene its points gather into a bright pulse at the centre —
+   * or the dots' disc contracts into it — and the reveal wave starts from the pulse at `peakS`.
+   */
+  finish: {
+    fadeOutS: 0.24,
+    appearS: 0.12,
+    gatherFromS: 0.1,
+    gatherS: 0.6,
+    gatherSweepS: 0.22,
+    /** The points spiral in a little on their way (radians). */
+    turn: Math.PI / 3,
+    contractS: 0.75,
+    pulseFromS: 0.42,
+    pulseS: 0.52,
+    pulseR: 128,
+    coreR: 14,
+    peakS: 0.92,
+  },
   /** Reduced motion: still drawings cross-fading. */
   calmHoldS: 3,
   calmFadeS: 0.4,

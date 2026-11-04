@@ -1,17 +1,19 @@
 import type { QuizAnswersV1 } from '@refectorio/contracts';
 import type { MenuStage, Plan } from '@refectorio/menu-core';
 import { useEffect, useState } from 'react';
-import { localIsoDate, menuClient, MenuRequestError, type MenuClientError } from './client';
+import { setStoredMenu } from '../../../lib/menuFlag';
+import { readTestParams } from '../../../lib/params';
+import { loadCatalog } from '../data/catalog';
+import { AVATAR_COUNT } from '../store/schema';
+import { menuStore } from '../store/store';
+import { todayIso } from '../data/today';
+import { menuClient, MenuRequestError, type MenuClientError } from './client';
 
 export type MenuGeneration =
   | { readonly status: 'idle' }
   | { readonly status: 'running'; readonly stage: MenuStage; readonly share: number }
   | { readonly status: 'ready'; readonly plan: Plan; readonly ms: number }
   | { readonly status: 'error'; readonly error: MenuClientError };
-
-/** The last generated plan (phase 4 takes it into the local store and the menu page). */
-let lastPlan: Plan | null = null;
-export const latestPlan = (): Plan | null => lastPlan;
 
 function randomSeed(): number {
   const values = new Uint32Array(1);
@@ -20,8 +22,9 @@ function randomSeed(): number {
 }
 
 /**
- * Starts the menu generation as soon as the finale mounts (ТЗ фаза 3 §9, фаза 4 §1). `seed` — ?seed= for tests;
- * otherwise a fresh random seed per plan.
+ * Makes the menu as soon as the finale mounts (ТЗ фаза 3 §9, фаза 4 §1) and keeps it in the local store. A person who
+ * already has a menu gets it re-planned for the new answers (`regenerate`: past days and marks stay, ADR 0014 §6) —
+ * never a second, unrelated plan. `seed` — ?seed= for tests. «Попробовать снова» remounts the finale's generation.
  */
 export function useMenuGeneration(
   answers: QuizAnswersV1 | null,
@@ -34,19 +37,37 @@ export function useMenuGeneration(
   useEffect(() => {
     if (!answers || answers.guardrails.status === 'refused') return undefined;
     let alive = true;
-    menuClient()
-      .request(
-        { type: 'generate', answers, today: localIsoDate(), seed: seed ?? randomSeed() },
-        {
-          onProgress: (stage, share) => {
-            if (alive) setState({ status: 'running', stage, share });
-          },
-        },
-      )
+    const onProgress = (stage: MenuStage, share: number) => {
+      if (alive) setState({ status: 'running', stage, share });
+    };
+    const store = menuStore();
+    void store
+      .load()
+      .then(({ plan, tracking }) => {
+        const today = todayIso();
+        const planSeed = seed ?? randomSeed();
+        return menuClient().request(
+          plan
+            ? { type: 'apply', op: 'regenerate', answers, plan, today, tracking, seed: planSeed }
+            : { type: 'generate', answers, today, seed: planSeed },
+          { onProgress },
+        );
+      })
       .then((answer) => {
         if (!alive || answer.type !== 'plan') return;
-        lastPlan = answer.plan;
-        setState({ status: 'ready', plan: answer.plan, ms: answer.ms });
+        store.commitPlan(answer.plan, (data) => ({
+          answers,
+          settings: {
+            ...data.settings,
+            // The avatar is chosen once, with the first menu (ТЗ фаза 4 §12).
+            avatar: data.settings.avatar ?? Math.floor(Math.random() * AVATAR_COUNT),
+          },
+        }));
+        if (!readTestParams(window.location.search).menuDemo) setStoredMenu(true);
+        // The page's item texts too: the reveal shows the menu complete from its first frame.
+        return loadCatalog().then(() => {
+          if (alive) setState({ status: 'ready', plan: answer.plan, ms: answer.ms });
+        });
       })
       .catch((error: unknown) => {
         if (!alive) return;

@@ -30,6 +30,8 @@ export const site = {
       'если весь день не встаёте из-за стола',
     ],
     cta: { label: 'Создать меню', href: '#quiz' },
+    /** A menu is stored in this browser (ТЗ фаза 4 §13). */
+    ctaOpen: { label: 'Открыть моё меню', href: '#menu' },
     featuresLabel: 'Возможности ПроЛанч',
     features: [
       {

@@ -2873,6 +2873,26 @@ html:has(.page[data-scene='quiz']) body {
   text-wrap: pretty;
 }
 
+/* The menu could not be made (stage 4, phase 4 §1): a calm card over the paused story. */
+.quiz-finale-failed {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 var(--q-gutter);
+  background-color: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  text-align: center;
+}
+
+.quiz-finale-failed-title {
+  font-size: max(24px, calc(44 * var(--q)));
+  font-weight: 800;
+  outline: none;
+}
+
 .quiz-finale-debug {
   width: min(100%, 900px);
   margin-top: 24px;
@@ -2894,55 +2914,6 @@ html:has(.page[data-scene='quiz']) body {
   background-color: rgb(0 0 0 / 0.05);
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
   white-space: pre-wrap;
-}
-
-/* The reveal wave (ТЗ §12.5, ?reveal=demo). */
-.quiz-reveal {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-scene);
-  pointer-events: none;
-}
-
-.quiz-reveal-content {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background-color: var(--color-bg);
-  clip-path: circle(0 at 50% 50%);
-  pointer-events: auto;
-}
-
-.quiz-reveal-text {
-  padding: 0 var(--q-gutter);
-  font-size: max(24px, calc(56 * var(--q)));
-  font-weight: 700;
-  -webkit-text-stroke: var(--type-hero-title-stroke) currentColor;
-  paint-order: stroke fill;
-  text-align: center;
-}
-
-.quiz-reveal-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.quiz-reveal-ring {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 200px;
-  height: 200px;
-  margin: -100px 0 0 -100px;
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 3px var(--color-accent-soft),
-    0 0 18px 8px color-mix(in srgb, var(--color-accent) 45%, transparent);
-  transform-origin: 50% 50%;
-  will-change: transform, opacity;
 }
 
 /* ── Reduced motion: no shimmer bands moving, no pulses ─────────────────────────────────── */

@@ -1,4 +1,4 @@
-import './zodConfig';
+import '../../lib/zodConfig';
 import '../../styles/quiz.css';
 
 import type { TasteDecision } from '@refectorio/contracts';
@@ -30,6 +30,10 @@ type Props = {
   readonly instant: boolean;
   readonly onExit: () => void;
   readonly params: TestParams;
+  /** Loads the menu's chunk (the finale reveals the menu only when it is here). */
+  readonly prepareMenu: () => Promise<unknown>;
+  /** The story's pulse: the menu page is uncovered from this point (phase 4 §1). */
+  readonly onMenuReady: (origin: { readonly x: number; readonly y: number }) => void;
 };
 
 const quizParams = readQuizParams(window.location.search);
@@ -63,7 +67,7 @@ function startState(seed: number | null): { state: QuizState; resumed: boolean }
  * guest draft in localStorage after every answer, mirrored in the browser history (one entry per step and per dish
  * answer).
  */
-export function QuizScene({ instant, onExit, params }: Props) {
+export function QuizScene({ instant, onExit, params, prepareMenu, onMenuReady }: Props) {
   const calm = useCalmMotion();
   const seed = quizParams.seed ?? params.seed;
   const [initial] = useState(() => startState(seed));
@@ -143,8 +147,21 @@ export function QuizScene({ instant, onExit, params }: Props) {
       exit: onExit,
       restart,
       announce,
+      prepareMenu,
+      revealMenu: onMenuReady,
     }),
-    [state, safety, calm, history.back, history.backBy, onExit, restart, announce],
+    [
+      state,
+      safety,
+      calm,
+      history.back,
+      history.backBy,
+      onExit,
+      restart,
+      announce,
+      prepareMenu,
+      onMenuReady,
+    ],
   );
 
   const screen = state.screen;

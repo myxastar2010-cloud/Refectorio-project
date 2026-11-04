@@ -336,7 +336,7 @@ const smooth = (a: number, b: number, v: number) => {
 };
 
 /** A soft round light: a radial gradient with a Gaussian-like falloff (no rim), down to zero alpha. */
-const GLOW_STOPS = [
+export const GLOW_STOPS = [
   [0, 1],
   [0.18, 0.88],
   [0.36, 0.62],
@@ -346,9 +346,9 @@ const GLOW_STOPS = [
   [1, 0],
 ] as const;
 
-type Rgb = readonly [number, number, number];
+export type Rgb = readonly [number, number, number];
 
-const rgbOf = (hex: string): Rgb => {
+export const rgbOf = (hex: string): Rgb => {
   const h = hex.replace('#', '');
   const v = Number.parseInt(h.length === 3 ? h.replace(/(.)/g, '$1$1') : h, 16);
   return [(v >> 16) & 255, (v >> 8) & 255, v & 255];

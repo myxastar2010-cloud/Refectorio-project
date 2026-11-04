@@ -1,6 +1,7 @@
 import { FINALE, STORY } from '../../../../motion/tokens';
 import { decodeScene, type RawStory, type SceneData } from './data';
 import { clamp01, type Palette } from './draw';
+import { drawContract, drawGather, pulseSprite, type FinishKind } from './finish';
 import { drawMorph, planMorph, type MorphPlan } from './morph';
 import { cartScene, craneScene, dotsScene, potScene } from './laterScenes';
 import { notebookScene, planetScene, type SceneContext, type SceneScript } from './scenes';
@@ -20,12 +21,16 @@ export type StoryOptions = {
   readonly seed: number;
   readonly palette: Palette;
   readonly onCaption: (index: number) => void;
+  /** After `finish()`: the pulse is at its brightest (reduced motion: the pot has been held) — the reveal starts. */
+  readonly onPulse: () => void;
   /** Test builds: start at this scene. */
   readonly startAt?: StorySceneId | undefined;
 };
 
 export type StoryHandle = {
   setPaused(paused: boolean): void;
+  /** The menu is ready (ТЗ фаза 4 §1): the story ends in the pulse at the end of the pot, or from the dots at once. */
+  finish(): void;
   dispose(): void;
 };
 
@@ -33,7 +38,7 @@ export type StoryHandle = {
 const BOX_UNITS = 512;
 
 export function createStory(raw: RawStory, options: StoryOptions): StoryHandle | null {
-  const { canvas, sizePx, calm, palette, onCaption } = options;
+  const { canvas, sizePx, calm, palette, onCaption, onPulse } = options;
   const context2d = canvas.getContext('2d');
   if (!context2d) return null;
   const ctx: CanvasRenderingContext2D = context2d;
@@ -96,6 +101,20 @@ export function createStory(raw: RawStory, options: StoryOptions): StoryHandle |
   let time = start;
   let caption = -2;
   let paused = false;
+  /** The pot's last moment (the pot → dots transformation starts there). */
+  const potIndex = DRAWN.length - 1;
+  const potEnd =
+    timeline.steps.find((s) => s.kind === 'morph' && s.from === potIndex)?.start ??
+    timeline.loopStart;
+  let ready = false;
+  let ending: { readonly kind: FinishKind; readonly at: number } | null = null;
+  let pulsed = false;
+  let sprite: HTMLCanvasElement | null = null;
+  const pulse = () => {
+    if (pulsed) return;
+    pulsed = true;
+    onPulse();
+  };
   let raf = 0;
   let last = 0;
   const frames: number[] = [];
@@ -129,6 +148,31 @@ export function createStory(raw: RawStory, options: StoryOptions): StoryHandle |
     }
   }
 
+  function renderEnding(t: number, end: { readonly kind: FinishKind; readonly at: number }) {
+    clear();
+    sprite ??= pulseSprite(palette[2]);
+    const local = t - end.at;
+    if (end.kind === 'gather') {
+      const plan = planOf(potIndex, potIndex + 1);
+      const pot = scripts[potIndex];
+      if (plan && pot) drawGather(ctx, local, plan, pot, palette, sprite);
+    } else {
+      const dotsScript = scripts[scripts.length - 1];
+      if (dotsScript) {
+        drawContract(ctx, local, dotsScript, (t - timeline.loopStart) % timeline.loopS, sprite);
+      }
+    }
+    if (local >= STORY.finish.peakS) pulse();
+  }
+
+  /** When the ending starts: crossing the pot's end with the menu ready, or from the dots loop. */
+  function endingAt(previous: number, now: number) {
+    if (!ready) return null;
+    if (previous <= potEnd && now >= potEnd) return { kind: 'gather' as const, at: potEnd };
+    if (now >= timeline.loopStart) return { kind: 'contract' as const, at: now };
+    return null;
+  }
+
   /** Reduced motion: every scene as a still drawing, cross-fading to the next after a while. */
   function renderCalm(t: number) {
     clear();
@@ -159,9 +203,18 @@ export function createStory(raw: RawStory, options: StoryOptions): StoryHandle |
     last = now;
     if (paused || document.hidden) return;
     // The story's own clock runs a little faster than the wall clock (STORY.speed); the calm stills keep real time.
+    const previous = time;
     time += calm ? dt : dt * STORY.speed;
-    if (calm) renderCalm(time - start);
-    else renderMotion(time);
+    if (calm) {
+      renderCalm(time - start);
+      // The still pot has been held (or the dots are up): a cross-fade to the menu (phase 4 §1).
+      const potHeld = (potIndex + 1) * STORY.calmHoldS - STORY.calmFadeS;
+      if (ready && time - start >= potHeld) pulse();
+    } else {
+      ending ??= endingAt(previous, time);
+      if (ending) renderEnding(time, ending);
+      else renderMotion(time);
+    }
     // Adaptive quality: frames slower than STORY.slowFrameMs on average → half the points from the next
     // transformation on.
     if (dt > 0) frames.push(dt * 1000);
@@ -176,6 +229,9 @@ export function createStory(raw: RawStory, options: StoryOptions): StoryHandle |
   return {
     setPaused(next) {
       paused = next;
+    },
+    finish() {
+      ready = true;
     },
     dispose() {
       cancelAnimationFrame(raf);

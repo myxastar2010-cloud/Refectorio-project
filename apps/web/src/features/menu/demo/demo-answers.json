@@ -1,0 +1,1201 @@
+{
+  "version": 1,
+  "createdAt": "2026-07-20T09:00:00.000Z",
+  "updatedAt": "2026-07-20T09:06:00.000Z",
+  "taste": {
+    "version": 1,
+    "engineVersion": "taste-core@1.0.0",
+    "catalogVersion": "2026-11-02",
+    "seed": 1,
+    "decisions": [],
+    "features": [
+      {
+        "id": "bias",
+        "mean": 0.405,
+        "variance": 0.13
+      },
+      {
+        "id": "has:meat",
+        "mean": 0,
+        "variance": 0.351
+      },
+      {
+        "id": "has:fish",
+        "mean": 0,
+        "variance": 0.333
+      },
+      {
+        "id": "trait:richness",
+        "mean": 0,
+        "variance": 0.175
+      },
+      {
+        "id": "trait:spiciness",
+        "mean": 0,
+        "variance": 0.274
+      },
+      {
+        "id": "trait:sweetness",
+        "mean": 0,
+        "variance": 0.22
+      },
+      {
+        "id": "trait:vegShare",
+        "mean": 0,
+        "variance": 0.152
+      },
+      {
+        "id": "trait:familiarity",
+        "mean": 0.35,
+        "variance": 0.09
+      },
+      {
+        "id": "trait:popularity",
+        "mean": 1.25,
+        "variance": 0.044
+      },
+      {
+        "id": "carb:bread",
+        "mean": 0,
+        "variance": 0.059
+      },
+      {
+        "id": "carb:buckwheat",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "carb:dough",
+        "mean": 0,
+        "variance": 0.059
+      },
+      {
+        "id": "carb:grains",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "carb:none",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "carb:noodles",
+        "mean": 0,
+        "variance": 0.076
+      },
+      {
+        "id": "carb:pasta",
+        "mean": 0,
+        "variance": 0.059
+      },
+      {
+        "id": "carb:potato",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "carb:rice",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "course:baking",
+        "mean": 0,
+        "variance": 0.131
+      },
+      {
+        "id": "course:breakfast",
+        "mean": 0,
+        "variance": 0.073
+      },
+      {
+        "id": "course:dessert",
+        "mean": 0,
+        "variance": 0.117
+      },
+      {
+        "id": "course:main",
+        "mean": 0,
+        "variance": 0.073
+      },
+      {
+        "id": "course:salad",
+        "mean": 0,
+        "variance": 0.095
+      },
+      {
+        "id": "course:side",
+        "mean": 0,
+        "variance": 0.073
+      },
+      {
+        "id": "course:snack",
+        "mean": 0,
+        "variance": 0.073
+      },
+      {
+        "id": "course:soup",
+        "mean": 0,
+        "variance": 0.073
+      },
+      {
+        "id": "cuisine:american",
+        "mean": 0,
+        "variance": 0.104
+      },
+      {
+        "id": "cuisine:caucasian",
+        "mean": 0,
+        "variance": 0.112
+      },
+      {
+        "id": "cuisine:centralAsian",
+        "mean": 0,
+        "variance": 0.112
+      },
+      {
+        "id": "cuisine:chinese",
+        "mean": 0,
+        "variance": 0.122
+      },
+      {
+        "id": "cuisine:eastEuropean",
+        "mean": 0,
+        "variance": 0.112
+      },
+      {
+        "id": "cuisine:european",
+        "mean": 0,
+        "variance": 0.104
+      },
+      {
+        "id": "cuisine:french",
+        "mean": 0,
+        "variance": 0.104
+      },
+      {
+        "id": "cuisine:indian",
+        "mean": 0,
+        "variance": 0.134
+      },
+      {
+        "id": "cuisine:italian",
+        "mean": 0,
+        "variance": 0.104
+      },
+      {
+        "id": "cuisine:japanese",
+        "mean": 0,
+        "variance": 0.122
+      },
+      {
+        "id": "cuisine:korean",
+        "mean": 0,
+        "variance": 0.166
+      },
+      {
+        "id": "cuisine:mediterranean",
+        "mean": 0,
+        "variance": 0.104
+      },
+      {
+        "id": "cuisine:mexican",
+        "mean": 0,
+        "variance": 0.134
+      },
+      {
+        "id": "cuisine:middleEastern",
+        "mean": 0,
+        "variance": 0.112
+      },
+      {
+        "id": "cuisine:russian",
+        "mean": 0,
+        "variance": 0.112
+      },
+      {
+        "id": "cuisine:southeastAsian",
+        "mean": 0,
+        "variance": 0.166
+      },
+      {
+        "id": "flavour:creamy",
+        "mean": 0,
+        "variance": 0.058
+      },
+      {
+        "id": "flavour:garlicky",
+        "mean": 0,
+        "variance": 0.058
+      },
+      {
+        "id": "flavour:herby",
+        "mean": 0,
+        "variance": 0.058
+      },
+      {
+        "id": "flavour:salty",
+        "mean": 0,
+        "variance": 0.058
+      },
+      {
+        "id": "flavour:smoky",
+        "mean": 0,
+        "variance": 0.058
+      },
+      {
+        "id": "flavour:sour",
+        "mean": 0,
+        "variance": 0.058
+      },
+      {
+        "id": "flavour:spicy",
+        "mean": 0,
+        "variance": 0.102
+      },
+      {
+        "id": "flavour:sweet",
+        "mean": 0,
+        "variance": 0.102
+      },
+      {
+        "id": "flavour:umami",
+        "mean": 0,
+        "variance": 0.058
+      },
+      {
+        "id": "method:baked",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "method:boiled",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "method:deepFried",
+        "mean": 0,
+        "variance": 0.067
+      },
+      {
+        "id": "method:fried",
+        "mean": 0,
+        "variance": 0.067
+      },
+      {
+        "id": "method:grilled",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "method:raw",
+        "mean": 0,
+        "variance": 0.067
+      },
+      {
+        "id": "method:smoked",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "method:steamed",
+        "mean": 0,
+        "variance": 0.067
+      },
+      {
+        "id": "method:stewed",
+        "mean": 0,
+        "variance": 0.044
+      },
+      {
+        "id": "protein:beef",
+        "mean": 0,
+        "variance": 0.24
+      },
+      {
+        "id": "protein:dairy",
+        "mean": 0,
+        "variance": 0.121
+      },
+      {
+        "id": "protein:eggs",
+        "mean": 0,
+        "variance": 0.121
+      },
+      {
+        "id": "protein:fish",
+        "mean": 0,
+        "variance": 0.199
+      },
+      {
+        "id": "protein:lamb",
+        "mean": 0,
+        "variance": 0.24
+      },
+      {
+        "id": "protein:legumes",
+        "mean": 0,
+        "variance": 0.131
+      },
+      {
+        "id": "protein:mushrooms",
+        "mean": 0,
+        "variance": 0.109
+      },
+      {
+        "id": "protein:none",
+        "mean": 0,
+        "variance": 0.109
+      },
+      {
+        "id": "protein:pork",
+        "mean": 0,
+        "variance": 0.24
+      },
+      {
+        "id": "protein:poultry",
+        "mean": 0,
+        "variance": 0.218
+      },
+      {
+        "id": "protein:seafood",
+        "mean": 0,
+        "variance": 0.199
+      },
+      {
+        "id": "protein:tofu",
+        "mean": 0,
+        "variance": 0.131
+      },
+      {
+        "id": "texture:chewy",
+        "mean": 0,
+        "variance": 0.032
+      },
+      {
+        "id": "texture:creamy",
+        "mean": 0,
+        "variance": 0.032
+      },
+      {
+        "id": "texture:crispy",
+        "mean": 0,
+        "variance": 0.055
+      },
+      {
+        "id": "texture:crunchy",
+        "mean": 0,
+        "variance": 0.032
+      },
+      {
+        "id": "texture:juicy",
+        "mean": 0,
+        "variance": 0.032
+      },
+      {
+        "id": "texture:liquid",
+        "mean": 0,
+        "variance": 0.032
+      },
+      {
+        "id": "texture:soft",
+        "mean": 0,
+        "variance": 0.032
+      }
+    ],
+    "predictions": [
+      {
+        "dishId": "d_oatmeal",
+        "pLike": 0.732
+      },
+      {
+        "dishId": "d_buckwheat_porridge",
+        "pLike": 0.752
+      },
+      {
+        "dishId": "d_semolina_porridge",
+        "pLike": 0.628
+      },
+      {
+        "dishId": "d_millet_pumpkin_porridge",
+        "pLike": 0.61
+      },
+      {
+        "dishId": "d_syrniki",
+        "pLike": 0.794
+      },
+      {
+        "dishId": "d_oladyi",
+        "pLike": 0.758
+      },
+      {
+        "dishId": "d_blini",
+        "pLike": 0.811
+      },
+      {
+        "dishId": "d_omelette",
+        "pLike": 0.771
+      },
+      {
+        "dishId": "d_fried_eggs",
+        "pLike": 0.77
+      },
+      {
+        "dishId": "d_shakshuka",
+        "pLike": 0.587
+      },
+      {
+        "dishId": "d_tvorog_smetana",
+        "pLike": 0.718
+      },
+      {
+        "dishId": "d_granola_yogurt",
+        "pLike": 0.672
+      },
+      {
+        "dishId": "d_avocado_toast",
+        "pLike": 0.624
+      },
+      {
+        "dishId": "d_pancakes",
+        "pLike": 0.743
+      },
+      {
+        "dishId": "d_cottage_cheese_casserole",
+        "pLike": 0.735
+      },
+      {
+        "dishId": "d_borscht",
+        "pLike": 0.789
+      },
+      {
+        "dishId": "d_shchi",
+        "pLike": 0.723
+      },
+      {
+        "dishId": "d_solyanka",
+        "pLike": 0.73
+      },
+      {
+        "dishId": "d_ukha",
+        "pLike": 0.701
+      },
+      {
+        "dishId": "d_rassolnik",
+        "pLike": 0.65
+      },
+      {
+        "dishId": "d_okroshka",
+        "pLike": 0.714
+      },
+      {
+        "dishId": "d_chicken_noodle_soup",
+        "pLike": 0.773
+      },
+      {
+        "dishId": "d_pea_soup",
+        "pLike": 0.699
+      },
+      {
+        "dishId": "d_mushroom_soup",
+        "pLike": 0.706
+      },
+      {
+        "dishId": "d_pumpkin_cream_soup",
+        "pLike": 0.671
+      },
+      {
+        "dishId": "d_minestrone",
+        "pLike": 0.569
+      },
+      {
+        "dishId": "d_gazpacho",
+        "pLike": 0.532
+      },
+      {
+        "dishId": "d_kharcho",
+        "pLike": 0.696
+      },
+      {
+        "dishId": "d_shurpa",
+        "pLike": 0.592
+      },
+      {
+        "dishId": "d_lentil_soup",
+        "pLike": 0.578
+      },
+      {
+        "dishId": "d_olivier",
+        "pLike": 0.778
+      },
+      {
+        "dishId": "d_herring_under_fur_coat",
+        "pLike": 0.762
+      },
+      {
+        "dishId": "d_vinegret",
+        "pLike": 0.736
+      },
+      {
+        "dishId": "d_caesar_chicken",
+        "pLike": 0.766
+      },
+      {
+        "dishId": "d_greek_salad",
+        "pLike": 0.765
+      },
+      {
+        "dishId": "d_mimosa",
+        "pLike": 0.693
+      },
+      {
+        "dishId": "d_crab_stick_salad",
+        "pLike": 0.743
+      },
+      {
+        "dishId": "d_caprese",
+        "pLike": 0.669
+      },
+      {
+        "dishId": "d_nicoise",
+        "pLike": 0.527
+      },
+      {
+        "dishId": "d_beet_garlic_salad",
+        "pLike": 0.672
+      },
+      {
+        "dishId": "d_cucumber_tomato_salad",
+        "pLike": 0.785
+      },
+      {
+        "dishId": "d_tabbouleh",
+        "pLike": 0.496
+      },
+      {
+        "dishId": "d_coleslaw",
+        "pLike": 0.601
+      },
+      {
+        "dishId": "d_korean_carrot",
+        "pLike": 0.751
+      },
+      {
+        "dishId": "d_beef_stroganoff",
+        "pLike": 0.734
+      },
+      {
+        "dishId": "d_kotlety",
+        "pLike": 0.764
+      },
+      {
+        "dishId": "d_pork_chop",
+        "pLike": 0.729
+      },
+      {
+        "dishId": "d_goulash",
+        "pLike": 0.728
+      },
+      {
+        "dishId": "d_tefteli",
+        "pLike": 0.711
+      },
+      {
+        "dishId": "d_beef_steak",
+        "pLike": 0.724
+      },
+      {
+        "dishId": "d_golubtsy",
+        "pLike": 0.717
+      },
+      {
+        "dishId": "d_stuffed_peppers",
+        "pLike": 0.714
+      },
+      {
+        "dishId": "d_pelmeni",
+        "pLike": 0.774
+      },
+      {
+        "dishId": "d_french_style_meat",
+        "pLike": 0.733
+      },
+      {
+        "dishId": "d_liver_onions",
+        "pLike": 0.606
+      },
+      {
+        "dishId": "d_pork_ribs",
+        "pLike": 0.718
+      },
+      {
+        "dishId": "d_burger",
+        "pLike": 0.756
+      },
+      {
+        "dishId": "d_zharkoe",
+        "pLike": 0.737
+      },
+      {
+        "dishId": "d_kholodets",
+        "pLike": 0.656
+      },
+      {
+        "dishId": "d_chicken_kiev",
+        "pLike": 0.724
+      },
+      {
+        "dishId": "d_roast_chicken",
+        "pLike": 0.776
+      },
+      {
+        "dishId": "d_chicken_sour_cream",
+        "pLike": 0.717
+      },
+      {
+        "dishId": "d_chicken_wings",
+        "pLike": 0.727
+      },
+      {
+        "dishId": "d_turkey_vegetables",
+        "pLike": 0.661
+      },
+      {
+        "dishId": "d_chicken_curry",
+        "pLike": 0.615
+      },
+      {
+        "dishId": "d_chicken_teriyaki",
+        "pLike": 0.692
+      },
+      {
+        "dishId": "d_chicken_fricassee",
+        "pLike": 0.593
+      },
+      {
+        "dishId": "d_chicken_schnitzel",
+        "pLike": 0.721
+      },
+      {
+        "dishId": "d_duck_apples",
+        "pLike": 0.66
+      },
+      {
+        "dishId": "d_baked_salmon",
+        "pLike": 0.725
+      },
+      {
+        "dishId": "d_fried_pollock",
+        "pLike": 0.648
+      },
+      {
+        "dishId": "d_herring_potatoes",
+        "pLike": 0.741
+      },
+      {
+        "dishId": "d_fish_cakes",
+        "pLike": 0.649
+      },
+      {
+        "dishId": "d_smoked_mackerel",
+        "pLike": 0.69
+      },
+      {
+        "dishId": "d_grilled_trout",
+        "pLike": 0.695
+      },
+      {
+        "dishId": "d_fish_and_chips",
+        "pLike": 0.62
+      },
+      {
+        "dishId": "d_tuna_steak",
+        "pLike": 0.57
+      },
+      {
+        "dishId": "d_zander_polish",
+        "pLike": 0.557
+      },
+      {
+        "dishId": "d_steamed_cod",
+        "pLike": 0.592
+      },
+      {
+        "dishId": "d_marinated_fish",
+        "pLike": 0.67
+      },
+      {
+        "dishId": "d_garlic_shrimp",
+        "pLike": 0.713
+      },
+      {
+        "dishId": "d_mussels",
+        "pLike": 0.59
+      },
+      {
+        "dishId": "d_fried_calamari",
+        "pLike": 0.678
+      },
+      {
+        "dishId": "d_seafood_paella",
+        "pLike": 0.631
+      },
+      {
+        "dishId": "d_grilled_octopus",
+        "pLike": 0.503
+      },
+      {
+        "dishId": "d_crab_cakes",
+        "pLike": 0.52
+      },
+      {
+        "dishId": "d_shrimp_tempura",
+        "pLike": 0.627
+      },
+      {
+        "dishId": "d_vegetable_stew",
+        "pLike": 0.69
+      },
+      {
+        "dishId": "d_ratatouille",
+        "pLike": 0.622
+      },
+      {
+        "dishId": "d_falafel",
+        "pLike": 0.616
+      },
+      {
+        "dishId": "d_dal",
+        "pLike": 0.462
+      },
+      {
+        "dishId": "d_draniki",
+        "pLike": 0.768
+      },
+      {
+        "dishId": "d_vegetable_lasagna",
+        "pLike": 0.617
+      },
+      {
+        "dishId": "d_tofu_vegetables",
+        "pLike": 0.484
+      },
+      {
+        "dishId": "d_chickpea_curry",
+        "pLike": 0.503
+      },
+      {
+        "dishId": "d_eggplant_parmigiana",
+        "pLike": 0.556
+      },
+      {
+        "dishId": "d_varenyky_potato",
+        "pLike": 0.773
+      },
+      {
+        "dishId": "d_mushroom_stroganoff",
+        "pLike": 0.529
+      },
+      {
+        "dishId": "d_veggie_burger",
+        "pLike": 0.552
+      },
+      {
+        "dishId": "d_fried_potatoes_mushrooms",
+        "pLike": 0.789
+      },
+      {
+        "dishId": "d_grilled_vegetables",
+        "pLike": 0.718
+      },
+      {
+        "dishId": "d_mashed_potatoes",
+        "pLike": 0.791
+      },
+      {
+        "dishId": "d_spaghetti_bolognese",
+        "pLike": 0.75
+      },
+      {
+        "dishId": "d_carbonara",
+        "pLike": 0.737
+      },
+      {
+        "dishId": "d_pesto_pasta",
+        "pLike": 0.646
+      },
+      {
+        "dishId": "d_navy_pasta",
+        "pLike": 0.737
+      },
+      {
+        "dishId": "d_buckwheat_mushrooms",
+        "pLike": 0.732
+      },
+      {
+        "dishId": "d_mushroom_risotto",
+        "pLike": 0.646
+      },
+      {
+        "dishId": "d_lasagna",
+        "pLike": 0.746
+      },
+      {
+        "dishId": "d_mac_and_cheese",
+        "pLike": 0.66
+      },
+      {
+        "dishId": "d_couscous_vegetables",
+        "pLike": 0.585
+      },
+      {
+        "dishId": "d_egg_fried_rice",
+        "pLike": 0.712
+      },
+      {
+        "dishId": "d_bulgur_vegetables",
+        "pLike": 0.585
+      },
+      {
+        "dishId": "d_buckwheat_merchant",
+        "pLike": 0.7
+      },
+      {
+        "dishId": "d_chicken_mushroom_pasta",
+        "pLike": 0.746
+      },
+      {
+        "dishId": "d_sushi_rolls",
+        "pLike": 0.739
+      },
+      {
+        "dishId": "d_ramen",
+        "pLike": 0.635
+      },
+      {
+        "dishId": "d_pho_bo",
+        "pLike": 0.575
+      },
+      {
+        "dishId": "d_tom_yum",
+        "pLike": 0.585
+      },
+      {
+        "dishId": "d_pad_thai",
+        "pLike": 0.592
+      },
+      {
+        "dishId": "d_kung_pao_chicken",
+        "pLike": 0.56
+      },
+      {
+        "dishId": "d_sweet_sour_pork",
+        "pLike": 0.675
+      },
+      {
+        "dishId": "d_gyoza",
+        "pLike": 0.587
+      },
+      {
+        "dishId": "d_bibimbap",
+        "pLike": 0.521
+      },
+      {
+        "dishId": "d_spring_rolls",
+        "pLike": 0.663
+      },
+      {
+        "dishId": "d_wok_noodles",
+        "pLike": 0.73
+      },
+      {
+        "dishId": "d_poke",
+        "pLike": 0.633
+      },
+      {
+        "dishId": "d_peking_duck",
+        "pLike": 0.642
+      },
+      {
+        "dishId": "d_kimchi_jjigae",
+        "pLike": 0.438
+      },
+      {
+        "dishId": "d_miso_soup",
+        "pLike": 0.592
+      },
+      {
+        "dishId": "d_dim_sum",
+        "pLike": 0.594
+      },
+      {
+        "dishId": "d_khachapuri",
+        "pLike": 0.758
+      },
+      {
+        "dishId": "d_khinkali",
+        "pLike": 0.72
+      },
+      {
+        "dishId": "d_shashlik",
+        "pLike": 0.79
+      },
+      {
+        "dishId": "d_plov",
+        "pLike": 0.777
+      },
+      {
+        "dishId": "d_lagman",
+        "pLike": 0.68
+      },
+      {
+        "dishId": "d_manty",
+        "pLike": 0.706
+      },
+      {
+        "dishId": "d_samsa",
+        "pLike": 0.704
+      },
+      {
+        "dishId": "d_chakhokhbili",
+        "pLike": 0.64
+      },
+      {
+        "dishId": "d_dolma",
+        "pLike": 0.648
+      },
+      {
+        "dishId": "d_lobio",
+        "pLike": 0.586
+      },
+      {
+        "dishId": "d_chebureki",
+        "pLike": 0.714
+      },
+      {
+        "dishId": "d_beshbarmak",
+        "pLike": 0.574
+      },
+      {
+        "dishId": "d_shawarma",
+        "pLike": 0.762
+      },
+      {
+        "dishId": "d_ajapsandali",
+        "pLike": 0.488
+      },
+      {
+        "dishId": "d_lula_kebab",
+        "pLike": 0.726
+      },
+      {
+        "dishId": "d_meat_pirozhki",
+        "pLike": 0.735
+      },
+      {
+        "dishId": "d_cabbage_pie",
+        "pLike": 0.714
+      },
+      {
+        "dishId": "d_pizza_margherita",
+        "pLike": 0.77
+      },
+      {
+        "dishId": "d_pizza_pepperoni",
+        "pLike": 0.77
+      },
+      {
+        "dishId": "d_croissant",
+        "pLike": 0.77
+      },
+      {
+        "dishId": "d_kulebyaka",
+        "pLike": 0.593
+      },
+      {
+        "dishId": "d_vatrushka",
+        "pLike": 0.729
+      },
+      {
+        "dishId": "d_focaccia",
+        "pLike": 0.594
+      },
+      {
+        "dishId": "d_quiche",
+        "pLike": 0.556
+      },
+      {
+        "dishId": "d_rasstegai",
+        "pLike": 0.57
+      },
+      {
+        "dishId": "d_cinnamon_bun",
+        "pLike": 0.763
+      },
+      {
+        "dishId": "d_napoleon",
+        "pLike": 0.781
+      },
+      {
+        "dishId": "d_medovik",
+        "pLike": 0.765
+      },
+      {
+        "dishId": "d_tiramisu",
+        "pLike": 0.736
+      },
+      {
+        "dishId": "d_cheesecake",
+        "pLike": 0.76
+      },
+      {
+        "dishId": "d_ice_cream",
+        "pLike": 0.803
+      },
+      {
+        "dishId": "d_bird_milk_cake",
+        "pLike": 0.745
+      },
+      {
+        "dishId": "d_panna_cotta",
+        "pLike": 0.639
+      },
+      {
+        "dishId": "d_sharlotka",
+        "pLike": 0.776
+      },
+      {
+        "dishId": "d_brownie",
+        "pLike": 0.716
+      },
+      {
+        "dishId": "d_chocolate_fondant",
+        "pLike": 0.651
+      },
+      {
+        "dishId": "d_eclairs",
+        "pLike": 0.764
+      },
+      {
+        "dishId": "d_pavlova",
+        "pLike": 0.58
+      },
+      {
+        "dishId": "d_creme_brulee",
+        "pLike": 0.671
+      },
+      {
+        "dishId": "d_fruit_salad",
+        "pLike": 0.743
+      },
+      {
+        "dishId": "d_kartoshka_cake",
+        "pLike": 0.73
+      },
+      {
+        "dishId": "d_hot_dog",
+        "pLike": 0.721
+      },
+      {
+        "dishId": "d_nachos",
+        "pLike": 0.673
+      },
+      {
+        "dishId": "d_hummus_pita",
+        "pLike": 0.653
+      },
+      {
+        "dishId": "d_bruschetta",
+        "pLike": 0.664
+      },
+      {
+        "dishId": "d_french_fries",
+        "pLike": 0.786
+      },
+      {
+        "dishId": "d_deviled_eggs",
+        "pLike": 0.703
+      },
+      {
+        "dishId": "d_cheese_sandwich",
+        "pLike": 0.772
+      },
+      {
+        "dishId": "d_cheese_plate",
+        "pLike": 0.71
+      },
+      {
+        "dishId": "d_popcorn",
+        "pLike": 0.735
+      },
+      {
+        "dishId": "d_zucchini_caviar",
+        "pLike": 0.712
+      },
+      {
+        "dishId": "d_guacamole",
+        "pLike": 0.604
+      },
+      {
+        "dishId": "d_tacos",
+        "pLike": 0.626
+      },
+      {
+        "dishId": "d_salo",
+        "pLike": 0.631
+      },
+      {
+        "dishId": "d_sauerkraut",
+        "pLike": 0.728
+      }
+    ],
+    "hints": []
+  },
+  "body": {
+    "sex": "female",
+    "ageYears": 29,
+    "heightCm": 166,
+    "weightKg": 68,
+    "mode": "self"
+  },
+  "goal": {
+    "goal": "lose",
+    "targetWeightKg": 63
+  },
+  "diet": "omnivore",
+  "macroProfile": "recommended",
+  "health": {
+    "flags": [],
+    "pregnancy": "none",
+    "lactation": "none",
+    "custom": []
+  },
+  "allergies": {
+    "items": [],
+    "custom": []
+  },
+  "activity": {
+    "exercise": "1to2",
+    "strengthTraining": false,
+    "lifestyle": "mostlySitting",
+    "pal": 1.5,
+    "group": "kfa2"
+  },
+  "extraGoals": [],
+  "guardrails": {
+    "status": "allowed",
+    "reasons": [],
+    "referToDoctor": [],
+    "allowedGoals": ["maintain", "lose", "gain", "habits"],
+    "energyDeficitAllowed": true,
+    "energySurplusAllowed": true,
+    "deemphasizeNumbers": false,
+    "forbiddenRegimes": [],
+    "dishRules": [],
+    "guestOnly": false,
+    "individualEnergy": true
+  },
+  "adjustments": []
+}

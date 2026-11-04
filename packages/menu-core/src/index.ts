@@ -142,6 +142,7 @@ export {
   type SearchIndex,
   type SearchSpan,
 } from './search';
+export { catalogView, type ItemView } from './view';
 export type {
   AlternativesMessage,
   ApplyMessage,

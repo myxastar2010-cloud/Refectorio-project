@@ -302,9 +302,6 @@ export const quizContentSchema = z.object({
   finale: z.object({
     captions: z.array(z.object({ text, icon: z.string().min(1) })).min(6),
     captionsCalm: z.object({ replace: text, with: text }),
-    honest: text,
-    /** Under the honest line: a health text the menu cannot follow (B.4, 3). */
-    unmatchedHealth: text,
     notSaved: text,
     again: text,
     generatingLabel: text,
@@ -315,7 +312,14 @@ export const quizContentSchema = z.object({
       change: text,
       home: text,
     }),
-    revealPlaceholder: text,
+    /** The menu could not be made (phase 4 §1): constraints that leave too few dishes, or our own failure. */
+    failed: z.object({
+      title: text,
+      infeasible: text,
+      broken: text,
+      change: text,
+      retry: text,
+    }),
     debugTitle: text,
     debugMenuTitle: text,
   }),

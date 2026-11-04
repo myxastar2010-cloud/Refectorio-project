@@ -71,6 +71,7 @@
   --z-girl: 5; /* under the food: her page-coloured box must not cut it (scenes/HeroGirl.tsx) */
   --z-food: 10;
   --z-scene: 20;
+  --z-menu: 30; /* the menu app over the landing and the quiz (its reveal too) */
   --z-scrim: 40;
   --z-dialog: 50;
   --z-toast: 60;
