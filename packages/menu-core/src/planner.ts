@@ -1041,7 +1041,10 @@ function restore(s: Snapshot): void {
   s.day.dayCost = s.dayCost;
 }
 
-/** e^(−x) through a rational approximation: arithmetic only, so acceptance is identical on every engine. */
+/**
+ * 1 / (the third-order Taylor sum of e^x): e^(−x) near zero, a heavier tail (≈ 6/x³) further out — still decreasing, and
+ * arithmetic only, so acceptance is identical on every engine (review of phase 3, m15).
+ */
 const acceptance = (x: number) => 1 / (1 + x + (x * x) / 2 + (x * x * x) / 6);
 
 export type SearchStats = {
