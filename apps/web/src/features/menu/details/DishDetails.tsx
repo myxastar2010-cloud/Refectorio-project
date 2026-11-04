@@ -6,13 +6,14 @@ import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { menu } from '../../../content/menu.ru';
 import { useModal } from '../../../components/useModal';
-import { fill, formatAmount, formatNumber, formatWhole } from '../../../lib/format';
+import { fill, formatAmount, formatWhole } from '../../../lib/format';
 import { revealMotion, useCornerMorph } from '../../../motion/cornerMorph';
 import { useCalmMotion } from '../../../motion/hooks';
 import { DURATION } from '../../../motion/tokens';
 import { photosFor, PHOTO_SIZES } from '../../quiz/tinder/photos';
 import { Segmented } from '../components/Segmented';
 import type { Catalog } from '../data/catalog';
+import { portionText } from '../data/portion';
 import { ROLE_ICONS } from '../dishes/roleIcons';
 import { useBackCloses } from '../shell/useBackCloses';
 import { dayMonth, weekdayShort } from '../week/dates';
@@ -334,21 +335,6 @@ function DetailsBody({
   );
 }
 
-function portionLine(view: ItemView, item: PlannedItem): string {
-  const weight = `${formatWhole(item.grams)}\u00a0${menu.units.g}`;
-  const { portion } = item;
-  if (portion.kind === 'volume' && portion.ml)
-    return `${formatWhole(portion.ml)}\u00a0${menu.units.ml}`;
-  if (portion.kind === 'pieces' && portion.pieces)
-    return fill(menu.details.portionWithCount, {
-      amount: `${formatNumber(portion.pieces)}\u00a0${menu.units.pieces}`,
-      weight,
-    });
-  return view.portion.ml !== null && view.role === 'drink'
-    ? `${formatWhole(view.portion.ml * portion.factor)}\u00a0${menu.units.ml}`
-    : weight;
-}
-
 function Overview({
   view,
   item,
@@ -375,7 +361,7 @@ function Overview({
       <dl className="details-facts">
         <div className="details-fact">
           <dt>{menu.details.portion}</dt>
-          <dd>{portionLine(view, item)}</dd>
+          <dd>{portionText(view, item)}</dd>
         </div>
         {deemphasizeNumbers ? null : (
           <>

@@ -68,6 +68,30 @@ const STATES = {
     await page.getByRole('option').first().waitFor();
     await page.getByRole('combobox').press('ArrowDown');
   },
+  more: async (page, touch) => {
+    await page.locator('.menu-top').getByRole('button', { name: 'Ещё' }).click();
+    const item = page.getByRole('menuitem', { name: 'Скачать меню' });
+    if (touch) await item.click();
+    else await item.hover();
+    await page.getByRole('menuitem', { name: 'PDF' }).waitFor();
+  },
+  goal: async (page) => {
+    await page.getByRole('button', { name: /^Цель:/ }).click();
+    await page.getByRole('dialog', { name: 'Цель' }).waitFor();
+    await page.waitForTimeout(500);
+  },
+  /** Saves the PDF and the pictures next to the screenshots (for a reviewer). */
+  downloads: async (page) => {
+    for (const label of ['PDF', 'Картинка (PNG)']) {
+      await page.locator('.menu-top').getByRole('button', { name: 'Ещё' }).click();
+      await page.getByRole('menuitem', { name: 'Скачать меню' }).click();
+      const waiting = page.waitForEvent('download');
+      await page.getByRole('menuitem', { name: label }).click();
+      const file = await waiting;
+      const name = `${String(page.viewportSize()?.width)}-${file.suggestedFilename().split('.').pop() ?? 'bin'}`;
+      await file.saveAs(path.join(args.out, `download-${name}.${name.split('-').pop() ?? ''}`));
+    }
+  },
   'details-kbju': async (page) => {
     await STATES.details(page);
     await page.getByRole('tab', { name: 'КБЖУ' }).click();

@@ -1429,95 +1429,6 @@ html:has(.page[data-scene='quiz']) body {
   color: var(--color-on-accent);
 }
 
-.quiz-wheel-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.quiz-wheel {
-  position: relative;
-  width: 100%;
-  height: calc(var(--q-wheel-row) * 6.6);
-  overflow: hidden;
-  border-radius: calc(32 * var(--q));
-  touch-action: none;
-  cursor: grab;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.quiz-wheel:active {
-  cursor: grabbing;
-}
-
-.quiz-wheel-band {
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 50%;
-  height: var(--q-wheel-row);
-  margin-top: calc(var(--q-wheel-row) / -2);
-  border-radius: 9999px;
-  background-color: rgb(0 0 0 / 0.06);
-}
-
-.quiz-wheel-items {
-  position: absolute;
-  inset: 0;
-}
-
-.quiz-wheel-item {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: var(--q-wheel-row);
-  margin-top: calc(var(--q-wheel-row) / -2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--q-wheel-font);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  will-change: transform, opacity;
-}
-
-.quiz-wheel-unit {
-  position: absolute;
-  top: 50%;
-  left: calc(50% + 2.4em);
-  transform: translateY(-50%);
-  font-size: var(--q-value);
-  font-weight: 600;
-  color: var(--color-ink-muted);
-  pointer-events: none;
-}
-
-.quiz-wheel-input {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 5.5em;
-  height: var(--q-wheel-row);
-  transform: translate(-50%, -50%);
-  border-radius: 9999px;
-  text-align: center;
-  font-size: var(--q-wheel-font);
-  font-weight: 700;
-  background-color: var(--color-bg);
-  box-shadow: inset 0 0 0 2px var(--color-ink);
-  outline: none;
-}
-
-.quiz-wheel-message {
-  min-height: 1.4em;
-  margin-top: 6px;
-  font-size: var(--q-note);
-  color: var(--color-ink-muted);
-}
-
 /* Landscape phones: the sheet fits the low screen — smaller rows, and the drum shows as many as there is room for. */
 @media (orientation: landscape) and (max-height: 31.25rem) and (min-width: 37.5rem) {
   .quiz,
@@ -1535,7 +1446,8 @@ html:has(.page[data-scene='quiz']) body {
     gap: 8px;
   }
 
-  .quiz-wheel {
+  /* Doubled class: wheel.css (imported by the wheel itself) comes later in the bundle. */
+  .quiz-wheel.quiz-wheel {
     height: min(calc(var(--q-wheel-row) * 6.6), calc(100svh - 168px));
   }
 }

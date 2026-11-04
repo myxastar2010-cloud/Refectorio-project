@@ -371,7 +371,7 @@ export const TINDER = {
   photoTimeoutMs: 4000,
 } as const;
 
-/** Wheel picker physics (ТЗ §8.3): item units, seconds. Unit-tested in components/wheelPhysics.ts. */
+/** Wheel picker physics (ТЗ §8.3): item units, seconds. Unit-tested in components/wheel/wheelPhysics.ts. */
 export const WHEEL = {
   visible: 7,
   itemDeg: 18,

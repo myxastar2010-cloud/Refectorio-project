@@ -16,8 +16,8 @@ import { ContinueButton } from '../components/PillButton';
 import { PickerPanel } from '../components/PickerPanel';
 import { useEnterToContinue } from '../components/useEnterToContinue';
 import { StepFrame } from '../components/StepFrame';
-import { WheelPicker } from '../components/WheelPicker';
-import type { WheelRange } from '../components/wheelPhysics';
+import { WheelPicker } from '../../../components/wheel/WheelPicker';
+import type { WheelRange } from '../../../components/wheel/wheelPhysics';
 import { stepDef } from '../flow/steps';
 import type { Answers, QuizSex } from '../flow/types';
 import { fill, formatNumber, pluralRu, useQuiz } from '../quizContext';
@@ -351,6 +351,7 @@ export function RowsStep({ step }: { readonly step: Step }) {
             onCommit={() => {
               commit(open, draft);
             }}
+            messages={quiz.goalSetup}
           />
         ) : null}
       </PickerPanel>

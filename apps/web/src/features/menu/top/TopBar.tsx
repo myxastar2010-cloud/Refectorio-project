@@ -9,10 +9,10 @@ import { goalText } from './goal';
 type Props = {
   readonly answers: QuizAnswersV1 | null;
   readonly unread: boolean;
-  readonly onGoal: () => void;
+  readonly onGoal: (pill: HTMLElement) => void;
   readonly search: SearchFieldProps;
-  readonly onMore: () => void;
-  readonly onBell: () => void;
+  readonly onMore: (button: HTMLElement) => void;
+  readonly onBell: (button: HTMLElement) => void;
   /** Below 1280 px Kiki lives in a sheet: its button sits in the top bar. */
   readonly onKiki: () => void;
 };
@@ -24,7 +24,14 @@ type Props = {
 export function TopBar({ answers, unread, onGoal, search, onMore, onBell, onKiki }: Props) {
   return (
     <div className="menu-top" data-search={search.open || undefined}>
-      <button type="button" className="menu-pill menu-goal" onClick={onGoal} title={menu.goal.hint}>
+      <button
+        type="button"
+        className="menu-pill menu-goal"
+        onClick={(event) => {
+          onGoal(event.currentTarget);
+        }}
+        title={menu.goal.hint}
+      >
         <IconStarFilled className="menu-goal-star" aria-hidden />
         <span>{goalText(answers)}</span>
       </button>
@@ -35,7 +42,9 @@ export function TopBar({ answers, unread, onGoal, search, onMore, onBell, onKiki
           className="menu-round"
           aria-label={menu.top.more}
           aria-haspopup="menu"
-          onClick={onMore}
+          onClick={(event) => {
+            onMore(event.currentTarget);
+          }}
         >
           <IconDots stroke={2.4} aria-hidden />
         </button>
@@ -43,7 +52,9 @@ export function TopBar({ answers, unread, onGoal, search, onMore, onBell, onKiki
           type="button"
           className="menu-round menu-bell"
           aria-label={unread ? menu.top.bellUnread : menu.top.bell}
-          onClick={onBell}
+          onClick={(event) => {
+            onBell(event.currentTarget);
+          }}
         >
           <IconBell stroke={2} aria-hidden />
           {unread ? <span className="menu-bell-dot" aria-hidden /> : null}

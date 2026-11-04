@@ -8,7 +8,7 @@ import type { Rule } from './dsl';
 import type { Alternative, OpError, PlanDiff } from './operations';
 import type { SearchHit } from './search';
 import type { Tracking } from './tracking';
-import type { Meal, Plan, SlotRef } from './types';
+import type { DayTargets, Meal, Plan, SlotRef } from './types';
 import type { ProfileError } from './profile';
 import type { ItemView } from './view';
 import type { PlanError } from './generate';
@@ -58,6 +58,8 @@ export type MenuRequest = { readonly id: number } & (
   | { readonly type: 'catalog' }
   /** The person's structure limits (the fewest main meals), so the page offers only allowed edits. */
   | { readonly type: 'limits'; readonly answers: unknown }
+  /** The day's targets for (changed) answers — the goal sheet's preview, before anything is re-planned. */
+  | { readonly type: 'targets'; readonly answers: unknown }
   | GenerateMessage
   | ApplyMessage
   | AlternativesMessage
@@ -94,4 +96,5 @@ export type MenuResponse =
   | { readonly id: number; readonly type: 'search'; readonly hits: readonly SearchHit[] }
   | { readonly id: number; readonly type: 'catalog'; readonly items: readonly ItemView[] }
   | { readonly id: number; readonly type: 'limits'; readonly minMainMeals: number }
+  | { readonly id: number; readonly type: 'targets'; readonly targets: DayTargets }
   | { readonly id: number; readonly type: 'error'; readonly error: MenuError };

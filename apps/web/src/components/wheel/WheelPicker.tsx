@@ -8,10 +8,10 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from 'react';
-import { quiz } from '../../../content/quiz.ru';
-import { useCalmMotion } from '../../../motion/hooks';
-import { WHEEL } from '../../../motion/tokens';
-import { fill, formatNumber } from '../quizContext';
+import '../../styles/wheel.css';
+import { fill, formatNumber } from '../../lib/format';
+import { useCalmMotion } from '../../motion/hooks';
+import { WHEEL } from '../../motion/tokens';
 import {
   clamp,
   drum,
@@ -40,6 +40,8 @@ export type WheelProps = {
   readonly onLimit?: (edge: 'min' | 'max') => void;
   /** Enter on the wheel = «Готово». */
   readonly onCommit: () => void;
+  /** What a typed value gets: not a number; clamped to the range (`{value}` — with its unit). */
+  readonly messages: { readonly typedInvalid: string; readonly typedClamped: string };
 };
 
 /** DOM slots around the centre: enough for 7 visible rows plus the ones rolling in. */
@@ -60,6 +62,7 @@ export function WheelPicker({
   decimals,
   onLimit,
   onCommit,
+  messages,
 }: WheelProps) {
   const calm = useCalmMotion();
   const count = itemCount(range);
@@ -290,7 +293,7 @@ export function WheelPicker({
     }
     const parsed = parseTyped(typed, range, decimals);
     if (!parsed) {
-      setMessage(quiz.goalSetup.typedInvalid);
+      setMessage(messages.typedInvalid);
       if (!refocus) {
         typingOpen.current = false;
         setTyping(false);
@@ -301,7 +304,7 @@ export function WheelPicker({
     setTyping(false);
     setMessage(
       parsed.clamped
-        ? fill(quiz.goalSetup.typedClamped, {
+        ? fill(messages.typedClamped, {
             value: `${formatNumber(parsed.value)} ${unit(parsed.value)}`,
           })
         : null,

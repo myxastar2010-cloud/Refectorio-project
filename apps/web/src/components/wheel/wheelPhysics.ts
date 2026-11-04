@@ -1,4 +1,4 @@
-import { TINDER, WHEEL } from '../../../motion/tokens';
+import { TINDER, WHEEL } from '../../motion/tokens';
 
 /**
  * Pure maths of the wheel picker (ТЗ §8.3), unit-tested: positions are in «items» (0 = the first value),

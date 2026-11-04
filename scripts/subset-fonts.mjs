@@ -36,5 +36,13 @@ for (const weight of WEIGHTS) {
     `open-runde-${weight}.woff2: ${Math.round(input.length / 1024)} KB → ${Math.round(output.length / 1024)} KB`,
   );
 }
+// The PDF export (features/menu/export) embeds TrueType: the regular and the bold, the same characters.
+for (const weight of [400, 700]) {
+  const input = await readFile(path.join(SOURCE, `files/open-runde-latin-${weight}-normal.woff2`));
+  const output = await subsetFont(input, characters, { targetFormat: 'truetype' });
+  await mkdir(path.join(OUT, 'pdf'), { recursive: true });
+  await writeFile(path.join(OUT, 'pdf', `open-runde-${weight}.ttf`), output);
+  console.log(`pdf/open-runde-${weight}.ttf: ${Math.round(output.length / 1024)} KB`);
+}
 // The OFL travels with the font files.
 await copyFile(path.join(SOURCE, 'LICENSE'), path.join(OUT, 'OFL.txt'));

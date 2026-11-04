@@ -6,6 +6,7 @@
 import type { QuizAnswersV1 } from '@refectorio/contracts';
 import { EMPTY_TRACKING, type Plan, type Tracking } from '@refectorio/menu-core';
 import { useSyncExternalStore } from 'react';
+import type { z } from 'zod';
 import { readTestParams } from '../../../lib/params';
 import { memoryStore, openStore, type KeyValue } from './db';
 import {
@@ -102,6 +103,19 @@ async function readAll(kv: KeyValue): Promise<{ data: MenuData; rev: number }> {
       }),
     },
   };
+}
+
+/** A backup file checked by its format and version (a newer app's file is refused, not half-read). */
+export function parseBackup(
+  file: unknown,
+):
+  | { ok: true; backup: z.output<typeof backupSchema> }
+  | { ok: false; reason: 'format' | 'version' } {
+  const version = typeof file === 'object' && file && 'version' in file ? file.version : null;
+  if (typeof version === 'number' && version > STORE_VERSION)
+    return { ok: false, reason: 'version' };
+  const result = backupSchema.safeParse(file);
+  return result.success ? { ok: true, backup: result.data } : { ok: false, reason: 'format' };
 }
 
 type Listener = () => void;
@@ -214,12 +228,9 @@ export function createMenuStore(open: () => Promise<KeyValue>, channelName: stri
       } as unknown as Backup;
     },
     restore(file) {
-      const version = typeof file === 'object' && file && 'version' in file ? file.version : null;
-      if (typeof version === 'number' && version > STORE_VERSION)
-        return { ok: false, reason: 'version' };
-      const result = backupSchema.safeParse(file);
-      if (!result.success) return { ok: false, reason: 'format' };
-      const { data } = result.data;
+      const result = parseBackup(file);
+      if (!result.ok) return result;
+      const { data } = result.backup;
       api.update(() => ({
         answers: data.profile.answers,
         plan: data.plan.current,

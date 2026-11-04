@@ -182,6 +182,78 @@ test.describe('the menu', () => {
     await expect(title(page)).toBeVisible();
   });
 
+  test('⋯: every download format, then the backup restores the plan after a regenerate', async ({
+    page,
+  }) => {
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    const more = page.locator('.menu-top').getByRole('button', { name: 'Ещё' });
+    const formats = [
+      ['Картинка (PNG)', '.png'],
+      ['Картинка (JPEG)', '.jpg'],
+      ['PDF', '.pdf'],
+      ['Excel (XLSX)', '.xlsx'],
+      ['Таблица (CSV)', '.csv'],
+      ['Календарь (ICS)', '.ics'],
+      ['Текст (TXT)', '.txt'],
+      ['Резервная копия (JSON)', '.json'],
+    ] as const;
+    let backup = '';
+    for (const [label, extension] of formats) {
+      await more.click();
+      await page.getByRole('menuitem', { name: 'Скачать меню' }).click();
+      const waiting = page.waitForEvent('download');
+      await page.getByRole('menuitem', { name: label }).click();
+      const file = await waiting;
+      expect(file.suggestedFilename()).toMatch(new RegExp(`^ПроЛанч — меню .+\\${extension}$`));
+      const path = await file.path();
+      const { size } = await import('node:fs').then((fs) => fs.promises.stat(path));
+      expect(size).toBeGreaterThan(200);
+      if (extension === '.json') backup = path;
+      if (extension === '.pdf') {
+        const head = await import('node:fs').then((fs) => fs.promises.readFile(path));
+        expect(head.subarray(0, 8).toString('latin1')).toBe('%PDF-1.7');
+      }
+    }
+    const names = () => page.locator('.dish-row .dish-open').allTextContents();
+    const before = await names();
+    // Regenerate with a confirm; «Отменить» brings the plan back.
+    await more.click();
+    await page.getByRole('menuitem', { name: 'Перегенерировать меню' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Пересобрать' }).click();
+    await expect(page.getByText('Меню пересобрано')).toBeVisible();
+    await page.getByRole('button', { name: 'Отменить' }).click();
+    await expect.poll(names).toEqual(before);
+    // The backup file: checked, previewed, applied.
+    await more.click();
+    const chooser = page.waitForEvent('filechooser');
+    await page.getByRole('menuitem', { name: 'Загрузить меню из файла' }).click();
+    await (await chooser).setFiles(backup);
+    const sheet = page.getByRole('dialog', { name: 'Загрузить меню из файла' });
+    await expect(sheet).toContainText('Резервная копия от');
+    await sheet.getByRole('button', { name: 'Загрузить' }).click();
+    await expect(page.getByText('Меню загружено из файла')).toBeVisible();
+    await expect.poll(names).toEqual(before);
+  });
+
+  test('the goal sheet: a forbidden goal is greyed, the preview shows the day before → after', async ({
+    page,
+  }) => {
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    await page.getByRole('button', { name: /^Цель:/ }).click();
+    const sheet = page.getByRole('dialog', { name: 'Цель' });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByRole('radio', { checked: true })).toHaveCount(1);
+    await sheet.getByRole('radio', { name: 'Поддерживать вес' }).click();
+    await expect(sheet.getByText(/ккал$/)).toBeVisible();
+    await sheet.getByRole('button', { name: 'Применить' }).click();
+    await expect(page.getByText('Цель изменена — меню пересобрано')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Цель: поддержание веса' })).toBeVisible();
+    await page.getByRole('button', { name: 'Отменить' }).click();
+    await expect(page.getByRole('button', { name: /^Цель: [−+]/ })).toBeVisible();
+  });
+
   test('search: «/» opens it, results by day and meal, arrows and Enter, Esc restores the dishes', async ({
     page,
   }) => {

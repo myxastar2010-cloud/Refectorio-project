@@ -14,6 +14,7 @@ import {
 import { AnimatePresence, m, type Variants } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { menu } from '../../content/menu.ru';
+import { fill } from '../../lib/format';
 import { useCalmMotion } from '../../motion/hooks';
 import { MENU } from '../../motion/tokens';
 import { Pic } from './components/Pic';
@@ -29,8 +30,14 @@ import { MealTabs } from './meals/MealTabs';
 import { useStructure } from './meals/useStructure';
 import type { Notify } from './notify';
 import { Nav } from './shell/Nav';
-import { menuStore, useMenu } from './store/store';
+import { menuStore, parseBackup, useMenu } from './store/store';
+import { GoalSheet } from './top/GoalSheet';
+import { MoreMenu } from './top/MoreMenu';
+import { RestoreSheet } from './top/RestoreSheet';
 import { TopBar } from './top/TopBar';
+import { usePlanOps } from './top/usePlanOps';
+import { Popover } from './components/Popover';
+import type { ExportFormat } from './export';
 import { DayCard } from './week/DayCard';
 import { dayKind } from './week/dates';
 import { SearchResults } from './search/SearchResults';
@@ -96,6 +103,16 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const [dishMenu, setDishMenu] = useState<DishTarget | null>(null);
   const [replacing, setReplacing] = useState<DishTarget | null>(null);
   const [details, setDetails] = useState<DetailsTarget | null>(null);
+  const [moreAt, setMoreAt] = useState<HTMLElement | null>(null);
+  const [goalAt, setGoalAt] = useState<HTMLElement | null>(null);
+  const [confirmAt, setConfirmAt] = useState<HTMLElement | null>(null);
+  const [restoring, setRestoring] = useState<{
+    anchor: HTMLElement;
+    backup: Extract<ReturnType<typeof parseBackup>, { ok: true }>['backup'];
+    file: unknown;
+  } | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const ops = usePlanOps(plan, today, onNotify);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -305,6 +322,73 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
     : null;
   const unread = letters.some((letter) => !letter.read);
 
+  const closeMore = useCallback(() => {
+    setMoreAt(null);
+  }, []);
+  const closeGoal = useCallback(() => {
+    setGoalAt(null);
+  }, []);
+  const closeRestore = useCallback(() => {
+    setRestoring(null);
+  }, []);
+
+  /** A download of the visible week: the export chunk renders it (ТЗ фаза 4 §10). */
+  const download = useCallback(
+    (format: ExportFormat) => {
+      const store = menuStore();
+      onNotify(menu.export.preparing);
+      import('./export')
+        .then(({ renderExport, saveFile }) =>
+          renderExport({
+            format,
+            plan,
+            catalog,
+            answers,
+            date,
+            landscape: window.innerWidth > window.innerHeight,
+            backup: () => store.backup(),
+          }).then(async ({ blob, name }) => {
+            await saveFile(blob, name);
+            onNotify(fill(menu.export.saved, { name }));
+          }),
+        )
+        .catch((error: unknown) => {
+          // The person closed the share sheet: nothing to report.
+          if (error instanceof DOMException && error.name === 'AbortError') return;
+          onNotify(menu.export.failed);
+        });
+    },
+    [plan, catalog, answers, date, onNotify],
+  );
+
+  /** «Загрузить меню из файла»: read, check its format and version, then show what it holds before replacing. */
+  const readBackup = useCallback(
+    (file: File) => {
+      file
+        .text()
+        .then((text) => {
+          let json: unknown;
+          try {
+            json = JSON.parse(text);
+          } catch {
+            onNotify(menu.restore.format);
+            return;
+          }
+          const parsed = parseBackup(json);
+          if (!parsed.ok) {
+            onNotify(parsed.reason === 'version' ? menu.restore.version : menu.restore.format);
+            return;
+          }
+          const anchor = document.querySelector<HTMLElement>('.menu-top .menu-round');
+          if (anchor) setRestoring({ anchor, backup: parsed.backup, file: json });
+        })
+        .catch(() => {
+          onNotify(menu.restore.format);
+        });
+    },
+    [onNotify],
+  );
+
   return (
     <div className="menu-app" data-kiki-open={kikiOpen || undefined}>
       <m.div className="menu-nav-slot" {...group(0)}>
@@ -315,7 +399,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           <TopBar
             answers={answers}
             unread={unread}
-            onGoal={soon}
+            onGoal={setGoalAt}
             search={{
               open: searchOpen,
               query,
@@ -334,7 +418,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
                 if (entry && element) openFound(entry, element);
               },
             }}
-            onMore={soon}
+            onMore={setMoreAt}
             onBell={soon}
             onKiki={() => {
               setKikiOpen(true);
@@ -541,6 +625,102 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           else setReplacing(target);
         }}
         onRecipe={soon}
+      />
+      <MoreMenu
+        anchor={moreAt}
+        onClose={closeMore}
+        onGoal={() => {
+          const pill = document.querySelector<HTMLElement>('.menu-goal');
+          setMoreAt(null);
+          setGoalAt(pill);
+        }}
+        onRegenerate={() => {
+          const anchor = moreAt;
+          setMoreAt(null);
+          setConfirmAt(anchor);
+        }}
+        onDownload={(format) => {
+          setMoreAt(null);
+          download(format);
+        }}
+        onRestore={() => {
+          setMoreAt(null);
+          fileInput.current?.click();
+        }}
+      />
+      <Popover
+        anchor={confirmAt}
+        label={menu.more.regenerate}
+        role="alertdialog"
+        onClose={() => {
+          setConfirmAt(null);
+        }}
+      >
+        <div className="meal-confirm">
+          <p>{menu.more.regenerateConfirm}</p>
+          <div className="meal-confirm-actions">
+            <button
+              type="button"
+              className="menu-pill menu-pill--accent"
+              disabled={ops.busy}
+              onClick={() => {
+                setConfirmAt(null);
+                ops.regenerate();
+              }}
+            >
+              {menu.more.regenerateYes}
+            </button>
+            <button
+              type="button"
+              className="menu-pill menu-pill--ghost"
+              onClick={() => {
+                setConfirmAt(null);
+              }}
+            >
+              {menu.meals.confirmNo}
+            </button>
+          </div>
+        </div>
+      </Popover>
+      <GoalSheet
+        anchor={goalAt}
+        answers={answers}
+        plan={plan}
+        busy={ops.busy}
+        onClose={closeGoal}
+        onApply={(next) => {
+          ops.changeGoal(next, closeGoal);
+        }}
+      />
+      <RestoreSheet
+        anchor={restoring?.anchor ?? null}
+        backup={restoring?.backup ?? null}
+        onClose={closeRestore}
+        onApply={() => {
+          const file = restoring?.file;
+          setRestoring(null);
+          const result = menuStore().restore(file);
+          onNotify(
+            result.ok
+              ? menu.restore.done
+              : result.reason === 'version'
+                ? menu.restore.version
+                : menu.restore.format,
+          );
+        }}
+      />
+      <input
+        ref={fileInput}
+        type="file"
+        accept="application/json,.json"
+        className="visually-hidden"
+        tabIndex={-1}
+        aria-hidden
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = '';
+          if (file) readBackup(file);
+        }}
       />
       <DayCard
         open={card}

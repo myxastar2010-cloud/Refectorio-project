@@ -466,3 +466,204 @@ button.seg-tab:focus-visible {
     transition: none;
   }
 }
+
+/* ——— Sheets without a mockup: the goal, a restored file (ТЗ фаза 4 §10) ——— */
+
+.sheet {
+  --sheet-bottom: 0;
+  position: fixed;
+  width: min(460px, calc(100vw - 32px));
+  border-radius: 36px;
+  pointer-events: auto;
+}
+.sheet > :not(.details-surface) {
+  position: relative;
+}
+.sheet-body {
+  max-height: calc(100svh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 28px;
+}
+.goal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.goal-title {
+  font-size: 26px;
+  font-weight: 800;
+}
+.goal-options {
+  display: grid;
+  gap: 8px;
+}
+.goal-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  min-height: 52px;
+  padding: 10px 18px;
+  border: 2px solid var(--color-ink-muted);
+  border-radius: 22px;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 17px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+.goal-option:focus-visible {
+  outline: none;
+  background: rgb(0 0 0 / 0.06);
+}
+.goal-option[aria-checked='true'] {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: #fff;
+}
+.goal-option[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: default;
+}
+.goal-option-note {
+  font-size: 13px;
+  font-weight: 500;
+}
+.goal-target {
+  --q: 1px;
+  --q-wheel-row: 44px;
+  --q-wheel-font: 26px;
+  --q-value: 17px;
+  --q-note: 13px;
+  padding: 14px 10px 6px;
+  border-radius: 26px;
+  background: var(--color-surface-beige);
+}
+.goal-target .quiz-wheel {
+  height: calc(var(--q-wheel-row) * 4.6);
+  /* The rows at the edges fade out instead of being cut. */
+  mask-image: linear-gradient(transparent, #000 28%, #000 72%, transparent);
+}
+@media (max-height: 820px) {
+  .goal {
+    gap: 12px;
+  }
+  .goal-target {
+    --q-wheel-row: 38px;
+    --q-wheel-font: 22px;
+  }
+  .goal-target .quiz-wheel {
+    height: calc(var(--q-wheel-row) * 3.6);
+  }
+  .sheet-body {
+    padding: 22px 24px;
+  }
+}
+.goal-target-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 10px 4px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.goal-target-title span {
+  font-weight: 500;
+  color: var(--color-ink-muted);
+}
+.goal-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 18px;
+  border-radius: 22px;
+  background: var(--color-surface-beige);
+}
+.goal-preview-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.goal-preview-line b {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.goal-note {
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+}
+.goal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.goal-apply,
+.goal-cancel {
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    opacity 0.2s;
+}
+.goal-apply {
+  border: 0;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+.goal-apply:hover,
+.goal-apply:focus-visible {
+  outline: none;
+  background: var(--color-accent-fill);
+}
+.goal-apply:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.goal-cancel {
+  border: 1.5px solid var(--color-ink);
+  background: transparent;
+  color: var(--color-ink);
+}
+.goal-cancel:hover,
+.goal-cancel:focus-visible {
+  outline: none;
+  background: rgb(0 0 0 / 0.06);
+}
+.restore-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .sheet {
+    --sheet-bottom: 1;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    border-radius: 28px 28px 0 0;
+  }
+  .sheet-body {
+    max-height: 92dvh;
+    padding: 24px 18px calc(24px + env(safe-area-inset-bottom));
+  }
+}

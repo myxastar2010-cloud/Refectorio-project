@@ -102,6 +102,10 @@ export function handle(request: MenuRequest, post: Post): void {
       post({ id, type: 'error', error: { code: 'profile', error: profile.error } });
       return;
     }
+    if (request.type === 'targets') {
+      post({ id, type: 'targets', targets: profile.value.targets });
+      return;
+    }
     if (request.type === 'limits') {
       post({ id, type: 'limits', minMainMeals: profile.value.safety.minMainMeals });
       return;
