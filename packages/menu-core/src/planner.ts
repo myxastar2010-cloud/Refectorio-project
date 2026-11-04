@@ -35,7 +35,8 @@ import {
   type SlotKind,
   type SlotSpec,
 } from './templates';
-import { MEAL_KINDS, type DayPlan, type MealId } from './types';
+import { kindOfMealId } from './structure';
+import { MEAL_KINDS, type DayPlan, type MealId, type PlannedItem } from './types';
 
 export type Slot = {
   kind: SlotKind;
@@ -1160,9 +1161,21 @@ export function dayStateFrom(
     readonly frozen?: (mealId: string, itemId: string) => boolean;
   },
 ): DayState {
-  const meals = ctx.structure.map((meal) => {
-    const items = plan.meals[meal.id] ?? [];
-    return items.flatMap((item): Slot[] => {
+  // A meal the structure no longer has (removed, or a past day's own structure) still counts in the caps and
+  // windows (M6): its frozen items join the meal of the same kind, else the day's last meal.
+  const orphans = new Map<number, PlannedItem[]>();
+  for (const [mealId, items] of Object.entries(plan.meals)) {
+    if (ctx.structure.some((m) => m.id === mealId)) continue;
+    const kind = kindOfMealId(mealId);
+    const same = ctx.structure.findIndex((m) => m.kind === kind);
+    const at = same >= 0 ? same : ctx.structure.length - 1;
+    const frozen = items.filter((i) => options.history || options.frozen?.(mealId, i.itemId));
+    orphans.set(at, [...(orphans.get(at) ?? []), ...frozen]);
+  }
+  const meals = ctx.structure.map((meal, mealIndex) => {
+    const own = (plan.meals[meal.id] ?? []).map((item) => ({ item, frozen: false }));
+    const moved = (orphans.get(mealIndex) ?? []).map((item) => ({ item, frozen: true }));
+    return [...own, ...moved].flatMap(({ item, frozen: orphan }): Slot[] => {
       const food = ctx.indexOf.get(item.itemId);
       const grid = food !== undefined ? ctx.grids[food] : undefined;
       if (food === undefined || !grid) return [];
@@ -1173,7 +1186,7 @@ export function dayStateFrom(
             : best,
         0,
       );
-      const frozen = options.history || options.frozen?.(meal.id, item.itemId) === true;
+      const frozen = orphan || options.history || options.frozen?.(meal.id, item.itemId) === true;
       return [{ kind: item.slot, food, fi, frozen, pinnedBy: item.pinnedBy ?? null }];
     });
   });

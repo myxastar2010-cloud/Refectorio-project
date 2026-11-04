@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { rule } from './rules';
 import {
+  addMeal,
   canRemoveMeal,
   checkStructure,
   DEFAULT_STRUCTURE,
   isMainMeal,
+  kindOfMealId,
   mealHours,
   mealShares,
+  moveMeal,
+  removeMeal,
   structureFromKinds,
 } from './structure';
 
@@ -145,5 +149,100 @@ describe('canRemoveMeal', () => {
 
   it('is false for an unknown meal', () => {
     expect(canRemoveMeal(DEFAULT_STRUCTURE, 'brunch', 2)).toBe(false);
+  });
+});
+
+describe('stable meal ids (review of phase 3, M6)', () => {
+  const ids = (meals: readonly { id: string }[]) => meals.map((m) => m.id);
+  const value = <T>(r: { ok: true; value: T } | { ok: false; error: unknown }): T => {
+    if (!r.ok) throw new Error(JSON.stringify(r.error));
+    return r.value;
+  };
+
+  it('adds a snack into the longest gap with a new number; the old snack keeps its id', () => {
+    const next = value(addMeal(DEFAULT_STRUCTURE, 'snack'));
+    expect(ids(next)).toEqual(['breakfast', 'snack-2', 'lunch', 'snack-1', 'dinner']);
+    expect(next.map((m) => m.titleRu)).toEqual([
+      'Завтрак',
+      'Перекус 1',
+      'Обед',
+      'Перекус 2',
+      'Ужин',
+    ]);
+    expect(next.map((m) => m.order)).toEqual([0, 1, 2, 3, 4]);
+  });
+
+  it('puts a main meal back at its hour', () => {
+    const noLunch = structureFromKinds(['breakfast', 'snack', 'dinner']);
+    expect(ids(value(addMeal(noLunch, 'lunch')))).toEqual([
+      'breakfast',
+      'lunch',
+      'snack-1',
+      'dinner',
+    ]);
+    const noDinner = structureFromKinds(['breakfast', 'lunch', 'snack']);
+    expect(ids(value(addMeal(noDinner, 'dinner')))).toEqual([
+      'breakfast',
+      'lunch',
+      'snack-1',
+      'dinner',
+    ]);
+    expect(ids(value(addMeal(structureFromKinds(['lunch']), 'snack')))).toEqual([
+      'lunch',
+      'snack-1',
+    ]);
+  });
+
+  it('refuses a second main meal of a kind and a seventh meal', () => {
+    expect(addMeal(DEFAULT_STRUCTURE, 'lunch')).toEqual({
+      ok: false,
+      error: { code: 'DUPLICATE_MAIN_MEAL' },
+    });
+    let six = DEFAULT_STRUCTURE;
+    six = value(addMeal(six, 'snack'));
+    six = value(addMeal(six, 'snack'));
+    expect(six).toHaveLength(6);
+    expect(addMeal(six, 'snack')).toEqual({ ok: false, error: { code: 'TOO_MANY_MEALS' } });
+  });
+
+  it('removes and moves meals without renaming the others', () => {
+    const five = value(addMeal(DEFAULT_STRUCTURE, 'snack'));
+    const four = value(removeMeal(five, 'snack-2', 2));
+    expect(ids(four)).toEqual(['breakfast', 'lunch', 'snack-1', 'dinner']);
+    expect(four[2]?.titleRu).toBe('Перекус');
+    expect(ids(value(addMeal(four, 'snack')))).toContain('snack-2');
+    const moved = value(moveMeal(five, 'snack-1', 0));
+    expect(ids(moved)).toEqual(['snack-1', 'breakfast', 'snack-2', 'lunch', 'dinner']);
+    expect(moved.map((m) => m.order)).toEqual([0, 1, 2, 3, 4]);
+    expect(removeMeal(five, 'snack-9', 2)).toEqual({
+      ok: false,
+      error: { code: 'NO_SUCH_MEAL', mealId: 'snack-9' },
+    });
+    expect(moveMeal(five, 'brunch', 1).ok).toBe(false);
+    expect(removeMeal(four, 'lunch', 3)).toEqual({
+      ok: false,
+      error: { code: 'TOO_FEW_MAIN_MEALS', minMainMeals: 3 },
+    });
+  });
+
+  it('checks ids against kinds, duplicates and positions', () => {
+    const [breakfast, lunch] = DEFAULT_STRUCTURE;
+    if (!breakfast || !lunch) throw new Error('no meals');
+    expect(kindOfMealId('snack-12')).toBe('snack');
+    expect(kindOfMealId('snack-0')).toBeNull();
+    expect(kindOfMealId('lunch')).toBe('lunch');
+    expect(checkStructure([{ ...breakfast, id: 'snack-1' }], 0)).toEqual({
+      ok: false,
+      error: { code: 'BAD_ID', mealId: 'snack-1' },
+    });
+    const snack = { id: 'snack-1', kind: 'snack', titleRu: 'Перекус', order: 1 } as const;
+    expect(checkStructure([breakfast, snack, { ...snack, order: 2 }], 0)).toEqual({
+      ok: false,
+      error: { code: 'DUPLICATE_ID', mealId: 'snack-1' },
+    });
+    expect(checkStructure([lunch, breakfast], 0)).toEqual({
+      ok: false,
+      error: { code: 'BAD_ORDER', mealId: 'lunch' },
+    });
   });
 });

@@ -21,7 +21,8 @@ import {
 } from './operations';
 import { buildMenuProfile, type MenuProfile } from './profile';
 import { RULES_FINGERPRINT } from './rules';
-import { DEFAULT_STRUCTURE, structureFromKinds } from './structure';
+import { dayStateFrom } from './planner';
+import { addMeal, DEFAULT_STRUCTURE, removeMeal, structureFromKinds } from './structure';
 import { quizAnswers, testFoods, type AnswersOverrides } from './testing';
 import { EMPTY_TRACKING, markEaten, type Tracking } from './tracking';
 import type { DayPlan, Plan, SlotRef } from './types';
@@ -664,5 +665,42 @@ describe('a stale plan (review of phase 3, M5)', () => {
     expect(
       unwrap(extendHorizon(newEngine, plan, addDays(plan.horizonEnd, 7))).plan.days.length,
     ).toBe(plan.days.length + 7);
+  });
+});
+
+describe('meal ids stay through structure edits (review of phase 3, M6)', () => {
+  const ids = (plan: Plan) => plan.structure.map((m) => m.id);
+
+  it('keeps an eaten snack in its meal when a morning snack is added', () => {
+    const slot = coreSlot(base, TODAY, 'snack-1');
+    const eatenId = itemAt(base, slot).itemId;
+    const tracking = eatenTracking(base, slot);
+    const structure = unwrap(addMeal(base.structure, 'snack'));
+    const { plan } = unwrap(setStructure(engine, base, structure, opts({ tracking })));
+    expect(ids(plan)).toEqual(['breakfast', 'snack-2', 'lunch', 'snack-1', 'dinner']);
+    const today = dayOf(plan, TODAY);
+    expect(today.meals['snack-1']?.some((i) => i.itemId === eatenId)).toBe(true);
+    expect((today.meals['snack-2'] ?? []).length).toBeGreaterThan(0);
+  });
+
+  it('refuses to remove a meal with something eaten today, and removes it otherwise', () => {
+    const tracking = eatenTracking(base, coreSlot(base, TODAY, 'snack-1'));
+    const structure = unwrap(removeMeal(base.structure, 'snack-1', office.safety.minMainMeals));
+    expect(setStructure(engine, base, structure, opts({ tracking }))).toEqual({
+      ok: false,
+      error: { code: 'mealHasEaten', mealId: 'snack-1' },
+    });
+    const { plan } = unwrap(setStructure(engine, base, structure, opts()));
+    for (const day of fromToday(plan)) expect(day.meals['snack-1']).toBeUndefined();
+    expect(dayOf(plan, START).meals['snack-1']?.length).toBeGreaterThan(0);
+  });
+
+  it('still counts the past days of a removed meal in caps and windows', () => {
+    const noSnack = unwrap(removeMeal(DEFAULT_STRUCTURE, 'snack-1', 2));
+    const ctx = buildContext(office, foods, noSnack, []);
+    const monday = dayOf(base, START);
+    const state = dayStateFrom(ctx, monday, { history: true });
+    expect(state.meals.flat()).toHaveLength(Object.values(monday.meals).flat().length);
+    expect(state.meals.flat().every((s) => s.frozen)).toBe(true);
   });
 });

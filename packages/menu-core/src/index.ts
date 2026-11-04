@@ -48,12 +48,16 @@ export {
 export { checkFood, HARD_REASONS, type HardReason, type Verdict } from './filter';
 export { likeProbability } from './taste';
 export {
+  addMeal,
   canRemoveMeal,
   checkStructure,
   DEFAULT_STRUCTURE,
   isMainMeal,
+  kindOfMealId,
   mealHours,
   mealShares,
+  moveMeal,
+  removeMeal,
   structureFromKinds,
   type StructureError,
 } from './structure';
@@ -96,6 +100,7 @@ export {
   changeTargets,
   diff,
   extendHorizon,
+  planStaleness,
   regenerate,
   replaceItem,
   ruleConflicts,
@@ -108,6 +113,7 @@ export {
   type OpOptions,
   type OpResult,
   type PlanDiff,
+  type StaleReason,
 } from './operations';
 export {
   addWater,

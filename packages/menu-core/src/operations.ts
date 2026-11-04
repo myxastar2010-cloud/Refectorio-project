@@ -55,6 +55,7 @@ export type OpError =
   | { readonly code: 'eaten' }
   | { readonly code: 'invalidRules'; readonly detail: string }
   | { readonly code: 'structureRejected'; readonly error: StructureError }
+  | { readonly code: 'mealHasEaten'; readonly mealId: string }
   | { readonly code: 'stalePlan'; readonly reason: StaleReason };
 
 /**
@@ -227,6 +228,14 @@ export function setStructure(
 ): OpResult {
   const checked = checkStructure(structure, engine.profile.safety.minMainMeals);
   if (!checked.ok) return err({ code: 'structureRejected', error: checked.error });
+  // Eaten today is a fact of its meal (M6): a meal holding one stays until tomorrow's history takes it.
+  const eaten = eatenItems(
+    plan.days.find((d) => d.date === options.today),
+    options.tracking,
+  );
+  const kept = new Set(structure.map((m) => m.id));
+  for (const [mealId, items] of Object.entries(eaten ?? {}))
+    if (items.length > 0 && !kept.has(mealId)) return err({ code: 'mealHasEaten', mealId });
   return replanFrom(
     engine,
     plan,
