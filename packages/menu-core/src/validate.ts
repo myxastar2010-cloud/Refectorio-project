@@ -8,12 +8,13 @@ import type { NutrientVector } from '@refectorio/food-data';
 import type { Diet } from '@refectorio/nutrition-core';
 import { allowedAt, fishBudgetShare, fishServings, weekKey, type PlanContext } from './context';
 import { checkFood, type HardReason } from './filter';
+import { Q } from './portions';
 import type { MenuFood } from './foods';
 import { repeatWindow } from './planner';
 import { rule } from './rules';
 import { ingredientCategories, withAncestors, type CategoryId } from './taxonomy';
 import { MAX_ITEMS_PER_MEAL } from './templates';
-import type { DayFlag, DayPlan, IsoDate, PlannedItem } from './types';
+import { MEAL_KINDS, type DayFlag, type DayPlan, type IsoDate, type PlannedItem } from './types';
 import { daysBetween } from './dates';
 
 export type HardViolation = {
@@ -176,7 +177,17 @@ export function hardViolations(
       if (mealCaffeineAdded && mealCaffeine > targets.caffeineSingleMaxMg + 1e-6)
         out.push({ date: day.date, meal: meal.id, code: 'caffeineSingle' });
     }
-    if (caffeineAdded && caffeine > targets.caffeineMaxMg + 1e-6)
+    // The targets' cap, and a «no more caffeine than…» rule of the person or Kiki (M3).
+    const ruleCap = ctx.rules.limits
+      .filter(
+        (l) =>
+          l.q === Q.caffeine &&
+          l.per === 'day' &&
+          l.max !== undefined &&
+          MEAL_KINDS.some((k) => l.appliesTo(day.date, k)),
+      )
+      .reduce((cap, l) => Math.min(cap, l.max ?? cap), targets.caffeineMaxMg);
+    if (caffeineAdded && caffeine > ruleCap + 1e-6)
       out.push({ date: day.date, meal: '', code: 'caffeineDay' });
     if (herbalAdded && herbal > herbalMax)
       out.push({ date: day.date, meal: '', code: 'herbalTeaDay' });

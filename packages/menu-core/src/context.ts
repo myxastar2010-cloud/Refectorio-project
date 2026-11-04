@@ -22,7 +22,7 @@ import { rule } from './rules';
 import { isMainMeal, mealHours, mealShares } from './structure';
 import { likeProbability } from './taste';
 import { MEAL_SLOTS, type SlotKind } from './templates';
-import { MEAL_KINDS, type Meal, type MealKind, type Portion } from './types';
+import { MEAL_KINDS, type DayTargets, type Meal, type MealKind, type Portion } from './types';
 
 /** Costs outside the day's nutrition (taste, habits, context, quotas, variety); see `costs.ts`. */
 export type CostWeights = {
@@ -239,10 +239,41 @@ const foodView = (f: MenuFood) => ({
 const scopeOf = (r: Rule) => (date: IsoDate, meal: MealKind) =>
   inDays(r.days, date) && inMeals(r.meals, meal);
 
+/**
+ * What a DSL rule may never undo (review of phase 3, M3): a deficit for a person whose guardrails forbid one (an eating
+ * disorder, a minor, pregnancy), a minimum of salt or sugar against limitSodium / limitAddedSugar.
+ */
+export type RuleGuard = {
+  readonly targets: DayTargets;
+  readonly restrictionForbidden: boolean;
+  readonly limitSodium: boolean;
+  readonly limitAddedSugar: boolean;
+  readonly meals: number;
+};
+
+/** The floor a «no more than» rule may not go under, by nutrient (a day's amount). */
+function guardFloor(guard: RuleGuard, nutrient: NutrientKey): number | null {
+  if (!guard.restrictionForbidden) return null;
+  const t = guard.targets;
+  switch (nutrient) {
+    case 'energyKcal':
+      return t.energyKcal * (1 - rule('S.energyToleranceRelaxedShare'));
+    case 'proteinG':
+      return t.proteinG.min;
+    case 'fatG':
+      return t.fatG.min;
+    case 'carbsG':
+      return t.carbsG.min;
+    default:
+      return null;
+  }
+}
+
 export function compileRules(
   rules: readonly Rule[],
   foods: readonly MenuFood[],
   verdicts: readonly (Verdict | null)[],
+  guard?: RuleGuard,
 ): CompiledRules {
   const excluders: Excluder[] = [];
   const includes: IncludeRule[] = [];
@@ -351,7 +382,20 @@ export function compileRules(
         });
         break;
       case 'minNutrient':
-      case 'maxNutrient':
+      case 'maxNutrient': {
+        if (guard) {
+          const floor = r.kind === 'maxNutrient' ? guardFloor(guard, r.nutrient) : null;
+          const dayValue = r.per === 'day' ? r.value : r.value * guard.meals;
+          const saltOrSugar =
+            r.kind === 'minNutrient' &&
+            ((guard.limitSodium && r.nutrient === 'sodiumMg') ||
+              (guard.limitAddedSugar &&
+                (r.nutrient === 'freeSugarsG' || r.nutrient === 'addedSugarsG')));
+          if ((floor !== null && dayValue < floor) || saltOrSugar) {
+            conflicts.push({ ruleId: r.id, code: 'RULE_CONFLICTS_SAFETY', detail: r.nutrient });
+            break;
+          }
+        }
         limits.push({
           ruleId: r.id,
           q: qOf(r.nutrient),
@@ -360,6 +404,7 @@ export function compileRules(
           appliesTo,
         });
         break;
+      }
       case 'goal':
       case 'mealStructure':
         conflicts.push({ ruleId: r.id, code: 'RULE_NOT_A_FILTER' });
@@ -388,7 +433,14 @@ export function buildContext(
 ): PlanContext {
   const foods = index.foods;
   const verdicts = foods.map((f) => checkFood(f, profile.safety));
-  const compiled = compileRules(rules, foods, verdicts);
+  const compiled = compileRules(rules, foods, verdicts, {
+    targets: profile.targets,
+    restrictionForbidden:
+      !profile.decision.energyDeficitAllowed || profile.safety.deemphasizeNumbers,
+    limitSodium: profile.safety.dishRules.has('limitSodium'),
+    limitAddedSugar: profile.safety.dishRules.has('limitAddedSugar'),
+    meals: Math.max(1, structure.length),
+  });
   const width = QN + compiled.extraNutrients.length;
   const fishQ: FishColumns | null =
     profile.safety.pregnant || profile.safety.lactating

@@ -35,7 +35,7 @@ import {
   type SlotKind,
   type SlotSpec,
 } from './templates';
-import type { DayPlan, MealId } from './types';
+import { MEAL_KINDS, type DayPlan, type MealId } from './types';
 
 export type Slot = {
   kind: SlotKind;
@@ -246,10 +246,23 @@ function dayProblemItems(ctx: PlanContext, day: DayState): { items: DayItem[]; r
   return { items, refs };
 }
 
-/** The day's room in its week's fish budget (R17 E9): each cap less what the week's other days already hold. */
+/**
+ * Hard caps of a day beside the targets' caffeine: a «no more caffeine than…» rule of the person or Kiki (review of
+ * phase 3, M3), and the day's room in its week's fish budget (R17 E9) — each fish cap less what the week's other days
+ * already hold.
+ */
 function capsFor(ctx: PlanContext, state: PlannerState, day: DayState): DayCap[] {
+  const caps: DayCap[] = [];
+  for (const l of ctx.rules.limits)
+    if (
+      l.q === Q.caffeine &&
+      l.per === 'day' &&
+      l.max !== undefined &&
+      MEAL_KINDS.some((m) => l.appliesTo(day.date, m))
+    )
+      caps.push({ q: Q.caffeine, max: l.max });
   const fq = ctx.fishQ;
-  if (!fq) return [];
+  if (!fq) return caps;
   let budget = 0;
   let oily = 0;
   let tuna = 0;
@@ -260,6 +273,7 @@ function capsFor(ctx: PlanContext, state: PlannerState, day: DayState): DayCap[]
     tuna += d.agg.tunaServ;
   }
   return [
+    ...caps,
     { q: fq.budget, max: 1 - budget },
     { q: fq.oily, max: rule('E9.oilyFishMaxServingsWeek') - oily },
     { q: fq.tuna, max: rule('E9.tunaMaxServingsWeek') - tuna },
@@ -688,19 +702,6 @@ export function totalCost(ctx: PlanContext, state: PlannerState): number {
 
 // ---------------------------------------------------------------- hard checks for a candidate
 
-/** The week's fish caps (R17 E9) hold with the day as it is now (its aggregate is fresh after `refreshDay`). */
-function fishCapsOk(ctx: PlanContext, state: PlannerState, day: DayState): boolean {
-  if (!ctx.fishQ) return true;
-  const caps = capsFor(ctx, state, day);
-  const agg = day.agg ?? aggregate(ctx, day);
-  const [budget, oily, tuna] = caps.map((c) => c.max);
-  return (
-    agg.fishBudget <= (budget ?? 0) + 1e-9 &&
-    agg.oilyFishServ <= (oily ?? 0) + 1e-9 &&
-    agg.tunaServ <= (tuna ?? 0) + 1e-9
-  );
-}
-
 /** A tracked quantity of the day with every other movable item at its smallest portion (eaten ones as they are). */
 function minDayQ(ctx: PlanContext, day: DayState, q: number, except?: Slot): number {
   let sum = 0;
@@ -777,7 +778,7 @@ export function candidateOk(
     herbalTeas(ctx, day, except) + 1 > HOT.herbalTeaMax
   )
     return false;
-  if (ctx.fishQ && (q?.[ctx.fishQ.budget] ?? 0) > 0) {
+  if (caffeine > 0 || (ctx.fishQ && (q?.[ctx.fishQ.budget] ?? 0) > 0)) {
     for (const cap of capsFor(ctx, state, day)) {
       const own = q?.[cap.q] ?? 0;
       if (own > 0 && minDayQ(ctx, day, cap.q, except) + own * minFactor > cap.max + 1e-9)
@@ -791,10 +792,10 @@ export function candidateOk(
 const dayLimitsOk = (ctx: PlanContext, day: DayState): boolean =>
   (day.solution?.totals[Q.caffeine] ?? 0) <= ctx.profile.targets.caffeineMaxMg + 1e-9;
 
-/** Every hard cap holds for this day and its week after a change. */
+/** Every hard cap holds for this day and its week after a change (the day's solution is fresh after `refreshDay`). */
 export const capsHold = (ctx: PlanContext, state: PlannerState, day: DayState): boolean =>
   dayLimitsOk(ctx, day) &&
-  fishCapsOk(ctx, state, day) &&
+  capsFor(ctx, state, day).every((c) => (day.solution?.totals[c.q] ?? 0) <= c.max + 1e-9) &&
   (!ctx.profile.safety.pregnant || herbalTeas(ctx, day) <= HOT.herbalTeaMax);
 
 // ---------------------------------------------------------------- construction

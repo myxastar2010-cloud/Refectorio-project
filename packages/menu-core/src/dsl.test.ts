@@ -10,6 +10,7 @@ import {
   type Rule,
 } from './dsl';
 import { generate } from './generate';
+import { hardViolations } from './validate';
 import { buildMenuProfile, type MenuProfile } from './profile';
 import { DEFAULT_STRUCTURE } from './structure';
 import { quizAnswers, type AnswersOverrides, testFoods } from './testing';
@@ -248,6 +249,65 @@ describe('rule compilation', () => {
       [goal.id, 'RULE_NOT_A_FILTER'],
       [meals.id, 'RULE_NOT_A_FILTER'],
     ]);
+  });
+});
+
+describe('a nutrient rule never undoes a guardrail (review of phase 3, M3)', () => {
+  const ed = profileFor({
+    health: { flags: ['eatingDisorderHistory'], pregnancy: 'none', lactation: 'none', custom: [] },
+  });
+  const deficit = () =>
+    make({
+      kind: 'maxNutrient',
+      nutrient: 'energyKcal',
+      per: 'day',
+      value: Math.round(ed.targets.energyKcal * 0.6),
+    });
+
+  it('refuses a deficit for a person with an eating disorder in the past', () => {
+    const rule = deficit();
+    expect(conflictsOf([rule], ed).map((c) => [c.ruleId, c.code, c.detail])).toEqual([
+      [rule.id, 'RULE_CONFLICTS_SAFETY', 'energyKcal'],
+    ]);
+    const perMeal = make({ kind: 'maxNutrient', nutrient: 'proteinG', per: 'meal', value: 5 });
+    expect(conflictsOf([perMeal], ed).map((c) => c.code)).toEqual(['RULE_CONFLICTS_SAFETY']);
+  });
+
+  it('lets the same limit through as a preference where a deficit is allowed', () => {
+    const rule = make({ kind: 'maxNutrient', nutrient: 'energyKcal', per: 'day', value: 1300 });
+    expect(conflictsOf([rule])).toEqual([]);
+  });
+
+  it('refuses a minimum of salt with hypertension', () => {
+    const hypertension = profileFor({
+      health: { flags: ['hypertension'], pregnancy: 'none', lactation: 'none', custom: [] },
+    });
+    const rule = make({ kind: 'minNutrient', nutrient: 'sodiumMg', per: 'day', value: 3000 });
+    expect(conflictsOf([rule], hypertension).map((c) => c.code)).toEqual(['RULE_CONFLICTS_SAFETY']);
+    expect(conflictsOf([rule])).toEqual([]);
+  });
+
+  it('makes «no more caffeine than…» a hard cap in the plan and in the validator', () => {
+    const coffee = make(
+      { kind: 'includeItem', target: { itemId: 'd_americano' } },
+      { meals: ['breakfast'] },
+    );
+    const cap = make({ kind: 'maxNutrient', nutrient: 'caffeineMg', per: 'day', value: 50 });
+    const request = { profile, foods, today: '2026-11-04', seed: 5, iterationsPerDay: 20 } as const;
+    const capped = generate({ ...request, rules: [coffee, cap] });
+    if (!capped.ok) throw new Error(JSON.stringify(capped.error));
+    for (const day of capped.value.plan.days)
+      expect(day.totals.caffeineMg ?? 0).toBeLessThanOrEqual(50 + 1e-6);
+
+    const free = generate({ ...request, rules: [coffee] });
+    if (!free.ok) throw new Error(JSON.stringify(free.error));
+    const over = free.value.plan.days.filter((d) => (d.totals.caffeineMg ?? 0) > 50 + 1e-6);
+    expect(over.length).toBeGreaterThan(0);
+    const ctx = buildContext(profile, foods, DEFAULT_STRUCTURE, [coffee, cap]);
+    const flagged = hardViolations(ctx, free.value.plan.days).filter(
+      (v) => v.code === 'caffeineDay',
+    );
+    expect(flagged.map((v) => v.date)).toEqual(over.map((d) => d.date));
   });
 });
 
