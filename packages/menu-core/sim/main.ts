@@ -9,15 +9,28 @@ import { cpus } from 'node:os';
 import path from 'node:path';
 import { isMainThread, parentPort, Worker, workerData } from 'node:worker_threads';
 import { buildContext } from '../src/context';
-import { daysBetween } from '../src/dates';
+import type { QuizAnswersV1 } from '@refectorio/contracts';
+import { createRandom } from '@refectorio/taste-core';
+import { addDays, daysBetween } from '../src/dates';
+import { ruleSchema, type Rule } from '../src/dsl';
+import type { FoodIndex } from '../src/foods';
 import { generate } from '../src/generate';
-import { buildMenuProfile } from '../src/profile';
+import {
+  alternatives,
+  applyRules,
+  changeTargets,
+  replaceItem,
+  type Engine,
+  type OpResult,
+} from '../src/operations';
+import { buildMenuProfile, type MenuProfile } from '../src/profile';
 import { rule } from '../src/rules';
 import { mealShares, structureFromKinds } from '../src/structure';
-import type { MealKind } from '../src/types';
+import { EMPTY_TRACKING, markEaten } from '../src/tracking';
+import type { MealKind, Plan } from '../src/types';
 import { likeProbability } from '../src/taste';
 import { randomAnswers, testFoods } from '../src/testing';
-import { hardViolations } from '../src/validate';
+import { hardViolations, type IsFact } from '../src/validate';
 
 type Row = {
   seed: number;
@@ -45,6 +58,10 @@ type Row = {
   flags: Record<string, number>;
   notes: string[];
   violations: number;
+  /** Operations on the plan for every 10th person (M4); null — not run. */
+  ops: Ops | null;
+  /** Days with at least one repeat flag (m17). */
+  repeatDays: number;
   /** Property checks (ТЗ фаза 3 §10): days off by > 10 % without an energy flag, main or soup repeats within the week
    * without the repeat flag, and — for every 50th person — the same plan from the same inputs and seed. */
   unflaggedEnergy: number;
@@ -173,6 +190,129 @@ const STRUCTURES: readonly (readonly MealKind[])[] = [
 
 type Job = { seeds: number[]; iterations: number; today: string[] };
 
+/** The operations a person or Kiki runs on a plan, re-checked by the validator (review of phase 3, M4). */
+type Ops = { checked: number; violations: number; refused: string[] };
+const OPS_ITERATIONS = 60;
+
+/**
+ * Two days after the plan was made: (1) breakfast marked eaten, then an allergy to something on the coming days →
+ * changeTargets; (2) 1–3 random rules (exclude a planned dish, a category, a caffeine cap, prefer less) →
+ * applyRules; (3) the best alternative put into a coming lunch → replaceItem. Every result goes through the validator
+ * with the new profile and rules; refusals are counted by code (a refusal is honest, a violation is a bug).
+ */
+function operationScenarios(
+  seed: number,
+  answers: QuizAnswersV1,
+  profile: MenuProfile,
+  plan: Plan,
+  foods: FoodIndex,
+): Ops {
+  const ops: Ops = { checked: 0, violations: 0, refused: [] };
+  const rng = createRandom((seed ^ 0x2f6b) >>> 0);
+  const today = addDays(plan.createdAt, 2);
+  const options = { today, iterationsPerDay: OPS_ITERATIONS };
+  const coming = plan.days.filter((d) => d.date >= today);
+  const check = (engine: Engine, result: OpResult, isFact?: IsFact) => {
+    if (!result.ok) {
+      ops.refused.push(result.error.code);
+      return;
+    }
+    const next = result.value.plan;
+    const ctx = buildContext(engine.profile, foods, next.structure, next.rules);
+    const fresh = next.days.filter((d) => d.date >= today);
+    const past = next.days.filter((d) => d.date < today);
+    ops.checked += 1;
+    ops.violations += hardViolations(ctx, fresh, past, isFact).length;
+  };
+
+  // (1) Eaten breakfast, then a new allergy.
+  const firstMeal = plan.structure[0]?.id ?? 'breakfast';
+  const eatenItem = coming[0]?.meals[firstMeal]?.[0];
+  const tracking =
+    eatenItem && coming[0]
+      ? markEaten(
+          EMPTY_TRACKING,
+          plan,
+          today,
+          firstMeal,
+          eatenItem.itemId,
+          true,
+          `${today}T08:00:00.000Z`,
+          today,
+        )
+      : null;
+  const planned = coming.flatMap((d) => Object.values(d.meals).flat());
+  const allergen = planned
+    .flatMap((i) => foods.byId.get(i.itemId)?.item.allergens ?? [])
+    .find((code) => !answers.allergies.items.some((a) => a.code === code));
+  if (allergen) {
+    const changed = buildMenuProfile(
+      {
+        ...answers,
+        allergies: {
+          ...answers.allergies,
+          items: [...answers.allergies.items, { code: allergen, level: 'allergy' }],
+        },
+      },
+      { foods },
+    );
+    if (changed.ok) {
+      const engine = { profile: changed.value, foods };
+      const facts: IsFact = (date, mealId, itemId) =>
+        tracking?.ok === true &&
+        date === today &&
+        mealId === firstMeal &&
+        itemId === eatenItem?.itemId;
+      check(
+        engine,
+        changeTargets(engine, plan, {
+          ...options,
+          ...(tracking?.ok ? { tracking: tracking.value } : {}),
+        }),
+        facts,
+      );
+    }
+  }
+
+  // (2) Random rules.
+  const engine = { profile, foods };
+  const rules: Rule[] = [];
+  const pick = <T>(list: readonly T[]): T | undefined => list[rng.int(Math.max(1, list.length))];
+  const count = 1 + rng.int(3);
+  for (let i = 0; i < count; i += 1) {
+    const base = { id: `sim${i}`, createdBy: 'kiki', textRu: 'Правило симуляции', active: true };
+    const kind = rng.int(4);
+    const item = pick(planned);
+    const category = pick([...(foods.byId.get(item?.itemId ?? '')?.categories ?? [])]);
+    const body =
+      kind === 0 && item
+        ? { kind: 'excludeItem', itemId: item.itemId }
+        : kind === 1 && category
+          ? { kind: 'excludeIngredient', target: { category } }
+          : kind === 2
+            ? { kind: 'maxNutrient', nutrient: 'caffeineMg', per: 'day', value: 20 + rng.int(150) }
+            : { kind: 'preferLess', target: { category: category ?? 'sugar' } };
+    const parsed = ruleSchema.safeParse({ ...base, ...body });
+    if (parsed.success) rules.push(parsed.data);
+  }
+  check(engine, applyRules(engine, plan, rules, options));
+
+  // (3) The best alternative for a coming lunch (or the first main meal).
+  const date = coming[1]?.date;
+  const meal = plan.structure.find((m) => m.kind === 'lunch') ?? plan.structure[0];
+  if (date && meal) {
+    const index = coming[1]?.meals[meal.id]?.findIndex((i) => i.slot === 'core') ?? -1;
+    if (index >= 0) {
+      const slot = { date, meal: meal.id, index };
+      const alts = alternatives(engine, plan, slot, 3);
+      if (!alts.ok) ops.refused.push(alts.error.code);
+      else if (alts.value[0])
+        check(engine, replaceItem(engine, plan, slot, alts.value[0].itemId, { today }));
+    }
+  }
+  return ops;
+}
+
 const share = (xs: readonly boolean[]) =>
   xs.length === 0 ? 1 : xs.filter(Boolean).length / xs.length;
 const round = (x: number, d = 3) => Math.round(x * 10 ** d) / 10 ** d;
@@ -205,6 +345,8 @@ function runOne(seed: number, iterations: number, today: string): Row {
     flags: {},
     notes: [],
     violations: 0,
+    ops: null,
+    repeatDays: 0,
     unflaggedEnergy: 0,
     unflaggedRepeats: 0,
     deterministic: null,
@@ -234,7 +376,13 @@ function runOne(seed: number, iterations: number, today: string): Row {
   if (p.targets.energyKcal >= 3500) groups.push('energy3500plus');
   if (p.targets.energyKcal <= 1300) groups.push('energy1300minus');
   const started = performance.now();
-  const kinds = STRUCTURES[seed % STRUCTURES.length] ?? STRUCTURES[0] ?? [];
+  // m16: a person who needs three main meals (teen, pregnancy, an eating disorder) would pick a structure the quiz
+  // allows them, so a two-meal pick falls back to the default instead of counting as a refusal.
+  const picked = STRUCTURES[seed % STRUCTURES.length] ?? STRUCTURES[0] ?? [];
+  const kinds =
+    picked.filter((k) => k !== 'snack').length < s.minMainMeals
+      ? (STRUCTURES[0] ?? picked)
+      : picked;
   const request = {
     profile: p,
     foods,
@@ -412,6 +560,8 @@ function runOne(seed: number, iterations: number, today: string): Row {
     flags,
     notes: plan.notes.map((n) => n.code),
     violations,
+    ops: seed % 10 === 0 ? operationScenarios(seed, answers, p, plan, foods) : null,
+    repeatDays: plan.days.filter((d) => d.flags.some((f) => f.code === 'repeatRelaxed')).length,
     unflaggedEnergy,
     unflaggedRepeats,
     deterministic,
@@ -482,7 +632,7 @@ function summarize(rows: readonly Row[], single: readonly number[]) {
           fibre: mean((r) => r.fibre, list),
           variety: mean((r) => r.variety, list),
           repeatDays:
-            list.reduce((s, r) => s + (r.flags.repeatRelaxed ?? 0), 0) /
+            list.reduce((s, r) => s + r.repeatDays, 0) /
             Math.max(
               1,
               list.reduce((s, r) => s + r.days, 0),
@@ -498,6 +648,17 @@ function summarize(rows: readonly Row[], single: readonly number[]) {
     plans: ok.length,
     errors,
     violations: ok.reduce((s, r) => s + r.violations, 0),
+    ops: (() => {
+      const runs = ok.flatMap((r) => (r.ops ? [r.ops] : []));
+      const refused: Record<string, number> = {};
+      for (const o of runs) for (const code of o.refused) refused[code] = (refused[code] ?? 0) + 1;
+      return {
+        people: runs.length,
+        checked: runs.reduce((s, o) => s + o.checked, 0),
+        violations: runs.reduce((s, o) => s + o.violations, 0),
+        refused,
+      };
+    })(),
     properties: {
       unflaggedEnergy: ok.reduce((s, r) => s + r.unflaggedEnergy, 0),
       unflaggedRepeats: ok.reduce((s, r) => s + r.unflaggedRepeats, 0),
@@ -619,7 +780,12 @@ function report(
     } (отказ guardrails — экран теста, не ошибка движка).`,
   );
   lines.push(
-    `- **Нарушений жёстких правил: ${s.violations}** (валидатор по составу: аллергены, следы, диеты, беременность, недельный бюджет рыбы, кофеин, исключения).`,
+    `- **Нарушений жёстких правил: ${s.violations}** (валидатор по составу: аллергены, следы, диеты, беременность, недельный бюджет рыбы, кофеин, исключения; вторая, простая проверка по меткам и ингредиентам).`,
+    `- **Операции** (каждый 10-й человек, через 2 дня после построения: съеден завтрак + новая аллергия → changeTargets; 1–3 случайных правила → applyRules; лучшая замена обеда → replaceItem): людей ${s.ops.people}, проверено результатов ${s.ops.checked}, **нарушений ${s.ops.violations}**; честные отказы — ${
+      Object.entries(s.ops.refused)
+        .map(([k, v]) => `${k} — ${v}`)
+        .join('; ') || 'нет'
+    }.`,
     `- Свойства: дней с энергией вне ±10 % без пометки — ${s.properties.unflaggedEnergy}; повторов основного блюда или супа в неделю без пометки — ${s.properties.unflaggedRepeats}; детерминизм — ${s.properties.determinismChecked - s.properties.determinismFailed} из ${s.properties.determinismChecked} повторных запусков дали то же меню байт в байт.`,
     `- Структуры дня: ${Object.entries(s.properties.structures)
       .map(([k, v]) => `${k} — ${v}`)
@@ -679,7 +845,7 @@ function report(
     lines.push(`| \`${k}\` | ${v.days} | ${pct(v.share)} |`);
   lines.push('', '## Время', '');
   lines.push(
-    `- Один поток (без конкуренции, первые 40 человек): медиана ${num(s.runtime.singleThreadMs.p50, 0)} мс, 95-й перцентиль ${num(s.runtime.singleThreadMs.p95, 0)} мс, максимум ${num(s.runtime.singleThreadMs.max, 0)} мс на меню 8–14 дней.`,
+    `- Один поток (без конкуренции, каждый 25-й человек, до 200): медиана ${num(s.runtime.singleThreadMs.p50, 0)} мс, 95-й перцентиль ${num(s.runtime.singleThreadMs.p95, 0)} мс, максимум ${num(s.runtime.singleThreadMs.max, 0)} мс на меню 8–14 дней.`,
   );
   lines.push(
     `- В ${args.threads} параллельных потоках: медиана ${num(s.runtime.parallelMs.p50, 0)} мс, 95-й перцентиль ${num(s.runtime.parallelMs.p95, 0)} мс.`,
@@ -719,8 +885,10 @@ async function main(): Promise<void> {
   const threads = Math.max(1, Math.min(Number(arg('threads', String(cpus().length - 2))), 16));
   const seeds = Array.from({ length: personas }, (_, i) => 1000 + i * 7919);
   // Single-thread timing first (no contention).
+  // m18: the single-thread sample spreads over the whole run (every 25th person, at most 200), not its first 40.
   const single = seeds
-    .slice(0, Math.min(40, personas))
+    .filter((_, i) => i % 25 === 0)
+    .slice(0, 200)
     .map((seed, i) => runOne(seed, iterations, TODAYS[i % TODAYS.length] ?? '').ms);
   const chunks: number[][] = Array.from({ length: threads }, () => []);
   seeds.forEach((seed, i) => chunks[i % threads]?.push(seed));
