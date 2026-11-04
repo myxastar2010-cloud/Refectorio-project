@@ -19,6 +19,8 @@ import { Pic } from './components/Pic';
 import type { Catalog } from './data/catalog';
 import { KIKI } from './data/pictures';
 import { DishCard } from './dishes/DishCard';
+import { DishMenu, ReplacePicker, type DishTarget } from './dishes/DishMenu';
+import { useReplace } from './dishes/useReplace';
 import { menuClient } from './engine/client';
 import { KikiPanel } from './kiki/KikiPanel';
 import { MealTabs } from './meals/MealTabs';
@@ -85,9 +87,12 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const [kikiOpen, setKikiOpen] = useState(false);
   const [card, setCard] = useState<{ date: string; pill: HTMLElement } | null>(null);
   const [extending, setExtending] = useState(false);
+  const [dishMenu, setDishMenu] = useState<DishTarget | null>(null);
+  const [replacing, setReplacing] = useState<DishTarget | null>(null);
   const day = plan.days.find((d) => d.date === date) ?? null;
   const kind = dayKind(plan, date, today);
   const structure = useStructure(plan, answers, today, onNotify);
+  const replacement = useReplace(plan, answers, today, catalog, onNotify);
   const variants = introVariants(calm);
   const group = (index: number) =>
     intro ? { variants, initial: 'hidden', animate: 'shown', custom: index } : {};
@@ -169,6 +174,12 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const items = day?.meals[mealId] ?? [];
   const lock = editable(date, today);
   const lockedReason = lock ? (TRACKING_ERRORS[lock.code] ?? menu.errors.generic) : null;
+  const closeDishMenu = useCallback(() => {
+    setDishMenu(null);
+  }, []);
+  const closePicker = useCallback(() => {
+    setReplacing(null);
+  }, []);
   const unread = letters.some((letter) => !letter.read);
 
   return (
@@ -237,7 +248,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           id="menu-dishes"
           className="dishes"
           aria-label={meals.find((meal) => meal.id === mealId)?.titleRu}
-          data-extending={extending || undefined}
+          data-extending={extending || replacement.busy || undefined}
           {...group(6)}
         >
           {kind === 'beforeMenu' || !day ? (
@@ -264,6 +275,19 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
                   if (!view) return null;
                   const eaten =
                     tracking.days[date]?.eaten[markKey(mealId, planned.itemId)] !== undefined;
+                  const target = (anchor: HTMLElement): DishTarget => ({
+                    anchor,
+                    slot: { date, meal: mealId, index },
+                    itemId: planned.itemId,
+                    blocked:
+                      date < today
+                        ? menu.dish.replacePast
+                        : eaten
+                          ? menu.dish.replaceEaten
+                          : planned.pinnedBy !== undefined
+                            ? menu.errors.pinned
+                            : null,
+                  });
                   return (
                     <li key={`${planned.itemId}:${String(index)}`} className="dish-cell">
                       <DishCard
@@ -274,7 +298,9 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
                           if (lockedReason) onNotify(lockedReason);
                           else toggleEaten(mealId, planned.itemId, eaten);
                         }}
-                        onMore={soon}
+                        onMore={(anchor) => {
+                          setDishMenu(target(anchor));
+                        }}
                         onOpen={soon}
                         onRecipe={soon}
                       />
@@ -305,6 +331,38 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
       >
         <Pic picture={KIKI} alt="" />
       </button>
+      <DishMenu
+        target={dishMenu}
+        catalog={catalog}
+        onClose={closeDishMenu}
+        onDetails={() => {
+          setDishMenu(null);
+          soon();
+        }}
+        onReplaceAi={(target) => {
+          setDishMenu(null);
+          setReplacing(target);
+        }}
+        onReplaceSelf={() => {
+          setDishMenu(null);
+          soon();
+        }}
+        onBlocked={(reason) => {
+          setDishMenu(null);
+          onNotify(reason);
+        }}
+      />
+      <ReplacePicker
+        target={replacing}
+        plan={plan}
+        answers={answers}
+        catalog={catalog}
+        onClose={closePicker}
+        onPick={(target, alternative) => {
+          setReplacing(null);
+          replacement.replace(target.slot, target.itemId, alternative.itemId);
+        }}
+      />
       <DayCard
         open={card}
         plan={plan}

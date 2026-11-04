@@ -1,41 +1,12 @@
 import type { ItemView } from '@refectorio/menu-core';
-import {
-  IconApple,
-  IconArrowUpRight,
-  IconBowl,
-  IconBread,
-  IconCookie,
-  IconCup,
-  IconDots,
-  IconIceCream,
-  IconMilk,
-  IconPlus,
-  IconSalad,
-  IconSoup,
-  IconToolsKitchen2,
-  type Icon,
-} from '@tabler/icons-react';
-import type { Role } from '@refectorio/food-data';
+import { IconArrowUpRight, IconDots, IconPlus } from '@tabler/icons-react';
 import { m } from 'motion/react';
 import { memo } from 'react';
 import { menu } from '../../../content/menu.ru';
 import { fill } from '../../../lib/format';
 import { useCalmMotion } from '../../../motion/hooks';
 import { photosFor, PHOTO_SIZES } from '../../quiz/tinder/photos';
-
-/** The placeholder's icon by role (D-080): never a broken image. */
-const ROLE_ICONS: Readonly<Record<Role, Icon>> = {
-  main: IconToolsKitchen2,
-  soup: IconSoup,
-  salad: IconSalad,
-  side: IconBowl,
-  bread: IconBread,
-  drink: IconCup,
-  fruit: IconApple,
-  dairy: IconMilk,
-  snack: IconCookie,
-  dessert: IconIceCream,
-};
+import { ROLE_ICONS } from './roleIcons';
 
 type Props = {
   readonly item: ItemView;

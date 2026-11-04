@@ -1,3 +1,4 @@
+import { REASON_CODES } from '@refectorio/menu-core';
 import { z } from 'zod';
 
 const text = z.string().trim().min(1);
@@ -100,9 +101,20 @@ export const menuContentSchema = z.object({
     replace: text,
     replaceAi: text,
     replaceSelf: text,
+    menuLabel: text,
+    replaceTitle: text,
+    replaceHint: text,
+    replaceLoading: text,
+    replaceNone: text,
+    replaced: text,
+    replacePast: text,
+    replaceEaten: text,
+    replaceUnsafe: text,
     empty: text,
     photoBy: text,
   }),
+  /** «Почему в меню» and the replacement picker: one short line per engine reason code, no numbers. */
+  reasons: z.record(z.enum(REASON_CODES), text),
   kiki: z.object({
     name: text,
     label: text,

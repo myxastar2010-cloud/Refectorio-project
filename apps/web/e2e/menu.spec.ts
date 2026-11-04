@@ -109,4 +109,41 @@ test.describe('the menu', () => {
     await page.getByRole('button', { name: 'Готово' }).click();
     await expect(page.getByRole('button', { name: /^Удалить «/ })).toHaveCount(0);
   });
+
+  test('the dish menu: a submenu by keys and by hover; a replacement and its undo', async ({
+    page,
+  }) => {
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    const names = () => page.locator('.dish-row .dish-open').allTextContents();
+    const before = await names();
+    const first = before[0] ?? '';
+    // Keys: Enter on ⋯ opens the menu; ↓ to «Заменить блюдо», → into its submenu, ← back, Esc closes the menu.
+    await page.getByRole('button', { name: `Действия: ${first}` }).focus();
+    await page.keyboard.press('Enter');
+    const dishMenu = page.getByRole('menu', { name: `Действия с блюдом «${first}»` });
+    await expect(dishMenu).toBeVisible();
+    await expect(dishMenu.getByRole('menuitem', { name: 'Подробнее' })).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowRight');
+    const sub = page.getByRole('menu', { name: 'Заменить блюдо' });
+    await expect(sub.getByRole('menuitem', { name: 'Заменить с ИИ' })).toBeFocused();
+    await page.keyboard.press('ArrowLeft');
+    await expect(sub).toHaveCount(0);
+    await expect(dishMenu.getByRole('menuitem', { name: 'Заменить блюдо' })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(dishMenu).toHaveCount(0);
+    // Right click on the card opens the same menu; hover opens the submenu; the picker lists the engine's choices.
+    await page.locator('.dish-card').first().click({ button: 'right' });
+    await dishMenu.getByRole('menuitem', { name: 'Заменить блюдо' }).hover();
+    await sub.getByRole('menuitem', { name: 'Заменить с ИИ' }).click();
+    const picker = page.getByRole('dialog', { name: `Чем заменить «${first}»` });
+    const option = picker.locator('.replace-option:not(.replace-option--ghost)').first();
+    await expect(option).toBeVisible({ timeout: 15_000 });
+    const chosen = (await option.locator('.replace-name').textContent()) ?? '';
+    await option.click();
+    await expect.poll(async () => (await names())[0]).toBe(chosen);
+    await page.getByRole('button', { name: 'Отменить' }).click();
+    await expect.poll(names).toEqual(before);
+  });
 });

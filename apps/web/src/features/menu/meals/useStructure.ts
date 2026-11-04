@@ -6,13 +6,13 @@ import {
   removeMeal,
   type Meal,
   type MealKind,
-  type MenuError,
   type Plan,
 } from '@refectorio/menu-core';
 import { useCallback, useEffect, useState } from 'react';
 import { menu } from '../../../content/menu.ru';
 import { fill } from '../../../lib/format';
-import { menuClient, MenuRequestError } from '../engine/client';
+import { menuClient } from '../engine/client';
+import { opErrorCode } from '../engine/opError';
 import type { Notify } from '../notify';
 import { menuStore } from '../store/store';
 
@@ -20,11 +20,7 @@ const MAIN_ORDER: readonly MealKind[] = ['breakfast', 'lunch', 'dinner'];
 
 /** What the engine says about a failed edit, in the page's words. */
 function editError(error: unknown): string {
-  if (!(error instanceof MenuRequestError)) return menu.errors.generic;
-  const e = error.error as MenuError | { code: string };
-  if (e.code !== 'plan' || !('error' in e)) return menu.errors.generic;
-  const op = e.error as { code: string };
-  switch (op.code) {
+  switch (opErrorCode(error)) {
     case 'mealHasEaten':
       return menu.errors.eaten;
     case 'structureRejected':

@@ -1501,3 +1501,140 @@
   font-weight: 500;
   line-height: 1.45;
 }
+
+/* Submenus (ТЗ фаза 4 §10): the panel lives inside its popover and is placed beside it. */
+.menu-item-label {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+.menu-item-chevron {
+  opacity: 0.7;
+}
+.menu-item[aria-expanded='true'] {
+  background: rgb(255 255 255 / 0.14);
+}
+.menu-item--two {
+  min-height: 56px;
+  padding-block: 8px;
+}
+.menu-item[aria-disabled='true'] > svg,
+.menu-item[aria-disabled='true'] .menu-item-label {
+  opacity: 0.55;
+}
+.menu-item-note {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  opacity: 0.85;
+}
+.popover--sub {
+  position: absolute;
+  width: max-content;
+}
+
+/* «Заменить с ИИ» before Kiki: the engine's replacements with their reasons. */
+.popover--replace {
+  width: min(360px, calc(100vw - 16px));
+}
+.replace {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.replace-title {
+  padding: 8px 10px 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.replace-hint,
+.replace-empty {
+  padding: 0 10px 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  opacity: 0.75;
+}
+.replace-empty {
+  padding-block: 10px;
+  font-size: 15px;
+  opacity: 1;
+}
+.replace-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: min(380px, 60svh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.replace-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 72px;
+  padding: 8px;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.replace-option:focus-visible {
+  outline: none;
+  background: rgb(255 255 255 / 0.14);
+}
+@media (hover: hover) {
+  .replace-option:hover {
+    background: rgb(255 255 255 / 0.14);
+  }
+}
+.replace-option--ghost {
+  background: rgb(255 255 255 / 0.08);
+  animation: menu-shimmer 1.2s ease-in-out infinite;
+}
+.replace-thumb {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.12);
+}
+.replace-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.replace-thumb svg {
+  width: 26px;
+  height: 26px;
+}
+.replace-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.replace-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.replace-why {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  opacity: 0.75;
+}
+@media (prefers-reduced-motion: reduce) {
+  .replace-option--ghost {
+    animation: none;
+  }
+}

@@ -410,7 +410,14 @@ export const MENU = {
   /** Day change: the cards slide from the side of the new date. */
   day: { slidePx: 24, durationS: 0.34 },
   /** Context menus: scale from the origin 0.96 → 1 with a fade; submenus slide 8 px. */
-  popover: { scaleFrom: 0.96, durationS: 0.14, submenuSlidePx: 8 },
+  popover: {
+    scaleFrom: 0.96,
+    durationS: 0.14,
+    submenuSlidePx: 8,
+    /** Hover intent before a submenu opens and the grace before it closes (the way to it crosses the gap). */
+    submenuOpenMs: 90,
+    submenuCloseMs: 220,
+  },
   /** Week paging: one week per gesture; the wheel's inertia tail is ignored for this long. */
   week: { wheelQuietMs: 420, swipeMinPx: 48, rubberBand: 0.35 },
   spring: { type: 'spring', stiffness: 420, damping: 38, mass: 0.9 },
