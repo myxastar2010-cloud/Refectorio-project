@@ -6,13 +6,14 @@ import {
   type Plan,
   type Tracking,
 } from '@refectorio/menu-core';
-import { IconDroplet, IconFlame } from '@tabler/icons-react';
+import { IconDroplet, IconFlame, IconInfoCircle, IconMinus } from '@tabler/icons-react';
 import { m } from 'motion/react';
 import { useState } from 'react';
 import { menu } from '../../../content/menu.ru';
 import { fill, formatWhole, pluralRu } from '../../../lib/format';
 import { useCalmMotion } from '../../../motion/hooks';
 import { MENU } from '../../../motion/tokens';
+import { Popover } from '../components/Popover';
 import type { DayKind } from '../week/dates';
 
 type Props = {
@@ -44,7 +45,9 @@ export function Widgets({
   onNotify,
 }: Props) {
   const calm = useCalmMotion();
-  const [menuOpen, setMenuOpen] = useState(false);
+  // The water's menu (right click, the context-menu key) and its «Как считаем?» note, both next to the widget.
+  const [menuAt, setMenuAt] = useState<HTMLElement | null>(null);
+  const [howAt, setHowAt] = useState<HTMLElement | null>(null);
   const t = day ? tracking.days[day.date] : undefined;
   const water = day ? drinking(day, plan.targets, t) : null;
   const drunk = water ? Math.floor(water.drunkGlasses + 1e-6) : 0;
@@ -78,12 +81,12 @@ export function Widgets({
           }}
           onContextMenu={(event) => {
             event.preventDefault();
-            setMenuOpen((open) => !open);
+            setMenuAt(event.currentTarget);
           }}
           onKeyDown={(event) => {
             if (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey)) {
               event.preventDefault();
-              setMenuOpen((open) => !open);
+              setMenuAt(event.currentTarget);
             }
           }}
         />
@@ -117,31 +120,51 @@ export function Widgets({
             <span style={{ transform: `scaleX(${Math.min(1, drunk / goal).toFixed(3)})` }} />
           </span>
         )}
-        {menuOpen ? (
-          <div className="widget-menu" role="menu" aria-label={menu.widgets.water.menu}>
-            <button
-              type="button"
-              role="menuitem"
-              disabled={inactive || drunk === 0}
-              onClick={() => {
-                setMenuOpen(false);
-                onWater(-1);
-              }}
-            >
-              {menu.widgets.water.remove}
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                onNotify(menu.widgets.water.howText);
-              }}
-            >
-              {menu.widgets.water.how}
-            </button>
-          </div>
-        ) : null}
+        <Popover
+          anchor={menuAt}
+          label={menu.widgets.water.menu}
+          role="menu"
+          onClose={() => {
+            setMenuAt(null);
+          }}
+        >
+          <button
+            type="button"
+            role="menuitem"
+            className="menu-item"
+            disabled={inactive || drunk === 0}
+            onClick={() => {
+              setMenuAt(null);
+              onWater(-1);
+            }}
+          >
+            <IconMinus stroke={2} aria-hidden />
+            {menu.widgets.water.remove}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="menu-item"
+            onClick={() => {
+              const anchor = menuAt;
+              setMenuAt(null);
+              setHowAt(anchor);
+            }}
+          >
+            <IconInfoCircle stroke={2} aria-hidden />
+            {menu.widgets.water.how}
+          </button>
+        </Popover>
+        <Popover
+          anchor={howAt}
+          label={menu.widgets.water.how}
+          role="dialog"
+          onClose={() => {
+            setHowAt(null);
+          }}
+        >
+          <p className="popover-note">{menu.widgets.water.howText}</p>
+        </Popover>
       </div>
       <div className="widget widget--calories" data-inactive={inactive || undefined}>
         <p className="widget-title">

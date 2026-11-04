@@ -46,7 +46,7 @@ export async function loadCatalog() {
   const catalog = await readJson(path.join(DATA_DIR, 'catalog.json'), null);
   if (!catalog) throw new Error('packages/taste-core/data/catalog.json is missing');
   const queries = await readJson(path.join(DATA_DIR, 'photo-queries.json'), {});
-  // Menu-only items (sides, breads, drinks …) live in food-core.json only: the pipeline sees them as { id, nameRu }.
+  // Menu-only items (sides, breads, drinks …) live in food-core.json only: the pipeline sees them as { id, nameRu, altRu }.
   const core = await readJson(
     path.join(APP_ROOT, 'packages', 'food-data', 'data', 'food-core.json'),
     null,
@@ -58,7 +58,14 @@ export async function loadCatalog() {
   const known = new Set(catalog.dishes.map((d) => d.id));
   const extra = (core?.items ?? [])
     .filter((item) => !known.has(item.id))
-    .map((item) => ({ id: item.id, nameRu: text?.items?.[item.id]?.[0] ?? item.id }));
+    .map((item) => {
+      const [nameRu = item.id, , , short = ''] = text?.items?.[item.id] ?? [];
+      // The photo's alt text: the item's short description («упругие цельнозерновые макароны с маслом»), capitalised.
+      const described = short.trim().replace(/\.$/, '');
+      const altRu =
+        described.length >= 8 ? described[0].toUpperCase() + described.slice(1) : nameRu;
+      return { id: item.id, nameRu, altRu: altRu.slice(0, 120) };
+    });
   return { catalog: { ...catalog, dishes: [...catalog.dishes, ...extra] }, queries };
 }
 

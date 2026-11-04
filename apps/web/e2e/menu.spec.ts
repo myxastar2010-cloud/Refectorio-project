@@ -85,4 +85,28 @@ test.describe('the menu', () => {
     await page.getByRole('link', { name: 'ПроЛанч — на главную' }).click();
     await expect(page.getByRole('link', { name: 'Создать меню' })).toBeVisible();
   });
+  test('edit mode: remove a meal with a confirm and undo it; reorder by keys', async ({ page }) => {
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    const tabs = page.getByRole('tablist', { name: 'Приёмы пищи' }).getByRole('tab');
+    const names = () => tabs.allTextContents();
+    const before = await names();
+    await page.getByRole('button', { name: 'Изменить приёмы пищи' }).click();
+    const last = before.at(-1) ?? '';
+    await page.getByRole('button', { name: `Удалить «${last}»` }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Удалить' }).click();
+    await expect.poll(names).toEqual(before.slice(0, -1));
+    await page.getByRole('button', { name: 'Отменить' }).click();
+    await expect.poll(names).toEqual(before);
+    // Keys: Space lifts the focused pill, ← moves it, Space drops it; the engine re-plans and offers «Отменить».
+    await tabs.first().focus();
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press(' ');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press(' ');
+    await expect.poll(names).toEqual([before[1], before[0], ...before.slice(2)]);
+    await expect(page.getByRole('button', { name: 'Отменить' })).toBeVisible();
+    await page.getByRole('button', { name: 'Готово' }).click();
+    await expect(page.getByRole('button', { name: /^Удалить «/ })).toHaveCount(0);
+  });
 });

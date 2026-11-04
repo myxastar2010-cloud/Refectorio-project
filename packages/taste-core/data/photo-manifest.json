@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "catalogVersion": "2026-10-09",
-  "updatedAt": "2026-10-11",
+  "catalogVersion": "2026-11-02",
+  "updatedAt": "2026-11-04",
   "photos": {
     "d_oatmeal": {
       "primary": {
@@ -2754,6 +2754,27 @@
         "downloadTrackedAt": "2026-10-11"
       }
     },
+    "d_manty": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "blUO3KfmerU",
+        "pageUrl": "https://unsplash.com/photos/white-ceramic-plate-with-brown-bread-blUO3KfmerU?utm_source=refectorio&utm_medium=referral",
+        "author": "Christine Isakzhanova",
+        "authorUrl": "https://unsplash.com/@bulochka?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1612950365044-500b2d7ba712?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8M3x8bGFyZ2UlMjBzdGVhbWVkJTIwZHVtcGxpbmdzJTIwd2l0aCUyMG1pbmNlZCUyMG1lYXQlMjBvbiUyMGElMjBwbGF0ZXxlbnwxfDF8fHwxNzkzNzgwMjcyfDA&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 5184,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LRLDrpIAE7W=8w~q-pkE5BM|nNog",
+        "altRu": "Манты на пару с мясной начинкой и сметаной",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
     "d_samsa": {
       "primary": {
         "provider": "unsplash",
@@ -2815,6 +2836,27 @@
         "altRu": "Хрустящие чебуреки с мясной начинкой",
         "chosenAt": "2026-10-11",
         "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_beshbarmak": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "d9jcPTRD9fo",
+        "pageUrl": "https://unsplash.com/photos/pasta-dish-on-black-ceramic-bowl-d9jcPTRD9fo?utm_source=refectorio&utm_medium=referral",
+        "author": "Nicholas Grande",
+        "authorUrl": "https://unsplash.com/@ndg_visuals?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1611270629569-8b357cb88da9?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTl8fGJlc2hiYXJtYWslMjBib2lsZWQlMjBtZWF0JTIwb24lMjBmbGF0JTIwbm9vZGxlc3xlbnwxfDF8fHwxNzkzNzgwMjc4fDA&ixlib=rb-4.1.0",
+        "width": 3117,
+        "height": 4676,
+        "focal": {
+          "x": 0.5,
+          "y": 0.468
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LFBCb]=_EmogIqEMIqNH0$s;^J%0",
+        "altRu": "Варёное мясо на широкой домашней лапше с луком",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
       }
     },
     "d_shawarma": {
@@ -3174,6 +3216,27 @@
         "downloadTrackedAt": "2026-10-11"
       }
     },
+    "d_bird_milk_cake": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "NlN_bhdjuPQ",
+        "pageUrl": "https://unsplash.com/photos/a-piece-of-cake-with-a-chocolate-drizzle-on-top-of-it-NlN_bhdjuPQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Adam Bartoszewicz",
+        "authorUrl": "https://unsplash.com/@bartoshevicz?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1652561781059-58d5d9ffcb4d?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8M3x8c291ZmZsZSUyMGNha2UlMjB3aXRoJTIwY2hvY29sYXRlJTIwZ2xhemUlMjBzbGljZXxlbnwxfDF8fHwxNzkzNzgwMjg5fDA&ixlib=rb-4.1.0",
+        "width": 5304,
+        "height": 6630,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LeKU7o~q-:NK.9WCRkxZ-=M{M{WB",
+        "altRu": "Кусок суфле-торта под шоколадной глазурью",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
     "d_panna_cotta": {
       "primary": {
         "provider": "unsplash",
@@ -3340,6 +3403,27 @@
         "altRu": "Миска нарезанных свежих фруктов и ягод",
         "chosenAt": "2026-10-11",
         "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_kartoshka_cake": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "chAyBF2MX2U",
+        "pageUrl": "https://unsplash.com/photos/a-delicious-chocolate-dessert-on-a-table-chAyBF2MX2U?utm_source=refectorio&utm_medium=referral",
+        "author": "tommao wang",
+        "authorUrl": "https://unsplash.com/@tommaomaoer?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1744125042088-15a4fa7771e0?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MjF8fGNob2NvbGF0ZSUyMHRydWZmbGUlMjBjYWtlJTIwcm9sbGVkJTIwaW4lMjBjb2NvYSUyMHBvd2RlcnxlbnwxfDF8fHwxNzkzNzgwMjkwfDA&ixlib=rb-4.1.0",
+        "width": 3984,
+        "height": 5976,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#c0d9d9",
+        "blurhash": "LUEy}LyYIUM{.T%gROfl%gx]M{xu",
+        "altRu": "Пирожное картошка в какао с кремовыми рожками",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
       }
     },
     "d_hot_dog": {
@@ -3592,6 +3676,951 @@
         "altRu": "Кукурузные тортильи тако с говядиной, сальсой и сыром",
         "chosenAt": "2026-10-11",
         "downloadTrackedAt": "2026-10-11"
+      }
+    },
+    "d_almonds": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "iD1Lo6DBD2g",
+        "pageUrl": "https://unsplash.com/photos/close-up-photo-of-almonds-iD1Lo6DBD2g?utm_source=refectorio&utm_medium=referral",
+        "author": "Tetiana Bykovets",
+        "authorUrl": "https://unsplash.com/@tetiana_bykovets?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1508779018996-601e37fa274e?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MjV8fGFsbW9uZHMlMjBpbiUyMGElMjBib3dsfGVufDF8MXx8fDE3OTM3ODAzMDF8MA&ixlib=rb-4.1.0",
+        "width": 3072,
+        "height": 4608,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#595959",
+        "blurhash": "LWHn:5tlIpV??wt7RiWAOsenROR+",
+        "altRu": "Горсть хрустящих ядер миндаля",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_americano": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "DvaoJEksloQ",
+        "pageUrl": "https://unsplash.com/photos/blue-ceramic-coffee-cup-on-blue-saucer-DvaoJEksloQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Daniel Norris",
+        "authorUrl": "https://unsplash.com/@danielnorris?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1551490434-bf8bc9eab4a9?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8N3x8YW1lcmljYW5vJTIwY29mZmVlJTIwY3VwJTIwYmxhY2t8ZW58MXwxfHx8MTc5Mzc4MDMwNHww&ixlib=rb-4.1.0",
+        "width": 2990,
+        "height": 3738,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#262626",
+        "blurhash": "LGG7}GwJh}^O}Ss.9^$%m+5mS#I;",
+        "altRu": "Эспрессо, разбавленный горячей водой",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_apple": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "qd0zVjoxAOg",
+        "pageUrl": "https://unsplash.com/photos/a-red-apple-sitting-on-top-of-a-table-qd0zVjoxAOg?utm_source=refectorio&utm_medium=referral",
+        "author": "Julio Cabrera Tizoc",
+        "authorUrl": "https://unsplash.com/@wolbi?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1739079316408-2e3052fa3441?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8M3x8cmVkJTIwYXBwbGUlMjBmcnVpdHxlbnwxfDF8fHwxNzkzNzgwMzA3fDA&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5472,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LaD%UZkDEzNG$*W;S2jF1Ie.$Ps:",
+        "altRu": "Хрустящее кисловатое яблоко",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_apple_juice": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "d6lNTwBs5bo",
+        "pageUrl": "https://unsplash.com/photos/clear-drinking-glass-with-brown-liquid-and-lemon-d6lNTwBs5bo?utm_source=refectorio&utm_medium=referral",
+        "author": "Bonnie Kittle",
+        "authorUrl": "https://unsplash.com/@bonniekdesign?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1605199910378-edb0c0709ab4?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MXx8Z2xhc3MlMjBvZiUyMGFwcGxlJTIwanVpY2V8ZW58MXwxfHx8MTc5Mzc4MDMwOXww&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 5184,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#8c5940",
+        "blurhash": "LHJsC30f9}%L_M9[Vt-UF}t6,:bI",
+        "altRu": "Золотистый яблочный сок, сладкий и холодный",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_banana": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "SRDC2uj-eZ0",
+        "pageUrl": "https://unsplash.com/photos/yellow-bananas-with-brown-spots-SRDC2uj-eZ0?utm_source=refectorio&utm_medium=referral",
+        "author": "Giorgio Trovato",
+        "authorUrl": "https://unsplash.com/@giorgiotrovato?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1741461679354-4371538d47ae?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8NHx8YmFuYW5hcyUyMGJ1bmNoJTIweWVsbG93fGVufDF8MXx8fDE3OTM3ODAzMTF8MA&ixlib=rb-4.1.0",
+        "width": 3840,
+        "height": 5760,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#59400c",
+        "blurhash": "LeJ%:4~T-n%KtP-nt7M~%JNHIWoI",
+        "altRu": "Сладкий банан с нежной мякотью",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_bean_salad": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "kvp1Ppohv9I",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-food-kvp1Ppohv9I?utm_source=refectorio&utm_medium=referral",
+        "author": "Metin Ozer",
+        "authorUrl": "https://unsplash.com/@metinozer?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1662743234719-d893bd7e6b61?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MXx8YmVhbiUyMHNhbGFkJTIwYm93bHxlbnwxfDF8fHwxNzkzNzgwMzE5fDA&ixlib=rb-4.1.0",
+        "width": 3288,
+        "height": 4928,
+        "focal": {
+          "x": 0.5,
+          "y": 0.445
+        },
+        "avgColor": "#262626",
+        "blurhash": "LEBpa.^$9Go~?GxYRjkD0gS%xtMx",
+        "altRu": "Красная фасоль со свежими овощами и луком",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_berries": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ZtiQef_SLTE",
+        "pageUrl": "https://unsplash.com/photos/strawberries-and-blueberries-in-white-ceramic-bowl-ZtiQef_SLTE?utm_source=refectorio&utm_medium=referral",
+        "author": "Nicholas Grande",
+        "authorUrl": "https://unsplash.com/@ndg_visuals?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1611270631141-ec7d25fb7aad?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTN8fGZyZXNoJTIwbWl4ZWQlMjBiZXJyaWVzJTIwYm93bHxlbnwxfDF8fHwxNzkzNzgwMzIzfDA&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5472,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#405973",
+        "blurhash": "LFAc-_E2ITxtY8xDWBR+EkofxuRj",
+        "altRu": "Кисло-сладкая смесь клубники, вишни и смородины",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_boiled_egg": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "wLzkojKzAUc",
+        "pageUrl": "https://unsplash.com/photos/a-cracked-egg-in-a-white-bowl-on-a-white-plate-wLzkojKzAUc?utm_source=refectorio&utm_medium=referral",
+        "author": "Elena Leya",
+        "authorUrl": "https://unsplash.com/@foodistika?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1648455321145-157393b7c982?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MjB8fGJvaWxlZCUyMGVnZyUyMGhhbHZlcyUyMG9uJTIwYSUyMHBsYXRlfGVufDF8MXx8fDE3OTM3ODAzMjh8MA&ixlib=rb-4.1.0",
+        "width": 3648,
+        "height": 5472,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LKMa35IVK+NH~pIoxtM|Kk%1m+tQ",
+        "altRu": "Яйцо, сваренное вкрутую",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_bread_butter": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "Ff8-AWSuBXw",
+        "pageUrl": "https://unsplash.com/photos/a-slice-of-bread-with-butter-partially-eaten-Ff8-AWSuBXw?utm_source=refectorio&utm_medium=referral",
+        "author": "Victoria Druc",
+        "authorUrl": "https://unsplash.com/@vikaelefant?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1744216834419-ff047cdea206?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8Mnx8c2xpY2UlMjBvZiUyMGJyZWFkJTIwd2l0aCUyMGJ1dHRlcnxlbnwxfDF8fHwxNzkzNzgwMzMzfDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 5616,
+        "focal": {
+          "x": 0.5,
+          "y": 0.475
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "L8LXMQMxo~t7D$t7t7RjyZkCIUoJ",
+        "altRu": "Ломтик пшеничного хлеба со сливочным маслом",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_brown_rice_side": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "0lqd3dXuSqQ",
+        "pageUrl": "https://unsplash.com/photos/cooked-rice-with-broccoli-and-carrots-on-black-plate-0lqd3dXuSqQ?utm_source=refectorio&utm_medium=referral",
+        "author": "Sonny Mauricio",
+        "authorUrl": "https://unsplash.com/@northernstatemedia?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1623800849466-435f89f567ce?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MjF8fGNvb2tlZCUyMGJyb3duJTIwcmljZSUyMGJvd2x8ZW58MXwxfHx8MTc5Mzc4MDMzN3ww&ixlib=rb-4.1.0",
+        "width": 4160,
+        "height": 5200,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#402626",
+        "blurhash": "LOHKE[0mxZ=xEO={%1Rkno--xHt6",
+        "altRu": "Рассыпчатый бурый рис с ореховым привкусом",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_bulgur_side": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "zPn53_jmW_k",
+        "pageUrl": "https://unsplash.com/photos/cooked-food-in-white-ceramic-bowl-zPn53_jmW_k?utm_source=refectorio&utm_medium=referral",
+        "author": "Karolina Kołodziejczak",
+        "authorUrl": "https://unsplash.com/@rabbit_in_blue?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1607116685391-29c9e9726561?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8Mnx8Y29va2VkJTIwYnVsZ3VyJTIwYm93bHxlbnwxfDF8fHwxNzkzNzgwMzQyfDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LHK,]QQkt.Io%ho}kXkCPCSiaxkC",
+        "altRu": "Рассыпчатый булгур со сливочным маслом",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_cabbage_carrot_salad": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "CvSAM5-fzfA",
+        "pageUrl": "https://unsplash.com/photos/red-and-green-vegetable-salad-in-clear-glass-bowl-CvSAM5-fzfA?utm_source=refectorio&utm_medium=referral",
+        "author": "Karolina Kołodziejczak",
+        "authorUrl": "https://unsplash.com/@rabbit_in_blue?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1613743973104-be3de5acbb49?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MjN8fGNhYmJhZ2UlMjBhbmQlMjBjYXJyb3QlMjBzYWxhZCUyMGJvd2x8ZW58MXwxfHx8MTc5Mzc4MDM0OXww&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#a6c0c0",
+        "blurhash": "LaKBE*H=OYs:YRxajEa#b^pIi_j]",
+        "altRu": "Хрустящая капуста с морковью и заправкой",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_cappuccino": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_hnL_961xTk",
+        "pageUrl": "https://unsplash.com/photos/white-ceramic-cup-with-saucer-on-brown-wooden-table-_hnL_961xTk?utm_source=refectorio&utm_medium=referral",
+        "author": "Caleb",
+        "authorUrl": "https://unsplash.com/@calebrussell?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1621135177072-57c9b6242e7a?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8NHx8Y2FwcHVjY2lubyUyMGN1cCUyMHdpdGglMjBmb2FtfGVufDF8MXx8fDE3OTM3ODAzNTV8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LPM%7dITs*xtPBD%4:kC0Lx]aJx]",
+        "altRu": "Эспрессо с горячим молоком и плотной пеной",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_carrot_sticks": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "jGqPqGdLqcw",
+        "pageUrl": "https://unsplash.com/photos/orange-carrots-on-blue-round-plate-jGqPqGdLqcw?utm_source=refectorio&utm_medium=referral",
+        "author": "Markus Spiske",
+        "authorUrl": "https://unsplash.com/@markusspiske?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1626846661139-5c4fbd66cbd1?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTV8fGNhcnJvdCUyMHN0aWNrcyUyMGluJTIwYSUyMGdsYXNzfGVufDF8MXx8fDE3OTM3ODAzNTd8MA&ixlib=rb-4.1.0",
+        "width": 2333,
+        "height": 3500,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#f37326",
+        "blurhash": "LVJ$BUC7AcS~X.t8wcWp1gr=rqnh",
+        "altRu": "Хрустящая сырая морковь брусочками",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_chickpeas_vegetables": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "jrs4j6k6QKA",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-filled-with-different-types-of-vegetables-jrs4j6k6QKA?utm_source=refectorio&utm_medium=referral",
+        "author": "Imad 786",
+        "authorUrl": "https://unsplash.com/@imad8321?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1688923130900-bc5d4ee364b4?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MjF8fGNoaWNrcGVhcyUyMHdpdGglMjB2ZWdldGFibGVzJTIwc3Rld3xlbnwxfDF8fHwxNzkzNzgwMzY0fDA&ixlib=rb-4.1.0",
+        "width": 3545,
+        "height": 4431,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "L+Qv2VIpk?s8kWo0i{W=%%xFnNW=",
+        "altRu": "Тушёный нут с овощами и зеленью",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_cocoa_milk": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "NtmNhrdfs-o",
+        "pageUrl": "https://unsplash.com/photos/a-cup-of-hot-chocolate-with-marshmallows-on-a-saucer-NtmNhrdfs-o?utm_source=refectorio&utm_medium=referral",
+        "author": "Elena Leya",
+        "authorUrl": "https://unsplash.com/@foodistika?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1637572815755-c4b80092dce1?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MXx8Y3VwJTIwb2YlMjBob3QlMjBjb2NvYXxlbnwxfDF8fHwxNzkzNzgwMzY3fDA&ixlib=rb-4.1.0",
+        "width": 3203,
+        "height": 4805,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LCHBxc01%g-;~qD%oyM{?vxEIUtQ",
+        "altRu": "Горячее сладкое какао на молоке",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_cranberry_mors": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "TnMonTHqYMk",
+        "pageUrl": "https://unsplash.com/photos/a-glass-of-red-liquid-with-oranges-and-oranges-TnMonTHqYMk?utm_source=refectorio&utm_medium=referral",
+        "author": "Elena Leya",
+        "authorUrl": "https://unsplash.com/@foodistika?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1670398563365-156dcbad9b9b?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8Mnx8Y3JhbmJlcnJ5JTIwanVpY2UlMjBnbGFzc3xlbnwxfDF8fHwxNzkzNzgwMzY4fDA&ixlib=rb-4.1.0",
+        "width": 3530,
+        "height": 5296,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LcMj8dxt?HIB_NjYS$t7%~WXMxt7",
+        "altRu": "Кисло-сладкий напиток из клюквы",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_crispbread": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "c0QokGIZ_P8",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-food-c0QokGIZ_P8?utm_source=refectorio&utm_medium=referral",
+        "author": "Wasa Crispbread",
+        "authorUrl": "https://unsplash.com/@wasacrispbread?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1657299156075-12b8c0a2da38?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8N3x8d2hvbGUlMjBncmFpbiUyMGNyaXNwYnJlYWR8ZW58MXwxfHx8MTc5Mzc4MDM3Mnww&ixlib=rb-4.1.0",
+        "width": 4160,
+        "height": 6240,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#a67373",
+        "blurhash": "LGKwIK03IVR4D*^PWFoz9|_3McNG",
+        "altRu": "Хрустящие зерновые хлебцы",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_dried_fruit_compote": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "cIH6XWThm5U",
+        "pageUrl": "https://unsplash.com/photos/a-glass-filled-with-fruit-and-nuts-on-top-of-a-table-cIH6XWThm5U?utm_source=refectorio&utm_medium=referral",
+        "author": "Alimentos Fotogénicos",
+        "authorUrl": "https://unsplash.com/@alimentosfotogenicos?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1728694509214-350c16740ce8?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MjZ8fGRyaWVkJTIwZnJ1aXQlMjBjb21wb3RlJTIwZ2xhc3N8ZW58MXwxfHx8MTc5Mzc4MDM4MHww&ixlib=rb-4.1.0",
+        "width": 2473,
+        "height": 3705,
+        "focal": {
+          "x": 0.5,
+          "y": 0.445
+        },
+        "avgColor": "#734026",
+        "blurhash": "LCD[910fE3$%~VIUR.oe%2adxYR,",
+        "altRu": "Сладкий компот из сухофруктов",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_dried_fruits": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "jTgDCFwwYRc",
+        "pageUrl": "https://unsplash.com/photos/raisins-in-a-bowl-and-container-jTgDCFwwYRc?utm_source=refectorio&utm_medium=referral",
+        "author": "Valentina Teramo",
+        "authorUrl": "https://unsplash.com/@valeteramo?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1741963383961-c1decb9d4d63?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8Mjd8fGRyaWVkJTIwYXByaWNvdHMlMjBhbmQlMjBwcnVuZXN8ZW58MXwxfHx8MTc5Mzc4MDM4M3ww&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LKNm+uWY~qt84oNF-;t8^,Ri9GV@",
+        "altRu": "Курага и чернослив, мягкие и сладкие",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_espresso": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "maO-qIKLqi8",
+        "pageUrl": "https://unsplash.com/photos/cup-of-coffee-on-top-of-saucer-maO-qIKLqi8?utm_source=refectorio&utm_medium=referral",
+        "author": "Irene Kredenets",
+        "authorUrl": "https://unsplash.com/@ikredenets?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1572286258217-40142c1c6a70?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8Mnx8ZXNwcmVzc28lMjBjdXB8ZW58MXwxfHx8MTc5Mzc4MDM4N3ww&ixlib=rb-4.1.0",
+        "width": 2988,
+        "height": 3735,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LMPQ4~%M?vt8%gf6WAj@_Nay9Eay",
+        "altRu": "Крепкий кофе в маленькой чашке",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_grapes": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "NMkWw9Hq9Sg",
+        "pageUrl": "https://unsplash.com/photos/a-bunch-of-green-grapes-sitting-on-top-of-a-table-NMkWw9Hq9Sg?utm_source=refectorio&utm_medium=referral",
+        "author": "Kier in Sight Archives",
+        "authorUrl": "https://unsplash.com/@kierinsightarchives?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1637715924886-cbe4485f90b9?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8NHx8YnVuY2glMjBvZiUyMGdyYXBlc3xlbnwxfDF8fHwxNzkzNzgyODMzfDA&ixlib=rb-4.1.0",
+        "width": 2600,
+        "height": 3250,
+        "focal": {
+          "x": 0.531,
+          "y": 0.5
+        },
+        "avgColor": "#d9f3d9",
+        "blurhash": "LSNKwpt7?wWUt1Mxt8x]_4oxD$V{",
+        "altRu": "Гроздь сочного сладкого винограда",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_green_tea": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "lXoAF3lKjE4",
+        "pageUrl": "https://unsplash.com/photos/a-cup-of-green-tea-next-to-a-spoon-lXoAF3lKjE4?utm_source=refectorio&utm_medium=referral",
+        "author": "Iryna Marienko",
+        "authorUrl": "https://unsplash.com/@iamr_r_r?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1707246499606-dd0ba2ee43e2?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTB8fGN1cCUyMG9mJTIwZ3JlZW4lMjB0ZWF8ZW58MXwxfHx8MTc5Mzc4MjgzOHww&ixlib=rb-4.1.0",
+        "width": 3072,
+        "height": 4608,
+        "focal": {
+          "x": 0.5,
+          "y": 0.468
+        },
+        "avgColor": "#8c8c8c",
+        "blurhash": "LBEf4q-myE9aDNtRM|xuJFXAMw%0",
+        "altRu": "Горячий зелёный чай без сахара",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_herbal_tea": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "PiVZUFpsx1Q",
+        "pageUrl": "https://unsplash.com/photos/an-overhead-view-of-a-cup-of-tea-on-a-saucer-PiVZUFpsx1Q?utm_source=refectorio&utm_medium=referral",
+        "author": "Maria Klichik",
+        "authorUrl": "https://unsplash.com/@switchinglanes?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1719004322362-d230dc138bee?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MjB8fGhlcmJhbCUyMHRlYSUyMGN1cHxlbnwxfDF8fHwxNzkzNzgyODQ4fDA&ixlib=rb-4.1.0",
+        "width": 4480,
+        "height": 6720,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#0c260c",
+        "blurhash": "LSEpcTobEKtQ4URkx[fPEMtR%1V@",
+        "altRu": "Ароматный настой трав в кружке",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_hummus_vegetables": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "gQezj6tMnGY",
+        "pageUrl": "https://unsplash.com/photos/creamy-hummus-with-olive-oil-and-cucumber-gQezj6tMnGY?utm_source=refectorio&utm_medium=referral",
+        "author": "Andrea Niebuhr",
+        "authorUrl": "https://unsplash.com/@andrea_niebuhr?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1753364547864-679728b22c31?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTZ8fGh1bW11cyUyMGJvd2wlMjB3aXRoJTIwdmVnZXRhYmxlc3xlbnwxfDF8fHwxNzkzNzgyODU5fDA&ixlib=rb-4.1.0",
+        "width": 4160,
+        "height": 6240,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#d9c0c0",
+        "blurhash": "LaM?||M_NgRkRjt7WBWB.ARjt2s:",
+        "altRu": "Хумус и хрустящие овощные палочки",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_kefir": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "fIs9p9eTksw",
+        "pageUrl": "https://unsplash.com/photos/clear-glass-jar-with-white-liquid-fIs9p9eTksw?utm_source=refectorio&utm_medium=referral",
+        "author": "Anshu A",
+        "authorUrl": "https://unsplash.com/@anshu18?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1581868164904-77b124b80242?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MXx8Z2xhc3MlMjBvZiUyMGtlZmlyfGVufDF8MXx8fDE3OTM3ODI4NzF8MA&ixlib=rb-4.1.0",
+        "width": 3914,
+        "height": 5863,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#59738c",
+        "blurhash": "LDDctB~W004oEU9Fxt-p9af+xtxZ",
+        "altRu": "Густоватый кефир с лёгкой кислинкой",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_kiwi": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "6F0jd4UXySA",
+        "pageUrl": "https://unsplash.com/photos/sliced-watermelon-with-white-background-6F0jd4UXySA?utm_source=refectorio&utm_medium=referral",
+        "author": "Anton",
+        "authorUrl": "https://unsplash.com/@uniqueton?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1593356261955-a4be882ee52b?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8M3x8a2l3aSUyMGZydWl0JTIwc2xpY2VkfGVufDF8MXx8fDE3OTM3ODI4NzZ8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#f3f3f3",
+        "blurhash": "LiN1GR4m?cRh_4t7M{og?dWAM{t8",
+        "altRu": "Сочное кисло-сладкое киви",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_latte": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "hmLY7GiNFyE",
+        "pageUrl": "https://unsplash.com/photos/clear-glass-mug-with-latte-art-hmLY7GiNFyE?utm_source=refectorio&utm_medium=referral",
+        "author": "Jeanie de Klerk",
+        "authorUrl": "https://unsplash.com/@jdk4lyfe?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1561882468-9110e03e0f78?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8M3x8bGF0dGUlMjBjb2ZmZWUlMjBnbGFzc3xlbnwxfDF8fHwxNzkzNzgyODg4fDA&ixlib=rb-4.1.0",
+        "width": 4480,
+        "height": 6720,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#734026",
+        "blurhash": "LIFg|1-U9FRP}nj[NHjs01Rk-;tQ",
+        "altRu": "Кофе с большим количеством молока и пены",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_mandarin": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "ISX_imp8t1o",
+        "pageUrl": "https://unsplash.com/photos/orange-fruit-on-white-table-cloth-ISX_imp8t1o?utm_source=refectorio&utm_medium=referral",
+        "author": "Dessy Dimcheva",
+        "authorUrl": "https://unsplash.com/@dessy_dmch?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1603638925702-37e1936b6d19?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTl8fG1hbmRhcmlucyUyMG9uJTIwYSUyMHRhYmxlfGVufDF8MXx8fDE3OTM3ODI5MDB8MA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#a6c0d9",
+        "blurhash": "LSLN*~.TS#k?GdMxZ~nhET$$tSV?",
+        "altRu": "Сладкие сочные дольки мандарина",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_milk": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "p3ViLmVgVJ4",
+        "pageUrl": "https://unsplash.com/photos/clear-drinking-glass-with-white-liquid-p3ViLmVgVJ4?utm_source=refectorio&utm_medium=referral",
+        "author": "Kim Leary",
+        "authorUrl": "https://unsplash.com/@kimleary?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1517448931760-9bf4414148c5?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8Mnx8Z2xhc3MlMjBvZiUyMG1pbGt8ZW58MXwxfHx8MTc5Mzc4MjkwNHww&ixlib=rb-4.1.0",
+        "width": 3712,
+        "height": 5568,
+        "focal": {
+          "x": 0.5,
+          "y": 0.531
+        },
+        "avgColor": "#260c0c",
+        "blurhash": "LPB3]BtR4TRPDiWB%Nof8_Rj-;tR",
+        "altRu": "Стакан молока, холодного или тёплого",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_natural_yogurt": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "qj_zfYm-sdI",
+        "pageUrl": "https://unsplash.com/photos/a-bowl-of-yogurt-with-blackberries-and-granola-qj_zfYm-sdI?utm_source=refectorio&utm_medium=referral",
+        "author": "Natalie Behn",
+        "authorUrl": "https://unsplash.com/@natalie_behn?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1692071106919-01bc0b9b0919?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8NHx8bmF0dXJhbCUyMHlvZ3VydCUyMGJvd2x8ZW58MXwxfHx8MTc5Mzc4MjkwNnww&ixlib=rb-4.1.0",
+        "width": 2161,
+        "height": 3237,
+        "focal": {
+          "x": 0.5,
+          "y": 0.555
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LIMQR~M{V?D$-px]D%IU_44TkW-;",
+        "altRu": "Густой йогурт без сахара с лёгкой кислинкой",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_oatmeal_plant_milk": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "9KcCLOFn2bc",
+        "pageUrl": "https://unsplash.com/photos/red-and-white-fruit-salad-on-white-ceramic-bowl-9KcCLOFn2bc?utm_source=refectorio&utm_medium=referral",
+        "author": "K8",
+        "authorUrl": "https://unsplash.com/@_k8_?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1583577012041-b9fe16bf9345?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MzB8fG9hdG1lYWwlMjBwb3JyaWRnZSUyMGJvd2x8ZW58MXwxfHx8MTc5Mzc4MjkxMHww&ixlib=rb-4.1.0",
+        "width": 3402,
+        "height": 5103,
+        "focal": {
+          "x": 0.5,
+          "y": 0.444
+        },
+        "avgColor": "#404040",
+        "blurhash": "LDE2:~D*pJ$+^+j[tlWC10-;?bM{",
+        "altRu": "Овсянка на соевом молоке",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_orange": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "dXG30bHebjY",
+        "pageUrl": "https://unsplash.com/photos/sliced-orange-fruit-on-white-surface-dXG30bHebjY?utm_source=refectorio&utm_medium=referral",
+        "author": "Elena Joland",
+        "authorUrl": "https://unsplash.com/@labf?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1592695953174-a6bc74c6a085?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTB8fGZyZXNoJTIwb3JhbmdlcyUyMHNsaWNlZHxlbnwxfDF8fHwxNzkzNzgyOTE5fDA&ixlib=rb-4.1.0",
+        "width": 1816,
+        "height": 2760,
+        "focal": {
+          "x": 0.5,
+          "y": 0.561
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LfP$Bf9DAdM{osnMr=j]GIt6v|t8",
+        "altRu": "Очищенный сочный апельсин",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_orange_juice": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "kkrXVKK-jhg",
+        "pageUrl": "https://unsplash.com/photos/orange-juice-in-clear-drinking-glass-kkrXVKK-jhg?utm_source=refectorio&utm_medium=referral",
+        "author": "ABHISHEK HAJARE",
+        "authorUrl": "https://unsplash.com/@abhishek_hajare?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MXx8Z2xhc3MlMjBvZiUyMG9yYW5nZSUyMGp1aWNlfGVufDF8MXx8fDE3OTM3ODI5MjJ8MA&ixlib=rb-4.1.0",
+        "width": 3865,
+        "height": 5797,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#262626",
+        "blurhash": "LhGj[}w]0*JB9uoywcafJpNH-QxF",
+        "altRu": "Яркий и холодный апельсиновый сок",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_pasta_side": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "jRBPF_5fg5c",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-spaghetti-and-a-cup-of-coffee-jRBPF_5fg5c?utm_source=refectorio&utm_medium=referral",
+        "author": "Josianne Pinard",
+        "authorUrl": "https://unsplash.com/@mamoot?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1739140597655-ff582775baeb?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTR8fGJvaWxlZCUyMHBhc3RhJTIwb24lMjBhJTIwcGxhdGV8ZW58MXwxfHx8MTc5Mzc4MjkyNXww&ixlib=rb-4.1.0",
+        "width": 3393,
+        "height": 5002,
+        "focal": {
+          "x": 0.5,
+          "y": 0.468
+        },
+        "avgColor": "#262626",
+        "blurhash": "LB9s@t^%ESE7%2s:WCWB0ND+r:$_",
+        "altRu": "Мягкие макароны со сливочным маслом",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_pear": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "P-S2zNn0Q0g",
+        "pageUrl": "https://unsplash.com/photos/a-green-pear-sitting-on-top-of-a-white-table-P-S2zNn0Q0g?utm_source=refectorio&utm_medium=referral",
+        "author": "Max Böhme",
+        "authorUrl": "https://unsplash.com/@max_boehme?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1679065104326-37eb353c411e?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTB8fHJpcGUlMjBwZWFyJTIwZnJ1aXR8ZW58MXwxfHx8MTc5Mzc4MjkyOHww&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 6000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#f3d9a6",
+        "blurhash": "LIQbXGDk~VM^}^NE4:oi4;WExGoy",
+        "altRu": "Сочная сладкая груша",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_rice_side": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "zXNC_lBBVGE",
+        "pageUrl": "https://unsplash.com/photos/rice-with-sesame-in-black-bowl-zXNC_lBBVGE?utm_source=refectorio&utm_medium=referral",
+        "author": "Vinn Koonyosying",
+        "authorUrl": "https://unsplash.com/@mggbox?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1516684732162-798a0062be99?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MXx8Ym9pbGVkJTIwd2hpdGUlMjByaWNlJTIwYm93bHxlbnwxfDF8fHwxNzkzNzgyOTQxfDA&ixlib=rb-4.1.0",
+        "width": 2592,
+        "height": 3888,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#0c2640",
+        "blurhash": "LGB:y;V[9Gt700%M%Mog4ntR%MWB",
+        "altRu": "Рассыпчатый белый рис с маслом",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_rye_bread": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "gmHuXuRlbFU",
+        "pageUrl": "https://unsplash.com/photos/slices-of-rye-bread-freshly-baked-gmHuXuRlbFU?utm_source=refectorio&utm_medium=referral",
+        "author": "Victoria Druc",
+        "authorUrl": "https://unsplash.com/@vikaelefant?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1744217256006-6fbf3195adc6?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTR8fHNsaWNlJTIwb2YlMjByeWUlMjBicmVhZHxlbnwxfDF8fHwxNzkzNzgyOTQ3fDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 5473,
+        "focal": {
+          "x": 0.5,
+          "y": 0.487
+        },
+        "avgColor": "#8c5940",
+        "blurhash": "L5Ee0s?GtQxtI[t6S6t70h%1-:WE",
+        "altRu": "Ломтик ароматного ржаного хлеба",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_steamed_vegetables": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "LalntMdtdbc",
+        "pageUrl": "https://unsplash.com/photos/corns-and-sliced-carrots-on-white-plate-LalntMdtdbc?utm_source=refectorio&utm_medium=referral",
+        "author": "Joyce",
+        "authorUrl": "https://unsplash.com/@rejoyced?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1501688356053-ee4bf6c4bffc?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8Mnx8c3RlYW1lZCUyMHZlZ2V0YWJsZXMlMjBwbGF0ZXxlbnwxfDF8fHwxNzkzNzgyOTUxfDA&ixlib=rb-4.1.0",
+        "width": 3456,
+        "height": 4608,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#c0c0c0",
+        "blurhash": "LGB:peITIpWFWXWCaeof01t8IAxu",
+        "altRu": "Овощи на пару без лишних добавок",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_tofu_scramble": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "z04UgR7o6wA",
+        "pageUrl": "https://unsplash.com/photos/a-white-plate-topped-with-eggs-and-vegetables-z04UgR7o6wA?utm_source=refectorio&utm_medium=referral",
+        "author": "gentilesco. ─ karolina ferretis",
+        "authorUrl": "https://unsplash.com/@gentilesco?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1673925962465-7bfd6339ab2e?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8OHx8dG9mdSUyMHNjcmFtYmxlJTIwcGFufGVufDF8MXx8fDE3OTM3ODI5NjB8MA&ixlib=rb-4.1.0",
+        "width": 3000,
+        "height": 4000,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#404040",
+        "blurhash": "LoIhB0IpNKoM0Lt7j[WBW@oKs+oe",
+        "altRu": "Обжаренный тофу с овощами и куркумой",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_walnuts": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "A8FOC-XPSlU",
+        "pageUrl": "https://unsplash.com/photos/a-glass-bowl-filled-with-nuts-on-top-of-a-white-table-A8FOC-XPSlU?utm_source=refectorio&utm_medium=referral",
+        "author": "Pranav tyagi",
+        "authorUrl": "https://unsplash.com/@pranavtyagi?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1724829260119-3db605c50a44?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8M3x8d2FsbnV0cyUyMGluJTIwYSUyMGJvd2x8ZW58MXwxfHx8MTc5Mzc4Mjk4Mnww&ixlib=rb-4.1.0",
+        "width": 3024,
+        "height": 4032,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LRN,@}WC?wt6?voeIUWC?wj?I9WC",
+        "altRu": "Горсть ядер грецкого ореха",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_water": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "UIRlrd0i5gc",
+        "pageUrl": "https://unsplash.com/photos/a-glass-of-water-sitting-on-top-of-a-wooden-table-UIRlrd0i5gc?utm_source=refectorio&utm_medium=referral",
+        "author": "li xiang",
+        "authorUrl": "https://unsplash.com/@lxngacn?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1700928620982-f8c5b9be5984?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MjR8fGdsYXNzJTIwb2YlMjB3YXRlcnxlbnwxfDF8fHwxNzkzNzgyOTkyfDA&ixlib=rb-4.1.0",
+        "width": 4000,
+        "height": 5333,
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "avgColor": "#a67340",
+        "blurhash": "LIGR|]?vxZ.T1i-:.7xZ#Qxv%Mt7",
+        "altRu": "Стакан питьевой воды",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_wheat_bread": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "sU-wwRFOGiI",
+        "pageUrl": "https://unsplash.com/photos/sliced-bread-on-brown-panel-sU-wwRFOGiI?utm_source=refectorio&utm_medium=referral",
+        "author": "Saile Ilyas",
+        "authorUrl": "https://unsplash.com/@saile_ilyas?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1568459004870-6dc6991708dc?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8Mjl8fHdob2xlJTIwZ3JhaW4lMjBicmVhZCUyMHNsaWNlc3xlbnwxfDF8fHwxNzkzNzgzMDA3fDA&ixlib=rb-4.1.0",
+        "width": 3200,
+        "height": 4800,
+        "focal": {
+          "x": 0.5,
+          "y": 0.556
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LTI#Z8_N9aD*%h-;tQWVo~Rjj?M{",
+        "altRu": "Ломтик мягкого белого хлеба",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_wholegrain_bread": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "bcF3zqBjeWo",
+        "pageUrl": "https://unsplash.com/photos/a-sliced-loaf-of-bread-sitting-on-top-of-a-wooden-cutting-board-bcF3zqBjeWo?utm_source=refectorio&utm_medium=referral",
+        "author": "Cynthia Winward",
+        "authorUrl": "https://unsplash.com/@meringuedesigns?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1671576130514-31bab884c2e7?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8MTN8fHdob2xlJTIwZ3JhaW4lMjBicmVhZCUyMHNsaWNlc3xlbnwxfDF8fHwxNzkzNzgzMDA3fDA&ixlib=rb-4.1.0",
+        "width": 2331,
+        "height": 3000,
+        "focal": {
+          "x": 0.518,
+          "y": 0.5
+        },
+        "avgColor": "#d9c0a6",
+        "blurhash": "LUK^ED4Ut8s,~qjYRkR*WB%MWXWV",
+        "altRu": "Зерновой хлеб с плотным мякишем",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
+      }
+    },
+    "d_wholegrain_pasta_side": {
+      "primary": {
+        "provider": "unsplash",
+        "id": "_7LCY_EI5Ik",
+        "pageUrl": "https://unsplash.com/photos/a-plate-of-pasta-with-parsley-and-tomatoes-_7LCY_EI5Ik?utm_source=refectorio&utm_medium=referral",
+        "author": "Stephanie Sarlos",
+        "authorUrl": "https://unsplash.com/@studiostephaniesarlos?utm_source=refectorio&utm_medium=referral",
+        "src": "https://images.unsplash.com/photo-1713449585141-0af71bcbfcc2?ixid=M3wxMTIzMTUxfDB8MXxzZWFyY2h8OHx8d2hvbGUlMjB3aGVhdCUyMHBhc3RhJTIwcGxhdGV8ZW58MXwxfHx8MTc5Mzc4MzAyMnww&ixlib=rb-4.1.0",
+        "width": 4800,
+        "height": 6000,
+        "focal": {
+          "x": 0.469,
+          "y": 0.5
+        },
+        "avgColor": "#d9d9d9",
+        "blurhash": "LXJ*I%_3.T-pE1IT$%xbJ.NFr;Rj",
+        "altRu": "Упругие цельнозерновые макароны с маслом",
+        "chosenAt": "2026-11-04",
+        "downloadTrackedAt": null
       }
     }
   }

@@ -37,9 +37,13 @@ const pexelsKey = await readKey('pexels');
 const pacer = createPacer();
 
 async function details(dishId, choice) {
-  const fromCandidates = candidates.dishes[dishId]?.candidates?.find(
-    (c) => c.provider === choice.provider && c.id === choice.id,
-  );
+  const same = (c) => c.provider === choice.provider && c.id === choice.id;
+  // The reviewer may take a cell from a neighbouring row (another item's search found the better photo).
+  const fromCandidates =
+    candidates.dishes[dishId]?.candidates?.find(same) ??
+    Object.values(candidates.dishes)
+      .flatMap((entry) => entry.candidates ?? [])
+      .find(same);
   if (fromCandidates) return fromCandidates;
   // A pinned photo that curate never saw: ask the API (needs that provider's key).
   if (choice.provider === 'pexels' && pexelsKey) {

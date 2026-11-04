@@ -651,40 +651,6 @@
   transform-origin: 0 50%;
   transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.widget-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: var(--z-dialog);
-  display: flex;
-  flex-direction: column;
-  min-width: 180px;
-  padding: 6px;
-  border-radius: 20px;
-  background: var(--color-ink);
-  box-shadow: 0 14px 34px rgb(0 0 0 / 0.2);
-}
-.widget-menu button {
-  padding: 10px 14px;
-  border: 0;
-  border-radius: 14px;
-  background: transparent;
-  color: var(--color-on-accent);
-  font-size: 15px;
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-}
-.widget-menu button:hover,
-.widget-menu button:focus-visible {
-  outline: none;
-  background: rgb(255 255 255 / 0.14);
-}
-.widget-menu button:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
 /* ——— Meal tabs ——— */
 
 .meals {
@@ -1527,4 +1493,11 @@
 .menu-pill--ghost:hover,
 .menu-pill--ghost:focus-visible {
   background: rgb(255 255 255 / 0.14);
+}
+.popover-note {
+  max-width: 320px;
+  padding: 8px 10px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.45;
 }
