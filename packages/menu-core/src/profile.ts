@@ -28,6 +28,7 @@ import {
   type Regime,
 } from '@refectorio/nutrition-core';
 import type { FoodIndex } from './foods';
+import { stableHash } from './hash';
 import { rule } from './rules';
 import {
   createTermResolver,
@@ -103,27 +104,6 @@ export function mergeDecisions(a: GuardrailDecision, b: GuardrailDecision): Guar
     guestOnly: a.guestOnly || b.guestOnly,
     individualEnergy: a.individualEnergy && b.individualEnergy,
   };
-}
-
-/** FNV-1a over a canonical JSON (sorted keys): the same inputs give the same hash on every device. */
-export function stableHash(value: unknown): string {
-  const canonical = (v: unknown): string => {
-    if (Array.isArray(v)) return `[${v.map(canonical).join(',')}]`;
-    if (v && typeof v === 'object') {
-      const entries = Object.entries(v as Record<string, unknown>)
-        .filter(([, x]) => x !== undefined)
-        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
-      return `{${entries.map(([k, x]) => `${JSON.stringify(k)}:${canonical(x)}`).join(',')}}`;
-    }
-    return JSON.stringify(v);
-  };
-  const text = canonical(value);
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < text.length; i += 1) {
-    hash ^= text.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193) >>> 0;
-  }
-  return hash.toString(16).padStart(8, '0');
 }
 
 const PROTECTED_REASONS = new Set([
@@ -286,6 +266,10 @@ export function buildMenuProfile(
       activity: answers.activity,
       extraGoals: answers.extraGoals,
       taste: { predictions: answers.taste.predictions, features: answers.taste.features },
+      // What the answers became (norms, guardrails, chosen adjustments): a change in nutrition-core makes the plan stale.
+      adjustments: answers.adjustments,
+      guardrails: decision,
+      targets,
     }),
     questionnaire: q,
     decision,

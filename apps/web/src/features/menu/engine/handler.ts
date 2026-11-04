@@ -18,7 +18,7 @@ import {
   replaceItem,
   search,
   setStructure,
-  stableHash,
+  canonicalJson,
   type FoodIndex,
   type MenuProfile,
   type MenuRequest,
@@ -44,7 +44,8 @@ function loadFoods(): FoodIndex {
 }
 
 function profileFor(answers: unknown): ReturnType<typeof buildMenuProfile> {
-  const key = stableHash(answers);
+  // The canonical text itself, not a 32-bit hash of it: a collision would hand back another person's profile (m19).
+  const key = canonicalJson(answers);
   const known = profiles.get(key);
   if (known) return { ok: true, value: known };
   const built = buildMenuProfile(answers, { foods: loadFoods() });

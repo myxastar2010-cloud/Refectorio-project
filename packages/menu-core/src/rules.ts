@@ -4,6 +4,7 @@
  */
 import { z } from 'zod';
 import rulesJson from '../data/rules.json';
+import { stableHash } from './hash';
 
 export const RULE_IDS = [
   'E1.vegFruitMinG',
@@ -147,6 +148,11 @@ function load(): ReadonlyMap<RuleId, RuleRecord> {
 
 export const RULES: ReadonlyMap<RuleId, RuleRecord> = load();
 export const RULES_VERSION: string = rulesFileSchema.shape.version.parse(rulesJson.version);
+/**
+ * The table's version plus a hash of every value: a plan made under other thresholds is stale even if someone forgot to
+ * bump the version (review of phase 3, M5).
+ */
+export const RULES_FINGERPRINT: string = `${RULES_VERSION}#${stableHash([...RULES].map(([id, r]) => [id, r.value]))}`;
 
 export function rule(id: RuleId): number {
   const found = RULES.get(id);

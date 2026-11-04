@@ -5,7 +5,16 @@
  */
 export * from './types';
 export * from './dates';
-export { RULES, RULES_VERSION, RULE_IDS, rule, type RuleId, type RuleRecord } from './rules';
+export { canonicalJson, stableHash } from './hash';
+export {
+  RULES,
+  RULES_FINGERPRINT,
+  RULES_VERSION,
+  RULE_IDS,
+  rule,
+  type RuleId,
+  type RuleRecord,
+} from './rules';
 export {
   CATEGORIES,
   CATEGORY_IDS,
@@ -32,7 +41,6 @@ export {
 export {
   buildMenuProfile,
   mergeDecisions,
-  stableHash,
   type MenuProfile,
   type ProfileError,
   type SafetyContext,

@@ -21,6 +21,7 @@ import {
 } from './planner';
 import { reasonsFor } from './explain';
 import type { MenuProfile } from './profile';
+import { RULES_FINGERPRINT } from './rules';
 import { checkStructure, type StructureError } from './structure';
 import { markKey, type Tracking } from './tracking';
 import {
@@ -53,7 +54,28 @@ export type OpError =
   | { readonly code: 'pastDay' }
   | { readonly code: 'eaten' }
   | { readonly code: 'invalidRules'; readonly detail: string }
-  | { readonly code: 'structureRejected'; readonly error: StructureError };
+  | { readonly code: 'structureRejected'; readonly error: StructureError }
+  | { readonly code: 'stalePlan'; readonly reason: StaleReason };
+
+/**
+ * Why a stored plan no longer matches the engine (review of phase 3, M5): the person's answers or targets, the dish data
+ * or the rules table changed. A stale plan is refreshed by `regenerate` / `changeTargets` (or by `setStructure` /
+ * `applyRules`, which re-plan from today with the current profile); edits of single slots and `extendHorizon` refuse
+ * it, so new days and replacements never mix two profiles or two versions of the data.
+ */
+export type StaleReason = 'profile' | 'foodData' | 'rules';
+
+export function planStaleness(engine: Engine, plan: Plan): StaleReason | null {
+  if (plan.profileHash !== engine.profile.hash) return 'profile';
+  if (plan.foodDataVersion !== engine.foods.version) return 'foodData';
+  if (plan.rulesVersion !== RULES_FINGERPRINT) return 'rules';
+  return null;
+}
+
+const staleError = (engine: Engine, plan: Plan) => {
+  const reason = planStaleness(engine, plan);
+  return reason ? err({ code: 'stalePlan' as const, reason }) : null;
+};
 
 export type MealDiff = {
   readonly mealId: string;
@@ -171,6 +193,8 @@ function replanFrom(engine: Engine, plan: Plan, next: Replan, options: OpOptions
     revision: plan.revision + 1,
     seed: nextSeed(plan, options.seed),
     profileHash: next.profile.hash,
+    foodDataVersion: engine.foods.version,
+    rulesVersion: RULES_FINGERPRINT,
     targets: next.profile.targets,
     structure: next.structure,
     rules: next.rules,
@@ -246,6 +270,8 @@ export function extendHorizon(
   options: Omit<OpOptions, 'today'> = {},
 ): OpResult {
   if (!isIsoDate(toDate)) return err({ code: 'invalidDate' });
+  const stale = staleError(engine, plan);
+  if (stale) return stale;
   if (compareDates(toDate, plan.horizonEnd) <= 0) return ok({ plan, diff: diff(plan, plan) });
   const result = planRange({
     profile: engine.profile,
@@ -294,6 +320,8 @@ function setupSlot(
   slot: SlotRef,
   tracking?: Tracking,
 ): Result<SlotSetup, OpError> {
+  const stale = staleError(engine, plan);
+  if (stale) return stale;
   const ctx = buildContext(engine.profile, engine.foods, plan.structure, plan.rules);
   const dayPlan = plan.days.find((d) => d.date === slot.date);
   const mealIndex = plan.structure.findIndex((m) => m.id === slot.meal);

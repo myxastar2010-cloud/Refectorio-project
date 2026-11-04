@@ -169,6 +169,9 @@ export type Plan = {
   readonly createdAt: IsoDate;
   /** Hash of the inputs that shaped the plan (answers, taste): a different profile means «regenerate». */
   readonly profileHash: string;
+  /** `food-core` version and the rules fingerprint the plan was made with: either changed means «regenerate» (M5). */
+  readonly foodDataVersion: string;
+  readonly rulesVersion: string;
   readonly targets: DayTargets;
   readonly structure: readonly Meal[];
   readonly rules: readonly Rule[];

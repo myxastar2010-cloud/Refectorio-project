@@ -23,6 +23,7 @@ import {
   type SearchStats,
 } from './planner';
 import type { MenuProfile } from './profile';
+import { RULES_FINGERPRINT } from './rules';
 import { checkStructure, DEFAULT_STRUCTURE, type StructureError } from './structure';
 import type { SlotKind } from './templates';
 import {
@@ -175,6 +176,8 @@ export function generate(
       seed: req.seed,
       createdAt: req.today,
       profileHash: req.profile.hash,
+      foodDataVersion: req.foods.version,
+      rulesVersion: RULES_FINGERPRINT,
       targets: req.profile.targets,
       structure,
       rules,

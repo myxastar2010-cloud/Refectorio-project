@@ -12,6 +12,7 @@ import {
   changeTargets,
   diff,
   extendHorizon,
+  planStaleness,
   regenerate,
   replaceItem,
   ruleConflicts,
@@ -19,6 +20,7 @@ import {
   type Engine,
 } from './operations';
 import { buildMenuProfile, type MenuProfile } from './profile';
+import { RULES_FINGERPRINT } from './rules';
 import { DEFAULT_STRUCTURE, structureFromKinds } from './structure';
 import { quizAnswers, testFoods, type AnswersOverrides } from './testing';
 import { EMPTY_TRACKING, markEaten, type Tracking } from './tracking';
@@ -612,4 +614,55 @@ describe('pregnancy: fish caps hold through replacements', () => {
     }
     expect(hardViolations(ctx, plan.days, []).map((v) => v.code)).not.toContain('fishWeek');
   }, 120_000);
+});
+
+describe('a stale plan (review of phase 3, M5)', () => {
+  const milkFree = profileOf({
+    allergies: { items: [{ code: 'MILK', level: 'allergy' }], custom: [] },
+  });
+  const newEngine: Engine = { profile: milkFree, foods };
+  const safeFor = (id: string) => {
+    const food = foods.byId.get(id);
+    return food !== undefined && checkFood(food, milkFree.safety).ok;
+  };
+
+  it('records the data and rules versions it was made with', () => {
+    expect(planStaleness(engine, base)).toBeNull();
+    expect(base.foodDataVersion).toBe(foods.version);
+    expect(base.rulesVersion).toBe(RULES_FINGERPRINT);
+  });
+
+  it('refuses single-slot edits and new days for another profile', () => {
+    const slot = coreSlot(base, TODAY, 'lunch');
+    const refused = { ok: false, error: { code: 'stalePlan', reason: 'profile' } };
+    expect(extendHorizon(newEngine, base, addDays(base.horizonEnd, 7))).toEqual(refused);
+    expect(alternatives(newEngine, base, slot)).toEqual(refused);
+    expect(replaceItem(newEngine, base, slot, itemAt(base, slot).itemId, { today: TODAY })).toEqual(
+      refused,
+    );
+  });
+
+  it('refuses them for other dish data or another rules table', () => {
+    const slot = coreSlot(base, TODAY, 'lunch');
+    const newData: Engine = { profile: office, foods: { ...foods, version: 'next' } };
+    expect(alternatives(newData, base, slot)).toEqual({
+      ok: false,
+      error: { code: 'stalePlan', reason: 'foodData' },
+    });
+    const oldRules: Plan = { ...base, rulesVersion: 'old' };
+    expect(alternatives(engine, oldRules, slot)).toEqual({
+      ok: false,
+      error: { code: 'stalePlan', reason: 'rules' },
+    });
+  });
+
+  it('is brought up to date by changeTargets: the new profile from today, the past untouched', () => {
+    const { plan } = unwrap(changeTargets(newEngine, base, opts()));
+    expect(planStaleness(newEngine, plan)).toBeNull();
+    expect(json(beforeToday(plan))).toBe(json(beforeToday(base)));
+    for (const day of fromToday(plan)) for (const id of idsOf(day)) expect(safeFor(id)).toBe(true);
+    expect(
+      unwrap(extendHorizon(newEngine, plan, addDays(plan.horizonEnd, 7))).plan.days.length,
+    ).toBe(plan.days.length + 7);
+  });
 });
