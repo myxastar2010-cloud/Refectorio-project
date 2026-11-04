@@ -33,6 +33,8 @@ export type FoodItem = {
   readonly ingredients: readonly {
     readonly id: string;
     readonly nameRu: string;
+    /** SR Legacy food_category_id; 0 for label foods. */
+    readonly group: number;
     readonly g: number;
   }[];
   /** Taste features of an item outside the game; the game dishes use the taste-core catalog. */
@@ -66,7 +68,7 @@ export function decodeFoodCore(json: unknown): {
       ingredients: item.i.map(([index, g]) => {
         const row = file.ingredients[index];
         if (!row) throw new Error(`food-core: ${item.id} refers to ingredient #${index}`);
-        return { id: row[0], nameRu: row[1], g };
+        return { id: row[0], nameRu: row[1], group: row[2], g };
       }),
       taste: item.x ?? null,
     };

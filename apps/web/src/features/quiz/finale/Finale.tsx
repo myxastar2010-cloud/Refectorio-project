@@ -16,6 +16,7 @@ import { captionsFor } from './captionPlan';
 import { Handoff, type Box, type Point } from './Handoff';
 import { RevealWave } from './RevealWave';
 import { Story } from './Story';
+import { useMenuGeneration, type MenuGeneration } from '../../menu/engine/useMenuGeneration';
 
 /** `?debug=answers`: the validated JSON of the answers. */
 function DebugAnswers({ result }: { readonly result: QuizAnswersV1 | null }) {
@@ -23,6 +24,28 @@ function DebugAnswers({ result }: { readonly result: QuizAnswersV1 | null }) {
     <details className="quiz-finale-debug" open>
       <summary>{quiz.finale.debugTitle}</summary>
       <pre>{result ? JSON.stringify(result, null, 2) : '—'}</pre>
+    </details>
+  );
+}
+
+/** `?debug=menu`: what the menu engine produced (phase 4 turns it into the menu page). */
+function DebugMenu({ generation }: { readonly generation: MenuGeneration }) {
+  const summary =
+    generation.status === 'ready'
+      ? {
+          status: generation.status,
+          ms: Math.round(generation.ms),
+          days: generation.plan.days.length,
+          horizonEnd: generation.plan.horizonEnd,
+          energyTarget: Math.round(generation.plan.targets.energyKcal),
+          firstDay: generation.plan.days[0],
+          notes: generation.plan.notes,
+        }
+      : generation;
+  return (
+    <details className="quiz-finale-debug" open data-menu-status={generation.status}>
+      <summary>{quiz.finale.debugMenuTitle}</summary>
+      <pre>{JSON.stringify(summary, null, 2)}</pre>
     </details>
   );
 }
@@ -57,6 +80,8 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
   const [dotPx, setDotPx] = useState(24);
   // A health text the menu cannot follow: the honest line says so too (review-health-synonyms.md B.4, 3).
   const unmatchedHealth = safety.decision.reasons.includes('OTHER_CHRONIC');
+  // The menu is generated while the story plays (ТЗ фаза 3 §9; the reveal comes in phase 4).
+  const generation = useMenuGeneration(result, params.seed);
 
   useEffect(() => {
     focusQuietly(titleRef.current);
@@ -186,6 +211,7 @@ function Generating({ result }: { readonly result: QuizAnswersV1 | null }) {
         ) : null}
       </AnimatePresence>
       {params.debugAnswers ? <DebugAnswers result={result} /> : null}
+      {params.debugMenu ? <DebugMenu generation={generation} /> : null}
       {handoff ? <Handoff from={handoff.from} to={handoff.to} onDone={onArrived} /> : null}
       {revealAt ? <RevealWave origin={revealAt} calm={calm} /> : null}
     </div>

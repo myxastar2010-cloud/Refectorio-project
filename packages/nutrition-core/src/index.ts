@@ -88,3 +88,16 @@ export {
   type TargetWeightInput,
   type WeightRangeKg,
 } from './weight';
+export {
+  effectiveMacroProfile,
+  profileMacros,
+  type MacroCorridor,
+  type ProfileMacros,
+} from './profiles';
+export {
+  MICRONUTRIENT_KEYS,
+  MICRONUTRIENT_SOURCE,
+  micronutrientNorms,
+  type MicronutrientKey,
+  type MicronutrientNorm,
+} from './micronutrients';

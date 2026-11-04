@@ -1,0 +1,1333 @@
+/**
+ * The weekly planner (ТЗ фаза 3 §3.2): a seeded greedy construction day by day with look-ahead on the weekly
+ * quotas, then a local search (simulated annealing with a fixed number of moves: replace an item, switch an optional
+ * slot, swap a meal between days). The objective is one cost: the day's nutrition after the portion solver + taste,
+ * habits and context per slot + weekly food-group quotas + variety. Hard rules never enter the cost: candidates
+ * come from the hard filter, DSL exclusions, the caffeine cut-off and the pregnancy fish caps are checked on every
+ * move. Deterministic for (inputs, seed): no clock, a seeded generator, ties broken by index, arithmetic only.
+ */
+import type { Random } from '@refectorio/taste-core';
+import type { IsoDate } from './dates';
+import {
+  allowedAt,
+  DISLIKE_BELOW,
+  fishBudgetShare,
+  fishServings,
+  isWeekday,
+  limitsFor,
+  weekKey,
+  SLOT_TASTE,
+  type PlanContext,
+} from './context';
+import { Q, solveDay, type DayCap, type DayItem, type DaySolution } from './portions';
+import { rule } from './rules';
+import {
+  ASIAN_CUISINES,
+  ASIAN_SIDE_BASES,
+  BREAD_WITH,
+  COHERENCE,
+  LEGUME_SIDE_BASES,
+  MAX_ITEMS_PER_MEAL,
+  MEAL_SLOTS,
+  PORTION_WEIGHT,
+  SIDE_HABIT,
+  SWEET_CORE,
+  type SlotKind,
+  type SlotSpec,
+} from './templates';
+import { kindOfMealId } from './structure';
+import { MEAL_KINDS, type DayPlan, type MealId, type PlannedItem } from './types';
+
+export type Slot = {
+  kind: SlotKind;
+  food: number;
+  /** Index into the food's factor grid. */
+  fi: number;
+  /** Kept as it is: an eaten item, a past day. */
+  frozen: boolean;
+  pinnedBy: string | null;
+};
+
+export type DayAgg = {
+  readonly energy: number;
+  readonly freeSugars: number;
+  readonly satFat: number;
+  readonly sodium: number;
+  readonly fishG: number;
+  /** Share of the weekly pregnancy fish budget (R17 E9, `fishBudgetShare`). */
+  readonly fishBudget: number;
+  readonly oilyFishServ: number;
+  readonly tunaServ: number;
+  readonly redMeatRawG: number;
+  readonly processedServ: number;
+  readonly legumesServ: number;
+  readonly nutsServ: number;
+  readonly wholeGrainServ: number;
+  readonly dairyServ: number;
+  readonly desserts: number;
+  readonly fried: number;
+  readonly freq: readonly number[];
+};
+
+export type DayState = {
+  readonly date: IsoDate;
+  readonly week: IsoDate;
+  readonly weekday: boolean;
+  /** A day of history: counted for windows and quotas, never changed. */
+  readonly history: boolean;
+  meals: Slot[][];
+  solution: DaySolution | null;
+  agg: DayAgg | null;
+  dayCost: number;
+};
+
+export type PlannerState = {
+  readonly days: DayState[];
+};
+
+/** Rule values read on every move of the search (the rules table is static). */
+const HOT = {
+  cookMax: rule('P.weekdayCookMaxMin'),
+  sweetDrink: rule('P.sweetDrinkFreeSugarsG'),
+  servingProcessed: rule('P.serving.processedMeatG'),
+  servingLegumes: rule('P.serving.legumesG'),
+  servingNuts: rule('P.serving.nutsG'),
+  servingWholeGrain: rule('P.serving.wholeGrainG'),
+  dessertMax: rule('P.dessertMaxPerDay'),
+  dairyMin: rule('P.dairyMinServingsDay'),
+  wholeGrainMin: rule('P.wholeGrainMinServingsDay'),
+  herbalTeaMax: rule('E21.herbalTeaMaxCupsDay'),
+  fishTarget: rule('E10.fishTargetGWeek'),
+  redCookedPerRaw: rule('E22.redMeatCookedPerRawG'),
+  redMaxWeek: rule('E22.redMeatMaxCookedGWeek'),
+  processedMaxWeek: rule('E23.processedMeatMaxServingsWeek'),
+  legumesMinWeek: rule('P.legumesMinServingsWeek'),
+  nutsMinWeek: rule('P.nutsMinServingsWeek'),
+  friedMaxWeek: rule('P.friedMaxPerWeek'),
+  sugarMaxLimited: rule('G.limitAddedSugarFreeSugarsMaxShare'),
+  sugarMax: rule('E3.freeSugarsMaxShare'),
+  satFatMax: rule('E5.satFatMaxShare'),
+} as const;
+
+const sq = (x: number) => x * x;
+const under = (value: number, min: number) => (min > 0 && value < min ? (min - value) / min : 0);
+
+// ---------------------------------------------------------------- per-slot and per-meal costs (portion-free)
+
+function specOf(ctx: PlanContext, mealIndex: number, slot: SlotKind): SlotSpec | undefined {
+  const meal = ctx.structure[mealIndex];
+  return meal ? MEAL_SLOTS[meal.kind].find((s) => s.slot === slot) : undefined;
+}
+
+export function slotCost(ctx: PlanContext, day: DayState, mealIndex: number, slot: Slot): number {
+  const food = ctx.foods[slot.food];
+  const meal = ctx.structure[mealIndex];
+  if (!food || !meal) return 0;
+  const C = ctx.costs;
+  const ref = ctx.tasteRef[meal.kind][slot.kind] ?? 0.5;
+  const like = ctx.pLike[slot.food] ?? ref;
+  let c = C.taste * SLOT_TASTE[slot.kind] * (ref - like);
+  if (like < DISLIKE_BELOW)
+    c += (C.dislike * SLOT_TASTE[slot.kind] * (DISLIKE_BELOW - like)) / DISLIKE_BELOW;
+  // A breakfast or snack core is usually a dish (porridge, eggs) or fruit/dairy at a snack — a pastry less so.
+  if (slot.kind === 'core' && meal.kind === 'breakfast' && food.role !== 'main') c += C.habit * 0.3;
+  if (slot.kind === 'core' && food.role === 'main') {
+    const breakfastDish = food.features.course === 'breakfast';
+    if (breakfastDish !== (meal.kind === 'breakfast')) c += C.habit * COHERENCE.courseMismatch;
+  }
+  c += C.habit * (specOf(ctx, mealIndex, slot.kind)?.presence ?? 0);
+  if (
+    day.weekday &&
+    meal.kind === 'lunch' &&
+    food.role !== 'drink' &&
+    !food.item.flags.has('boxable')
+  )
+    c += C.boxable;
+  const cap = HOT.cookMax;
+  if (day.weekday && food.item.cookMin > cap)
+    c += C.cookTime * Math.min(1, (food.item.cookMin - cap) / cap);
+  if (meal.kind === 'dinner' && slot.kind === 'core' && ctx.profile.extraGoals.has('sleep')) {
+    const t = food.features.traits;
+    c += C.sleepDinner * (Math.max(0, t.richness - 0.5) + Math.max(0, t.spiciness - 0.4));
+  }
+  if ((meal.kind === 'dinner' || (ctx.hours[mealIndex] ?? 0) >= 17) && food.caffeineMg >= 1)
+    c += C.eveningCaffeine;
+  if (food.role === 'drink' && (food.item.perPortion.freeSugarsG ?? 0) >= HOT.sweetDrink)
+    c += C.habit * 0.5;
+  c += C.processedItem * (food.groups.processedMeatG / HOT.servingProcessed);
+  for (const p of ctx.rules.prefer) {
+    if (p.foods.has(slot.food) && p.appliesTo(day.date, meal.kind)) c += p.sign * C.prefer;
+  }
+  return c;
+}
+
+function mealHabitCost(ctx: PlanContext, mealIndex: number, slots: readonly Slot[]): number {
+  const meal = ctx.structure[mealIndex];
+  if (!meal) return 0;
+  const present = new Set(slots.map((s) => s.kind));
+  let c = 0;
+  for (const spec of MEAL_SLOTS[meal.kind]) {
+    if (
+      !present.has(spec.slot) &&
+      spec.absence > 0 &&
+      (ctx.pools[meal.kind][spec.slot]?.length ?? 0) > 0
+    )
+      c += spec.absence;
+  }
+  const core = slots.find((s) => s.kind === 'core');
+  const coreFood = core ? ctx.foods[core.food] : undefined;
+  if ((meal.kind === 'lunch' || meal.kind === 'dinner') && coreFood) {
+    if (coreFood.needsSide && !present.has('side'))
+      c += present.has('salad') ? SIDE_HABIT.saladInstead : SIDE_HABIT.missing;
+    const side = slots.find((s) => s.kind === 'side');
+    const sideFood = side ? ctx.foods[side.food] : undefined;
+    const base = sideFood?.features.carbBase;
+    if (
+      base !== undefined &&
+      ((coreFood.cuisine !== null &&
+        ASIAN_CUISINES.has(coreFood.cuisine) &&
+        !ASIAN_SIDE_BASES.has(base)) ||
+        (coreFood.mainProtein === 'legumes' && !LEGUME_SIDE_BASES.has(base)))
+    )
+      c += COHERENCE.sidePairing;
+    if (!coreFood.needsSide && present.has('side')) c += SIDE_HABIT.needless;
+  }
+  // Bread next to a starchy dish or side (porridge, pasta, buckwheat) — unless it comes with the soup.
+  const starchy = slots.some(
+    (s) =>
+      (s.kind === 'core' || s.kind === 'side') &&
+      (ctx.foods[s.food]?.features.carbBase ?? 'none') !== 'none',
+  );
+  if (present.has('bread') && starchy && !present.has('soup')) c += COHERENCE.doubleStarch;
+  if (
+    meal.kind === 'breakfast' &&
+    present.has('bread') &&
+    (coreFood?.features.traits.sweetness ?? 0) >= SWEET_CORE
+  )
+    c += COHERENCE.sweetWithBread;
+  const fruits = slots.filter((s) => {
+    const f = ctx.foods[s.food];
+    return (
+      f !== undefined && (f.role === 'fruit' || (s.kind === 'core' && f.categories.has('fruit')))
+    );
+  }).length;
+  if (fruits > 1) c += COHERENCE.doubleFruit * (fruits - 1);
+  if (present.has('bread')) {
+    const withSoup = meal.kind === 'lunch' && present.has('soup');
+    const sideless = meal.kind === 'breakfast' && coreFood?.needsSide === true;
+    if (withSoup) c += BREAD_WITH.soup - (specOf(ctx, mealIndex, 'bread')?.presence ?? 0);
+    else if (sideless) c += BREAD_WITH.sideless - (specOf(ctx, mealIndex, 'bread')?.presence ?? 0);
+  }
+  return ctx.costs.habit * c;
+}
+
+// ---------------------------------------------------------------- day solution, aggregates, day cost
+
+function dayProblemItems(ctx: PlanContext, day: DayState): { items: DayItem[]; refs: Slot[] } {
+  const items: DayItem[] = [];
+  const refs: Slot[] = [];
+  day.meals.forEach((slots, m) => {
+    for (const slot of slots) {
+      const q = ctx.q[slot.food];
+      const grid = ctx.grids[slot.food];
+      if (!q || !grid) continue;
+      const verdict = ctx.verdicts[slot.food];
+      const fixedPortion = verdict?.ok === true && verdict.fixedPortion;
+      items.push({
+        q,
+        grid,
+        fixed: slot.frozen || fixedPortion,
+        ...(slot.frozen ? { fixedAt: slot.fi } : {}),
+        meal: m,
+        portionWeight: PORTION_WEIGHT[slot.kind],
+      });
+      refs.push(slot);
+    }
+  });
+  return { items, refs };
+}
+
+/**
+ * Hard caps of a day beside the targets' caffeine: a «no more caffeine than…» rule of the person or Kiki (review of
+ * phase 3, M3), and the day's room in its week's fish budget (R17 E9) — each fish cap less what the week's other days
+ * already hold.
+ */
+function capsFor(ctx: PlanContext, state: PlannerState, day: DayState): DayCap[] {
+  const caps: DayCap[] = [];
+  for (const l of ctx.rules.limits)
+    if (
+      l.q === Q.caffeine &&
+      l.per === 'day' &&
+      l.max !== undefined &&
+      MEAL_KINDS.some((m) => l.appliesTo(day.date, m))
+    )
+      caps.push({ q: Q.caffeine, max: l.max });
+  const fq = ctx.fishQ;
+  if (!fq) return caps;
+  let budget = 0;
+  let oily = 0;
+  let tuna = 0;
+  for (const d of state.days) {
+    if (d === day || d.week !== day.week || !d.agg) continue;
+    budget += d.agg.fishBudget;
+    oily += d.agg.oilyFishServ;
+    tuna += d.agg.tunaServ;
+  }
+  return [
+    ...caps,
+    { q: fq.budget, max: 1 - budget },
+    { q: fq.oily, max: rule('E9.oilyFishMaxServingsWeek') - oily },
+    { q: fq.tuna, max: rule('E9.tunaMaxServingsWeek') - tuna },
+  ];
+}
+
+export function solveDayState(
+  ctx: PlanContext,
+  state: PlannerState,
+  day: DayState,
+  full: boolean,
+): DaySolution {
+  const { items, refs } = dayProblemItems(ctx, day);
+  const solution = solveDay(
+    {
+      items,
+      mealShare: ctx.shares,
+      mainMeal: ctx.mainMeal,
+      targets: ctx.profile.targets,
+      weights: ctx.weights,
+      limits: limitsFor(ctx, day.date),
+      caps: capsFor(ctx, state, day),
+    },
+    refs.map((s) => s.fi),
+    full,
+  );
+  refs.forEach((slot, i) => {
+    slot.fi = solution.factorIndex[i] ?? slot.fi;
+  });
+  return solution;
+}
+
+export function aggregate(ctx: PlanContext, day: DayState): DayAgg {
+  let fishG = 0;
+  let fishBudget = 0;
+  let oily = 0;
+  let tuna = 0;
+  let red = 0;
+  let processed = 0;
+  let legumes = 0;
+  let nuts = 0;
+  let wholeGrain = 0;
+  let dairy = 0;
+  let desserts = 0;
+  let fried = 0;
+  let energy = 0;
+  let sugars = 0;
+  let satFat = 0;
+  let sodium = 0;
+  const freq = ctx.rules.frequency.map(() => 0);
+  for (const slots of day.meals) {
+    for (const slot of slots) {
+      const food = ctx.foods[slot.food];
+      if (!food) continue;
+      const f = ctx.grids[slot.food]?.[slot.fi] ?? 1;
+      const g = food.groups;
+      const n = food.item.perPortion;
+      energy += f * (n.energyKcal ?? 0);
+      sugars += f * (n.freeSugarsG ?? 0);
+      satFat += f * (n.satFatG ?? 0);
+      sodium += f * (n.sodiumMg ?? 0);
+      fishG += f * g.fishG;
+      // Shellfish-only dishes share the budget too (m1): gate on the share, not on fish grams.
+      const share = fishBudgetShare(food);
+      if (share > 0) {
+        const servings = fishServings(food);
+        fishBudget += f * share;
+        oily += f * servings.oily;
+        tuna += f * servings.tuna;
+      }
+      red += f * g.redMeatRawG;
+      processed += (f * g.processedMeatG) / HOT.servingProcessed;
+      legumes += (f * g.legumesG) / HOT.servingLegumes;
+      nuts += (f * g.nutsG) / HOT.servingNuts;
+      wholeGrain += (f * g.wholeGrainG) / HOT.servingWholeGrain;
+      dairy += f * g.dairyServings;
+      if (food.role === 'dessert') desserts += 1;
+      if (food.fried) fried += 1;
+      ctx.rules.frequency.forEach((r, i) => {
+        if (r.foods.has(slot.food)) freq[i] = (freq[i] ?? 0) + 1;
+      });
+    }
+  }
+  return {
+    energy,
+    freeSugars: sugars,
+    satFat,
+    sodium,
+    fishG,
+    fishBudget,
+    oilyFishServ: oily,
+    tunaServ: tuna,
+    redMeatRawG: red,
+    processedServ: processed,
+    legumesServ: legumes,
+    nutsServ: nuts,
+    wholeGrainServ: wholeGrain,
+    dairyServ: dairy,
+    desserts,
+    fried,
+    freq,
+  };
+}
+
+function dayExtras(ctx: PlanContext, day: DayState, agg: DayAgg): number {
+  const C = ctx.costs;
+  let c = C.dessertDay * Math.max(0, agg.desserts - HOT.dessertMax);
+  if (ctx.dairyAllowed) c += C.dairyDay * sq(under(agg.dairyServ, HOT.dairyMin));
+  c += C.wholeGrainDay * sq(under(agg.wholeGrainServ, HOT.wholeGrainMin));
+  // No same main protein at lunch and dinner (R17 §5).
+  const proteins: string[] = [];
+  day.meals.forEach((slots, m) => {
+    const kind = ctx.structure[m]?.kind;
+    if (kind !== 'lunch' && kind !== 'dinner') return;
+    const core = slots.find((s) => s.kind === 'core');
+    const p = core ? ctx.foods[core.food]?.mainProtein : undefined;
+    if (p && p !== 'none' && p !== 'dairy') proteins.push(p);
+  });
+  if (proteins.length === 2 && proteins[0] === proteins[1]) c += C.sameProtein;
+  const starches: string[] = [];
+  day.meals.forEach((slots, m) => {
+    const kind = ctx.structure[m]?.kind;
+    if (kind !== 'lunch' && kind !== 'dinner') return;
+    for (const s of slots) {
+      const f = ctx.foods[s.food];
+      if (f && (s.kind === 'core' || s.kind === 'side') && f.features.carbBase !== 'none')
+        starches.push(f.features.carbBase);
+    }
+  });
+  if (new Set(starches).size < starches.length) c += C.habit * COHERENCE.sameStarchDay;
+  const drinks: number[] = [];
+  for (const slots of day.meals)
+    for (const s of slots) if (ctx.foods[s.food]?.role === 'drink') drinks.push(s.food);
+  const sweet = drinks.filter(
+    (d) => (ctx.foods[d]?.item.perPortion.freeSugarsG ?? 0) >= HOT.sweetDrink,
+  ).length;
+  if (sweet > 1) c += C.habit * COHERENCE.secondSweetDrink * (sweet - 1);
+  c += C.habit * COHERENCE.sameDrinkDay * (drinks.length - new Set(drinks).size);
+  // includeItem: the rule's foods appear in a covered meal of this day.
+  for (const inc of ctx.rules.includes) {
+    const covered = ctx.structure
+      .map((meal, m) => [meal, m] as const)
+      .filter(([meal]) => inc.appliesTo(day.date, meal.kind));
+    if (covered.length === 0) continue;
+    const met = inc.meals
+      ? covered.every(([, m]) => (day.meals[m] ?? []).some((s) => inc.foods.has(s.food)))
+      : covered.some(([, m]) => (day.meals[m] ?? []).some((s) => inc.foods.has(s.food)));
+    if (!met) c += C.includeRule;
+  }
+  return c;
+}
+
+export function refreshDay(
+  ctx: PlanContext,
+  state: PlannerState,
+  day: DayState,
+  full = false,
+): void {
+  const solution = solveDayState(ctx, state, day, full);
+  const agg = aggregate(ctx, day);
+  let c = solution.cost + dayExtras(ctx, day, agg);
+  day.meals.forEach((slots, m) => {
+    for (const slot of slots) c += slotCost(ctx, day, m, slot);
+    c += mealHabitCost(ctx, m, slots);
+  });
+  day.solution = solution;
+  day.agg = agg;
+  day.dayCost = c;
+}
+
+// ---------------------------------------------------------------- weekly quotas
+
+export function weekCosts(ctx: PlanContext, days: readonly DayState[]): number {
+  const C = ctx.costs;
+  const weeks = new Map<IsoDate, DayAgg[]>();
+  for (const d of days) {
+    if (!d.agg) continue;
+    const list = weeks.get(d.week) ?? [];
+    list.push(d.agg);
+    weeks.set(d.week, list);
+  }
+  let c = 0;
+  for (const aggs of weeks.values()) {
+    const share = aggs.length / 7;
+    const sum = (key: keyof Omit<DayAgg, 'freq'>) => aggs.reduce((s, a) => s + a[key], 0);
+    if (ctx.fishAllowed) c += C.fishWeek * sq(under(sum('fishG'), HOT.fishTarget * share));
+    c +=
+      C.redMeatWeek *
+      sq(
+        Math.max(0, sum('redMeatRawG') * HOT.redCookedPerRaw - HOT.redMaxWeek * share) /
+          (HOT.redMaxWeek * share),
+      );
+    c += C.processedWeek * Math.max(0, sum('processedServ') - HOT.processedMaxWeek * share);
+    c += C.legumesWeek * sq(under(sum('legumesServ'), HOT.legumesMinWeek * share));
+    if (ctx.nutsAllowed) c += C.nutsWeek * sq(under(sum('nutsServ'), HOT.nutsMinWeek * share));
+    c += C.friedWeek * Math.max(0, sum('fried') - HOT.friedMaxWeek * share);
+    // R17 E3, E5: free sugars and saturated fat — hard on the weekly average (soft hints without numbers for E28).
+    const energy = sum('energy');
+    if (energy > 0) {
+      const sugarShare = (sum('freeSugars') * 4) / energy;
+      const sfaShare = (sum('satFat') * 9) / energy;
+      const sugarMax = ctx.profile.safety.dishRules.has('limitAddedSugar')
+        ? HOT.sugarMaxLimited
+        : HOT.sugarMax;
+      c += C.weeklyHard * sq(Math.max(0, sugarShare - sugarMax) / sugarMax);
+      c += C.weeklyHard * sq(Math.max(0, sfaShare - HOT.satFatMax) / HOT.satFatMax);
+    }
+    // R17 E4: WHO's sodium limit is about habitual intake — the week's average is held, a day may vary (D-084).
+    const limit = ctx.profile.targets.sodiumMaxMg;
+    if (limit > 0) {
+      const average = sum('sodium') / aggs.length;
+      const weight = ctx.profile.safety.dishRules.has('limitSodium') ? 3 : 1;
+      c += C.weeklyHard * weight * sq(Math.max(0, average - limit) / limit);
+    }
+    ctx.rules.frequency.forEach((r, i) => {
+      const n = aggs.reduce((s, a) => s + (a.freq[i] ?? 0), 0);
+      c += C.frequencyRule * (Math.max(0, r.min * share - n) + Math.max(0, n - r.max * share));
+    });
+  }
+  return c;
+}
+
+// ---------------------------------------------------------------- variety
+
+const REPEAT_ROLES = new Set(['main', 'soup', 'salad', 'side', 'snack', 'dessert']);
+/** Fruit and dairy may repeat in a week, not in the same meal on two days running nor twice a day. */
+const COMPONENT_ROLES = new Set(['fruit', 'dairy']);
+
+export function repeatWindow(role: string): number {
+  switch (role) {
+    case 'main':
+    case 'soup':
+      return rule('E19.repeatWindowDays');
+    case 'salad':
+      return rule('P.repeatWindowDays.salad');
+    case 'side':
+      return rule('P.repeatWindowDays.side');
+    case 'snack':
+      return rule('P.repeatWindowDays.snack');
+    case 'dessert':
+      return rule('P.repeatWindowDays.dessert');
+    case 'fruit':
+    case 'dairy':
+      return rule('P.repeatWindowDays.component');
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Per-food facts the variety cost reads on every move, as numbers (no strings, no maps in the hot loop), plus scratch
+ * buffers reused between calls. One per context.
+ */
+type VarietyIndex = {
+  readonly kindOf: Int8Array;
+  /** 1 — main or soup, 2 — fruit or dairy (components), 3 — other repeat roles, 0 — not counted. */
+  readonly cls: Int8Array;
+  readonly window: Int16Array;
+  readonly protein: Int16Array;
+  readonly starch: Int16Array;
+  readonly cuisine: Int16Array;
+  readonly isMain: Uint8Array;
+  readonly proteins: number;
+  readonly starches: number;
+  readonly anyMealDays: number;
+  readonly proteinMax: number;
+  readonly cuisineStreakMax: number;
+  readonly lastSeen: Int32Array;
+  readonly lastAny: Int32Array;
+  readonly stamp: Int32Array;
+  readonly lastStarch: Int32Array;
+  readonly proteinCount: Int32Array;
+};
+
+const KIND_INDEX = { breakfast: 0, lunch: 1, dinner: 2, snack: 3 } as const;
+const NEVER = -1_000_000;
+const varietyIndexes = new WeakMap<PlanContext, VarietyIndex>();
+
+/** Small integer ids for the values of one field (`none` and null get −1). */
+function idsOf(
+  values: readonly (string | null)[],
+  none: string,
+): { ids: Int16Array; count: number } {
+  const seen = new Map<string, number>();
+  const ids = Int16Array.from(values, (value) => {
+    if (value === null || value === none) return -1;
+    let id = seen.get(value);
+    if (id === undefined) {
+      id = seen.size;
+      seen.set(value, id);
+    }
+    return id;
+  });
+  return { ids, count: seen.size };
+}
+
+function varietyIndex(ctx: PlanContext): VarietyIndex {
+  const known = varietyIndexes.get(ctx);
+  if (known) return known;
+  const n = ctx.foods.length;
+  const protein = idsOf(
+    ctx.foods.map((f) => f.mainProtein),
+    'none',
+  );
+  const starch = idsOf(
+    ctx.foods.map((f) => f.features.carbBase),
+    'none',
+  );
+  const cuisine = idsOf(
+    ctx.foods.map((f) => f.cuisine),
+    '',
+  );
+  const index: VarietyIndex = {
+    kindOf: Int8Array.from(ctx.structure, (m) => KIND_INDEX[m.kind]),
+    cls: Int8Array.from(ctx.foods, (f) =>
+      f.role === 'main' || f.role === 'soup'
+        ? 1
+        : COMPONENT_ROLES.has(f.role)
+          ? 2
+          : REPEAT_ROLES.has(f.role)
+            ? 3
+            : 0,
+    ),
+    window: Int16Array.from(ctx.foods, (f) => repeatWindow(f.role)),
+    protein: protein.ids,
+    starch: starch.ids,
+    cuisine: cuisine.ids,
+    isMain: Uint8Array.from(ctx.foods, (f) => (f.role === 'main' ? 1 : 0)),
+    proteins: protein.count,
+    starches: starch.count,
+    anyMealDays: rule('P.repeatAnyMealDays'),
+    proteinMax: rule('E19.proteinBaseMaxPerWeekPerMeal'),
+    cuisineStreakMax: rule('P.cuisineStreakMax'),
+    lastSeen: new Int32Array(4 * n),
+    lastAny: new Int32Array(n),
+    stamp: new Int32Array(n),
+    lastStarch: new Int32Array(Math.max(1, ctx.structure.length * starch.count)),
+    proteinCount: new Int32Array(Math.max(1, 4 * protein.count)),
+  };
+  varietyIndexes.set(ctx, index);
+  return index;
+}
+
+/**
+ * Variety over the days in time order: the same item in the same meal kind within its window (R17 E19 for mains and
+ * soups); a main or soup on two days running in any meal; the same dish twice a day; the same starch for the same
+ * meal on consecutive days; a protein base too often in a week's meal kind; cuisine streaks of main dishes. One pass
+ * with typed arrays — it runs on every move of the search (`variety.test.ts` keeps the plain reference it must equal).
+ */
+export function varietyCost(ctx: PlanContext, days: readonly DayState[]): number {
+  const C = ctx.costs;
+  const v = varietyIndex(ctx);
+  const n = ctx.foods.length;
+  v.lastSeen.fill(NEVER);
+  v.lastAny.fill(NEVER);
+  v.stamp.fill(NEVER);
+  v.lastStarch.fill(NEVER);
+  v.proteinCount.fill(0);
+  let c = 0;
+  let week: IsoDate | null = null;
+  const flushProteins = () => {
+    for (const count of v.proteinCount)
+      if (count > v.proteinMax) c += C.proteinWeek * (count - v.proteinMax);
+    v.proteinCount.fill(0);
+  };
+  let lastCuisine = -2;
+  let run = 0;
+  days.forEach((day, d) => {
+    if (day.week !== week) {
+      flushProteins();
+      week = day.week;
+    }
+    day.meals.forEach((slots, m) => {
+      const kind = v.kindOf[m] ?? KIND_INDEX.snack;
+      let core = -1;
+      for (const slot of slots) {
+        const food = slot.food;
+        if (slot.kind === 'core' && core < 0) core = food;
+        const cls = v.cls[food] ?? 0;
+        if (cls === 0) continue;
+        if (v.stamp[food] === d) c += C.repeat * (cls === 2 ? 0.15 : 0.5);
+        v.stamp[food] = d;
+        const key = kind * n + food;
+        if (d - (v.lastSeen[key] ?? NEVER) < (v.window[food] ?? 0))
+          c += C.repeat * (cls === 1 ? 1 : cls === 2 ? 0.1 : 0.5);
+        v.lastSeen[key] = d;
+        if (cls === 1) {
+          const any = v.lastAny[food] ?? NEVER;
+          if (any !== d) {
+            if (d - any < v.anyMealDays) c += C.consecutive;
+            v.lastAny[food] = d;
+          }
+        }
+        const protein = v.protein[food] ?? -1;
+        if (slot.kind === 'core' && protein >= 0) {
+          const pk = kind * v.proteins + protein;
+          v.proteinCount[pk] = (v.proteinCount[pk] ?? 0) + 1;
+        }
+      }
+      if (core < 0) return;
+      const starch = v.starch[core] ?? -1;
+      if (starch >= 0) {
+        const sk = m * v.starches + starch;
+        if (d - (v.lastStarch[sk] ?? NEVER) === 1) c += C.habit * 0.3;
+        v.lastStarch[sk] = d;
+      }
+      if (v.isMain[core] === 1) {
+        const cuisine = v.cuisine[core] ?? -1;
+        if (cuisine >= 0 && cuisine === lastCuisine) {
+          run += 1;
+          if (run > v.cuisineStreakMax) c += C.cuisineStreak;
+        } else {
+          lastCuisine = cuisine;
+          run = 1;
+        }
+      }
+    });
+  });
+  flushProteins();
+  return c;
+}
+
+export function totalCost(ctx: PlanContext, state: PlannerState): number {
+  let c = 0;
+  for (const d of state.days) if (!d.history) c += d.dayCost;
+  return c + weekCosts(ctx, state.days) + varietyCost(ctx, state.days);
+}
+
+// ---------------------------------------------------------------- hard checks for a candidate
+
+/** A tracked quantity of the day with every other movable item at its smallest portion (eaten ones as they are). */
+function minDayQ(ctx: PlanContext, day: DayState, q: number, except?: Slot): number {
+  let sum = 0;
+  for (const slots of day.meals) {
+    for (const slot of slots) {
+      if (slot === except) continue;
+      const grid = ctx.grids[slot.food] ?? [1];
+      const factor = slot.frozen ? (grid[slot.fi] ?? 1) : (grid[0] ?? 1);
+      sum += (ctx.q[slot.food]?.[q] ?? 0) * factor;
+    }
+  }
+  return sum;
+}
+
+/** The same, for one meal. */
+function minMealQ(
+  ctx: PlanContext,
+  day: DayState,
+  mealIndex: number,
+  q: number,
+  except?: Slot,
+): number {
+  let sum = 0;
+  for (const slot of day.meals[mealIndex] ?? []) {
+    if (slot === except) continue;
+    const grid = ctx.grids[slot.food] ?? [1];
+    const factor = slot.frozen ? (grid[slot.fi] ?? 1) : (grid[0] ?? 1);
+    sum += (ctx.q[slot.food]?.[q] ?? 0) * factor;
+  }
+  return sum;
+}
+
+const herbalTeas = (ctx: PlanContext, day: DayState, except?: Slot): number =>
+  day.meals.reduce(
+    (n, slots) =>
+      n +
+      slots.filter((s) => s !== except && ctx.foods[s.food]?.categories.has('herbalTea')).length,
+    0,
+  );
+
+/**
+ * Can `food` go into this meal (in place of `except`)? Rule exclusions and the caffeine cut-off, no item twice in a
+ * meal, and room at its smallest portion under the hard caps: the day's caffeine (R17 E11–E13) and the week's fish
+ * budget (E9) — so neither the construction nor a move can ever start from a broken cap.
+ */
+export function candidateOk(
+  ctx: PlanContext,
+  state: PlannerState,
+  day: DayState,
+  mealIndex: number,
+  food: number,
+  except?: Slot,
+): boolean {
+  if (!allowedAt(ctx, food, day.date, mealIndex)) return false;
+  const slots = day.meals[mealIndex] ?? [];
+  if (slots.some((s) => s !== except && s.food === food)) return false;
+  const q = ctx.q[food];
+  const minFactor = ctx.grids[food]?.[0] ?? 1;
+  const targets = ctx.profile.targets;
+  const caffeine = q?.[Q.caffeine] ?? 0;
+  if (caffeine > 0) {
+    if (
+      minMealQ(ctx, day, mealIndex, Q.caffeine, except) + caffeine * minFactor >
+      targets.caffeineSingleMaxMg + 1e-9
+    )
+      return false;
+    if (minDayQ(ctx, day, Q.caffeine, except) + caffeine * minFactor > targets.caffeineMaxMg + 1e-9)
+      return false;
+  }
+  // R17 E21: herbal tea in pregnancy — at most four cups a day.
+  if (
+    ctx.profile.safety.pregnant &&
+    ctx.foods[food]?.categories.has('herbalTea') === true &&
+    herbalTeas(ctx, day, except) + 1 > HOT.herbalTeaMax
+  )
+    return false;
+  if (caffeine > 0 || (ctx.fishQ && (q?.[ctx.fishQ.budget] ?? 0) > 0)) {
+    for (const cap of capsFor(ctx, state, day)) {
+      const own = q?.[cap.q] ?? 0;
+      if (own > 0 && minDayQ(ctx, day, cap.q, except) + own * minFactor > cap.max + 1e-9)
+        return false;
+    }
+  }
+  return true;
+}
+
+/** Hard day limits after a change: caffeine (R17 E11–E13) as solved. */
+const dayLimitsOk = (ctx: PlanContext, day: DayState): boolean =>
+  (day.solution?.totals[Q.caffeine] ?? 0) <= ctx.profile.targets.caffeineMaxMg + 1e-9;
+
+/** Every hard cap holds for this day and its week after a change (the day's solution is fresh after `refreshDay`). */
+export const capsHold = (ctx: PlanContext, state: PlannerState, day: DayState): boolean =>
+  dayLimitsOk(ctx, day) &&
+  capsFor(ctx, state, day).every((c) => (day.solution?.totals[c.q] ?? 0) <= c.max + 1e-9) &&
+  (!ctx.profile.safety.pregnant || herbalTeas(ctx, day) <= HOT.herbalTeaMax);
+
+// ---------------------------------------------------------------- construction
+
+const TOP_K_WEIGHTS = [0.45, 0.25, 0.18, 0.12];
+
+function pickTop(rng: Random, ranked: readonly number[]): number | undefined {
+  const k = Math.min(ranked.length, TOP_K_WEIGHTS.length);
+  if (k === 0) return undefined;
+  const total = TOP_K_WEIGHTS.slice(0, k).reduce((s, w) => s + w, 0);
+  let u = rng.next() * total;
+  for (let i = 0; i < k; i += 1) {
+    u -= TOP_K_WEIGHTS[i] ?? 0;
+    if (u <= 0) return ranked[i];
+  }
+  return ranked[k - 1];
+}
+
+/** Share of the meal's energy the core dish usually carries (lunch also has soup and a side). */
+const CORE_SHARE = { breakfast: 0.7, lunch: 0.5, dinner: 0.65, snack: 0.9 } as const;
+
+function heuristic(
+  ctx: PlanContext,
+  state: PlannerState,
+  dayIndex: number,
+  mealIndex: number,
+  kind: SlotKind,
+  food: number,
+): number {
+  const day = state.days[dayIndex];
+  const meal = ctx.structure[mealIndex];
+  const f = ctx.foods[food];
+  if (!day || !meal || !f) return Number.POSITIVE_INFINITY;
+  const C = ctx.costs;
+  let h = slotCost(ctx, day, mealIndex, { kind, food, fi: 0, frozen: false, pinnedBy: null });
+  // Repeats against the days already built and the history.
+  const window = repeatWindow(f.role);
+  for (let back = 1; back <= Math.max(window, 1); back += 1) {
+    const prev = state.days[dayIndex - back];
+    if (!prev) break;
+    if (back < window && (prev.meals[mealIndex] ?? []).some((s) => s.food === food)) h += C.repeat;
+    if (
+      back === 1 &&
+      (f.role === 'main' || f.role === 'soup') &&
+      prev.meals.some((ss) => ss.some((s) => s.food === food))
+    )
+      h += C.consecutive;
+  }
+  // Look-ahead on the week's quotas.
+  const weekDays = state.days.filter((d) => d.week === day.week && d.agg);
+  const sum = (key: 'fishG' | 'redMeatRawG' | 'legumesServ' | 'fried') =>
+    weekDays.reduce((s, d) => s + (d.agg?.[key] ?? 0), 0);
+  const left = 7 - weekDays.length;
+  if (ctx.fishAllowed && f.groups.fishG > 0 && sum('fishG') < HOT.fishTarget)
+    h -= (C.fishWeek * 0.3 * 7) / (left + 4);
+  if (f.groups.redMeatRawG > 0 && sum('redMeatRawG') * HOT.redCookedPerRaw >= HOT.redMaxWeek * 0.8)
+    h += C.redMeatWeek * 0.5;
+  if (f.groups.legumesG > 0 && sum('legumesServ') < HOT.legumesMinWeek)
+    h -= (C.legumesWeek * 0.4 * 7) / (left + 4);
+  if (f.fried && sum('fried') >= HOT.friedMaxWeek) h += C.friedWeek;
+  if (
+    f.role === 'dessert' &&
+    day.meals.some((ss) => ss.some((s) => ctx.foods[s.food]?.role === 'dessert'))
+  )
+    h += C.dessertDay;
+  // Can a portion of it fill its part of the meal?
+  if (kind === 'core') {
+    const target =
+      (ctx.shares[mealIndex] ?? 0) * ctx.profile.targets.energyKcal * CORE_SHARE[meal.kind];
+    const e = ctx.q[food]?.[0] ?? 0;
+    const grid = ctx.grids[food] ?? [1];
+    if (target > 0 && e > 0) {
+      const best = Math.min(grid[grid.length - 1] ?? 1, Math.max(grid[0] ?? 1, target / e));
+      h += 3 * sq((e * best - target) / target);
+    }
+    // The other main meal already has this protein.
+    if (meal.kind === 'lunch' || meal.kind === 'dinner') {
+      const other = day.meals.some((ss, m) => {
+        const k = ctx.structure[m]?.kind;
+        if (m === mealIndex || (k !== 'lunch' && k !== 'dinner')) return false;
+        const core = ss.find((s) => s.kind === 'core');
+        return (
+          core !== undefined &&
+          ctx.foods[core.food]?.mainProtein === f.mainProtein &&
+          f.mainProtein !== 'none'
+        );
+      });
+      if (other) h += C.sameProtein;
+    }
+  }
+  return h;
+}
+
+function rankCandidates(
+  ctx: PlanContext,
+  state: PlannerState,
+  dayIndex: number,
+  mealIndex: number,
+  kind: SlotKind,
+): number[] {
+  const day = state.days[dayIndex];
+  const meal = ctx.structure[mealIndex];
+  if (!day || !meal) return [];
+  const pool = ctx.pools[meal.kind][kind] ?? [];
+  return pool
+    .filter((food) => candidateOk(ctx, state, day, mealIndex, food))
+    .map((food) => [food, heuristic(ctx, state, dayIndex, mealIndex, kind, food)] as const)
+    .sort((a, b) => a[1] - b[1] || a[0] - b[0])
+    .map(([food]) => food);
+}
+
+const standardIndex = (ctx: PlanContext, food: number): number => {
+  const grid = ctx.grids[food] ?? [1];
+  const i = grid.indexOf(1);
+  return i >= 0 ? i : 0;
+};
+
+function addSlot(
+  ctx: PlanContext,
+  day: DayState,
+  mealIndex: number,
+  kind: SlotKind,
+  food: number,
+  pinnedBy: string | null = null,
+): void {
+  const slots = day.meals[mealIndex];
+  if (!slots) return;
+  slots.push({ kind, food, fi: standardIndex(ctx, food), frozen: false, pinnedBy });
+}
+
+/** Template rule: a side only next to a main without its own starch (never «пельмени + макароны»). */
+function normalizeMeal(ctx: PlanContext, day: DayState, mealIndex: number): void {
+  const slots = day.meals[mealIndex];
+  if (!slots) return;
+  const core = slots.find((s) => s.kind === 'core');
+  const needsSide = core ? ctx.foods[core.food]?.needsSide === true : false;
+  if (!needsSide)
+    day.meals[mealIndex] = slots.filter(
+      (s) => s.kind !== 'side' || s.frozen || s.pinnedBy !== null,
+    );
+}
+
+export const sideAllowed = (ctx: PlanContext, slots: readonly Slot[]): boolean => {
+  const core = slots.find((s) => s.kind === 'core');
+  return core ? ctx.foods[core.food]?.needsSide === true : false;
+};
+
+function mealEnergyEstimate(ctx: PlanContext, slots: readonly Slot[]): number {
+  return slots.reduce((s, slot) => s + (ctx.q[slot.food]?.[0] ?? 0), 0);
+}
+
+/** Optional slots in the order they are switched on when the meal needs more energy. */
+function optionalOrder(ctx: PlanContext, mealIndex: number): SlotSpec[] {
+  const meal = ctx.structure[mealIndex];
+  if (!meal) return [];
+  return MEAL_SLOTS[meal.kind]
+    .filter((s) => s.slot !== 'core' && s.slot !== 'side')
+    .sort((a, b) => a.presence - a.absence - (b.presence - b.absence) || a.display - b.display);
+}
+
+export function constructDay(
+  ctx: PlanContext,
+  state: PlannerState,
+  dayIndex: number,
+  rng: Random,
+): void {
+  const day = state.days[dayIndex];
+  if (!day || day.history) return;
+  ctx.structure.forEach((meal, m) => {
+    const slots = day.meals[m] ?? [];
+    day.meals[m] = slots;
+    const has = (kind: SlotKind) => slots.some((s) => s.kind === kind);
+    // Rules that pin an item to this meal come first.
+    for (const inc of ctx.rules.includes) {
+      if (!inc.meals?.includes(meal.kind) || !inc.appliesTo(day.date, meal.kind)) continue;
+      if (slots.some((s) => inc.foods.has(s.food))) continue;
+      const choice = [...inc.foods].find((food) => candidateOk(ctx, state, day, m, food));
+      const f = choice !== undefined ? ctx.foods[choice] : undefined;
+      if (choice === undefined || !f) continue;
+      const kind = MEAL_SLOTS[meal.kind].find(
+        (s) => s.roles.includes(f.role) && !has(s.slot),
+      )?.slot;
+      if (kind && slots.length < MAX_ITEMS_PER_MEAL) addSlot(ctx, day, m, kind, choice, inc.ruleId);
+    }
+    if (!has('core')) {
+      const pick = pickTop(rng, rankCandidates(ctx, state, dayIndex, m, 'core'));
+      if (pick !== undefined) addSlot(ctx, day, m, 'core', pick);
+    }
+    const core = slots.find((s) => s.kind === 'core');
+    const coreFood = core ? ctx.foods[core.food] : undefined;
+    if (
+      (meal.kind === 'lunch' || meal.kind === 'dinner') &&
+      coreFood?.needsSide &&
+      !has('side') &&
+      slots.length < MAX_ITEMS_PER_MEAL
+    ) {
+      const side = pickTop(rng, rankCandidates(ctx, state, dayIndex, m, 'side'));
+      if (side !== undefined) addSlot(ctx, day, m, 'side', side);
+      else {
+        const salad = pickTop(rng, rankCandidates(ctx, state, dayIndex, m, 'salad'));
+        if (salad !== undefined) addSlot(ctx, day, m, 'salad', salad);
+      }
+    }
+    const target = (ctx.shares[m] ?? 0) * ctx.profile.targets.energyKcal;
+    for (const spec of optionalOrder(ctx, m)) {
+      if (slots.length >= MAX_ITEMS_PER_MEAL) break;
+      if (has(spec.slot)) continue;
+      const habitual = spec.absence > spec.presence;
+      if (!habitual && mealEnergyEstimate(ctx, slots) >= target * 0.9) continue;
+      const pick = pickTop(rng, rankCandidates(ctx, state, dayIndex, m, spec.slot));
+      if (pick !== undefined) addSlot(ctx, day, m, spec.slot, pick);
+    }
+    normalizeMeal(ctx, day, m);
+  });
+  refreshDay(ctx, state, day);
+}
+
+// ---------------------------------------------------------------- local search
+
+type Snapshot = {
+  day: DayState;
+  meals: Slot[][];
+  solution: DaySolution | null;
+  agg: DayAgg | null;
+  dayCost: number;
+};
+
+const snapshot = (day: DayState): Snapshot => ({
+  day,
+  meals: day.meals.map((slots) => slots.map((s) => ({ ...s }))),
+  solution: day.solution,
+  agg: day.agg,
+  dayCost: day.dayCost,
+});
+
+function restore(s: Snapshot): void {
+  s.day.meals = s.meals;
+  s.day.solution = s.solution;
+  s.day.agg = s.agg;
+  s.day.dayCost = s.dayCost;
+}
+
+/**
+ * 1 / (the third-order Taylor sum of e^x): e^(−x) near zero, a heavier tail (≈ 6/x³) further out — still decreasing, and
+ * arithmetic only, so acceptance is identical on every engine (review of phase 3, m15).
+ */
+const acceptance = (x: number) => 1 / (1 + x + (x * x) / 2 + (x * x * x) / 6);
+
+export type SearchStats = {
+  iterations: number;
+  accepted: number;
+  improved: number;
+  finalCost: number;
+};
+
+export function localSearch(
+  ctx: PlanContext,
+  state: PlannerState,
+  rng: Random,
+  iterations: number,
+): SearchStats {
+  const editable = state.days.map((d, i) => [d, i] as const).filter(([d]) => !d.history);
+  let cost = totalCost(ctx, state);
+  const stats: SearchStats = { iterations, accepted: 0, improved: 0, finalCost: cost };
+  if (editable.length === 0 || iterations <= 0) return stats;
+  const t0 = 1;
+  const t1 = 0.02;
+  for (let k = 0; k < iterations; k += 1) {
+    const temperature = t0 - ((t0 - t1) * k) / iterations;
+    const roll = rng.next();
+    const [day] = editable[rng.int(editable.length)] ?? [];
+    if (!day) continue;
+    const m = rng.int(ctx.structure.length);
+    const meal = ctx.structure[m];
+    const slots = day.meals[m];
+    if (!meal || !slots) continue;
+    let touched: Snapshot[];
+    if (roll < 0.5) {
+      // Replace an item.
+      const movable = slots.filter((s) => !s.frozen && s.pinnedBy === null);
+      const slot = movable[rng.int(movable.length)];
+      const pool = slot ? (ctx.pools[meal.kind][slot.kind] ?? []) : [];
+      if (!slot || pool.length < 2) continue;
+      const food = pool[rng.int(pool.length)];
+      if (food === undefined || food === slot.food || !candidateOk(ctx, state, day, m, food, slot))
+        continue;
+      touched = [snapshot(day)];
+      const index = slots.indexOf(slot);
+      const replaced = day.meals[m]?.[index];
+      if (replaced) {
+        replaced.food = food;
+        replaced.fi = standardIndex(ctx, food);
+      }
+      normalizeMeal(ctx, day, m);
+    } else if (roll < 0.75) {
+      // Switch an optional slot on or off.
+      const options = MEAL_SLOTS[meal.kind].filter((s) => s.slot !== 'core');
+      const spec = options[rng.int(options.length)];
+      if (!spec) continue;
+      const existing = slots.find((s) => s.kind === spec.slot);
+      if (existing) {
+        if (existing.frozen || existing.pinnedBy !== null) continue;
+        touched = [snapshot(day)];
+        day.meals[m] = slots.filter((s) => s !== existing);
+      } else {
+        if (slots.length >= MAX_ITEMS_PER_MEAL) continue;
+        if (spec.slot === 'side' && !sideAllowed(ctx, slots)) continue;
+        const pool = (ctx.pools[meal.kind][spec.slot] ?? []).filter((f) =>
+          candidateOk(ctx, state, day, m, f),
+        );
+        const food = pool[rng.int(pool.length)];
+        if (food === undefined) continue;
+        touched = [snapshot(day)];
+        addSlot(ctx, day, m, spec.slot, food);
+      }
+    } else {
+      // Swap this meal with the same meal of another day.
+      const [other] = editable[rng.int(editable.length)] ?? [];
+      const otherSlots = other?.meals[m];
+      if (!other || other === day || !otherSlots) continue;
+      if (
+        slots.some((s) => s.frozen || s.pinnedBy !== null) ||
+        otherSlots.some((s) => s.frozen || s.pinnedBy !== null)
+      )
+        continue;
+      if (
+        !otherSlots.every((s) => allowedAt(ctx, s.food, day.date, m)) ||
+        !slots.every((s) => allowedAt(ctx, s.food, other.date, m))
+      )
+        continue;
+      touched = [snapshot(day), snapshot(other)];
+      day.meals[m] = otherSlots.map((s) => ({ ...s }));
+      other.meals[m] = slots.map((s) => ({ ...s }));
+    }
+    for (const t of touched) refreshDay(ctx, state, t.day);
+    if (!touched.every((t) => capsHold(ctx, state, t.day))) {
+      touched.forEach(restore);
+      continue;
+    }
+    const next = totalCost(ctx, state);
+    const delta = next - cost;
+    if (delta <= 0 || rng.next() < acceptance(delta / temperature)) {
+      if (delta < 0) stats.improved += 1;
+      stats.accepted += 1;
+      cost = next;
+    } else {
+      touched.forEach(restore);
+    }
+  }
+  stats.finalCost = cost;
+  return stats;
+}
+
+// ---------------------------------------------------------------- state from and to plans
+
+/**
+ * Days of a plan as planner days. History days are frozen and only counted; an editable day keeps the items
+ * `frozen` says (eaten ones) and lets the planner move the rest.
+ */
+export function dayStateFrom(
+  ctx: PlanContext,
+  plan: Pick<DayPlan, 'date' | 'meals'>,
+  options: {
+    readonly history: boolean;
+    readonly frozen?: (mealId: string, itemId: string) => boolean;
+  },
+): DayState {
+  // A meal the structure no longer has (removed, or a past day's own structure) still counts in the caps and
+  // windows (M6): its frozen items join the meal of the same kind, else the day's last meal.
+  const orphans = new Map<number, PlannedItem[]>();
+  for (const [mealId, items] of Object.entries(plan.meals)) {
+    if (ctx.structure.some((m) => m.id === mealId)) continue;
+    const kind = kindOfMealId(mealId);
+    const same = ctx.structure.findIndex((m) => m.kind === kind);
+    const at = same >= 0 ? same : ctx.structure.length - 1;
+    const frozen = items.filter((i) => options.history || options.frozen?.(mealId, i.itemId));
+    orphans.set(at, [...(orphans.get(at) ?? []), ...frozen]);
+  }
+  const meals = ctx.structure.map((meal, mealIndex) => {
+    const own = (plan.meals[meal.id] ?? []).map((item) => ({ item, frozen: false }));
+    const moved = (orphans.get(mealIndex) ?? []).map((item) => ({ item, frozen: true }));
+    return [...own, ...moved].flatMap(({ item, frozen: orphan }): Slot[] => {
+      const food = ctx.indexOf.get(item.itemId);
+      const grid = food !== undefined ? ctx.grids[food] : undefined;
+      if (food === undefined || !grid) return [];
+      const fi = grid.reduce(
+        (best, f, i) =>
+          Math.abs(f - item.portion.factor) < Math.abs((grid[best] ?? 1) - item.portion.factor)
+            ? i
+            : best,
+        0,
+      );
+      const frozen = orphan || options.history || options.frozen?.(meal.id, item.itemId) === true;
+      return [{ kind: item.slot, food, fi, frozen, pinnedBy: item.pinnedBy ?? null }];
+    });
+  });
+  const day: DayState = {
+    date: plan.date,
+    week: weekKey(plan.date),
+    weekday: isWeekday(plan.date),
+    history: options.history,
+    meals,
+    solution: null,
+    agg: null,
+    dayCost: 0,
+  };
+  day.agg = aggregate(ctx, day);
+  return day;
+}
+
+export const stateFromHistory = (
+  ctx: PlanContext,
+  history: readonly Pick<DayPlan, 'date' | 'meals'>[],
+): DayState[] => history.map((plan) => dayStateFrom(ctx, plan, { history: true }));
+
+export const emptyDay = (ctx: PlanContext, date: IsoDate): DayState => ({
+  date,
+  week: weekKey(date),
+  weekday: isWeekday(date),
+  history: false,
+  meals: ctx.structure.map(() => []),
+  solution: null,
+  agg: null,
+  dayCost: 0,
+});
+
+export type { MealId };
+
+// ---------------------------------------------------------------- deterministic polish
+
+/**
+ * Hill climbing after the annealing: every optional slot of every day is tried on and off, every movable item is
+ * tried against its best few candidates; a change stays only if the whole plan's cost drops. Catches the obvious
+ * moves the random search may have missed (tea at breakfast) without randomness.
+ */
+export function polish(ctx: PlanContext, state: PlannerState, candidatesPerSlot = 6): number {
+  let cost = totalCost(ctx, state);
+  let changes = 0;
+  const tryChange = (touched: DayState[], apply: () => void): boolean => {
+    const saved = touched.map(snapshot);
+    apply();
+    for (const d of touched) refreshDay(ctx, state, d);
+    const next = totalCost(ctx, state);
+    if (next < cost - 1e-9 && touched.every((d) => capsHold(ctx, state, d))) {
+      cost = next;
+      changes += 1;
+      return true;
+    }
+    saved.forEach(restore);
+    return false;
+  };
+  state.days.forEach((day, d) => {
+    if (day.history) return;
+    ctx.structure.forEach((meal, m) => {
+      for (const spec of MEAL_SLOTS[meal.kind]) {
+        if (spec.slot === 'core') continue;
+        const slots = day.meals[m] ?? [];
+        const existing = slots.find((s) => s.kind === spec.slot);
+        if (existing) {
+          if (!existing.frozen && existing.pinnedBy === null)
+            tryChange([day], () => {
+              day.meals[m] = (day.meals[m] ?? []).filter((s) => s !== existing);
+            });
+        } else if (
+          slots.length < MAX_ITEMS_PER_MEAL &&
+          (spec.slot !== 'side' || sideAllowed(ctx, slots))
+        ) {
+          for (const food of rankCandidates(ctx, state, d, m, spec.slot).slice(0, 3)) {
+            const added = tryChange([day], () => {
+              addSlot(ctx, day, m, spec.slot, food);
+            });
+            if (added) break;
+          }
+        }
+      }
+      for (const slot of [...(day.meals[m] ?? [])]) {
+        if (slot.frozen || slot.pinnedBy !== null) continue;
+        const ranked = rankCandidates(ctx, state, d, m, slot.kind).filter((f) => f !== slot.food);
+        for (const food of ranked.slice(0, candidatesPerSlot)) {
+          const index = (day.meals[m] ?? []).findIndex(
+            (s) => s.kind === slot.kind && s.food === slot.food,
+          );
+          if (index < 0) break;
+          const done = tryChange([day], () => {
+            const target = day.meals[m]?.[index];
+            if (target) {
+              target.food = food;
+              target.fi = standardIndex(ctx, food);
+            }
+            normalizeMeal(ctx, day, m);
+          });
+          if (done) break;
+        }
+      }
+    });
+  });
+  return changes;
+}
+
+export type CostBreakdown = {
+  readonly nutrition: number;
+  readonly slots: number;
+  readonly habits: number;
+  readonly dayExtras: number;
+  readonly weeks: number;
+  readonly variety: number;
+};
+
+/** Where the plan's cost comes from (the simulation report and tuning). */
+export function costBreakdown(ctx: PlanContext, state: PlannerState): CostBreakdown {
+  let nutrition = 0;
+  let slots = 0;
+  let habits = 0;
+  let extras = 0;
+  for (const day of state.days) {
+    if (day.history || !day.agg) continue;
+    nutrition += day.solution?.cost ?? 0;
+    extras += dayExtras(ctx, day, day.agg);
+    day.meals.forEach((list, m) => {
+      for (const slot of list) slots += slotCost(ctx, day, m, slot);
+      habits += mealHabitCost(ctx, m, list);
+    });
+  }
+  return {
+    nutrition,
+    slots,
+    habits,
+    dayExtras: extras,
+    weeks: weekCosts(ctx, state.days),
+    variety: varietyCost(ctx, state.days),
+  };
+}

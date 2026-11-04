@@ -20,6 +20,11 @@ import { testState } from './flow/testStates';
 import type { QuizState } from './flow/types';
 import { QuizContext, readQuizParams, type QuizApi } from './quizContext';
 import { useQuizHistory } from './useQuizHistory';
+import { whenIdle } from '../../lib/idle';
+import { prefetchMenuEngine } from '../menu/engine/client';
+
+/** The engine prefetch waits for an idle moment, at most this long after the quiz opens. */
+const PREFETCH_IDLE_MS = 4000;
 
 type Props = {
   readonly instant: boolean;
@@ -75,6 +80,9 @@ export function QuizScene({ instant, onExit, params }: Props) {
   useEffect(() => {
     saveDraft(state);
   }, [state]);
+
+  // The menu engine's worker and food data load while the person answers (ТЗ фаза 3 §9).
+  useEffect(() => whenIdle(prefetchMenuEngine, PREFETCH_IDLE_MS), []);
 
   const safety = useMemo(() => safetyOf(state.answers), [state.answers]);
 

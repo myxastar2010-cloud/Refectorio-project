@@ -181,7 +181,10 @@ describe('allergens, traces and diets', () => {
 describe('decodeFoodCore', () => {
   it('resolves ingredients and derives per 100 g from the portion', () => {
     const kefir = item('d_kefir');
-    expect(kefir.ingredients).toEqual([{ id: 'ru:kefir-2.5', nameRu: 'кефир 2,5 %', g: 208 }]);
+    expect(kefir.ingredients).toEqual([
+      { id: 'ru:kefir-2.5', nameRu: 'кефир 2,5 %', group: 0, g: 208 },
+    ]);
+    expect(item('d_baked_salmon').ingredients.find((i) => i.nameRu === 'лосось')?.group).toBe(15);
     expect(kefir.per100g.energyKcal).toBeCloseTo(
       ((kefir.perPortion.energyKcal ?? 0) * 100) / 208,
       6,

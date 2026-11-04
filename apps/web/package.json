@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@refectorio/contracts": "*",
+    "@refectorio/food-data": "*",
+    "@refectorio/menu-core": "*",
     "@refectorio/nutrition-core": "*",
     "@refectorio/taste-core": "*",
     "@tabler/icons-react": "^3.48.0",

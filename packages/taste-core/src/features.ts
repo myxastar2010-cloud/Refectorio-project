@@ -26,11 +26,30 @@ export const TRAIT_FEATURES = [
   'trait:popularity',
 ] as const;
 
+/**
+ * What the features need: a catalog dish, or a menu item outside the game (food-data), which may have no course or
+ * cuisine (drinks, bread, fruit) — then those features are simply absent.
+ */
+export type FeatureSource = Pick<
+  Dish,
+  | 'proteins'
+  | 'cookingMethods'
+  | 'carbBase'
+  | 'flavours'
+  | 'textures'
+  | 'traits'
+  | 'allergens'
+  | 'extras'
+> & {
+  readonly course?: Dish['course'] | undefined;
+  readonly cuisine?: Dish['cuisine'] | undefined;
+};
+
 /** Raw (feature id, weight) pairs of one dish before it is mapped onto a feature space. */
-export function dishFeatures(dish: Dish): [string, number][] {
+export function dishFeatures(dish: FeatureSource): [string, number][] {
   const pairs: [string, number][] = [[BIAS, 1]];
-  pairs.push([`course:${dish.course}`, 1]);
-  pairs.push([`cuisine:${dish.cuisine}`, 1]);
+  if (dish.course) pairs.push([`course:${dish.course}`, 1]);
+  if (dish.cuisine) pairs.push([`cuisine:${dish.cuisine}`, 1]);
   pairs.push([`carb:${dish.carbBase}`, 1]);
   // The main protein counts fully, side proteins half: a vegetarian still sees the meat in a fish soup on meat broth.
   dish.proteins.forEach((protein, order) => {
@@ -71,7 +90,7 @@ export function buildFeatureSpace(dishes: readonly Dish[]): FeatureSpace {
   return { ids, indexOf: new Map(ids.map((id, index) => [id, index])), size: ids.length };
 }
 
-export function encode(dish: Dish, space: FeatureSpace): SparseVector {
+export function encode(dish: FeatureSource, space: FeatureSpace): SparseVector {
   const merged = new Map<number, number>();
   for (const [id, weight] of dishFeatures(dish)) {
     const index = space.indexOf.get(id);

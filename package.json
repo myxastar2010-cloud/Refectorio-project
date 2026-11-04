@@ -47,7 +47,8 @@
     "dish-data": "node scripts/dish-data/build.mjs",
     "food-data": "node packages/food-data/build/run.mjs",
     "secrets:check": "node scripts/secrets/check.mjs",
-    "girl-video": "node scripts/girl-video/build.mjs"
+    "girl-video": "node scripts/girl-video/build.mjs",
+    "menu:sim": "node packages/menu-core/sim/run.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
@@ -60,6 +61,7 @@
     "eslint": "^10.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
+    "fast-check": "^4.10.2",
     "globals": "^17.12.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",

@@ -21,7 +21,14 @@ export {
   type TasteSessionOptions,
   type TasteState,
 } from './engine';
-export { buildFeatureSpace, encode, type FeatureSpace, type SparseVector } from './features';
+export {
+  buildFeatureSpace,
+  dishFeatures,
+  encode,
+  type FeatureSource,
+  type FeatureSpace,
+  type SparseVector,
+} from './features';
 export {
   DEFAULT_PRIOR,
   latent,
