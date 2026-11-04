@@ -1,7 +1,7 @@
 /**
- * The main thread's side of the menu worker: promise per request, progress callbacks, a timeout; a cancelled or
- * timed-out request terminates the worker (the engine runs synchronously and cannot be interrupted) and the next
- * request starts a fresh one. `prefetchMenuEngine` starts the worker and loads the food data during the quiz.
+ * The main thread's side of the menu worker: promise per request, progress callbacks, a timeout. The engine runs
+ * synchronously and cannot be interrupted, so a timed-out request terminates the worker and the requests still waiting
+ * go to a fresh one (review of phase 3, m13); cancel stops them all. `prefetchMenuEngine` starts the worker and loads the food data during the quiz.
  */
 import type { MenuError, MenuRequest, MenuResponse, MenuStage } from '@refectorio/menu-core';
 
@@ -25,6 +25,7 @@ type Pending = {
   readonly reject: (error: MenuRequestError) => void;
   readonly onProgress?: ((stage: MenuStage, share: number) => void) | undefined;
   readonly timer: ReturnType<typeof setTimeout>;
+  readonly message: MenuRequest;
 };
 
 export type MenuClient = {
@@ -57,6 +58,18 @@ export function createMenuClient(spawn: () => Worker): MenuClient {
     worker = null;
   };
 
+  const expire = (id: number) => {
+    const p = pending.get(id);
+    if (!p) return;
+    pending.delete(id);
+    p.reject(new MenuRequestError({ code: 'timeout' }));
+    worker?.terminate();
+    worker = null;
+    if (pending.size === 0) return;
+    const fresh = ensure();
+    for (const waiting of pending.values()) fresh.postMessage(waiting.message);
+  };
+
   const ensure = (): Worker => {
     if (worker) return worker;
     const w = spawn();
@@ -86,10 +99,11 @@ export function createMenuClient(spawn: () => Worker): MenuClient {
         const id = nextId;
         nextId += 1;
         const timer = setTimeout(() => {
-          fail({ code: 'timeout' });
+          expire(id);
         }, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
-        pending.set(id, { resolve, reject, onProgress: options.onProgress, timer });
-        ensure().postMessage({ ...body, id });
+        const message = { ...body, id } as MenuRequest;
+        pending.set(id, { resolve, reject, onProgress: options.onProgress, timer, message });
+        ensure().postMessage(message);
       }),
     cancel: () => {
       fail({ code: 'cancelled' });

@@ -194,7 +194,8 @@ export type FishColumns = { readonly budget: number; readonly oily: number; read
  * anything else — «good» or an unknown species — against the stricter 113 g.
  */
 export function fishBudgetShare(food: MenuFood): number {
-  const fish = food.groups.fishG;
+  // Shellfish share the budget under the dish's own FDA class (unknown, e.g. mussels — the strict cap).
+  const fish = food.groups.fishG + food.groups.seafoodG;
   if (fish <= 0) return 0;
   return (
     fish /

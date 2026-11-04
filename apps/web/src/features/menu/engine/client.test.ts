@@ -89,15 +89,21 @@ describe('menu client', () => {
     expect(at(workers, 0).terminated).toBe(0);
   });
 
-  it('times out every pending request and terminates the worker', async () => {
+  it('times out only the late request; the waiting ones go to a fresh worker', async () => {
     const { workers, client } = setup();
     const a = errorOf(client.request({ type: 'init' }, { timeoutMs: 1000 }));
-    const b = errorOf(client.request({ type: 'init' }, { timeoutMs: 5000 }));
+    const b = client.request({ type: 'init' }, { timeoutMs: 5000 });
     await vi.advanceTimersByTimeAsync(1000);
     expect(((await a) as MenuRequestError).error).toEqual({ code: 'timeout' });
-    expect(((await b) as MenuRequestError).error).toEqual({ code: 'timeout' });
     expect(at(workers, 0).terminated).toBe(1);
-    client.request({ type: 'init' }).catch(() => undefined);
+    expect(workers).toHaveLength(2);
+    expect(at(workers, 1).sent).toEqual([{ id: 2, type: 'init' }]);
+    at(workers, 1).reply({ id: 2, type: 'ready' });
+    await expect(b).resolves.toEqual({ id: 2, type: 'ready' });
+    const c = errorOf(client.request({ type: 'init' }, { timeoutMs: 1000 }));
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(((await c) as MenuRequestError).error).toEqual({ code: 'timeout' });
+    expect(at(workers, 1).terminated).toBe(1);
     expect(workers).toHaveLength(2);
   });
 

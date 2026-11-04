@@ -12,6 +12,7 @@ import {
   changeTargets,
   diff,
   extendHorizon,
+  MAX_DAYS_AHEAD,
   planStaleness,
   regenerate,
   replaceItem,
@@ -438,9 +439,22 @@ describe('extendHorizon', () => {
   });
 
   it('rejects an invalid date', () => {
-    expect(extendHorizon(engine, base, 'later')).toEqual({
+    expect(extendHorizon(engine, base, 'later', opts())).toEqual({
       ok: false,
       error: { code: 'invalidDate' },
+    });
+  });
+  it('reaches at most four weeks past today and does not extend a horizon in the past (m8)', () => {
+    const maxDate = addDays(TODAY, MAX_DAYS_AHEAD);
+    expect(extendHorizon(engine, base, addDays(maxDate, 1), opts())).toEqual({
+      ok: false,
+      error: { code: 'tooFarAhead', maxDate },
+    });
+    expect(unwrap(extendHorizon(engine, base, maxDate, opts())).plan.horizonEnd).toBe(maxDate);
+    const later = addDays(base.horizonEnd, 1);
+    expect(extendHorizon(engine, base, addDays(later, 7), opts({ today: later }))).toEqual({
+      ok: false,
+      error: { code: 'horizonPast' },
     });
   });
 });
@@ -636,7 +650,7 @@ describe('a stale plan (review of phase 3, M5)', () => {
   it('refuses single-slot edits and new days for another profile', () => {
     const slot = coreSlot(base, TODAY, 'lunch');
     const refused = { ok: false, error: { code: 'stalePlan', reason: 'profile' } };
-    expect(extendHorizon(newEngine, base, addDays(base.horizonEnd, 7))).toEqual(refused);
+    expect(extendHorizon(newEngine, base, addDays(base.horizonEnd, 7), opts())).toEqual(refused);
     expect(alternatives(newEngine, base, slot)).toEqual(refused);
     expect(replaceItem(newEngine, base, slot, itemAt(base, slot).itemId, { today: TODAY })).toEqual(
       refused,
@@ -663,7 +677,7 @@ describe('a stale plan (review of phase 3, M5)', () => {
     expect(json(beforeToday(plan))).toBe(json(beforeToday(base)));
     for (const day of fromToday(plan)) for (const id of idsOf(day)) expect(safeFor(id)).toBe(true);
     expect(
-      unwrap(extendHorizon(newEngine, plan, addDays(plan.horizonEnd, 7))).plan.days.length,
+      unwrap(extendHorizon(newEngine, plan, addDays(plan.horizonEnd, 7), opts())).plan.days.length,
     ).toBe(plan.days.length + 7);
   });
 });
@@ -702,5 +716,23 @@ describe('meal ids stay through structure edits (review of phase 3, M6)', () => 
     const state = dayStateFrom(ctx, monday, { history: true });
     expect(state.meals.flat()).toHaveLength(Object.values(monday.meals).flat().length);
     expect(state.meals.flat().every((s) => s.frozen)).toBe(true);
+  });
+});
+
+describe('a dish a rule put in place (review of phase 3, m2)', () => {
+  it('is not replaced or offered alternatives: the rule changes first', () => {
+    const rule = makeRule({
+      kind: 'includeItem',
+      target: { itemId: 'd_omelette' },
+      meals: ['breakfast'],
+    });
+    const { plan } = unwrap(applyRules(engine, base, [rule], opts()));
+    const index =
+      dayOf(plan, TODAY).meals.breakfast?.findIndex((i) => i.pinnedBy === rule.id) ?? -1;
+    expect(index).toBeGreaterThanOrEqual(0);
+    const slot = { date: TODAY, meal: 'breakfast', index };
+    const refused = { ok: false, error: { code: 'pinned', ruleId: rule.id } };
+    expect(alternatives(engine, plan, slot)).toEqual(refused);
+    expect(replaceItem(engine, plan, slot, 'd_syrniki', { today: TODAY })).toEqual(refused);
   });
 });

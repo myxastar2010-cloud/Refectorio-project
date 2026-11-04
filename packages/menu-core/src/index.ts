@@ -100,6 +100,7 @@ export {
   changeTargets,
   diff,
   extendHorizon,
+  MAX_DAYS_AHEAD,
   planStaleness,
   regenerate,
   replaceItem,

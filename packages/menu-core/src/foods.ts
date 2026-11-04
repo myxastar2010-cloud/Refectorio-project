@@ -27,6 +27,8 @@ export type GroupGrams = {
   readonly fishG: number;
   readonly oilyFishG: number;
   readonly tunaG: number;
+  /** Shellfish and molluscs: FDA counts them with fish in pregnancy ('fish and shellfish', R17 E9; review m1). */
+  readonly seafoodG: number;
   /** Cooked/canned equivalent (dry legumes × 2.5). */
   readonly legumesG: number;
   readonly wholeGrainG: number;
@@ -118,6 +120,7 @@ function groupGrams(
     dairyServings: 0,
     nutsG: 0,
     eggsG: 0,
+    seafoodG: 0,
   };
   ingredients.forEach((ingredient, index) => {
     const c = categoriesOf(index);
@@ -132,6 +135,7 @@ function groupGrams(
       if (c.has('oilyFish')) g.oilyFishG += grams;
       if (c.has('tuna')) g.tunaG += grams;
     }
+    if (c.has('seafood') && !isSauceOrBroth) g.seafoodG += grams;
     if (c.has('legumes')) {
       g.legumesG += /сух/.test(ingredient.nameRu) ? grams * rule('P.dryLegumeToCooked') : grams;
     }

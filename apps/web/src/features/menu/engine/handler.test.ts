@@ -38,6 +38,22 @@ describe('menu handler', () => {
     expect(out.every((r) => r.id === out[0]?.id)).toBe(true);
   });
 
+  it('generate refuses malformed rules and meals with typed errors, not internal ones (m12)', () => {
+    const rules = last(
+      run({ type: 'generate', answers, today: TODAY, seed: 1, rules: [{ kind: 'nope' }] }),
+    );
+    expect(rules.type === 'error' && rules.error.code === 'plan' && rules.error.error.code).toBe(
+      'invalidRules',
+    );
+    const brunch = { id: 'brunch', kind: 'brunch', titleRu: 'Бранч', order: 0 };
+    const meals = last(
+      run({ type: 'generate', answers, today: TODAY, seed: 1, structure: [brunch] }),
+    );
+    expect(meals.type === 'error' && meals.error.code === 'plan' && meals.error.error.code).toBe(
+      'structure',
+    );
+  });
+
   it('generate reports progress and a plan with 8-14 non-empty days', () => {
     expect(first.length).toBeGreaterThan(1);
     expect(first.slice(0, -1).every((r) => r.type === 'progress')).toBe(true);

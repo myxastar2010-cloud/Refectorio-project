@@ -12,13 +12,14 @@ import {
   buildFoodIndex,
   buildMenuProfile,
   buildSearchIndex,
+  canonicalJson,
   extendHorizon,
   generate,
   regenerate,
   replaceItem,
   search,
+  parseRules,
   setStructure,
-  canonicalJson,
   type FoodIndex,
   type MenuProfile,
   type MenuRequest,
@@ -95,13 +96,24 @@ export function handle(request: MenuRequest, post: Post): void {
     post({ id, type: 'progress', stage: 'planning', share: 0.1 });
     switch (request.type) {
       case 'generate': {
+        // The same schema as applyRules: a message from the page is not trusted to be well-formed (m12).
+        const rules = parseRules(request.rules ?? []);
+        if (!rules.success) {
+          const detail = rules.error.issues[0]?.message ?? '';
+          post({
+            id,
+            type: 'error',
+            error: { code: 'plan', error: { code: 'invalidRules', detail } },
+          });
+          return;
+        }
         const result = generate({
           profile: profile.value,
           foods: engine.foods,
           today: request.today,
           seed: request.seed,
           ...(request.structure ? { structure: request.structure } : {}),
-          ...(request.rules ? { rules: request.rules } : {}),
+          rules: rules.data,
         });
         if (result.ok)
           post({ id, type: 'plan', plan: result.value.plan, diff: null, ms: now() - started });
@@ -142,7 +154,7 @@ export function handle(request: MenuRequest, post: Post): void {
             postOp(id, applyRules(engine, request.plan, request.rules, options), started, post);
             return;
           case 'extendHorizon':
-            postOp(id, extendHorizon(engine, request.plan, request.toDate), started, post);
+            postOp(id, extendHorizon(engine, request.plan, request.toDate, options), started, post);
             return;
           case 'replaceItem':
             postOp(

@@ -56,6 +56,9 @@ export type OpError =
   | { readonly code: 'invalidRules'; readonly detail: string }
   | { readonly code: 'structureRejected'; readonly error: StructureError }
   | { readonly code: 'mealHasEaten'; readonly mealId: string }
+  | { readonly code: 'pinned'; readonly ruleId: string }
+  | { readonly code: 'horizonPast' }
+  | { readonly code: 'tooFarAhead'; readonly maxDate: IsoDate }
   | { readonly code: 'stalePlan'; readonly reason: StaleReason };
 
 /**
@@ -271,16 +274,28 @@ export function ruleConflicts(
   return buildContext(engine.profile, engine.foods, plan.structure, rules).rules.conflicts;
 }
 
-/** Plans days after the horizon (the person scrolled forward); repeat windows continue across weeks. */
+/**
+ * How far ahead a plan may reach: the menu scrolls a few weeks, and Kiki's «распланируй год» must not hold a worker
+ * or the server for minutes (review of phase 3, m8). An interface limit, not a nutrition rule.
+ */
+export const MAX_DAYS_AHEAD = 28;
+
+/**
+ * Plans days after the horizon (the person scrolled forward); repeat windows continue across weeks. A horizon that
+ * already ended is not extended — `regenerate` plans from today.
+ */
 export function extendHorizon(
   engine: Engine,
   plan: Plan,
   toDate: IsoDate,
-  options: Omit<OpOptions, 'today'> = {},
+  options: OpOptions,
 ): OpResult {
-  if (!isIsoDate(toDate)) return err({ code: 'invalidDate' });
+  if (!isIsoDate(toDate) || !isIsoDate(options.today)) return err({ code: 'invalidDate' });
   const stale = staleError(engine, plan);
   if (stale) return stale;
+  if (compareDates(plan.horizonEnd, options.today) < 0) return err({ code: 'horizonPast' });
+  const maxDate = addDays(options.today, MAX_DAYS_AHEAD);
+  if (compareDates(toDate, maxDate) > 0) return err({ code: 'tooFarAhead', maxDate });
   if (compareDates(toDate, plan.horizonEnd) <= 0) return ok({ plan, diff: diff(plan, plan) });
   const result = planRange({
     profile: engine.profile,
@@ -338,6 +353,8 @@ function setupSlot(
   if (!dayPlan || mealIndex < 0 || !item) return err({ code: 'noSuchSlot' });
   const marks = tracking?.days[slot.date]?.eaten ?? {};
   if (marks[markKey(slot.meal, item.itemId)] !== undefined) return err({ code: 'eaten' });
+  // A dish a rule put there is the person's own choice: the rule changes first, not the slot (m2).
+  if (item.pinnedBy !== undefined) return err({ code: 'pinned', ruleId: item.pinnedBy });
   const day = dayStateFrom(ctx, dayPlan, {
     history: false,
     frozen: (mealId, itemId) => marks[markKey(mealId, itemId)] !== undefined,

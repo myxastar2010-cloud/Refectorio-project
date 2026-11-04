@@ -1,6 +1,8 @@
 import type { FoodItem } from '@refectorio/food-data';
 import { describe, expect, it } from 'vitest';
+import { fishBudgetShare } from './context';
 import { buildFoodIndex, portionGrid, scaleNutrients } from './foods';
+import { rule } from './rules';
 import { testCatalog, testFoods } from './testing';
 
 const foods = testFoods();
@@ -202,5 +204,20 @@ describe('scaleNutrients', () => {
   it('is the identity at factor 1', () => {
     const base = item('d_omelette').perPortion;
     expect(scaleNutrients(base, 1)).toEqual(base);
+  });
+});
+
+describe('shellfish in the pregnancy fish budget (R17 E9, review of phase 3 m1)', () => {
+  const foods = testFoods();
+  const seafood = foods.foods.filter((f) => f.groups.seafoodG > 0);
+
+  it('counts shrimp, squid and mussels under the dish class, an unknown class at the strict cap', () => {
+    expect(seafood.length).toBeGreaterThan(0);
+    for (const f of seafood) {
+      const cap =
+        f.item.fishMercury === 'best' ? rule('E9.bestFishMaxGWeek') : rule('E9.goodFishMaxGWeek');
+      expect(fishBudgetShare(f)).toBeCloseTo((f.groups.fishG + f.groups.seafoodG) / cap, 9);
+    }
+    expect(seafood.some((f) => f.groups.fishG === 0 && fishBudgetShare(f) > 0)).toBe(true);
   });
 });
