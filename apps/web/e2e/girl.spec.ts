@@ -389,7 +389,9 @@ test.describe('the food goes around her', () => {
         before = after;
       }
       // The slowest item (10 px/s) drifts ≈ 100 px in 10 s; one held beside her moved a few.
-      expect(slowest).toBeGreaterThan(30);
+      // On a phone the longer heading (stage 4 landing) holds slow items beside the text next to her: the bar is lower
+      // there, still far above the few pixels of an item held by her push.
+      expect(slowest).toBeGreaterThan(width < 600 ? 10 : 30);
     });
   }
 });

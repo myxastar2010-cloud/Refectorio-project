@@ -205,9 +205,9 @@ html {
     gap: calc(var(--hero-cta-gap) * var(--s));
   }
 
-  /* Four cards between their side margins. */
+  /* Five cards between their side margins. */
   .feature-card {
-    --card-w: calc((100% - 2 * var(--hero-cards-side) - 3 * var(--hero-cards-gap-w)) / 4);
+    --card-w: calc((100% - 2 * var(--hero-cards-side) - 4 * var(--hero-cards-gap-w)) / 5);
     --y: var(--hero-cards-y);
     --h: var(--hero-card-h);
     --dy: var(--extra);

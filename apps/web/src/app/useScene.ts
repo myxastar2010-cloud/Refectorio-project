@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type Scene = 'hero' | 'about' | 'pricing' | 'quiz' | 'menu';
+export type Scene = 'hero' | 'discover' | 'about' | 'pricing' | 'quiz' | 'menu';
 
 export const ABOUT_HASH = '#about';
+export const DISCOVER_HASH = '#discover';
 export const PRICING_HASH = '#pricing';
 export const QUIZ_HASH = '#quiz';
 export const MENU_HASH = '#menu';
 
 const HASH_SCENES: Readonly<Record<string, Scene>> = {
   [ABOUT_HASH]: 'about',
+  [DISCOVER_HASH]: 'discover',
   [PRICING_HASH]: 'pricing',
   [QUIZ_HASH]: 'quiz',
 };
@@ -28,6 +30,8 @@ export type HistoryState = {
   quiz?: number;
   /** The quiz was opened from the landing (there is a landing entry right before depth 0). */
   fromLanding?: boolean;
+  /** The scene this entry was opened from: Back from it leads there (hero → discover → about). */
+  from?: Scene;
 } | null;
 
 /**
@@ -69,18 +73,42 @@ export function useScene() {
   const go = useCallback((next: Scene) => {
     if (sceneRef.current === next) return;
     const state = window.history.state as HistoryState;
-    if (next === 'about' || next === 'pricing' || next === 'menu') {
-      const hash = next === 'about' ? ABOUT_HASH : next === 'pricing' ? PRICING_HASH : MENU_HASH;
-      window.history.pushState({ scene: next } satisfies HistoryState, '', hash);
+    if (next === 'about' || next === 'discover' || next === 'pricing' || next === 'menu') {
+      const hash =
+        next === 'about'
+          ? ABOUT_HASH
+          : next === 'discover'
+            ? DISCOVER_HASH
+            : next === 'pricing'
+              ? PRICING_HASH
+              : MENU_HASH;
+      window.history.pushState(
+        { scene: next, from: sceneRef.current } satisfies HistoryState,
+        '',
+        hash,
+      );
     } else if (next === 'quiz') {
       window.history.pushState(
         { scene: 'quiz', quiz: 0, fromLanding: true } satisfies HistoryState,
         '',
         QUIZ_HASH,
       );
-    } else if (state?.scene === 'about' || state?.scene === 'pricing' || state?.scene === 'menu') {
+    } else if (
+      state?.scene === 'about' ||
+      state?.scene === 'discover' ||
+      state?.scene === 'pricing' ||
+      state?.scene === 'menu'
+    ) {
       // We added the #about / #pricing / #menu entry ourselves: going back keeps the history short and Back predictable.
       window.history.back();
+      // Back leads to the entry before it: the scene it was opened from (the browser's popstate agrees).
+      const from = state.from;
+      if (from && from !== 'quiz' && from !== next) {
+        sceneRef.current = from;
+        setInstant(false);
+        setScene(from);
+        return;
+      }
     } else {
       const { pathname, search } = window.location;
       window.history.pushState({ scene: 'hero' } satisfies HistoryState, '', pathname + search);

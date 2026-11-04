@@ -340,6 +340,11 @@
     min-height: 140px;
   }
 
+  /* Five cards in two columns: the last one spans the whole row. */
+  .feature-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
   .feature-title {
     font-size: 26px;
   }

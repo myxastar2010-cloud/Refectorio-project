@@ -17,8 +17,8 @@ test.describe('scenes', () => {
     await page.mouse.move(960, 400);
     // 33 px: one notch in Chromium on Windows with «scroll 1 line at a time».
     await page.mouse.wheel(0, 33);
-    await settled(page, 'about');
-    await expect(page).toHaveURL(/#about$/);
+    await settled(page, 'discover');
+    await expect(page).toHaveURL(/#discover$/);
     await page.mouse.wheel(0, -33);
     await settled(page, 'hero');
   });
@@ -31,7 +31,7 @@ test.describe('scenes', () => {
     const changes = await countSceneChanges(page);
     // ≈2.4 s of deltas: the tail is still strong (≈10 px every 16 ms) when the 1.15 s input lock ends.
     await fling(page, 90);
-    await settled(page, 'about');
+    await settled(page, 'discover');
     expect(await changes()).toBe(1);
     // A fling back right away is a new gesture (inertia never reverses), and its own tail is silenced again.
     await fling(page, -90);
@@ -44,12 +44,13 @@ test.describe('scenes', () => {
     await settled(page, 'hero');
     await page.locator('body').click({ position: { x: 900, y: 300 } });
     for (const [key, target] of [
-      ['ArrowDown', 'about'],
+      ['ArrowDown', 'discover'],
       ['ArrowUp', 'hero'],
-      ['PageDown', 'about'],
+      ['PageDown', 'discover'],
       ['PageUp', 'hero'],
-      ['End', 'about'],
+      ['End', 'discover'],
       ['Home', 'hero'],
+      // Focus came back to «О проекте» with the last scene change: Space presses that button.
       ['Space', 'about'],
       ['Shift+Space', 'hero'],
     ] as const) {
@@ -87,7 +88,7 @@ test.describe('scenes', () => {
     await page.goto('./?seed=1');
     await settled(page, 'hero');
     await page.keyboard.press('ArrowDown');
-    await settled(page, 'about');
+    await settled(page, 'discover');
     await page.keyboard.press('ArrowUp');
     await settled(page, 'hero');
   });
@@ -309,7 +310,7 @@ test.describe('quality', () => {
     const errors = collectErrors(page);
     await page.goto('./?seed=1');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Минимум усилий Максимум результата',
+      'Вкусно питаться, не отвлекаясь от важного',
     );
     const faces = await page.evaluate(async () => {
       const loaded = await document.fonts.load('700 16px "Open Runde"', 'Питаться ПроЛанч');
@@ -351,6 +352,9 @@ test.describe('quality', () => {
       });
     expect(await check()).toEqual([]);
     await page.keyboard.press('ArrowDown');
+    await settled(page, 'discover');
+    expect(await check()).toEqual([]);
+    await page.keyboard.press('End');
     await settled(page, 'about');
     await page.getByRole('button', { name: /Подробнее о команде/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -362,6 +366,9 @@ test.describe('quality', () => {
     await settled(page, 'hero');
     expect(await seriousViolations(page)).toEqual([]);
     await page.keyboard.press('ArrowDown');
+    await settled(page, 'discover');
+    expect(await seriousViolations(page)).toEqual([]);
+    await page.keyboard.press('End');
     await settled(page, 'about');
     expect(await seriousViolations(page)).toEqual([]);
     await page.getByRole('button', { name: /Подробнее о команде/ }).click();

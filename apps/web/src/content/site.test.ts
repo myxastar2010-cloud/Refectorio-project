@@ -24,20 +24,20 @@ describe('site content', () => {
   it('keeps the mockup typos fixed', () => {
     const all = strings(site).join('\n');
     expect(all).not.toMatch(/настроивайте|то что|ИИ помощник|Ясинский алексей|Название Проекта/);
-    expect(all).toContain('ИИ-консультант');
+    expect(all).toContain('Кики');
     expect(all).toContain('Ясинский Алексей');
   });
 
   it('has a 2-line heading and a 3-line lead, as the composition of part 1 expects', () => {
     expect(site.hero.titleLines).toHaveLength(2);
     expect(site.hero.leadLines).toHaveLength(3);
-    expect(site.hero.titleLines.join(' ')).toBe('Минимум усилий Максимум результата');
-    expect(site.hero.titleSpoken.toLowerCase()).toBe(site.hero.titleLines.join(', ').toLowerCase());
+    expect(site.hero.titleLines.join(' ')).toBe('Вкусно питаться, не отвлекаясь от важного');
+    expect(site.hero.titleSpoken).toBe(site.hero.titleLines.join(' '));
   });
 
   it('calls the product ПроЛанч everywhere: the old name stays only in addresses', () => {
     expect(JSON.stringify(site)).not.toContain('Refectorio');
-    expect(site.meta.title).toBe('ПроЛанч — минимум усилий, максимум результата');
+    expect(site.meta.title).toBe('ПроЛанч — вкусно питаться, не отвлекаясь от важного');
   });
 
   it('shows the two plans of the mockups, a month and a year of Premium', () => {

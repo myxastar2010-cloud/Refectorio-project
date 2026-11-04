@@ -7,7 +7,7 @@ const text = z.string().trim().min(1);
 /** Lines as in the mockup: rendered with explicit breaks on desktop, joined on small screens. */
 const lines = z.array(text).min(1);
 
-const featureIcon = z.enum(['school', 'sparkles', 'listDetails', 'shieldCheck']);
+const featureIcon = z.enum(['school', 'sparkles', 'listDetails', 'shieldCheck', 'mug', 'bolt']);
 const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamCard', 'brandLogo']);
 
 /** A link of the project details card: not working yet — a press says «Мы работаем над этим» (D-051). */
@@ -44,7 +44,7 @@ export const siteContentSchema = z.object({
     cta: z.object({ label: text, href: z.string().startsWith('#') }),
     ctaOpen: z.object({ label: text, href: z.string().startsWith('#') }),
     featuresLabel: text,
-    features: z.array(z.object({ title: text, textLines: lines, icon: featureIcon })).length(4),
+    features: z.array(z.object({ title: text, textLines: lines, icon: featureIcon })).length(5),
   }),
   about: z.object({
     title: text,

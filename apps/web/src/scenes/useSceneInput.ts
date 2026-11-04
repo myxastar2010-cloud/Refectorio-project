@@ -45,9 +45,12 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
 
     const navigate = (direction: Direction) => {
       const current = sceneRef.current;
-      if (direction === 'down' && current === 'hero') go('about');
+      // The landing continues downwards: hero → «Для кого и зачем» + Кики (discover) → «О проекте».
+      if (direction === 'down' && current === 'hero') go('discover');
+      else if (direction === 'down' && current === 'discover') go('about');
       // «Цены» is reached only by its button; a scroll up leaves it, like part 2.
-      else if (direction === 'up' && (current === 'about' || current === 'pricing')) go('hero');
+      else if (direction === 'up' && current === 'about') go('hero');
+      else if (direction === 'up' && (current === 'pricing' || current === 'discover')) go('hero');
       else return false;
       wheel.consume();
       return true;

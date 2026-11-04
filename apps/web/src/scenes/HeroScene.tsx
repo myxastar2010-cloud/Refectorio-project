@@ -1,7 +1,9 @@
 import clsx from 'clsx';
 import { memo } from 'react';
 import {
+  IconBoltFilled,
   IconListDetails,
+  IconMugFilled,
   IconSchoolFilled,
   IconShieldCheckFilled,
   IconSparklesFilled,
@@ -24,6 +26,8 @@ const FEATURE_ICONS: Record<FeatureIcon, Icon> = {
   sparkles: IconSparklesFilled,
   listDetails: IconListDetails, // Its squares are filled by CSS, as on the mockup: Tabler has no such filled icon.
   shieldCheck: IconShieldCheckFilled,
+  mug: IconMugFilled,
+  bolt: IconBoltFilled,
 };
 
 type Props = {
@@ -42,7 +46,7 @@ type Props = {
 };
 
 /**
- * Part 1: heading, lead, «Создать меню» and the four feature cards (ТЗ 6.2; the cards are not shown on phones);
+ * Part 1: heading, lead, «Создать меню» and the five feature cards (ТЗ 6.2; the cards are not shown on phones);
  * the header is SiteHeader.
  */
 /* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */

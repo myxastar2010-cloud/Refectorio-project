@@ -50,6 +50,20 @@ const prefetchPricing = () => {
   });
 };
 
+/** The screens under the landing (#discover: segments, progress, key functions, Kiki): a chunk of its own, on idle. */
+const loadDiscover = () => import('../features/discover');
+const DiscoverScene = lazy(() =>
+  loadDiscover().then((module) => ({ default: module.DiscoverScene })),
+);
+let discoverRequested = false;
+const prefetchDiscover = () => {
+  if (discoverRequested) return;
+  discoverRequested = true;
+  void loadDiscover().catch(() => {
+    discoverRequested = false;
+  });
+};
+
 /** The menu app (ТЗ фаза 4): a chunk of its own, fetched during the quiz so the reveal never waits for it. */
 const loadMenu = () => import('../features/menu');
 const lazyMenu = () => lazy(() => loadMenu().then((module) => ({ default: module.MenuScene })));
@@ -99,6 +113,10 @@ function Page() {
   const projectTileRef = useRef<HTMLDivElement>(null);
   // «Цены»: the scene is mounted from its first visit on (it must be there, hidden, to come in like part 2).
   const [pricingMounted, setPricingMounted] = useState(false);
+  // The screens under the landing: mounted once the chunk has come (idle) or the scene is opened.
+  const [discoverMounted, setDiscoverMounted] = useState(false);
+  const discoverRef = useRef<HTMLDivElement>(null);
+  const discoverTitleRef = useRef<HTMLHeadingElement>(null);
   const [pricingPictures, setPricingPictures] = useState<PlanPictures | null>(null);
   /** The next visit's pictures: chosen and loading from the first hover on «Цены», taken by the click. */
   const nextPricingVisit = useRef<Promise<PlanPictures> | null>(null);
@@ -116,7 +134,10 @@ function Page() {
   /** The story's pulse: the menu page is uncovered from there (phase 4 §1). */
   const [menuReveal, setMenuReveal] = useState<Point | null>(null);
   // Read again whenever the scene changes: the quiz or «Удалить мои данные» may have changed it.
-  const hasMenu = useMemo(() => scene === 'hero' && hasStoredMenu(), [scene]);
+  const hasMenu = useMemo(
+    () => (scene === 'hero' || scene === 'discover') && hasStoredMenu(),
+    [scene],
+  );
   const lockedUntil = useRef(0);
   const busyTimer = useRef(0);
   const aboutTitleRef = useRef<HTMLButtonElement>(null);
@@ -198,6 +219,7 @@ function Page() {
     const from = previousScene.current;
     previousScene.current = scene;
     if (scene === 'about') focusQuietly(aboutTitleRef.current);
+    else if (scene === 'discover') focusQuietly(discoverTitleRef.current);
     else if (scene === 'hero' && (from === 'quiz' || from === 'menu')) {
       focusQuietly(document.querySelector<HTMLAnchorElement>('.cta'));
     } else if (scene === 'hero' && from === 'pricing') focusQuietly(pricingRef.current);
@@ -212,9 +234,11 @@ function Page() {
         ? heroRef.current
         : of === 'about'
           ? aboutRef.current
-          : of === 'pricing'
-            ? pricingScrollRef.current
-            : null,
+          : of === 'discover'
+            ? discoverRef.current
+            : of === 'pricing'
+              ? pricingScrollRef.current
+              : null,
     [],
   );
   useSceneInput({ scene, go: goScene, locked, scrollerOf });
@@ -240,7 +264,13 @@ function Page() {
     const timer = window.setTimeout(() => {
       cancel = whenIdle(() => {
         prefetchQuiz();
-        cancel = whenIdle(prefetchPricing, QUIZ.prefetchAfterMs);
+        cancel = whenIdle(() => {
+          prefetchPricing();
+          cancel = whenIdle(() => {
+            prefetchDiscover();
+            setDiscoverMounted(true);
+          }, QUIZ.prefetchAfterMs);
+        }, QUIZ.prefetchAfterMs);
       }, QUIZ.prefetchAfterMs);
     }, QUIZ.prefetchAfterMs);
     return () => {
@@ -274,6 +304,10 @@ function Page() {
   const openAbout = useCallback(() => {
     goScene('about');
   }, [goScene]);
+  /** «Создать меню» on the screens under the landing: the quiz, or the stored menu. */
+  const createMenuHere = useCallback(() => {
+    goScene(hasMenu ? 'menu' : 'quiz');
+  }, [goScene, hasMenu]);
   const toHero = useCallback(() => {
     goScene('hero');
   }, [goScene]);
@@ -399,6 +433,13 @@ function Page() {
     notify(site.notices.noPayment);
   }, [notify]);
 
+  const discoverFailed = useCallback(() => {
+    discoverRequested = false;
+    setDiscoverMounted(false);
+    goScene('hero');
+    notify(site.notices.loadError);
+  }, [goScene, notify]);
+
   const pricingFailed = useCallback(() => {
     pricingRequested = false;
     goScene('hero');
@@ -445,6 +486,22 @@ function Page() {
               projectTileRef={projectTileRef}
             />
           </div>
+          {(discoverMounted || scene === 'discover') && (
+            <ChunkBoundary onError={discoverFailed}>
+              <Suspense fallback={null}>
+                <DiscoverScene
+                  phase={scene === 'discover' ? 'shown' : 'hidden'}
+                  instant={instant}
+                  scrollerRef={discoverRef}
+                  titleRef={discoverTitleRef}
+                  onHome={toHero}
+                  onAbout={openAbout}
+                  onCreateMenu={createMenuHere}
+                  hasMenu={hasMenu}
+                />
+              </Suspense>
+            </ChunkBoundary>
+          )}
           <div className="pricing-scroller" ref={pricingScrollRef} inert={scene !== 'pricing'}>
             {(pricingMounted || scene === 'pricing') && (
               <ChunkBoundary onError={pricingFailed}>

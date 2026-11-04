@@ -78,7 +78,7 @@ function quizColumn(): Rect {
 }
 
 const speedOf = (scene: Scene) =>
-  scene === 'about' || scene === 'pricing'
+  scene === 'about' || scene === 'pricing' || scene === 'discover'
     ? SCENE.food.speedFactor
     : scene === 'quiz'
       ? QUIZ.foodSpeed

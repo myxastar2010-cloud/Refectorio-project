@@ -111,13 +111,13 @@
   --type-cta-label-weight: 600;
   --type-cta-label-tracking: -0.0167em;
 
-  --type-card-title-size: 30;
+  --type-card-title-size: 27;
   --type-card-title-weight: 700;
   --type-card-title-tracking: 0em;
 
-  --type-card-text-size: 18;
+  --type-card-text-size: 16.5;
   --type-card-text-weight: 500; /* lighter than the card title: it is the subtitle */
-  --type-card-text-leading: 23;
+  --type-card-text-leading: 22;
   --type-card-text-tracking: -0.011em;
 
   --type-about-title-size: 61.3;
@@ -211,12 +211,12 @@
   --hero-cta-gap: 5;
   --hero-cards-y: 864.9;
   --hero-card-h: 167.5;
-  --hero-card-pad-x: 47; /* text origin of title and text (ink + side bearing) */
+  --hero-card-pad-x: 30; /* text origin of title and text (ink + side bearing) */
   --hero-card-pad-y: 23.4; /* top of the title's line box: the title stays put whatever the text's length */
-  --hero-card-title-leading: 36;
+  --hero-card-title-leading: 33;
   --hero-card-text-gap: 9; /* title line box → text: baselines 34 apart */
-  --hero-card-icon-size: 73;
-  --hero-card-icon-inset: 39; /* from the right edge */
+  --hero-card-icon-size: 56;
+  --hero-card-icon-inset: 22; /* from the right edge */
   /* The girl: her video's frame, placed so that the artwork in it is as tall as on the mockup (550) and ends where it
      ends there (right 1809, bottom 760). */
   --hero-girl-right: 99.6;

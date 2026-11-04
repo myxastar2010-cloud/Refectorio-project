@@ -22,7 +22,7 @@ export function collectErrors(page: Page): string[] {
 export const scene = (page: Page) => page.locator('.page');
 
 /** Waits until a scene transition (input lock) is over — by state, not by timeouts. */
-export async function settled(page: Page, expected: 'hero' | 'about' | 'pricing') {
+export async function settled(page: Page, expected: 'hero' | 'discover' | 'about' | 'pricing') {
   await expect(scene(page)).toHaveAttribute('data-ready', '');
   await expect(scene(page)).toHaveAttribute('data-scene', expected);
   await expect(scene(page)).not.toHaveAttribute('data-busy', /.*/);
@@ -47,7 +47,14 @@ export async function countSceneChanges(page: Page) {
 export async function seriousViolations(page: Page) {
   // Colours are judged on the settled page: a card still fading in (slow engines) would read as low contrast.
   await page.waitForFunction(() =>
-    document.getAnimations().every((animation) => animation.playState !== 'running'),
+    document
+      .getAnimations()
+      // Endless idle loops (Kiki breathing, sparkles) never settle: they do not change colours.
+      .every(
+        (animation) =>
+          animation.playState !== 'running' ||
+          animation.effect?.getComputedTiming().iterations === Infinity,
+      ),
   );
   // JS-driven springs (Motion writes inline styles every frame) are invisible to getAnimations(): wait for 300 ms
   // without inline-style writes outside the food field (capped, so a living page cannot hang the test).
