@@ -1,11 +1,11 @@
 import { useEffect, useRef, type RefObject } from 'react';
-import { focusQuietly } from '../../../lib/quietFocus';
+import { focusQuietly } from '../lib/quietFocus';
 
 const FOCUSABLE =
   'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /** Everything around an open dialog of the quiz: made inert (not clickable, not reachable, not announced). */
-const BACKGROUND = '.site-header, .quiz-header, .quiz-stage, .quiz-notice-layer, .quiz-toast';
+const QUIZ_BACKGROUND = '.site-header, .quiz-header, .quiz-stage, .quiz-notice-layer, .quiz-toast';
 
 type Options = {
   readonly open: boolean;
@@ -15,13 +15,25 @@ type Options = {
   readonly returnFocusTo?: HTMLElement | null;
   /** The element to focus first (otherwise the first focusable inside). */
   readonly initialFocusRef?: RefObject<HTMLElement | null>;
+  /** What becomes inert around it (default: the quiz around its sheets). */
+  readonly background?: string;
+  /** Focused when the opener is gone (default: the quiz step's title). */
+  readonly fallbackFocusId?: string;
 };
 
 /**
- * Dialog behaviour for the quiz's sheets, notices and pickers (ТЗ §7.5, §8.3): focus moves in and is trapped, Esc
+ * Dialog behaviour for the quiz's sheets, notices and pickers (ТЗ §7.5, §8.3) and the menu's panels: focus moves in and is trapped, Esc
  * closes, the background is inert, focus returns to the opener. The landing's team dialog does the same its own way.
  */
-export function useModal({ open, containerRef, onClose, returnFocusTo, initialFocusRef }: Options) {
+export function useModal({
+  open,
+  containerRef,
+  onClose,
+  returnFocusTo,
+  initialFocusRef,
+  background: backgroundSelector = QUIZ_BACKGROUND,
+  fallbackFocusId = 'quiz-step-title',
+}: Options) {
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -31,7 +43,7 @@ export function useModal({ open, containerRef, onClose, returnFocusTo, initialFo
     if (!open) return undefined;
     const container = containerRef.current;
     const opener = returnFocusTo ?? (document.activeElement as HTMLElement | null);
-    const background = [...document.querySelectorAll<HTMLElement>(BACKGROUND)].filter(
+    const background = [...document.querySelectorAll<HTMLElement>(backgroundSelector)].filter(
       (element) => !container?.contains(element) && !element.contains(container),
     );
     const wasInert = background.map((element) => element.inert);
@@ -85,7 +97,7 @@ export function useModal({ open, containerRef, onClose, returnFocusTo, initialFo
       // Not into a step that is leaving (inert): the new step moves focus to its own title.
       if (opener?.isConnected && !opener.closest('[inert]')) focusQuietly(opener);
       // The opener is gone (the answers were deleted and the quiz started over): the current step's title.
-      else if (!opener?.isConnected) focusQuietly(document.getElementById('quiz-step-title'));
+      else if (!opener?.isConnected) focusQuietly(document.getElementById(fallbackFocusId));
     };
-  }, [open, containerRef, returnFocusTo, initialFocusRef]);
+  }, [open, containerRef, returnFocusTo, initialFocusRef, backgroundSelector, fallbackFocusId]);
 }

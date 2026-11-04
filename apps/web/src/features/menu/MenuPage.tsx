@@ -7,6 +7,7 @@ import {
   MAX_DAYS_AHEAD,
   weekStart,
   type Plan,
+  type SlotRef,
   type Tracking,
   type TrackingError,
 } from '@refectorio/menu-core';
@@ -20,6 +21,7 @@ import type { Catalog } from './data/catalog';
 import { KIKI } from './data/pictures';
 import { DishCard } from './dishes/DishCard';
 import { DishMenu, ReplacePicker, type DishTarget } from './dishes/DishMenu';
+import { DishDetails, type DetailsTarget } from './details/DishDetails';
 import { useReplace } from './dishes/useReplace';
 import { menuClient } from './engine/client';
 import { KikiPanel } from './kiki/KikiPanel';
@@ -89,6 +91,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const [extending, setExtending] = useState(false);
   const [dishMenu, setDishMenu] = useState<DishTarget | null>(null);
   const [replacing, setReplacing] = useState<DishTarget | null>(null);
+  const [details, setDetails] = useState<DetailsTarget | null>(null);
   const day = plan.days.find((d) => d.date === date) ?? null;
   const kind = dayKind(plan, date, today);
   const structure = useStructure(plan, answers, today, onNotify);
@@ -117,12 +120,40 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   );
 
   const toggleEaten = useCallback(
-    (meal: string, itemId: string, eaten: boolean) => {
+    (on: string, meal: string, itemId: string, eaten: boolean) => {
       changeTracking((stored) =>
-        markEaten(stored, plan, date, meal, itemId, !eaten, new Date().toISOString(), today),
+        markEaten(stored, plan, on, meal, itemId, !eaten, new Date().toISOString(), today),
       );
     },
-    [changeTracking, plan, date, today],
+    [changeTracking, plan, today],
+  );
+
+  const isEaten = useCallback(
+    (slot: SlotRef, itemId: string) =>
+      tracking.days[slot.date]?.eaten[markKey(slot.meal, itemId)] !== undefined,
+    [tracking],
+  );
+
+  /** The dish at a slot as its ⋯ menu and the picker see it, with the reason it cannot change, if any. */
+  const dishAt = useCallback(
+    (slot: SlotRef, anchor: HTMLElement): DishTarget | null => {
+      const planned = plan.days.find((d) => d.date === slot.date)?.meals[slot.meal]?.[slot.index];
+      if (!planned) return null;
+      return {
+        anchor,
+        slot,
+        itemId: planned.itemId,
+        blocked:
+          slot.date < today
+            ? menu.dish.replacePast
+            : isEaten(slot, planned.itemId)
+              ? menu.dish.replaceEaten
+              : planned.pinnedBy !== undefined
+                ? menu.errors.pinned
+                : null,
+      };
+    },
+    [plan, today, isEaten],
   );
 
   const water = useCallback(
@@ -180,6 +211,13 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const closePicker = useCallback(() => {
     setReplacing(null);
   }, []);
+  const closeDetails = useCallback(() => {
+    setDetails(null);
+  }, []);
+  const detailsLockCode = details ? editable(details.slot.date, today) : null;
+  const detailsLock = detailsLockCode
+    ? (TRACKING_ERRORS[detailsLockCode.code] ?? menu.errors.generic)
+    : null;
   const unread = letters.some((letter) => !letter.read);
 
   return (
@@ -273,21 +311,8 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
                 {items.map((planned, index) => {
                   const view = catalog.get(planned.itemId);
                   if (!view) return null;
-                  const eaten =
-                    tracking.days[date]?.eaten[markKey(mealId, planned.itemId)] !== undefined;
-                  const target = (anchor: HTMLElement): DishTarget => ({
-                    anchor,
-                    slot: { date, meal: mealId, index },
-                    itemId: planned.itemId,
-                    blocked:
-                      date < today
-                        ? menu.dish.replacePast
-                        : eaten
-                          ? menu.dish.replaceEaten
-                          : planned.pinnedBy !== undefined
-                            ? menu.errors.pinned
-                            : null,
-                  });
+                  const slot = { date, meal: mealId, index };
+                  const eaten = isEaten(slot, planned.itemId);
                   return (
                     <li key={`${planned.itemId}:${String(index)}`} className="dish-cell">
                       <DishCard
@@ -296,12 +321,14 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
                         lockedReason={lockedReason}
                         onToggle={() => {
                           if (lockedReason) onNotify(lockedReason);
-                          else toggleEaten(mealId, planned.itemId, eaten);
+                          else toggleEaten(date, mealId, planned.itemId, eaten);
                         }}
                         onMore={(anchor) => {
-                          setDishMenu(target(anchor));
+                          setDishMenu(dishAt(slot, anchor));
                         }}
-                        onOpen={soon}
+                        onOpen={(card) => {
+                          setDetails({ card, slot, itemId: planned.itemId });
+                        }}
                         onRecipe={soon}
                       />
                     </li>
@@ -335,9 +362,13 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         target={dishMenu}
         catalog={catalog}
         onClose={closeDishMenu}
-        onDetails={() => {
+        onDetails={(target) => {
           setDishMenu(null);
-          soon();
+          setDetails({
+            card: target.anchor.closest<HTMLElement>('.dish-card') ?? target.anchor,
+            slot: target.slot,
+            itemId: target.itemId,
+          });
         }}
         onReplaceAi={(target) => {
           setDishMenu(null);
@@ -362,6 +393,37 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           setReplacing(null);
           replacement.replace(target.slot, target.itemId, alternative.itemId);
         }}
+      />
+      <DishDetails
+        target={details}
+        plan={plan}
+        catalog={catalog}
+        answers={answers}
+        eaten={details ? isEaten(details.slot, details.itemId) : false}
+        lockedReason={detailsLock}
+        deemphasizeNumbers={deemphasizeNumbers}
+        onClose={closeDetails}
+        onToggleEaten={() => {
+          if (!details) return;
+          if (detailsLock) onNotify(detailsLock);
+          else
+            toggleEaten(
+              details.slot.date,
+              details.slot.meal,
+              details.itemId,
+              isEaten(details.slot, details.itemId),
+            );
+        }}
+        onReplace={() => {
+          if (!details) return;
+          const more = details.card.querySelector<HTMLElement>('.dish-more') ?? details.card;
+          const target = dishAt(details.slot, more);
+          setDetails(null);
+          if (!target) return;
+          if (target.blocked) onNotify(target.blocked);
+          else setReplacing(target);
+        }}
+        onRecipe={soon}
       />
       <DayCard
         open={card}

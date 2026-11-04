@@ -7,7 +7,7 @@ import { useCalmMotion } from '../../../motion/hooks';
 import { DURATION, MORPH } from '../../../motion/tokens';
 import { deleteAll } from '../flow/persistence';
 import { PillButton } from './PillButton';
-import { useModal } from './useModal';
+import { useModal } from '../../../components/useModal';
 
 type Props = {
   readonly open: boolean;

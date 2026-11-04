@@ -146,4 +146,39 @@ test.describe('the menu', () => {
     await page.getByRole('button', { name: 'Отменить' }).click();
     await expect.poll(names).toEqual(before);
   });
+
+  test('dish details: tabs by keys, an eaten mark from inside, Esc and Back close it', async ({
+    page,
+  }) => {
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    const first = (await page.locator('.dish-row .dish-open').first().textContent()) ?? '';
+    await page.locator('.dish-row .dish-open').first().click();
+    const details = page.getByRole('dialog', { name: first });
+    await expect(details).toBeVisible();
+    await expect(details.getByRole('tab', { name: 'Обзор' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await details.getByRole('tab', { name: 'Обзор' }).focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(details.getByRole('tab', { name: 'КБЖУ' })).toBeFocused();
+    await expect(details.getByRole('tabpanel').getByRole('table')).toBeVisible();
+    await page.keyboard.press('End');
+    await expect(details.getByRole('tabpanel')).toContainText('Ваши ограничения');
+    await details.getByRole('button', { name: 'Отметить съеденным' }).click();
+    await expect(details.getByRole('button', { name: 'Съедено' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await page.keyboard.press('Escape');
+    await expect(details).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^Снять отметку/ })).toHaveCount(1);
+    // Back closes it too and leaves the menu where it was.
+    await page.locator('.dish-row .dish-open').first().click();
+    await expect(details).toBeVisible();
+    await page.goBack();
+    await expect(details).toHaveCount(0);
+    await expect(title(page)).toBeVisible();
+  });
 });

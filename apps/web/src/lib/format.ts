@@ -21,3 +21,8 @@ export const formatNumber = (value: number) =>
 const wholeFormat = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
 /** A rounded whole number (kcal, grams): «1 520». */
 export const formatWhole = (value: number) => wholeFormat.format(Math.round(value));
+
+const smallFormat = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
+/** A measured amount: whole from 10, one decimal from 1, two below 1 (0,03 мг of vitamin B1 is not «0»). */
+export const formatAmount = (value: number) =>
+  value >= 10 ? formatWhole(value) : value >= 1 ? formatNumber(value) : smallFormat.format(value);

@@ -61,6 +61,18 @@ const STATES = {
     await firstDish(page).locator('.dish-open').click();
     await page.getByRole('dialog').waitFor();
   },
+  'details-kbju': async (page) => {
+    await STATES.details(page);
+    await page.getByRole('tab', { name: 'КБЖУ' }).click();
+  },
+  'details-micros': async (page) => {
+    await STATES.details(page);
+    await page.getByRole('tab', { name: 'Витамины и минералы' }).click();
+  },
+  'details-allergens': async (page) => {
+    await STATES.details(page);
+    await page.getByRole('tab', { name: 'Аллергены' }).click();
+  },
 };
 
 /** Runs in the page: elements cut by the window or by an ancestor that clips. */

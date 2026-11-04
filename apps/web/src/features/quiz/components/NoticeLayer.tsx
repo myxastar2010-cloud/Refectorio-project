@@ -7,7 +7,7 @@ import { DURATION } from '../../../motion/tokens';
 import { useQuiz } from '../quizContext';
 import { PillButton } from './PillButton';
 import { sheetMotion } from './sheetMotion';
-import { useModal } from './useModal';
+import { useModal } from '../../../components/useModal';
 
 /** Notices that may end the personal path: they also offer the way home. */
 const HOME_NOTICES = new Set<NoticeId>(['refused', 'insulinUnknown']);

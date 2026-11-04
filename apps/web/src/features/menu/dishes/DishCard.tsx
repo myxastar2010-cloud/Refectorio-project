@@ -15,7 +15,8 @@ type Props = {
   readonly lockedReason: string | null;
   readonly onToggle: () => void;
   readonly onMore: (button: HTMLElement) => void;
-  readonly onOpen: () => void;
+  /** Details: grown from this card. */
+  readonly onOpen: (card: HTMLElement) => void;
   readonly onRecipe: () => void;
 };
 
@@ -42,6 +43,11 @@ export const DishCard = memo(function DishCard({
       className="dish-card"
       data-eaten={eaten || undefined}
       style={photos.avgColor ? { backgroundColor: photos.avgColor } : undefined}
+      onClick={(event) => {
+        // The whole card opens the details; its own buttons and link do their own thing.
+        if ((event.target as Element).closest('button, a')) return;
+        onOpen(event.currentTarget);
+      }}
       onContextMenu={(event) => {
         event.preventDefault();
         onMore(event.currentTarget.querySelector<HTMLElement>('.dish-more') ?? event.currentTarget);
@@ -86,7 +92,13 @@ export const DishCard = memo(function DishCard({
         ) : null}
       </div>
       <h3 className="dish-title">
-        <button type="button" className="dish-open" onClick={onOpen}>
+        <button
+          type="button"
+          className="dish-open"
+          onClick={(event) => {
+            onOpen(event.currentTarget.closest<HTMLElement>('.dish-card') ?? event.currentTarget);
+          }}
+        >
           {item.nameRu}
         </button>
       </h3>

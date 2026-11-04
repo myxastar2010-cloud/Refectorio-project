@@ -7,7 +7,7 @@ import { quiz } from '../../../content/quiz.ru';
 import { useCalmMotion } from '../../../motion/hooks';
 import { DURATION } from '../../../motion/tokens';
 import { PillButton } from './PillButton';
-import { useModal } from './useModal';
+import { useModal } from '../../../components/useModal';
 import { useShapeMorph } from './useShapeMorph';
 
 type Props = {
