@@ -1,5 +1,6 @@
 import type { QuizAnswersV1 } from '@refectorio/contracts';
 import { IconBell, IconDots, IconStarFilled } from '@tabler/icons-react';
+import type { ReactNode } from 'react';
 import { menu } from '../../../content/menu.ru';
 import { Pic } from '../components/Pic';
 import { KIKI } from '../data/pictures';
@@ -16,6 +17,8 @@ type Props = {
   readonly onBell: (button: HTMLElement, keyboard: boolean) => void;
   readonly onBellHover: (button: HTMLElement | null) => void;
   readonly newsOpen: boolean;
+  /** The person's own widgets, between the goal and the search (ТЗ фаза 4 §5). */
+  readonly widgets?: ReactNode;
   /** Below 1280 px Kiki lives in a sheet: its button sits in the top bar. */
   readonly onKiki: () => void;
 };
@@ -33,6 +36,7 @@ export function TopBar({
   onBell,
   onBellHover,
   newsOpen,
+  widgets,
   onKiki,
 }: Props) {
   return (
@@ -48,6 +52,7 @@ export function TopBar({
         <IconStarFilled className="menu-goal-star" aria-hidden />
         <span>{goalText(answers)}</span>
       </button>
+      {widgets}
       <div className="menu-top-actions">
         <SearchField {...search} />
         <button

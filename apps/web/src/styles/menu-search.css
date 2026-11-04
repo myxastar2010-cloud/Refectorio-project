@@ -580,3 +580,330 @@
     margin-top: calc(22 * var(--m));
   }
 }
+
+/* ——— Custom widgets (ТЗ фаза 4 §5): chips between the goal and the search ——— */
+
+[data-color='plum'] {
+  --w-bg: #6e4a8e;
+  --w-fg: #fff;
+}
+[data-color='blue'] {
+  --w-bg: #2f62a8;
+  --w-fg: #fff;
+}
+[data-color='gold'] {
+  --w-bg: #e6b84a;
+  --w-fg: #000;
+}
+[data-color='teal'] {
+  --w-bg: #18797c;
+  --w-fg: #fff;
+}
+[data-color='coral'] {
+  --w-bg: #ef8a73;
+  --w-fg: #000;
+}
+[data-color='sage'] {
+  --w-bg: #bfd3ad;
+  --w-fg: #000;
+}
+[data-color='sand'] {
+  --w-bg: #f2e4d8;
+  --w-fg: #000;
+}
+[data-color='ink'] {
+  --w-bg: #3f3a37;
+  --w-fg: #fff;
+}
+.custom-widgets {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.custom-widget {
+  position: relative;
+  flex: none;
+}
+.custom-widget-hit {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 0 8px;
+  height: calc(56 * var(--m));
+  min-height: 44px;
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--w-bg);
+  color: var(--w-fg);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.custom-widget-hit:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+}
+@media (hover: hover) {
+  .custom-widget-hit:hover {
+    transform: translateY(-2px);
+  }
+}
+.custom-widget-name {
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.custom-widget-value {
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+.custom-widget-bar {
+  grid-column: 1 / -1;
+  height: 4px;
+  margin-top: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--w-fg) 22%, transparent);
+}
+.custom-widget-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--w-fg);
+  transform-origin: left;
+}
+.custom-widget[data-over] .custom-widget-bar span {
+  background: var(--color-danger);
+}
+.custom-widget-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
+/* The picker */
+.popover--picker {
+  width: min(360px, calc(100vw - 16px));
+}
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px;
+}
+.picker-title {
+  font-size: 17px;
+  font-weight: 800;
+}
+.picker-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+}
+.picker-search svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+}
+.picker-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+}
+.picker-search input::placeholder {
+  color: rgb(255 255 255 / 0.6);
+}
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: min(360px, 55svh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.picker-group {
+  margin: 0 4px 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+}
+.picker-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.picker-item {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid rgb(255 255 255 / 0.3);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.picker-item:focus-visible {
+  outline: none;
+  background: rgb(255 255 255 / 0.16);
+}
+@media (hover: hover) {
+  .picker-item:hover {
+    background: rgb(255 255 255 / 0.12);
+  }
+}
+.picker-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.1);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.picker-card-title {
+  font-weight: 800;
+}
+.picker-empty {
+  font-size: 14px;
+  opacity: 0.75;
+}
+.picker-back {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 12px 0 6px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.picker-back svg {
+  width: 18px;
+  height: 18px;
+}
+.picker-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+.picker-field legend,
+.picker-field > span {
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+.picker-field select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid rgb(255 255 255 / 0.3);
+  border-radius: 14px;
+  background: var(--color-ink);
+  color: #fff;
+  font: inherit;
+}
+.picker-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.picker-option {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid rgb(255 255 255 / 0.3);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.picker-option input,
+.picker-swatch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.picker-option:has(input:checked) {
+  border-color: #fff;
+  background: #fff;
+  color: #000;
+}
+.picker-option:has(input:focus-visible) {
+  border-color: var(--color-accent);
+}
+.picker-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.picker-swatch {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  background: var(--w-bg);
+  cursor: pointer;
+}
+.picker-swatch:has(input:checked) {
+  border-color: #fff;
+}
+.picker-swatch {
+  transition: transform 0.15s;
+}
+.picker-swatch:has(input:focus-visible) {
+  transform: scale(1.15);
+}
+.picker-create {
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.picker-create:focus-visible {
+  outline: none;
+  background: var(--color-accent-fill);
+}
+
+@media (max-width: 1023.98px) {
+  .menu-top {
+    flex-wrap: wrap;
+  }
+  .custom-widgets {
+    flex-basis: 100%;
+    order: 3;
+  }
+  .custom-widget-hit {
+    height: 48px;
+  }
+}

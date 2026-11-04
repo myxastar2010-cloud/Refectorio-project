@@ -315,6 +315,50 @@ test.describe('the menu', () => {
     });
   });
 
+  test('custom widgets: add from edit mode, options, collagen card, move and remove with undo', async ({
+    page,
+  }) => {
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    const add = async (name: string) => {
+      await page.getByRole('button', { name: 'Изменить приёмы пищи' }).click();
+      await page.getByRole('button', { name: 'Добавить', exact: true }).click();
+      await page.getByRole('menuitem', { name: 'Добавить виджет' }).click();
+      const picker = page.getByRole('dialog', { name: 'Новый виджет' });
+      await picker.getByRole('searchbox').fill(name.slice(0, 4).toLowerCase());
+      await picker.getByRole('button', { name, exact: true }).first().click();
+      await picker.getByText('За неделю').click();
+      await picker.getByRole('button', { name: 'Добавить' }).click();
+      await page.getByRole('button', { name: 'Готово' }).click();
+    };
+    await add('Железо');
+    const widgets = page.getByRole('list', { name: 'Мои виджеты' });
+    await expect(widgets.getByRole('listitem')).toHaveCount(1);
+    await expect(widgets).toContainText('Железо');
+    await add('Белки');
+    await expect(widgets.getByRole('listitem')).toHaveCount(2);
+    // The honest card for collagen.
+    await page.getByRole('button', { name: 'Изменить приёмы пищи' }).click();
+    await page.getByRole('button', { name: 'Добавить', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Добавить виджет' }).click();
+    const picker = page.getByRole('dialog', { name: 'Новый виджет' });
+    await picker.getByRole('searchbox').fill('коллаген');
+    await expect(picker).toContainText('нет надёжных данных о коллагене');
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Готово' }).click();
+    // Move «Белки» left, then remove it and undo.
+    await widgets.getByRole('button', { name: /^Белки/ }).click();
+    await page.getByRole('menuitem', { name: 'Левее' }).click();
+    await expect(widgets.getByRole('listitem').first()).toContainText('Белки');
+    await widgets.getByRole('button', { name: /^Белки/ }).click();
+    await page.getByRole('menuitem', { name: 'Убрать виджет' }).click();
+    await expect(widgets.getByRole('listitem')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Отменить' }).click();
+    await expect(widgets.getByRole('listitem')).toHaveCount(2);
+    await page.reload();
+    await expect(widgets.getByRole('listitem')).toHaveCount(2, { timeout: 30_000 });
+  });
+
   test('search: «/» opens it, results by day and meal, arrows and Enter, Esc restores the dishes', async ({
     page,
   }) => {

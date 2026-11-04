@@ -75,6 +75,32 @@ const STATES = {
     else await item.hover();
     await page.getByRole('menuitem', { name: 'PDF' }).waitFor();
   },
+  widgets: async (page) => {
+    for (const [name, color] of [
+      ['Железо', 'Синий'],
+      ['Белки', 'Золотой'],
+      ['Витамин C', 'Коралловый'],
+    ]) {
+      await page.getByRole('button', { name: 'Изменить приёмы пищи' }).click();
+      await page.getByRole('button', { name: 'Добавить', exact: true }).click();
+      await page.getByRole('menuitem', { name: 'Добавить виджет' }).click();
+      const picker = page.getByRole('dialog', { name: 'Новый виджет' });
+      await picker.getByRole('button', { name, exact: true }).first().click();
+      await picker.getByRole('radio', { name: color }).check({ force: true });
+      await picker.getByRole('button', { name: 'Добавить' }).click();
+      await page.getByRole('button', { name: 'Готово' }).click();
+    }
+    await page
+      .getByRole('button', { name: /^Отметить «.+» съеденным$/ })
+      .first()
+      .click();
+  },
+  'widget-picker': async (page) => {
+    await page.getByRole('button', { name: 'Изменить приёмы пищи' }).click();
+    await page.getByRole('button', { name: 'Добавить', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Добавить виджет' }).click();
+    await page.getByRole('dialog', { name: 'Новый виджет' }).waitFor();
+  },
   account: async (page, touch) => {
     await page.getByRole('button', { name: 'Аккаунт' }).first().click();
     const item = page.getByRole('menuitem', { name: 'Сменить аватар' });

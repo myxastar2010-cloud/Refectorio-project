@@ -49,7 +49,11 @@ import { dayKind } from './week/dates';
 import { SearchResults } from './search/SearchResults';
 import { optionId, useSearch, type SearchEntry } from './search/useSearch';
 import { WeekStrip } from './week/WeekStrip';
+import { CustomWidgets } from './widgets/CustomWidgets';
+import { widgetName } from './widgets/nutrientWidgets';
+import { WidgetPicker } from './widgets/WidgetPicker';
 import { Widgets } from './widgets/Widgets';
+import { MAX_WIDGETS, type WidgetConfig } from './store/schema';
 
 type Props = {
   readonly plan: Plan;
@@ -98,6 +102,8 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const [accountAt, setAccountAt] = useState<HTMLElement | null>(null);
   const [wipeAt, setWipeAt] = useState<HTMLElement | null>(null);
   const letters = useMenu((s) => s.letters);
+  const customWidgets = useMenu((s) => s.widgets);
+  const [pickerAt, setPickerAt] = useState<HTMLElement | null>(null);
   const deemphasizeNumbers = answers?.guardrails.deemphasizeNumbers ?? false;
   const meals = useMemo(
     () => [...plan.structure].sort((a, b) => a.order - b.order),
@@ -371,6 +377,31 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
     : null;
   const unread = letters.some((letter) => !letter.read);
 
+  const moveWidget = useCallback((id: string, delta: -1 | 1) => {
+    menuStore().update((d) => {
+      const at = d.widgets.findIndex((w) => w.id === id);
+      const to = at + delta;
+      if (at < 0 || to < 0 || to >= d.widgets.length) return d;
+      const next = [...d.widgets];
+      const [moved] = next.splice(at, 1);
+      if (moved) next.splice(to, 0, moved);
+      return { ...d, widgets: next };
+    });
+  }, []);
+  const removeWidget = useCallback(
+    (widget: WidgetConfig) => {
+      const store = menuStore();
+      const before = store.get().widgets;
+      store.update((d) => ({ ...d, widgets: d.widgets.filter((w) => w.id !== widget.id) }));
+      onNotify(fill(menu.widgets.custom.removed, { name: widgetName(widget.nutrient) }), {
+        label: menu.meals.undo,
+        run: () => {
+          store.update((d) => ({ ...d, widgets: before }));
+        },
+      });
+    },
+    [onNotify],
+  );
   const closeAccount = useCallback(() => {
     setAccountAt(null);
   }, []);
@@ -472,6 +503,18 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
             }}
             onMore={setMoreAt}
             newsOpen={news !== null}
+            widgets={
+              <CustomWidgets
+                widgets={customWidgets}
+                plan={plan}
+                tracking={tracking}
+                date={date}
+                editing={editing}
+                deemphasizeNumbers={deemphasizeNumbers}
+                onMove={moveWidget}
+                onRemove={removeWidget}
+              />
+            }
             onBell={(bell, keyboard) => {
               window.clearTimeout(newsTimer.current);
               setNews((now) =>
@@ -548,7 +591,10 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
             onRemove={structure.remove}
             onAddMeal={structure.add}
             onAddDish={soon}
-            onAddWidget={soon}
+            onAddWidget={() => {
+              if (customWidgets.length >= MAX_WIDGETS) onNotify(menu.widgets.custom.full);
+              else setPickerAt(document.querySelector<HTMLElement>('.meal-add'));
+            }}
             onMove={structure.move}
             busy={structure.busy}
           />
@@ -710,6 +756,25 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           else setReplacing(target);
         }}
         onRecipe={soon}
+      />
+      <WidgetPicker
+        anchor={pickerAt}
+        answers={answers}
+        plan={plan}
+        catalog={catalog}
+        taken={customWidgets}
+        onClose={() => {
+          setPickerAt(null);
+        }}
+        onAdd={(widget) => {
+          setPickerAt(null);
+          menuStore().update((d) =>
+            d.widgets.length >= MAX_WIDGETS
+              ? d
+              : { ...d, widgets: [...d.widgets, { ...widget, id: `w-${String(Date.now())}` }] },
+          );
+          onNotify(fill(menu.widgets.custom.added, { name: widgetName(widget.nutrient) }));
+        }}
       />
       <AccountMenu
         anchor={accountAt}
