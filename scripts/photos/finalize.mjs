@@ -153,7 +153,7 @@ async function entry(dish, choice, today) {
     focal: analysis.focal,
     avgColor: analysis.avgColor,
     blurhash: analysis.blurhash,
-    altRu: dish.altRu,
+    altRu: dish.altRu ?? dish.nameRu,
     chosenAt: known?.chosenAt ?? today,
     ...(photo.provider === 'unsplash' ? { downloadTrackedAt } : {}),
   };

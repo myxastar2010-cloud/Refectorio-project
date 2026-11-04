@@ -1,5 +1,5 @@
 // Finds photo candidates for every dish (ТЗ §9.8 step 2). Needs a key; resumable — run it again to continue.
-//   node scripts/photos/curate.mjs [--provider pexels|unsplash] [--dish d_borscht] [--refresh]
+//   node scripts/photos/curate.mjs [--provider pexels|unsplash] [--dish d_borscht] [--refresh] [--missing]
 // Providers in order Pexels → Unsplash; the top 6 candidates per dish and their thumbnails (CDN, no API cost) go to
 // .cache/photos/. Then: review-sheets.mjs → visual choice → finalize.mjs.
 import { existsSync } from 'node:fs';
@@ -12,6 +12,7 @@ import {
   createPacer,
   fetchWithTimeout,
   loadCatalog,
+  MANIFEST_FILE,
   readJson,
   readKey,
   searchPexels,
@@ -29,6 +30,10 @@ const option = (name) => {
 const onlyProvider = option('provider');
 const onlyDish = option('dish');
 const refresh = args.includes('--refresh');
+// --missing: only items without a photo in the manifest (game dishes and menu-only items), searched again once even if
+// searched before (`rechecked` keeps a restart from spending the hour's requests twice); the earlier candidates were all
+// refused in review, so only the new ones are kept.
+const missing = args.includes('--missing');
 
 const keys = { pexels: await readKey('pexels'), unsplash: await readKey('unsplash') };
 const providers = ['pexels', 'unsplash'].filter(
@@ -41,6 +46,7 @@ if (providers.length === 0) {
 
 const { catalog, queries } = await loadCatalog();
 const state = await readJson(CANDIDATES_FILE, { version: 1, dishes: {} });
+const manifest = await readJson(MANIFEST_FILE, { photos: {} });
 const pacer = createPacer();
 const search = { pexels: searchPexels, unsplash: searchUnsplash };
 /**
@@ -92,11 +98,13 @@ async function saveThumb(dishId, candidate) {
 let done = 0;
 for (const dish of catalog.dishes) {
   if (onlyDish && dish.id !== onlyDish) continue;
+  if (missing && manifest.photos[dish.id]) continue;
   const existing = state.dishes[dish.id];
-  const wanted = providers.filter((p) => refresh || !existing?.searched?.includes(p));
+  const recheck = missing && !existing?.rechecked;
+  const wanted = providers.filter((p) => refresh || recheck || !existing?.searched?.includes(p));
   if (wanted.length === 0) continue;
   const dishQueries = queries[dish.id] ?? [dish.nameRu];
-  const found = [...(existing?.candidates ?? [])];
+  const found = recheck ? [] : [...(existing?.candidates ?? [])];
   const searched = new Set(existing?.searched ?? []);
   for (const provider of wanted) {
     // Unsplash only tops up dishes where Pexels did not give enough choice.
@@ -121,6 +129,7 @@ for (const dish of catalog.dishes) {
   state.dishes[dish.id] = {
     candidates: withThumbs,
     searched: [...searched],
+    ...(recheck || existing?.rechecked ? { rechecked: true } : {}),
     updatedAt: new Date().toISOString(),
   };
   await writeJson(CANDIDATES_FILE, state);

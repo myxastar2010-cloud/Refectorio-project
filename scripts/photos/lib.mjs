@@ -46,7 +46,20 @@ export async function loadCatalog() {
   const catalog = await readJson(path.join(DATA_DIR, 'catalog.json'), null);
   if (!catalog) throw new Error('packages/taste-core/data/catalog.json is missing');
   const queries = await readJson(path.join(DATA_DIR, 'photo-queries.json'), {});
-  return { catalog, queries };
+  // Menu-only items (sides, breads, drinks …) live in food-core.json only: the pipeline sees them as { id, nameRu }.
+  const core = await readJson(
+    path.join(APP_ROOT, 'packages', 'food-data', 'data', 'food-core.json'),
+    null,
+  );
+  const text = await readJson(
+    path.join(APP_ROOT, 'packages', 'food-data', 'data', 'food-text.json'),
+    null,
+  );
+  const known = new Set(catalog.dishes.map((d) => d.id));
+  const extra = (core?.items ?? [])
+    .filter((item) => !known.has(item.id))
+    .map((item) => ({ id: item.id, nameRu: text?.items?.[item.id]?.[0] ?? item.id }));
+  return { catalog: { ...catalog, dishes: [...catalog.dishes, ...extra] }, queries };
 }
 
 /** Polite pacing: at most one API request per second, and waiting out the rate limit when it runs low. */

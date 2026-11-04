@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { catalogSchema } from '../src/catalog';
 import { photoManifestSchema, photoSchema } from '../src/photos';
 import catalogJson from './catalog.json';
+import foodCoreJson from '../../food-data/data/food-core.json';
 import manifestJson from './photo-manifest.json';
 import overridesJson from './photo-overrides.json';
 
@@ -9,8 +10,11 @@ const catalog = catalogSchema.parse(catalogJson);
 const manifest = photoManifestSchema.parse(manifestJson);
 
 describe('photo manifest', () => {
-  it('only describes catalog dishes', () => {
-    const ids = new Set(catalog.dishes.map((d) => d.id));
+  it('only describes catalog dishes and menu items', () => {
+    const ids = new Set([
+      ...catalog.dishes.map((d) => d.id),
+      ...foodCoreJson.items.map((item) => item.id),
+    ]);
     for (const id of Object.keys(manifest.photos)) expect(ids.has(id), id).toBe(true);
   });
 

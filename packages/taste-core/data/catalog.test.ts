@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import foodCoreJson from '../../food-data/data/food-core.json';
 import {
   CARB_BASES,
   catalogSchema,
@@ -105,9 +106,12 @@ describe('dish catalog', () => {
     }
   });
 
-  it('has 1–3 English photo queries for every dish and nothing else', () => {
+  it('has 1–3 English photo queries for every dish and menu item and nothing else', () => {
     const queries = photoQueriesSchema.parse(photoQueriesJson);
-    expect(Object.keys(queries).sort()).toEqual(dishes.map((d) => d.id).sort());
+    const menuIds = foodCoreJson.items.map((item) => item.id);
+    expect(Object.keys(queries).sort()).toEqual(
+      [...new Set([...dishes.map((d) => d.id), ...menuIds])].sort(),
+    );
     for (const list of Object.values(queries)) {
       for (const query of list) expect(query, query).toMatch(/^[a-z0-9 ,'-]+$/i);
     }
