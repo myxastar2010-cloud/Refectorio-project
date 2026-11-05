@@ -4,9 +4,7 @@ import {
   IconBoltFilled,
   IconListDetails,
   IconMugFilled,
-  IconSchoolFilled,
-  IconShieldCheckFilled,
-  IconSparklesFilled,
+  IconTrophyFilled,
   type Icon,
 } from '@tabler/icons-react';
 import { m, type MotionStyle } from 'motion/react';
@@ -19,16 +17,23 @@ import { TiltGlare } from '../motion/TiltGlare';
 import { useWave } from '../motion/useWave';
 import { WaveLayer } from '../motion/WaveHover';
 import { heroFadeVariants, heroLiftVariants, heroVariants, type Phase } from './choreography';
+import { HeroKiki } from '../components/HeroKiki';
+import { Kiki } from '../components/Kiki';
 import { Lines } from '../components/Lines';
 
-const FEATURE_ICONS: Record<FeatureIcon, Icon> = {
-  school: IconSchoolFilled,
-  sparkles: IconSparklesFilled,
+/** Kiki's card draws her face instead of an icon (below). */
+const FEATURE_ICONS: Record<Exclude<FeatureIcon, 'kiki'>, Icon> = {
   listDetails: IconListDetails, // Its squares are filled by CSS, as on the mockup: Tabler has no such filled icon.
-  shieldCheck: IconShieldCheckFilled,
   mug: IconMugFilled,
   bolt: IconBoltFilled,
+  trophy: IconTrophyFilled,
 };
+
+/** A feature card's icon from Tabler (Kiki's card has her own face). */
+function CardGlyph({ icon, className }: { icon: keyof typeof FEATURE_ICONS; className: string }) {
+  const Glyph = FEATURE_ICONS[icon];
+  return <Glyph aria-hidden className={className} />;
+}
 
 type Props = {
   readonly phase: Phase;
@@ -46,8 +51,8 @@ type Props = {
 };
 
 /**
- * Part 1: heading, lead, «Создать меню» and the five feature cards (ТЗ 6.2; the cards are not shown on phones);
- * the header is SiteHeader.
+ * Part 1: heading, lead, «Создать меню», Kiki by the girl's desk and the five feature cards (ТЗ 6.2; the cards are not
+ * shown on phones); the header is SiteHeader.
  */
 /* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
 export const HeroScene = memo(function HeroScene({
@@ -143,11 +148,12 @@ export const HeroScene = memo(function HeroScene({
         </TiltGlare>
       </m.div>
 
-      <div ref={girlSlotRef} className="hero-girl-slot at box" aria-hidden />
+      <div ref={girlSlotRef} className="hero-girl-slot at box" aria-hidden>
+        <HeroKiki motion={motionProps(3)} active={phase === 'shown'} calm={calm} />
+      </div>
 
       <ul className="features" aria-label={site.hero.featuresLabel}>
         {site.hero.features.map((feature, index) => {
-          const FeatureIconComponent = FEATURE_ICONS[feature.icon];
           return (
             <m.li
               key={feature.title}
@@ -161,13 +167,23 @@ export const HeroScene = memo(function HeroScene({
                 <p className="feature-text at text-at">
                   <Lines lines={feature.textLines} />
                 </p>
-                <FeatureIconComponent
-                  aria-hidden
-                  className={clsx(
-                    'feature-icon',
-                    feature.icon === 'listDetails' && 'feature-icon--list',
-                  )}
-                />
+                {feature.icon === 'kiki' ? (
+                  <Kiki
+                    decorative
+                    mood="glow"
+                    level={2}
+                    label={site.hero.kiki.label}
+                    className="feature-icon"
+                  />
+                ) : (
+                  <CardGlyph
+                    icon={feature.icon}
+                    className={clsx(
+                      'feature-icon',
+                      feature.icon === 'listDetails' && 'feature-icon--list',
+                    )}
+                  />
+                )}
               </TiltGlare>
             </m.li>
           );

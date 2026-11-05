@@ -31,8 +31,11 @@ async function pixels(png: Buffer) {
 }
 
 /** Without the food: these tests look at her own pixels. */
+// Kiki stands in her slot too (D-102): the pixel tests are about the girl's own picture, so she is hidden with the food.
 const hideFood = (page: Page) =>
-  page.addStyleTag({ content: '.food-layer { visibility: hidden !important; }' });
+  page.addStyleTag({
+    content: '.food-layer, .hero-kiki { visibility: hidden !important; }',
+  });
 
 test.describe('the girl', () => {
   test('the still is there at once, and the video takes its place without moving a pixel', async ({

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { scene, settled } from './helpers';
 
-// The screens under the landing (#discover): segments + mini test, progress and goals, key functions, Kiki.
+// The screens under the landing (#discover), top to bottom: key functions, Kiki, who ПроЛанч is for with the 30-second test.
 
 test.describe('discover', () => {
   test('the wheel leads from the landing down to it, then to «О проекте»; Back returns', async ({
@@ -20,32 +20,33 @@ test.describe('discover', () => {
     await settled(page, 'hero');
   });
 
-  test('a direct visit opens it at once and shows its blocks', async ({ page }) => {
+  test('a direct visit opens it at once, with the key functions on top and Kiki after them', async ({
+    page,
+  }) => {
     await page.goto('./?seed=1#discover');
     await expect(scene(page)).toHaveAttribute('data-scene', 'discover');
-    await expect(page.getByRole('heading', { name: /Два способа вкусно питаться/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Всё, чтобы вкусно питаться/ })).toBeVisible();
     await expect(page.locator('.scene--hero')).toHaveAttribute('aria-hidden', 'true');
+    const order = await page
+      .locator('.dsc-main > section')
+      .evaluateAll((sections) => sections.map((section) => section.id));
+    expect(order).toEqual(['dsc-features', 'dsc-kiki', 'dsc-segments', '']);
+    // The «progress and goals» block is gone: Kiki is the centre of the product.
+    await expect(page.getByRole('heading', { name: /Видно, как вы идёте к цели/ })).toHaveCount(0);
   });
 
-  test('the mini test names the type and can be restarted', async ({ page }) => {
+  test('the 30-second test names the type and can be restarted', async ({ page }) => {
     await page.goto('./?seed=1#discover');
-    const quiz = page.locator('.dsc-quiz');
-    await quiz.scrollIntoViewIfNeeded();
+    const plaque = page.locator('.dsc-plaque');
+    await plaque.scrollIntoViewIfNeeded();
+    await expect(plaque.getByText('30', { exact: true })).toBeVisible();
+    await plaque.getByRole('button', { name: 'Начать тест' }).click();
     for (let step = 0; step < 5; step += 1) {
-      await quiz.locator('.dsc-answer[data-kind="rush"]').click();
+      await plaque.locator('.dsc-answer[data-kind="timesaver"]').click();
     }
-    await expect(quiz.getByRole('heading', { name: 'Вы — Торопыжка' })).toBeVisible();
-    await quiz.getByRole('button', { name: 'Пройти заново' }).click();
-    await expect(quiz.locator('.dsc-answer')).toHaveCount(2);
-  });
-
-  test('goals switch the example chart', async ({ page }) => {
-    await page.goto('./?seed=1#discover');
-    const tab = page.getByRole('tab', { name: 'Набрать массу' });
-    await tab.scrollIntoViewIfNeeded();
-    await tab.click();
-    await expect(tab).toHaveAttribute('aria-selected', 'true');
-    await expect(page.locator('.dsc-stats')).toContainText('70');
+    await expect(plaque.getByRole('heading', { name: 'Вы — ценитель времени' })).toBeVisible();
+    await plaque.getByRole('button', { name: 'Пройти заново' }).click();
+    await expect(plaque.locator('.dsc-answer')).toHaveCount(2);
   });
 
   test('Kiki changes with what she eats and starts over', async ({ page }) => {
@@ -59,5 +60,32 @@ test.describe('discover', () => {
     await expect(stage).toHaveAttribute('data-mood', 'sad');
     await stage.getByRole('button', { name: 'Начать сначала' }).click();
     await expect(stage).toHaveAttribute('data-mood', 'good');
+  });
+
+  test('her mood in the introduction follows the action the person picks', async ({ page }) => {
+    await page.goto('./?seed=1#discover');
+    const intro = page.locator('.dsc-head--kiki');
+    await intro.scrollIntoViewIfNeeded();
+    await intro.getByRole('button', { name: /Устала/ }).click();
+    await expect(intro).toHaveAttribute('data-mood', 'tired');
+    await expect(intro.getByRole('button', { name: /Устала/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  test('the food is blurred and moves on these screens, as in «О проекте»', async ({ page }) => {
+    await page.goto('./#discover');
+    await expect(scene(page)).toHaveAttribute('data-scene', 'discover');
+    const sharp = page.locator('.food-plane:first-child .food-item').first();
+    const blurred = page.locator('.food-plane:nth-child(2) .food-item').first();
+    await expect(sharp).toHaveCSS('opacity', '0');
+    await expect(blurred).not.toHaveCSS('opacity', '0');
+    const before = await blurred.evaluate((node) => (node as HTMLElement).style.transform);
+    await expect
+      .poll(() => blurred.evaluate((node) => (node as HTMLElement).style.transform), {
+        timeout: 8000,
+      })
+      .not.toBe(before);
   });
 });

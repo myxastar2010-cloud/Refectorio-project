@@ -11,7 +11,6 @@ import { DURATION, EASE_OUT_EXPO } from '../../motion/tokens';
 import type { Phase } from '../../scenes/choreography';
 import { Features } from './Features';
 import { KikiSection } from './KikiSection';
-import { Progress } from './Progress';
 import { Segments } from './Segments';
 
 type Props = {
@@ -27,14 +26,14 @@ type Props = {
 };
 
 const SECTIONS = [
-  { id: 'dsc-segments', label: discover.segments.eyebrow },
-  { id: 'dsc-progress', label: discover.progress.eyebrow },
   { id: 'dsc-features', label: discover.features.eyebrow },
-  { id: 'dsc-kiki', label: discover.kiki.eyebrow },
+  { id: 'dsc-kiki', label: discover.kiki.title },
+  { id: 'dsc-segments', label: discover.segments.eyebrow },
 ] as const;
 
 /**
- * The screens under the landing (#discover): who ПроЛанч is for, progress and goals, key functions and Kiki.
+ * The screens under the landing (#discover), in this order: key functions, Kiki, who ПроЛанч is for with the 30-second test
+ * (D-102: Kiki is the centre of the product, the «progress and goals» block is gone).
  * A scene of its own that scrolls natively; at its top a scroll up leads back to the landing, at its bottom a scroll
  * down to «О проекте» (useSceneInput). Blocks appear as they enter the view.
  */
@@ -150,10 +149,9 @@ export const DiscoverScene = memo(function DiscoverScene({
           <h1 className="visually-hidden" ref={titleRef} tabIndex={-1}>
             {discover.title}
           </h1>
-          <Segments hasMenu={hasMenu} onCreateMenu={onCreateMenu} />
-          <Progress />
           <Features />
           <KikiSection />
+          <Segments hasMenu={hasMenu} onCreateMenu={onCreateMenu} />
 
           <section className="dsc-final" data-reveal aria-labelledby="dsc-final-title">
             <h2 id="dsc-final-title">{discover.cta.title}</h2>

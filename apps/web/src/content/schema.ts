@@ -7,7 +7,8 @@ const text = z.string().trim().min(1);
 /** Lines as in the mockup: rendered with explicit breaks on desktop, joined on small screens. */
 const lines = z.array(text).min(1);
 
-const featureIcon = z.enum(['school', 'sparkles', 'listDetails', 'shieldCheck', 'mug', 'bolt']);
+const featureIcon = z.enum(['kiki', 'listDetails', 'mug', 'bolt', 'trophy']);
+const kikiMood = z.enum(['glow', 'good', 'tired', 'sad']);
 const imageKey = z.enum(['teamLogo', 'projectLogo', 'teamCard', 'brandLogo']);
 
 /** A link of the project details card: not working yet — a press says «Мы работаем над этим» (D-051). */
@@ -45,6 +46,11 @@ export const siteContentSchema = z.object({
     ctaOpen: z.object({ label: text, href: z.string().startsWith('#') }),
     featuresLabel: text,
     features: z.array(z.object({ title: text, textLines: lines, icon: featureIcon })).length(5),
+    /** Kiki on the first screen: she stands by the girl's desk and her mood follows what she says (D-102). */
+    kiki: z.object({
+      label: text,
+      lines: z.array(z.object({ mood: kikiMood, text })).min(2),
+    }),
   }),
   about: z.object({
     title: text,

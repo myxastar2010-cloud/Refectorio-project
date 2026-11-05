@@ -28,11 +28,25 @@ describe('site content', () => {
     expect(all).toContain('Ясинский Алексей');
   });
 
-  it('has a 2-line heading and a 3-line lead, as the composition of part 1 expects', () => {
+  it('has a 2-line heading and a 4-line lead that names Kiki, as the composition of part 1 expects', () => {
     expect(site.hero.titleLines).toHaveLength(2);
-    expect(site.hero.leadLines).toHaveLength(3);
+    expect(site.hero.leadLines).toHaveLength(4);
+    expect(site.hero.leadLines.join(' ')).toContain('ПроЛанч и ваш личный ИИ Кики возьмут на себя');
     expect(site.hero.titleLines.join(' ')).toBe('Вкусно питаться, не отвлекаясь от важного');
     expect(site.hero.titleSpoken).toBe(site.hero.titleLines.join(' '));
+  });
+
+  it('puts Kiki first among the five cards and talks about the types as the presentation does (D-102)', () => {
+    expect(site.hero.features.map((feature) => feature.icon)).toEqual([
+      'kiki',
+      'listDetails',
+      'mug',
+      'bolt',
+      'trophy',
+    ]);
+    expect(site.hero.features[0].title).toBe('Кики');
+    expect(strings(site).join(' ')).not.toMatch(/кайфожор|торопыж/i);
+    expect(site.hero.kiki.lines.length).toBeGreaterThanOrEqual(2);
   });
 
   it('calls the product ПроЛанч everywhere: the old name stays only in addresses', () => {

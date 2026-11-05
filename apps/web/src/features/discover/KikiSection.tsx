@@ -1,7 +1,8 @@
 import { IconLockFilled, IconRefresh } from '@tabler/icons-react';
-import { useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { discover } from '../../content/discover.ru';
-import { Kiki, type KikiLevel, type KikiMood } from './Kiki';
+import { useCalmMotion } from '../../motion/hooks';
+import { Kiki, type KikiLevel, type KikiMood } from '../../components/Kiki';
 import { NamedIcon } from './icons';
 
 const { kiki } = discover;
@@ -26,20 +27,13 @@ const levelOf = (xp: number): KikiLevel => {
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
 
-/** Kiki: what she is for, the tamagotchi to try, habits, levels, bonuses and badges. */
+const MOOD_MS = 3400;
+
+/** Kiki: what she is for, how her mood follows the person's actions, the tamagotchi to try, habits, levels, bonuses. */
 export function KikiSection() {
   return (
     <section className="dsc-section dsc-kiki" id="dsc-kiki" aria-labelledby="dsc-kiki-title">
-      <header className="dsc-head dsc-head--kiki" data-reveal>
-        <div className="dsc-kiki-hero">
-          <Kiki mood="glow" level={2} label={kiki.title} />
-        </div>
-        <p className="dsc-eyebrow">{kiki.eyebrow}</p>
-        <h2 id="dsc-kiki-title" className="dsc-title">
-          {kiki.title}
-        </h2>
-        <p className="dsc-lead">{kiki.lead}</p>
-      </header>
+      <KikiIntro />
 
       <ul className="dsc-perks">
         {kiki.perks.map((perk, index) => (
@@ -63,6 +57,100 @@ export function KikiSection() {
       <Levels />
       <Rewards />
     </section>
+  );
+}
+
+/**
+ * The introduction: «Знакомьтесь, ваш личный ИИ Кики» and the point of the block — her mood follows what the person does.
+ * The four moods take turns while the block is on screen; a press on one holds it (and stops the turns).
+ */
+function KikiIntro() {
+  const { reacts } = kiki;
+  const calm = useCalmMotion();
+  const rootRef = useRef<HTMLElement | null>(null);
+  const [index, setIndex] = useState(0);
+  const [held, setHeld] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const current = reacts.items[index] ?? reacts.items[0];
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setVisible(entry?.isIntersecting ?? false);
+    });
+    observer.observe(root);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (calm || held || !visible) return;
+    const timer = window.setInterval(() => {
+      setIndex((previous) => (previous + 1) % reacts.items.length);
+    }, MOOD_MS);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [calm, held, visible, reacts.items.length]);
+
+  if (!current) return null;
+  return (
+    <header className="dsc-head dsc-head--kiki" data-reveal data-mood={current.mood} ref={rootRef}>
+      <div className="dsc-kiki-copy">
+        <p className="dsc-eyebrow">{kiki.eyebrow}</p>
+        <h2 id="dsc-kiki-title" className="dsc-title">
+          {kiki.title}
+        </h2>
+        <p className="dsc-lead">{kiki.lead}</p>
+
+        <div className="dsc-reacts" role="group" aria-label={reacts.title}>
+          <p className="dsc-reacts-title">{reacts.title}</p>
+          <p className="dsc-reacts-lead">{reacts.lead}</p>
+          <ul>
+            {reacts.items.map((item, itemIndex) => (
+              <li key={item.mood}>
+                <button
+                  type="button"
+                  className="dsc-react"
+                  data-mood={item.mood}
+                  aria-pressed={itemIndex === index}
+                  onClick={() => {
+                    setIndex(itemIndex);
+                    setHeld(true);
+                  }}
+                >
+                  <i aria-hidden />
+                  <span>
+                    <b>{item.name}</b>
+                    <small>{item.action}</small>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="dsc-kiki-hero">
+        <p
+          className="dsc-bubble dsc-kiki-say"
+          key={current.mood}
+          aria-live={held ? 'polite' : 'off'}
+        >
+          {current.say}
+        </p>
+        <Kiki
+          mood={current.mood}
+          level={2}
+          label={`${kiki.title}: ${kiki.stage.moods[current.mood]}`}
+        />
+        <p className="dsc-kiki-mood" key={`m-${current.mood}`}>
+          {kiki.stage.moods[current.mood]}
+        </p>
+      </div>
+    </header>
   );
 }
 

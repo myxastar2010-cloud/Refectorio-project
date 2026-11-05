@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
 /**
- * The texts of the screens under the landing (#discover): who ПроЛанч is for (Кайфожор / Торопыжка) with a mini test,
- * progress and goals, the key functions, and Kiki — the tamagotchi dietitian with habits and levels.
+ * The texts of the screens under the landing (#discover), top to bottom: the key functions, Kiki (what she is, how her
+ * mood follows the person's actions, the tamagotchi, habits, levels, bonuses), who ПроЛанч is for (искатель впечатлений /
+ * ценитель времени) with the 30-second test, and the final call. The «progress and goals» block is gone (D-102).
  * Everything here is a demonstration: the numbers on the example screens are examples, and the page says so.
  */
 const text = z.string().trim().min(1);
@@ -19,67 +20,6 @@ const food = z.object({
 const schema = z.object({
   title: text,
   nav: z.object({ home: text, about: text, label: text }),
-  segments: z.object({
-    eyebrow: text,
-    title: text,
-    lead: text,
-    kinds: z
-      .array(
-        z.object({
-          id: z.enum(['kaif', 'rush']),
-          name: text,
-          tagline: text,
-          points: z.array(text).length(3),
-        }),
-      )
-      .length(2),
-  }),
-  quiz: z.object({
-    title: text,
-    lead: text,
-    step: text,
-    questions: z.array(z.object({ text, kaif: text, rush: text })).length(5),
-    restart: text,
-    cta: text,
-    ctaOpen: text,
-    resultLabel: text,
-    results: z.object({
-      kaif: z.object({ name: text, text, chips: z.array(text).length(3) }),
-      rush: z.object({ name: text, text, chips: z.array(text).length(3) }),
-    }),
-  }),
-  progress: z.object({
-    eyebrow: text,
-    title: text,
-    lead: text,
-    demo: text,
-    goalsLabel: text,
-    goals: z
-      .array(
-        z.object({
-          id: z.enum(['lose', 'keep', 'gain']),
-          label: text,
-          from: z.number(),
-          to: z.number(),
-          unit: text,
-          weekly: text,
-          path: z.array(z.number()).length(9),
-        }),
-      )
-      .length(3),
-    now: text,
-    target: text,
-    done: text,
-    week: text,
-    scrub: text,
-    kcal: text,
-    kcalNote: text,
-    days: z.array(text).length(7),
-    weekTitle: text,
-    weekNote: text,
-    streak: text,
-    water: text,
-  }),
   features: z.object({
     eyebrow: text,
     title: text,
@@ -89,6 +29,21 @@ const schema = z.object({
     eyebrow: text,
     title: text,
     lead: text,
+    /** How her mood follows the person's actions: four moods, each with the action that brings it. */
+    reacts: z.object({
+      title: text,
+      lead: text,
+      items: z
+        .array(
+          z.object({
+            mood: z.enum(['glow', 'good', 'tired', 'sad']),
+            name: text,
+            action: text,
+            say: text,
+          }),
+        )
+        .length(4),
+    }),
     perks: z.array(z.object({ icon: z.string(), title: text, text })).length(4),
     stage: z.object({
       title: text,
@@ -130,138 +85,47 @@ const schema = z.object({
       badges: z.array(z.object({ icon: z.string(), title: text, text })).length(6),
     }),
   }),
+  segments: z.object({
+    eyebrow: text,
+    title: text,
+    lead: text,
+    kinds: z
+      .array(
+        z.object({
+          id: z.enum(['explorer', 'timesaver']),
+          name: text,
+          tagline: text,
+          points: z.array(text).length(3),
+        }),
+      )
+      .length(2),
+  }),
+  quiz: z.object({
+    /** The big plaque: «30 секунд» is what says it is a test. */
+    seconds: text,
+    secondsUnit: text,
+    eyebrow: text,
+    title: text,
+    lead: text,
+    facts: z.array(text).length(3),
+    start: text,
+    step: text,
+    questions: z.array(z.object({ text, explorer: text, timesaver: text })).length(5),
+    restart: text,
+    cta: text,
+    ctaOpen: text,
+    resultLabel: text,
+    results: z.object({
+      explorer: z.object({ name: text, text, chips: z.array(text).length(3) }),
+      timesaver: z.object({ name: text, text, chips: z.array(text).length(3) }),
+    }),
+  }),
   cta: z.object({ title: text, lead: text, about: text }),
 });
 
 export const discover: DiscoverContent = {
-  title: 'ПроЛанч: для кого он, как видно прогресс и кто такая Кики',
+  title: 'ПроЛанч: ключевые функции, Кики и стиль питания',
   nav: { home: 'На главную', about: 'О проекте', label: 'Разделы сайта' },
-
-  segments: {
-    eyebrow: 'Для кого ПроЛанч',
-    title: 'Два способа вкусно питаться на работе',
-    lead: 'Мы не делим людей на «правильных» и «неправильных». Мы смотрим, как вы живёте в рабочий день, — и собираем меню под ваш ритм.',
-    kinds: [
-      {
-        id: 'kaif',
-        name: 'Кайфожор',
-        tagline: 'Обед — маленький праздник',
-        points: [
-          'Вкусные новинки рядом с вашим офисом',
-          'Меню из блюд, которые вам нравятся, — без скучных повторов',
-          'Любимая еда в меру: баланс вместо запретов',
-        ],
-      },
-      {
-        id: 'rush',
-        name: 'Торопыжка',
-        tagline: 'Поесть быстро — и вернуться к делам',
-        points: [
-          'Быстрый ланч-бокс на работу с точным КБЖУ',
-          'Привычки и цели, которые не требуют лишнего ввода',
-          'Простые блюда, которые можно взять с собой',
-        ],
-      },
-    ],
-  },
-
-  quiz: {
-    title: 'Кто вы: Кайфожор или Торопыжка?',
-    lead: 'Пять вопросов на полминуты. Ответов «правильных» нет.',
-    step: 'Вопрос {n} из {total}',
-    questions: [
-      {
-        text: 'Обеденный перерыв для вас —',
-        kaif: 'Маленький праздник: хочется выйти и попробовать что-то новое',
-        rush: 'Несколько минут между задачами: поесть и вернуться',
-      },
-      {
-        text: 'Вы проголодались в разгар недели. Вы…',
-        kaif: 'Загляну в новое место, о котором все говорят',
-        rush: 'Достану ланч-бокс: всё уже с собой',
-      },
-      {
-        text: 'Что в еде важнее всего?',
-        kaif: 'Вкус и впечатления',
-        rush: 'Скорость и удобство',
-      },
-      {
-        text: 'Хорошая цель по питанию —',
-        kaif: 'Радоваться еде и не переедать',
-        rush: 'Не думать о еде: пусть всё идёт по плану',
-      },
-      {
-        text: 'В выходной вы…',
-        kaif: 'Попробую новый рецепт',
-        rush: 'Заранее приготовлю на всю неделю',
-      },
-    ],
-    restart: 'Пройти заново',
-    cta: 'Создать моё меню',
-    ctaOpen: 'Открыть моё меню',
-    resultLabel: 'Ваш результат',
-    results: {
-      kaif: {
-        name: 'Вы — Кайфожор',
-        text: 'Вы цените вкус и разнообразие. ПроЛанч соберёт меню из блюд, которые вам по душе, и подскажет, куда сходить за новинками рядом с офисом.',
-        chips: ['Новинки рядом с офисом', 'Любимые блюда в меру', 'Без скучных повторов'],
-      },
-      rush: {
-        name: 'Вы — Торопыжка',
-        text: 'У вас мало времени, и это нормально. ПроЛанч соберёт быстрый ланч-бокс на работу, а привычки и цели будет отслеживать за вас.',
-        chips: ['Ланч-бокс с собой', 'Точное КБЖУ', 'Привычки на автопилоте'],
-      },
-    },
-  },
-
-  progress: {
-    eyebrow: 'Прогресс и цели',
-    title: 'Видно, как вы идёте к цели',
-    lead: 'Выберите цель — и ПроЛанч покажет путь по неделям: вес, калории, серию удачных дней. Без идеальных графиков и без вины за пропуск.',
-    demo: 'Пример: так будет выглядеть ваш экран',
-    goalsLabel: 'Цель',
-    goals: [
-      {
-        id: 'lose',
-        label: 'Сбросить вес',
-        from: 82,
-        to: 76,
-        unit: 'кг',
-        weekly: '−0,5 кг в неделю — спокойный темп',
-        path: [82, 81.6, 81.1, 80.5, 80.1, 79.4, 78.8, 78.5, 78],
-      },
-      {
-        id: 'keep',
-        label: 'Держать форму',
-        from: 70,
-        to: 70,
-        unit: 'кг',
-        weekly: 'Вес в коридоре ±0,5 кг',
-        path: [70, 70.3, 69.9, 70.2, 70.1, 69.8, 70, 70.2, 70],
-      },
-      {
-        id: 'gain',
-        label: 'Набрать массу',
-        from: 66,
-        to: 70,
-        unit: 'кг',
-        weekly: '+0,25 кг в неделю — без перегруза',
-        path: [66, 66.2, 66.6, 66.9, 67.1, 67.6, 67.9, 68.3, 68.5],
-      },
-    ],
-    now: 'Сейчас',
-    target: 'Цель',
-    done: 'пути пройдено',
-    week: 'Неделя {n}',
-    scrub: 'Двигайте ползунок по неделям',
-    kcal: 'Калории сегодня',
-    kcalNote: 'из 1 900 ккал',
-    days: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-    weekTitle: 'Неделя в норме',
-    weekNote: '5 дней из 7 — отличный результат',
-    streak: 'Серия',
-    water: 'Вода',
-  },
 
   features: {
     eyebrow: 'Ключевые функции',
@@ -301,9 +165,39 @@ export const discover: DiscoverContent = {
   },
 
   kiki: {
-    eyebrow: 'Кики',
-    title: 'Знакомьтесь: Кики',
-    lead: 'Ваш ИИ-диетолог, друг и немного тамагочи. Она живёт в приложении и меняется вместе с вашими привычками: чем лучше вы заботитесь о себе, тем ярче она сияет.',
+    eyebrow: 'Знакомьтесь',
+    title: 'Знакомьтесь, ваш личный ИИ Кики',
+    lead: 'Ваш ИИ-диетолог, друг и немного тамагочи. Она живёт в приложении и растёт вместе с вашими привычками — а настроение меняет в ответ на ваши действия.',
+    reacts: {
+      title: 'Её настроение — отражение ваших привычек',
+      lead: 'Выберите настроение и посмотрите, что к нему приводит.',
+      items: [
+        {
+          mood: 'glow',
+          name: 'Сияет',
+          action: 'Вы пьёте воду, едите овощи и держитесь плана',
+          say: 'Сегодня всё по плану — я сияю!',
+        },
+        {
+          mood: 'good',
+          name: 'Бодрая',
+          action: 'День идёт спокойно: обед вовремя, без перекусов на бегу',
+          say: 'Всё хорошо, продолжаем в том же духе.',
+        },
+        {
+          mood: 'tired',
+          name: 'Устала',
+          action: 'Вы пропустили приём пищи или забыли про воду',
+          say: 'Давайте вспомним про обед?',
+        },
+        {
+          mood: 'sad',
+          name: 'Грустит',
+          action: 'Несколько дней подряд сладкие напитки и фастфуд',
+          say: 'Скучаю по зелёному. Вернёмся мягко?',
+        },
+      ],
+    },
     perks: [
       {
         icon: 'chat',
@@ -476,8 +370,90 @@ export const discover: DiscoverContent = {
     },
   },
 
+  segments: {
+    eyebrow: 'Для кого ПроЛанч',
+    title: 'Два способа вкусно питаться на работе',
+    lead: 'Мы не делим людей на «правильных» и «неправильных». Мы смотрим, как вы живёте в рабочий день, — и собираем меню под ваш ритм.',
+    kinds: [
+      {
+        id: 'explorer',
+        name: 'Искатель впечатлений',
+        tagline: 'Обед — маленький праздник',
+        points: [
+          'Вкусные новинки рядом с вашим офисом',
+          'Меню из блюд, которые вам нравятся, — без скучных повторов',
+          'Любимая еда в меру: баланс вместо запретов',
+        ],
+      },
+      {
+        id: 'timesaver',
+        name: 'Ценитель времени',
+        tagline: 'Поесть быстро — и вернуться к делам',
+        points: [
+          'Быстрый ланч-бокс на работу с точным КБЖУ',
+          'Привычки и цели, которые не требуют лишнего ввода',
+          'Простые блюда, которые можно взять с собой',
+        ],
+      },
+    ],
+  },
+
+  quiz: {
+    seconds: '30',
+    secondsUnit: 'секунд',
+    eyebrow: 'Мини-тест',
+    title: 'Узнайте свой стиль питания за 30 секунд',
+    lead: 'Искатель впечатлений вы или ценитель времени? Ответьте на пять быстрых вопросов — и мы это покажем.',
+    facts: ['5 вопросов', 'Без «правильных» ответов', 'Результат сразу'],
+    start: 'Начать тест',
+    step: 'Вопрос {n} из {total}',
+    questions: [
+      {
+        text: 'Обеденный перерыв для вас —',
+        explorer: 'Маленький праздник: хочется выйти и попробовать что-то новое',
+        timesaver: 'Несколько минут между задачами: поесть и вернуться',
+      },
+      {
+        text: 'Вы проголодались в разгар недели. Вы…',
+        explorer: 'Загляну в новое место, о котором все говорят',
+        timesaver: 'Достану ланч-бокс: всё уже с собой',
+      },
+      {
+        text: 'Что в еде важнее всего?',
+        explorer: 'Вкус и впечатления',
+        timesaver: 'Скорость и удобство',
+      },
+      {
+        text: 'Хорошая цель по питанию —',
+        explorer: 'Радоваться еде и не переедать',
+        timesaver: 'Не думать о еде: пусть всё идёт по плану',
+      },
+      {
+        text: 'В выходной вы…',
+        explorer: 'Попробую новый рецепт',
+        timesaver: 'Заранее приготовлю на всю неделю',
+      },
+    ],
+    restart: 'Пройти заново',
+    cta: 'Создать моё меню',
+    ctaOpen: 'Открыть моё меню',
+    resultLabel: 'Ваш результат',
+    results: {
+      explorer: {
+        name: 'Вы — искатель впечатлений',
+        text: 'Вы цените вкус и разнообразие. ПроЛанч соберёт меню из блюд, которые вам по душе, и подскажет, куда сходить за новинками рядом с офисом.',
+        chips: ['Новинки рядом с офисом', 'Любимые блюда в меру', 'Без скучных повторов'],
+      },
+      timesaver: {
+        name: 'Вы — ценитель времени',
+        text: 'У вас мало времени, и это нормально. ПроЛанч соберёт быстрый ланч-бокс на работу, а привычки и цели будет отслеживать за вас.',
+        chips: ['Ланч-бокс с собой', 'Точное КБЖУ', 'Привычки на автопилоте'],
+      },
+    },
+  },
+
   cta: {
-    title: 'Начните с меню — Кики уже ждёт',
+    title: 'Начните с меню — Кики уже ждёт',
     lead: 'Тест займёт пару минут, а первое меню будет готово сразу после него.',
     about: 'О проекте и команде',
   },

@@ -697,9 +697,11 @@ html[data-modality='keyboard']
   opacity: 0;
 }
 
-/* Part 2, «Цены» and the quiz show the pre-blurred food (ТЗ §7.9). */
+/* Part 2, «Цены», the quiz and the screens under the landing (#discover) show the pre-blurred food (ТЗ §7.9; D-102: without
+   «discover» here the sharp sprites hung still on those screens, while the blurred ones flew unseen). */
 .food-layer[data-scene='about'] .food-item,
 .food-layer[data-scene='pricing'] .food-item,
+.food-layer[data-scene='discover'] .food-item,
 .food-layer[data-scene='quiz'] .food-item {
   opacity: 0;
   transition-delay: var(--food-fade-delay-ms);
@@ -707,6 +709,7 @@ html[data-modality='keyboard']
 
 .food-layer[data-scene='about'] .food-item--blur,
 .food-layer[data-scene='pricing'] .food-item--blur,
+.food-layer[data-scene='discover'] .food-item--blur,
 .food-layer[data-scene='quiz'] .food-item--blur {
   opacity: var(--food-about-opacity);
 }
@@ -728,6 +731,7 @@ html[data-modality='keyboard']
   .food-item,
   .food-layer[data-scene='about'] .food-item,
   .food-layer[data-scene='pricing'] .food-item,
+  .food-layer[data-scene='discover'] .food-item,
   .food-layer[data-scene='quiz'] .food-item {
     transition-duration: var(--motion-fade, 200ms);
     transition-delay: 0s;

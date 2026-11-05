@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import '../styles/kiki.css';
 
 export type KikiMood = 'glow' | 'good' | 'tired' | 'sad';
 export type KikiLevel = 1 | 2 | 3 | 4 | 5;
