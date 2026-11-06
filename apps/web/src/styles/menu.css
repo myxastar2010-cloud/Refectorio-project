@@ -216,7 +216,7 @@
   width: calc(80 * var(--m));
   border-radius: 50%;
 }
-.menu-nav-logo img {
+.menu-nav-logo .kiki {
   width: 100%;
   height: auto;
 }

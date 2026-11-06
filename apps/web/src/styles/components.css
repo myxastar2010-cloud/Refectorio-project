@@ -12,14 +12,11 @@
   display: block;
 }
 
-.brand-icon picture,
-.brand-icon img,
-.project-tile-icon picture,
-.project-tile-icon img {
+.brand-icon .kiki,
+.project-tile-icon .kiki {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
 }
 
 /* ── Wave hosts (ТЗ 6.8) ─────────────────────────────────────────────────────────────────── */

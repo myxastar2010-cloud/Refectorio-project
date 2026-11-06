@@ -31,22 +31,37 @@ describe('site content', () => {
   it('has a 2-line heading and a 4-line lead that names Kiki, as the composition of part 1 expects', () => {
     expect(site.hero.titleLines).toHaveLength(2);
     expect(site.hero.leadLines).toHaveLength(4);
-    expect(site.hero.leadLines.join(' ')).toContain('ПроЛанч и ваш личный ИИ Кики возьмут на себя');
+    expect(site.hero.leadLines.join(' ')).toBe(
+      'ПроЛанч и ваш личный ИИ Кики возьмут на себя планирование меню. Худейте без диет или просто питайтесь вовремя, даже если весь день не встаёте из-за рабочего стола',
+    );
     expect(site.hero.titleLines.join(' ')).toBe('Вкусно питаться, не отвлекаясь от важного');
     expect(site.hero.titleSpoken).toBe(site.hero.titleLines.join(' '));
   });
 
-  it('puts Kiki first among the five cards and talks about the types as the presentation does (D-102)', () => {
+  it('puts Kiki first and «Ценителям времени» in the middle of the five cards (D-102, D-103)', () => {
     expect(site.hero.features.map((feature) => feature.icon)).toEqual([
       'kiki',
       'listDetails',
-      'mug',
       'bolt',
+      'mug',
       'trophy',
     ]);
-    expect(site.hero.features[0].title).toBe('Кики');
+    expect(site.hero.features.map((feature) => feature.title)).toEqual([
+      'Кики',
+      'Меню за минуту',
+      'Ценителям времени',
+      'Новые вкусы',
+      'Бонусы и уровни',
+    ]);
     expect(strings(site).join(' ')).not.toMatch(/кайфожор|торопыж/i);
     expect(site.hero.kiki.lines.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('says «вопросы», not «тест», on the first card, and never calls Kiki a tamagotchi or a dietitian (D-103)', () => {
+    const card = site.hero.features[1];
+    expect(strings(card).join(' ')).not.toMatch(/тест/i);
+    expect(strings(site.hero).join(' ')).not.toMatch(/тамагочи|диетолог|агент|ассистент/i);
+    expect(site.brand.logoAlt).toContain('Кики');
   });
 
   it('calls the product ПроЛанч everywhere: the old name stays only in addresses', () => {

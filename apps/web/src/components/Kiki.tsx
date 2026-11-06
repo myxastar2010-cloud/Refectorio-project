@@ -11,46 +11,66 @@ type Props = {
   readonly className?: string;
   /** Decorative copies (the evolution strip) are hidden from screen readers. */
   readonly decorative?: boolean;
+  /** The brand mark: cropped square, no halo, ground, sparks or star — only her, still (see BrandLogo). */
+  readonly logo?: boolean;
 };
 
 /** The cloud body and its darker lower layer: one silhouette, the second shifted down. */
 const CLOUD =
   'M62 148C40 140 40 108 62 100C56 74 86 58 106 70C116 44 158 44 168 70C192 62 214 84 200 106C222 118 216 150 190 154C188 176 156 184 140 170C124 188 92 184 84 166C70 172 56 164 62 148Z';
 
+/** The square around her body, the sprout and the headphones: the brand mark crops to it (no room for the halo). */
+const LOGO_VIEW_BOX = '33 11 196 196';
+
 /** Kiki as the team drew her: a soft green cloud with headphones. Her face, colour and outfit follow `mood` and `level`. */
-export function Kiki({ mood, level, label, className, decorative }: Props) {
+export function Kiki({ mood, level, label, className, decorative, logo }: Props) {
   const glowId = useId();
   const a11y = decorative
     ? ({ 'aria-hidden': true } as const)
     : ({ role: 'img', 'aria-label': label } as const);
   return (
     <svg
-      viewBox="0 0 260 240"
-      className={className ? `kiki ${className}` : 'kiki'}
+      viewBox={logo ? LOGO_VIEW_BOX : '0 0 260 240'}
+      className={['kiki', logo && 'kiki--logo', className].filter(Boolean).join(' ')}
       data-mood={mood}
       data-level={level}
       {...a11y}
     >
-      <defs>
-        <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="var(--kiki-glow)" stopOpacity="0.55" />
-          <stop offset="1" stopColor="var(--kiki-glow)" stopOpacity="0" />
-        </radialGradient>
-      </defs>
+      {!logo && (
+        <>
+          <defs>
+            <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
+              <stop offset="0" stopColor="var(--kiki-glow)" stopOpacity="0.55" />
+              <stop offset="1" stopColor="var(--kiki-glow)" stopOpacity="0" />
+            </radialGradient>
+          </defs>
 
-      <ellipse className="kiki-halo" cx="130" cy="124" rx="122" ry="108" fill={`url(#${glowId})`} />
-      <ellipse className="kiki-ground" cx="130" cy="214" rx="64" ry="9" />
+          <ellipse
+            className="kiki-halo"
+            cx="130"
+            cy="124"
+            rx="122"
+            ry="108"
+            fill={`url(#${glowId})`}
+          />
+          <ellipse className="kiki-ground" cx="130" cy="214" rx="64" ry="9" />
+        </>
+      )}
 
       <g className="kiki-bob">
-        <g className="kiki-sparks" fill="none" strokeLinecap="round">
-          <path d="M214 38l12-14" />
-          <path d="M226 62l18-8" />
-          <path d="M228 90l16 4" />
-        </g>
-        <path
-          className="kiki-star4"
-          d="M30 176c2 8 5 11 13 13c-8 2-11 5-13 13c-2-8-5-11-13-13c8-2 11-5 13-13z"
-        />
+        {!logo && (
+          <>
+            <g className="kiki-sparks" fill="none" strokeLinecap="round">
+              <path d="M214 38l12-14" />
+              <path d="M226 62l18-8" />
+              <path d="M228 90l16 4" />
+            </g>
+            <path
+              className="kiki-star4"
+              d="M30 176c2 8 5 11 13 13c-8 2-11 5-13 13c-2-8-5-11-13-13c8-2 11-5 13-13z"
+            />
+          </>
+        )}
 
         <path className="kiki-shade" d={CLOUD} transform="translate(0 9)" />
         <path className="kiki-body" d={CLOUD} />

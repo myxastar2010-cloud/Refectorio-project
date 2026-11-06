@@ -1,5 +1,6 @@
-// Raster icons from the logo (assets-src/brand/logo-cabbage.png): favicons 16 and 32 px, Apple touch icon 180 px,
-// manifest icons 192 and 512 px (logo on the page background with padding). Run: npm run icons
+// Raster icons from the logo — Kiki (assets-src/brand/logo-kiki.svg, the same drawing as components/Kiki.tsx): favicons
+// 16 and 32 px, Apple touch icon 180 px, manifest icons 192 and 512 px (logo on the page background with padding).
+// The same SVG is the vector favicon (public/favicon.svg). Run: npm run icons
 // Node fs does the disk I/O, sharp only sees buffers (non-ASCII project path on Windows).
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -10,10 +11,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = path.join(ROOT, 'apps/web/public');
 const BACKGROUND = '#FEF9F7';
 
-const logo = await sharp(await readFile(path.join(ROOT, 'assets-src/brand/logo-cabbage.png')))
-  .trim()
-  .png()
-  .toBuffer();
+const svg = await readFile(path.join(ROOT, 'assets-src/brand/logo-kiki.svg'));
+const logo = await sharp(svg, { density: 1200 }).png().toBuffer();
+await writeFile(path.join(PUBLIC, 'favicon.svg'), svg);
 
 async function icon(size, padding, background) {
   const inner = Math.round(size * (1 - 2 * padding));
@@ -38,8 +38,8 @@ async function icon(size, padding, background) {
 }
 
 const outputs = [
-  ['favicon-16.png', await icon(16, 0)],
-  ['favicon-32.png', await icon(32, 0.02)],
+  ['favicon-16.png', await icon(16, 0.02)],
+  ['favicon-32.png', await icon(32, 0.04)],
   ['apple-touch-icon.png', await icon(180, 0.14, BACKGROUND)],
   ['icon-192.png', await icon(192, 0.14, BACKGROUND)],
   ['icon-512.png', await icon(512, 0.14, BACKGROUND)],

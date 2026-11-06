@@ -518,7 +518,7 @@ export const menu = {
   },
   kiki: {
     name: 'Кики',
-    label: 'Кики — ИИ-диетолог',
+    label: 'Кики — ваш личный ИИ',
     placeholder: 'Спроси что угодно…',
     send: 'Отправить',
     attach: 'Прикрепить фото',

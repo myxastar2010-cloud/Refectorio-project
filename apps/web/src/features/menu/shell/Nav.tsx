@@ -48,7 +48,7 @@ export function Nav({ avatar, onHome, onNotify, onAccount }: Props) {
           onHome();
         }}
       >
-        <BrandLogo sizes="64px" />
+        <BrandLogo />
       </a>
       <ul className="menu-nav-tabs">
         {TABS.map((tab) => {

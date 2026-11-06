@@ -70,7 +70,7 @@ export const ProjectDialog = memo(function ProjectDialog({
           overlay={
             <div ref={dockApple} className="project-docked-apple" aria-hidden>
               <span className="project-tile-icon">
-                <BrandLogo sizes="(min-width: 80rem) 10vw, 96px" />
+                <BrandLogo />
               </span>
             </div>
           }

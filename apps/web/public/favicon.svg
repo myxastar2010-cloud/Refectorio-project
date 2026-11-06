@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="33 11 196 196" fill="none">
+  <!-- Kiki as the brand mark: the same drawing as components/Kiki.tsx (mood «good», level 2), colours inlined. -->
+  <path transform="translate(0 9)" fill="#5f7f49" d="M62 148C40 140 40 108 62 100C56 74 86 58 106 70C116 44 158 44 168 70C192 62 214 84 200 106C222 118 216 150 190 154C188 176 156 184 140 170C124 188 92 184 84 166C70 172 56 164 62 148Z"/>
+  <path fill="#7d9c65" d="M62 148C40 140 40 108 62 100C56 74 86 58 106 70C116 44 158 44 168 70C192 62 214 84 200 106C222 118 216 150 190 154C188 176 156 184 140 170C124 188 92 184 84 166C70 172 56 164 62 148Z"/>
+  <path d="M92 84C100 74 112 70 122 72" stroke="#fff" stroke-opacity=".5" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="96" cy="136" rx="9" ry="5.5" fill="#e63946" fill-opacity=".22"/>
+  <ellipse cx="164" cy="136" rx="9" ry="5.5" fill="#e63946" fill-opacity=".22"/>
+  <ellipse cx="110" cy="116" rx="6" ry="8.5" fill="#000"/>
+  <ellipse cx="150" cy="116" rx="6" ry="8.5" fill="#000"/>
+  <circle cx="112" cy="112.5" r="2" fill="#fff"/>
+  <circle cx="152" cy="112.5" r="2" fill="#fff"/>
+  <path d="M119 136q11 11 22 0" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+  <path d="M63 116C63 40 197 40 197 116" stroke="#000" stroke-width="9" stroke-linecap="round"/>
+  <rect x="42" y="94" width="30" height="50" rx="14" fill="#000"/>
+  <rect x="188" y="94" width="30" height="50" rx="14" fill="#000"/>
+  <path d="M54 106c-5 8-5 20 0 28M206 106c5 8 5 20 0 28" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  <g stroke="#3f5a30" stroke-width="3" stroke-linejoin="round">
+    <path d="M130 56V40" stroke-linecap="round"/>
+    <path fill="#7fb05a" d="M130 44c-14-2-20-12-18-20c12 0 20 6 18 20z"/>
+    <path fill="#7fb05a" d="M130 40c12-2 18-10 17-18c-11 0-18 6-17 18z"/>
+  </g>
+</svg>

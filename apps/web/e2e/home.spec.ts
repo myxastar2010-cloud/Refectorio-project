@@ -297,6 +297,21 @@ test.describe('food', () => {
 });
 
 test.describe('quality', () => {
+  test('the logo is Kiki and she speaks under it; the first screen has no other Kiki figure; the middle card is «Ценителям времени» (D-103)', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=1');
+    await settled(page, 'hero');
+    const logo = page.locator('.brand-icon svg.kiki--logo');
+    await expect(logo).toBeVisible();
+    await expect(page.locator('.brand-icon img')).toHaveCount(0);
+    await expect(page.locator('.hero-kiki')).toHaveCount(0);
+    // Her first line comes after a short pause, softly.
+    await expect(page.locator('.brand-bubble-line')).toContainText('Привет! Я Кики');
+    await expect(page.locator('.feature-card').nth(2)).toContainText('Ценителям времени');
+    await expect(page.locator('.feature-card').nth(3)).toContainText('Новые вкусы');
+  });
+
   test('no scene shows the old name (D-060: it stays only in addresses)', async ({ page }) => {
     for (const hash of ['', '#about', '#pricing', '#quiz']) {
       await page.goto(`./?seed=1${hash}`);
@@ -531,7 +546,7 @@ test.describe('project card', () => {
   }) => {
     await page.goto('./?seed=1#about');
     await settled(page, 'about');
-    await expect(page.getByRole('img', { name: 'Логотип ПроЛанч — кочан капусты' })).toBeVisible();
+    await expect(page.getByRole('img', { name: 'Логотип ПроЛанч — Кики' })).toBeVisible();
     // The links moved from the about card into the details.
     await expect(page.getByRole('button', { name: 'Исходный код' })).toHaveCount(0);
     const more = page.getByRole('button', { name: 'Подробнее о проекте ПроЛанч' });

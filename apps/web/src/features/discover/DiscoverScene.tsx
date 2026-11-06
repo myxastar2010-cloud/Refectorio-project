@@ -123,7 +123,7 @@ export const DiscoverScene = memo(function DiscoverScene({
             onClick={onHome}
             aria-label={`${site.brand.name}: ${discover.nav.home.toLowerCase()}`}
           >
-            <BrandLogo className="dsc-brand-logo" sizes="40px" />
+            <BrandLogo className="dsc-brand-logo" />
             <span>{site.brand.name}</span>
           </button>
           <nav className="dsc-nav" aria-label={discover.nav.label}>

@@ -36,6 +36,21 @@ describe('discover content', () => {
     ]);
   });
 
+  it('has the headlines of the second priority task (D-103): no «тамагочи», no «Бонусы от сервиса»', () => {
+    const all = JSON.stringify(discover);
+    expect(all).not.toMatch(/тамагочи|агент|ассистент|диетолог/i);
+    const titles = discover.features.items.map((item) => item.title);
+    expect(titles).toContain('Ваши вкусы');
+    expect(titles).toContain('Новые привычки и цели');
+    expect(titles).toContain('Учитываем ограничения и аллергены');
+    expect(discover.kiki.lead).toContain('ИИ-помощник');
+    expect(discover.kiki.habits.title).toBe(
+      'С Кики хорошие привычки приживаются, а вредные уходят',
+    );
+    expect(discover.kiki.rewards.title).not.toContain('Бонусы от сервиса');
+    expect(discover.cta.title).toBe('Начните с создания вашего меню — Кики уже ждёт');
+  });
+
   it('keeps the tone: no guilt, no medical promises', () => {
     const all = JSON.stringify(discover).toLowerCase();
     expect(all).not.toMatch(/вылеч|гарантир|диагноз|лишний вес|плохая еда/);

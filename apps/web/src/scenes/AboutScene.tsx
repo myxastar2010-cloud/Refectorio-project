@@ -146,7 +146,7 @@ export const AboutScene = memo(function AboutScene({
               className="project-tile-icon"
               style={project.out ? { visibility: 'hidden' } : undefined}
             >
-              <BrandLogo sizes="(min-width: 80rem) 10vw, 96px" />
+              <BrandLogo />
             </span>
           </div>
           <h3 id="project-card-name" className="info-name at text-at">

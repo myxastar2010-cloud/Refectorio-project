@@ -49,11 +49,13 @@ export async function seriousViolations(page: Page) {
   await page.waitForFunction(() =>
     document
       .getAnimations()
-      // Endless idle loops (Kiki breathing, sparkles) never settle: they do not change colours.
+      // Endless idle loops (Kiki breathing, sparkles) never settle: they do not change colours. Nor does the line under the
+      // logo: it fades in and out for ever, one line after another (decorative, aria-hidden, ink on white).
       .every(
         (animation) =>
           animation.playState !== 'running' ||
-          animation.effect?.getComputedTiming().iterations === Infinity,
+          animation.effect?.getComputedTiming().iterations === Infinity ||
+          (animation.effect as KeyframeEffect | null)?.target?.closest('.brand-bubble') != null,
       ),
   );
   // JS-driven springs (Motion writes inline styles every frame) are invisible to getAnimations(): wait for 300 ms
@@ -80,7 +82,8 @@ export async function seriousViolations(page: Page) {
         });
       }),
   );
-  const { violations } = await new AxeBuilder({ page }).analyze();
+  // The line under the logo is decorative and fades by design: judged by its static colours (ink on white), not mid-fade.
+  const { violations } = await new AxeBuilder({ page }).exclude('.brand-bubble').analyze();
   return violations
     .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
     .map(

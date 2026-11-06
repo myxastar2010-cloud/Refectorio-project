@@ -17,7 +17,7 @@ import { TiltGlare } from '../motion/TiltGlare';
 import { useWave } from '../motion/useWave';
 import { WaveLayer } from '../motion/WaveHover';
 import { heroFadeVariants, heroLiftVariants, heroVariants, type Phase } from './choreography';
-import { HeroKiki } from '../components/HeroKiki';
+import '../styles/hero-kiki.css';
 import { Kiki } from '../components/Kiki';
 import { Lines } from '../components/Lines';
 
@@ -51,8 +51,8 @@ type Props = {
 };
 
 /**
- * Part 1: heading, lead, «Создать меню», Kiki by the girl's desk and the five feature cards (ТЗ 6.2; the cards are not
- * shown on phones); the header is SiteHeader.
+ * Part 1: heading, lead, «Создать меню», the girl's place and the five feature cards (ТЗ 6.2; the cards are not shown on
+ * phones); the header is SiteHeader (Kiki is its logo and speaks there, D-103).
  */
 /* memo: a scene change re-rendered every scene, the hidden ones too (stage-3 performance audit, F3). */
 export const HeroScene = memo(function HeroScene({
@@ -148,9 +148,7 @@ export const HeroScene = memo(function HeroScene({
         </TiltGlare>
       </m.div>
 
-      <div ref={girlSlotRef} className="hero-girl-slot at box" aria-hidden>
-        <HeroKiki motion={motionProps(3)} active={phase === 'shown'} calm={calm} />
-      </div>
+      <div ref={girlSlotRef} className="hero-girl-slot at box" aria-hidden />
 
       <ul className="features" aria-label={site.hero.featuresLabel}>
         {site.hero.features.map((feature, index) => {

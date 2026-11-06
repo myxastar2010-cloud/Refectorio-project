@@ -29,7 +29,7 @@ const clamp = (value: number, low: number, high: number) => Math.min(high, Math.
 
 const MOOD_MS = 3400;
 
-/** Kiki: what she is for, how her mood follows the person's actions, the tamagotchi to try, habits, levels, bonuses. */
+/** Kiki: what she is for, how her mood follows the person's actions, her levels, the feeding demo to try, habits, bonuses. */
 export function KikiSection() {
   return (
     <section className="dsc-section dsc-kiki" id="dsc-kiki" aria-labelledby="dsc-kiki-title">
@@ -52,9 +52,9 @@ export function KikiSection() {
         ))}
       </ul>
 
+      <Levels />
       <Stage />
       <Habits />
-      <Levels />
       <Rewards />
     </section>
   );
@@ -154,7 +154,7 @@ function KikiIntro() {
   );
 }
 
-/** The tamagotchi: what Kiki eats changes how she feels and looks. */
+/** The feeding demo: what Kiki eats changes how she feels and looks. */
 function Stage() {
   const { stage } = kiki;
   const [health, setHealth] = useState(START.health);
@@ -421,8 +421,24 @@ function Rewards() {
       <header className="dsc-subhead">
         <h3>{rewards.title}</h3>
         <p>{rewards.lead}</p>
-        <p className="dsc-balance">{rewards.balance.replace('{n}', String(POINTS))}</p>
       </header>
+
+      <div className="dsc-how">
+        <h4 className="dsc-how-title">{rewards.how.title}</h4>
+        <ol className="dsc-how-steps">
+          {rewards.how.steps.map((step, index) => (
+            <li key={step.title}>
+              <span className="dsc-how-num" aria-hidden>
+                {index + 1}
+              </span>
+              <b>{step.title}</b>
+              <p>{step.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <p className="dsc-balance">{rewards.balance.replace('{n}', String(POINTS))}</p>
       <ul className="dsc-reward-grid">
         {rewards.items.map((item) => (
           <li key={item.title} className="dsc-reward" data-can={POINTS >= item.cost || undefined}>
