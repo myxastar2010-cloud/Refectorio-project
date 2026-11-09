@@ -301,7 +301,14 @@ function Page() {
   const onCreateMenu = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
-      goScene(hasMenu ? 'menu' : 'quiz');
+      const next = hasMenu ? 'menu' : 'quiz';
+      // A click during the landing's own transition (just back from the menu) is kept, not lost: it runs as it ends.
+      const waitMs = lockedUntil.current - performance.now();
+      if (waitMs > 0 && !cardOpenRef.current)
+        window.setTimeout(() => {
+          goScene(next);
+        }, waitMs + 16);
+      else goScene(next);
     },
     [goScene, hasMenu],
   );
