@@ -73,11 +73,14 @@ export function useStructure(
         .request({ type: 'apply', op: 'setStructure', answers, plan, today, tracking, structure })
         .then((answer) => {
           if (answer.type !== 'plan') return;
-          store.commitPlan(answer.plan);
+          if (!store.commitPlanIf(plan, answer.plan)) {
+            notify(menu.errors.changed);
+            return;
+          }
           notify(done, {
             label: menu.meals.undo,
             run: () => {
-              store.undoPlan();
+              store.undoPlan(answer.plan);
             },
           });
         })

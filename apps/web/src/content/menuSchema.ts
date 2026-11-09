@@ -45,6 +45,7 @@ export const menuContentSchema = z.object({
     monthsGenitive: z.array(text).length(12),
     beforeMenu: text,
     extending: text,
+    notPlanned: text,
     tooFar: text,
     statusLabel: z.object({ done: text, partial: text, missed: text }),
   }),
@@ -384,6 +385,7 @@ export const menuContentSchema = z.object({
     pinned: text,
     tooFar: text,
     horizonPast: text,
+    changed: text,
   }),
 });
 

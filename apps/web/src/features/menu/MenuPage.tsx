@@ -26,15 +26,21 @@ import { DishDetails, type DetailsTarget } from './details/DishDetails';
 import { cardVariants, rowVariants, useRowSlide } from './dishes/rowMotion';
 import { useReplace } from './dishes/useReplace';
 import { menuClient } from './engine/client';
+import { planError } from './engine/opError';
 import { KikiPanel } from './kiki/KikiPanel';
 import { MealTabs } from './meals/MealTabs';
 import { useStructure } from './meals/useStructure';
 import type { Notify } from './notify';
 import { AccountMenu } from './shell/AccountMenu';
+import { useBackCloses } from './shell/useBackCloses';
+import { KIKI_SHEET_MEDIA, useMedia } from './shell/useMedia';
+import { useModal } from '../../components/useModal';
 import { Nav } from './shell/Nav';
 import { Notices } from './shell/Notices';
 import { noticesFor } from './shell/noticeRules';
 import { readTestParams } from '../../lib/params';
+import { setStoredMenu } from '../../lib/menuFlag';
+import { deleteAll as deleteQuizAnswers } from '../quiz/flow/persistence';
 import { menuStore, parseBackup, useMenu } from './store/store';
 import { newLetters } from './news/letters';
 import { NewsPanel } from './news/NewsPanel';
@@ -117,6 +123,26 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
     : (meals[0]?.id ?? '');
   const [editing, setEditing] = useState(false);
   const [kikiOpen, setKikiOpen] = useState(false);
+  // Below 1280 px Kiki is a sheet: a dialog while open, out of reach (inert) while closed (ТЗ фаза 4 §2).
+  const kikiSheet = useMedia(KIKI_SHEET_MEDIA);
+  const kikiRef = useRef<HTMLDivElement>(null);
+  const [kikiOpener, setKikiOpener] = useState<HTMLElement | null>(null);
+  const openKiki = useCallback(() => {
+    setKikiOpener(document.activeElement instanceof HTMLElement ? document.activeElement : null);
+    setKikiOpen(true);
+  }, []);
+  const closeKiki = useCallback(() => {
+    setKikiOpen(false);
+  }, []);
+  useModal({
+    open: kikiSheet && kikiOpen,
+    containerRef: kikiRef,
+    onClose: closeKiki,
+    returnFocusTo: kikiOpener,
+    background: '.menu-nav-slot, .menu-main, .menu-kiki-fab',
+    fallbackFocusId: 'menu-title',
+  });
+  useBackCloses(kikiSheet && kikiOpen, closeKiki, 'kiki');
   const [card, setCard] = useState<{ date: string; pill: HTMLElement } | null>(null);
   const [extending, setExtending] = useState(false);
   const [dishMenu, setDishMenu] = useState<DishTarget | null>(null);
@@ -321,6 +347,36 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
     [changeTracking, date, today],
   );
 
+  // The person came back after the plan's horizon (two weeks and more): it is re-planned from today on its own —
+  // past days and marks stay (regenerate keeps them). Shown as «Собираем меню…» until it lands; a refusal says why.
+  const healing = useRef<Plan | null>(null);
+  const [healFailed, setHealFailed] = useState<Plan | null>(null);
+  const horizonPast = plan.horizonEnd < today;
+  useEffect(() => {
+    if (!horizonPast || healing.current === plan) return;
+    const store = menuStore();
+    const { answers: stored, tracking: storedTracking } = store.get();
+    if (!stored) return;
+    healing.current = plan;
+    menuClient()
+      .request({
+        type: 'apply',
+        op: 'regenerate',
+        answers: stored,
+        plan,
+        today,
+        tracking: storedTracking,
+      })
+      .then((answer) => {
+        if (answer.type === 'plan') store.commitPlanIf(plan, answer.plan);
+      })
+      .catch((error: unknown) => {
+        setHealFailed(plan);
+        onNotify(planError(error));
+      });
+  }, [horizonPast, plan, today, onNotify]);
+  const gathering = extending || (horizonPast && healFailed !== plan);
+
   // A week past the plan's horizon is planned on the way (extendHorizon), up to four weeks ahead (ТЗ фаза 4 §4).
   const selectDate = useCallback(
     (next: string) => {
@@ -348,10 +404,12 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           toDate,
         })
         .then((answer) => {
-          if (answer.type === 'plan') store.update((data) => ({ ...data, plan: answer.plan }));
+          // Only onto the plan it was planned from (another operation may have replaced it meanwhile).
+          if (answer.type === 'plan')
+            store.update((data) => (data.plan === plan ? { ...data, plan: answer.plan } : data));
         })
-        .catch(() => {
-          onNotify(menu.errors.generic);
+        .catch((error: unknown) => {
+          onNotify(planError(error));
         })
         .finally(() => {
           setExtending(false);
@@ -540,7 +598,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
                 }, MENU.popover.submenuCloseMs);
             }}
             onKiki={() => {
-              setKikiOpen(true);
+              openKiki();
             }}
           />
         </m.div>
@@ -613,7 +671,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           aria-label={
             searching ? menu.search.results : meals.find((meal) => meal.id === mealId)?.titleRu
           }
-          data-extending={extending || replacement.busy || undefined}
+          data-extending={gathering || replacement.busy || undefined}
           data-search={searching || undefined}
           {...group(6)}
         >
@@ -631,7 +689,11 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
             />
           ) : kind === 'beforeMenu' || !day ? (
             <p className="dishes-note">
-              {kind === 'beforeMenu' ? menu.week.beforeMenu : menu.week.extending}
+              {kind === 'beforeMenu'
+                ? menu.week.beforeMenu
+                : gathering
+                  ? menu.week.extending
+                  : menu.week.notPlanned}
             </p>
           ) : items.length === 0 ? (
             <p className="dishes-note">{menu.dish.empty}</p>
@@ -682,21 +744,25 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           )}
         </m.section>
       </main>
-      <m.div className="menu-kiki-slot" {...group(7)}>
-        <KikiPanel
-          open={kikiOpen}
-          onClose={() => {
-            setKikiOpen(false);
-          }}
-          onNotify={onNotify}
-        />
-      </m.div>
+      {/* The intro moves an inner box: the slot's own transform is the sheet's (CSS), never an inline style. */}
+      <div
+        ref={kikiRef}
+        className="menu-kiki-slot"
+        role={kikiSheet ? 'dialog' : undefined}
+        aria-modal={kikiSheet || undefined}
+        aria-label={kikiSheet ? menu.kiki.label : undefined}
+        inert={kikiSheet && !kikiOpen}
+      >
+        <m.div className="menu-kiki-intro" {...group(7)}>
+          <KikiPanel open={kikiOpen} onClose={closeKiki} onNotify={onNotify} />
+        </m.div>
+      </div>
       <button
         type="button"
         className="menu-kiki-fab"
         aria-label={menu.kiki.open}
         onClick={() => {
-          setKikiOpen(true);
+          openKiki();
         }}
       >
         <Pic picture={KIKI} alt="" />
@@ -806,7 +872,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         }}
         onSupport={() => {
           closeAccount();
-          setKikiOpen(true);
+          openKiki();
         }}
         onDownload={() => {
           closeAccount();
@@ -841,6 +907,12 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
                 void menuStore()
                   .wipe()
                   .then(() => {
+                    // Everything this browser keeps about the person: the quiz answers (health, weight)
+                    // and the landing's «есть меню» flag go too. The demo's own database leaves them alone.
+                    if (!readTestParams(window.location.search).menuDemo) {
+                      deleteQuizAnswers();
+                      setStoredMenu(false);
+                    }
                     onNotify(menu.account.wipeDone);
                     onHome();
                   });
@@ -884,7 +956,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         }}
         onAskKiki={() => {
           closeNews();
-          setKikiOpen(true);
+          openKiki();
         }}
         onDownload={() => {
           closeNews();

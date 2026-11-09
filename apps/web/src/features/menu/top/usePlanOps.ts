@@ -5,7 +5,7 @@ import { menu } from '../../../content/menu.ru';
 import { fill } from '../../../lib/format';
 import { changeLetter } from '../news/letters';
 import { menuClient } from '../engine/client';
-import { opErrorCode } from '../engine/opError';
+import { planError } from '../engine/opError';
 import type { Notify } from '../notify';
 import { menuStore } from '../store/store';
 
@@ -44,26 +44,28 @@ export function usePlanOps(plan: Plan, today: string, notify: Notify) {
         .then((answer) => {
           if (answer.type !== 'plan') return;
           // A receipt in «Новости от Кики» (already read: the person did it).
-          store.commitPlan(answer.plan, (data) => ({
+          const written = store.commitPlanIf(plan, answer.plan, (data) => ({
             answers,
             letters: [
               ...data.letters,
               changeLetter(data.letters, receipt, new Date(), Math.random),
             ],
           }));
+          if (!written) {
+            notify(menu.errors.changed);
+            return;
+          }
           onDone?.();
           notify(done, {
             label: menu.meals.undo,
             run: () => {
-              if (store.undoPlan() && before !== answers)
+              if (store.undoPlan(answer.plan) && before !== answers)
                 store.update((data) => ({ ...data, answers: before }));
             },
           });
         })
         .catch((error: unknown) => {
-          notify(
-            opErrorCode(error) === 'horizonPast' ? menu.errors.horizonPast : menu.errors.generic,
-          );
+          notify(planError(error));
         })
         .finally(() => {
           setBusy(false);

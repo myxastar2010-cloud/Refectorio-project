@@ -123,13 +123,22 @@ type Listener = () => void;
 export type MenuStore = {
   get(): MenuSnapshot;
   subscribe(listener: Listener): () => void;
-  /** Loads once (later calls return the same promise). */
+  /** Reads the database once; every call resolves to the snapshot as it is then (not as it was at the first load). */
   load(): Promise<MenuSnapshot>;
   update(change: (data: MenuData) => MenuData): MenuSnapshot;
   /** A new plan: the current one goes to the undo history. */
   commitPlan(plan: Plan, extra?: (data: MenuData) => Partial<MenuData>): MenuSnapshot;
-  /** Back to the previous revision (false — nothing to undo). */
-  undoPlan(): boolean;
+  /**
+   * commitPlan for a worker's answer computed from `base`: written only while the plan is still `base` — another
+   * operation, a restore, a wipe or another tab may have replaced it meanwhile (then null, nothing written).
+   */
+  commitPlanIf(
+    base: Plan | null,
+    plan: Plan,
+    extra?: (data: MenuData) => Partial<MenuData>,
+  ): MenuSnapshot | null;
+  /** Back to the previous revision (false — nothing to undo, or the plan is no longer `expected`). */
+  undoPlan(expected?: Plan): boolean;
   backup(): Backup;
   restore(file: unknown): { ok: true } | { ok: false; reason: 'format' | 'version' };
   wipe(): Promise<void>;
@@ -138,7 +147,7 @@ export type MenuStore = {
 export function createMenuStore(open: () => Promise<KeyValue>, channelName: string): MenuStore {
   let kv: KeyValue | null = null;
   let snapshot: MenuSnapshot = { ...EMPTY, status: 'loading', durable: true, rev: 0 };
-  let loading: Promise<MenuSnapshot> | null = null;
+  let loading: Promise<void> | null = null;
   const listeners = new Set<Listener>();
   const channel =
     typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel(channelName);
@@ -184,9 +193,8 @@ export function createMenuStore(open: () => Promise<KeyValue>, channelName: stri
         kv = await open().catch(() => memoryStore());
         const { data, rev } = await readAll(kv);
         emit({ ...data, status: 'ready', durable: kv.durable, rev });
-        return snapshot;
       })();
-      return loading;
+      return loading.then(() => snapshot);
     },
     update(change) {
       const before: MenuData = snapshot;
@@ -205,9 +213,13 @@ export function createMenuStore(open: () => Promise<KeyValue>, channelName: stri
         ...extra?.(data),
       }));
     },
-    undoPlan() {
+    commitPlanIf(base, plan, extra) {
+      if (snapshot.plan !== base) return null;
+      return api.commitPlan(plan, extra);
+    },
+    undoPlan(expected) {
       const [previous, ...rest] = snapshot.history;
-      if (!previous) return false;
+      if (!previous || (expected !== undefined && snapshot.plan !== expected)) return false;
       api.update((data) => ({ ...data, plan: previous, history: rest }));
       return true;
     },
@@ -246,6 +258,8 @@ export function createMenuStore(open: () => Promise<KeyValue>, channelName: stri
       await writing;
       await kv?.clear();
       const rev = snapshot.rev + 1;
+      // The revision outlives the wipe: the other tabs compare against it.
+      await kv?.set({ [KEYS.meta]: { version: STORE_VERSION, rev } }).catch(() => undefined);
       emit({ ...EMPTY, status: 'ready', durable: snapshot.durable, rev });
       channel?.postMessage({ rev, wiped: true });
     },

@@ -94,7 +94,10 @@ export function useReplace(
         })
         .then((answer) => {
           if (answer.type !== 'plan') return;
-          store.commitPlan(answer.plan);
+          if (!store.commitPlanIf(plan, answer.plan)) {
+            notify(menu.errors.changed);
+            return;
+          }
           notify(
             fill(menu.dish.replaced, {
               from: catalog.get(fromId)?.nameRu ?? '',
@@ -103,7 +106,7 @@ export function useReplace(
             {
               label: menu.meals.undo,
               run: () => {
-                store.undoPlan();
+                store.undoPlan(answer.plan);
               },
             },
           );
