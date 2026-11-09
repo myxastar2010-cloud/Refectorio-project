@@ -67,6 +67,7 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
     // A wheel gesture that starts where the content can still scroll belongs to the browser to its very end
     // (inertia included); only a gesture that starts at the edge switches scenes.
     let nativeUntilMs = Number.NEGATIVE_INFINITY;
+    let nativeSign = 0;
 
     // The quiz owns all input while it is open (ТЗ §7.1), the menu likewise: scene gestures never switch scenes there.
     const inQuiz = () => sceneRef.current === 'quiz' || sceneRef.current === 'menu';
@@ -77,11 +78,14 @@ export function useSceneInput({ scene, go, locked, scrollerOf }: Options) {
       if (event.deltaY === 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       const delta = normalizeWheelDelta(event.deltaY, event.deltaMode, window.innerHeight);
       const scroller = activeScroller();
+      // Inertia never reverses: a wheel turned the other way is a new gesture, not the scroll's tail.
+      if (Math.sign(delta) !== nativeSign) nativeUntilMs = Number.NEGATIVE_INFINITY;
       if (
         scroller &&
         (hasScrollRoom(scroller, delta < 0 ? 'up' : 'down') || event.timeStamp < nativeUntilMs)
       ) {
         nativeUntilMs = event.timeStamp + GESTURE.wheelQuietMs;
+        nativeSign = Math.sign(delta);
         return;
       }
       event.preventDefault();
