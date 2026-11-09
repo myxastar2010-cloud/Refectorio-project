@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useModal } from '../../../components/useModal';
 import { revealMotion, useCornerMorph } from '../../../motion/cornerMorph';
 import { useCalmMotion } from '../../../motion/hooks';
-import { DURATION } from '../../../motion/tokens';
+import { DURATION, MORPH } from '../../../motion/tokens';
 import { useBackCloses } from '../shell/useBackCloses';
 
 type Reveal = (index: number) => ReturnType<typeof revealMotion>;
@@ -80,6 +80,7 @@ function SheetBody({
     anchor: anchorRef,
     present: present && box !== null,
     calm,
+    fadeBelow: MORPH.cardFadeBelow,
     onReveal: () => {
       setRevealed(true);
     },

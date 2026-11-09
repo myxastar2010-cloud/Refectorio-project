@@ -1,6 +1,6 @@
 import { animate, m, useMotionValue, useTransform } from 'motion/react';
 import { useEffect } from 'react';
-import { EASE_OUT_EXPO, MENU } from '../../../motion/tokens';
+import { EASE_OUT_SOFT, MENU } from '../../../motion/tokens';
 
 type Props = {
   readonly value: number;
@@ -19,7 +19,7 @@ export function CountUp({ value, format, calm, className }: Props) {
       shown.jump(value);
       return undefined;
     }
-    const controls = animate(shown, value, { duration: MENU.countS, ease: EASE_OUT_EXPO });
+    const controls = animate(shown, value, { duration: MENU.countS, ease: EASE_OUT_SOFT });
     return () => {
       controls.stop();
     };

@@ -286,8 +286,8 @@ export function Submenu({ label, icon: ItemIcon, children }: SubmenuProps) {
       left = -SUB_GAP - width;
       side = -1;
     } else {
-      // Narrow screens: over the menu, just under the item.
-      left = Math.min(at.left - host.left + 24, window.innerWidth - MARGIN - width - host.left);
+      // Narrow screens: over the menu, under the item, as wide as the menu (no items peeking out beside it).
+      left = 0;
       top = at.bottom - host.top + 4;
       side = 0;
     }
@@ -370,6 +370,7 @@ export function Submenu({ label, icon: ItemIcon, children }: SubmenuProps) {
             role="menu"
             aria-label={label}
             className="popover popover--sub"
+            data-over={place?.side === 0 || undefined}
             style={
               place
                 ? { left: place.left, top: place.top }

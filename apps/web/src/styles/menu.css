@@ -664,7 +664,7 @@
 }
 .meal-tabs {
   display: flex;
-  gap: calc(14 * var(--m));
+  gap: calc(12 * var(--m));
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -672,7 +672,8 @@
 .meal-tab {
   flex: none;
   height: calc(67 * var(--m));
-  padding: 0 calc(30 * var(--m));
+  /* «Завтрак» 198 px wide at 1920, as in the mockup: four meals fit beside the widgets down to 1280 px. */
+  padding: 0 calc(26 * var(--m));
   border: var(--menu-border) solid var(--menu-line);
   border-radius: 999px;
   background: transparent;
@@ -690,7 +691,8 @@
   outline: none;
   background-color: var(--color-surface-beige);
 }
-.meal-tab[aria-selected='true'] {
+.meal-tab[aria-selected='true'],
+.meal-tab[aria-current='true'] {
   border-color: var(--color-ink);
   background-color: var(--color-ink);
   color: var(--color-on-accent);
@@ -698,6 +700,13 @@
 .meal-edit {
   width: calc(67 * var(--m));
   height: calc(67 * var(--m));
+}
+.meal-edit,
+.meal-add {
+  flex: none;
+}
+.meals[data-editing] {
+  flex-wrap: wrap;
 }
 .meal-edit[data-done] {
   border-color: var(--color-accent);
@@ -1164,6 +1173,8 @@
     display: none;
   }
   .menu-title {
+    /* A flex column here: `end` (the wide grid's) would push it to the right edge. */
+    align-self: flex-start;
     margin-top: 12px;
     font-size: clamp(28px, 7.4vw, 44px);
   }
@@ -1554,6 +1565,10 @@
 .popover--sub {
   position: absolute;
   width: max-content;
+}
+/* Narrow screens: laid over the parent menu, at least as wide as it. */
+.popover--sub[data-over] {
+  min-width: 100%;
 }
 
 /* «Заменить с ИИ» before Kiki: the engine's replacements with their reasons. */

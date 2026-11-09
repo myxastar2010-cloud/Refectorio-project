@@ -59,13 +59,20 @@ export function MealTabs(props: Props) {
   const { meals, selected, onSelect, editing, onEdit, lockOf, onRemove, busy } = props;
   const calm = useCalmMotion();
   const listRef = useRef<HTMLDivElement>(null);
-  const [order, setOrder] = useState<readonly string[] | null>(null);
+  // A local order while a pill is dragged — and after the drop until the engine's plan brings it (`base` is the
+  // structure it was made on; a failed move ends `busy` with the old structure, and the pills slide back).
+  const [order, setOrder] = useState<{
+    readonly ids: readonly string[];
+    readonly base: readonly Meal[];
+    readonly dropped: boolean;
+  } | null>(null);
   const [lifted, setLifted] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<{ meal: Meal; anchor: HTMLElement } | null>(null);
   const [addMenu, setAddMenu] = useState<HTMLElement | null>(null);
   const [announcement, setAnnouncement] = useState('');
-  const shown = order
-    ? order.map((id) => meals.find((meal) => meal.id === id)).filter((meal): meal is Meal => !!meal)
+  const local = order && order.base === meals && (!order.dropped || busy) ? order.ids : null;
+  const shown = local
+    ? local.map((id) => meals.find((meal) => meal.id === id)).filter((meal): meal is Meal => !!meal)
     : meals;
 
   // FLIP: after a reorder each pill starts from where it was and slides to its new place (transform only).
@@ -91,14 +98,16 @@ export function MealTabs(props: Props) {
   const reorder = (id: string, to: number) => {
     const ids = shown.map((meal) => meal.id).filter((x) => x !== id);
     ids.splice(Math.max(0, Math.min(ids.length, to)), 0, id);
-    setOrder(ids);
+    setOrder({ ids, base: meals, dropped: false });
   };
   const commit = (id: string) => {
     const to = indexOf(id);
     const from = meals.findIndex((meal) => meal.id === id);
-    setOrder(null);
     setLifted(null);
-    if (to >= 0 && to !== from) props.onMove(id, to);
+    if (to >= 0 && to !== from) {
+      setOrder((o) => (o ? { ...o, dropped: true } : o));
+      props.onMove(id, to);
+    } else setOrder(null);
   };
   const cancel = () => {
     setOrder(null);
@@ -117,7 +126,15 @@ export function MealTabs(props: Props) {
     active: boolean;
     timer: number;
     release: () => void;
+    /** The pill's left edge in the list (from the pointer), kept to re-place it after a swap moves its slot. */
+    x: number | null;
   } | null>(null);
+  useLayoutEffect(() => {
+    const d = drag.current;
+    const list = listRef.current;
+    if (!d?.active || d.x === null || !list) return;
+    d.pill.style.transform = `translateX(${String(d.x - placeOf(d.pill, list))}px) scale(1.04)`;
+  });
   const latest = useRef<{
     move: (event: PointerEvent) => void;
     up: (event: PointerEvent) => void;
@@ -146,6 +163,7 @@ export function MealTabs(props: Props) {
       grab: start - pill.getBoundingClientRect().left,
       active: false,
       timer: 0,
+      x: null,
       release: () => {
         window.removeEventListener('pointermove', move);
         window.removeEventListener('pointerup', up);
@@ -187,6 +205,7 @@ export function MealTabs(props: Props) {
     event.preventDefault();
     const listLeft = list.getBoundingClientRect().left - list.scrollLeft;
     const x = event.clientX - d.grab - listLeft;
+    d.x = x;
     pill.style.transform = `translateX(${String(x - placeOf(pill, list))}px) scale(1.04)`;
     const middle = x + pill.offsetWidth / 2;
     const others = [...list.querySelectorAll<HTMLElement>('[data-meal]')].filter(

@@ -323,6 +323,13 @@ button.seg-tab:focus-visible {
 .details-table tbody th {
   font-weight: 700;
 }
+/* Phones: «на 100 г» gives way, so «в порции» and «от нормы» fit without a sideways scroll. */
+@media (max-width: 480px) {
+  .details-table th:nth-child(3),
+  .details-table td:nth-child(3) {
+    display: none;
+  }
+}
 .details-table tr[data-sub] th {
   padding-left: 16px;
   font-weight: 500;

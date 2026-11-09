@@ -114,6 +114,13 @@ function PanelBody({
     };
   }, [anchor]);
 
+  // The panel keeps the height it opened with: list ↔ letter swap inside it (a longer letter scrolls) instead of the
+  // black panel jumping by a few lines at every switch. The CSS max-height still caps it on short windows.
+  useLayoutEffect(() => {
+    const panel = ref.current;
+    if (panel) panel.style.height = `${String(panel.offsetHeight)}px`;
+  }, []);
+
   useEffect(() => {
     if (place && focusFirst)
       ref.current

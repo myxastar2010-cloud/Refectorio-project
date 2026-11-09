@@ -230,6 +230,8 @@ export const MORPH = {
   startWaitMs: 120,
   /** A text label as the anchor (the privacy sheet): the surface fades in and out over this first share of the way. */
   labelFadeBelow: 0.16,
+  /** A card as the anchor (dish details, the menu's sheets): the surface melts into the card's photo as it lands. */
+  cardFadeBelow: 0.35,
 } as const;
 
 /**
@@ -413,8 +415,8 @@ export const MENU = {
   eaten: { checkS: 0.28, fillFromScale: 0.35 },
   /** Meal pills reordered: each slides from its old place to the new one (FLIP). */
   reorderMs: 220,
-  /** Widget numbers count to their new value. */
-  countS: 0.45,
+  /** Widget numbers count to their new value (a soft curve: the count stays readable, not a jump). */
+  countS: 0.7,
   /** Context menus: scale from the origin 0.96 → 1 with a fade; submenus slide 8 px. */
   popover: {
     scaleFrom: 0.96,

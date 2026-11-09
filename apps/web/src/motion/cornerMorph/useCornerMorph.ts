@@ -119,6 +119,8 @@ export function useCornerMorph(options: Options) {
     last: number;
     raf: number;
     closing: boolean;
+    /** It has started opening once: before that a «closed» run has nothing to close. */
+    shown: boolean;
   }>({
     corners: null,
     targets: null,
@@ -131,6 +133,7 @@ export function useCornerMorph(options: Options) {
     last: 0,
     raf: 0,
     closing: false,
+    shown: false,
   });
 
   const { present, calm } = options;
@@ -141,6 +144,10 @@ export function useCornerMorph(options: Options) {
     const element = surface.current;
     const tileElement = anchor.current;
     if (!element) return;
+    // Still being measured (the caller holds `present` until its box is placed): no closing from an unplaced surface,
+    // or the opening would later start from there instead of from the anchor.
+    if (!present && !s.shown) return;
+    if (present) s.shown = true;
     const revealAt = latest.current.revealAt ?? DIALOG.contentRevealAt;
 
     if (calm || !tileElement?.isConnected) {

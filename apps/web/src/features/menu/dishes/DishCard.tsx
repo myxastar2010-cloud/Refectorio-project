@@ -148,18 +148,22 @@ export const DishCard = memo(function DishCard({
               />
             )}
           </AnimatePresence>
-          {eaten ? (
-            <svg viewBox="0 0 24 24" className="dish-check" aria-hidden>
-              <m.path
-                d="M5 12.5l4.5 4.5L19 7.5"
-                initial={calm ? false : { pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: MENU.eaten.checkS, ease: EASE_OUT_EXPO }}
-              />
-            </svg>
-          ) : (
-            <IconPlus stroke={2.4} aria-hidden />
-          )}
+          {/* Its own presence: a mark already there at load stays still, a new one draws on (an outer
+              AnimatePresence initial={false} would hold the draw-on back for the row's whole life). */}
+          <AnimatePresence initial={false}>
+            {eaten ? (
+              <svg key="check" viewBox="0 0 24 24" className="dish-check" aria-hidden>
+                <m.path
+                  d="M5 12.5l4.5 4.5L19 7.5"
+                  initial={calm ? false : { pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: MENU.eaten.checkS, ease: EASE_OUT_EXPO }}
+                />
+              </svg>
+            ) : (
+              <IconPlus key="plus" stroke={2.4} aria-hidden />
+            )}
+          </AnimatePresence>
         </button>
       </div>
     </article>

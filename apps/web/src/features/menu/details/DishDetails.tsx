@@ -9,7 +9,7 @@ import { useModal } from '../../../components/useModal';
 import { fill, formatAmount, formatWhole } from '../../../lib/format';
 import { revealMotion, useCornerMorph } from '../../../motion/cornerMorph';
 import { useCalmMotion } from '../../../motion/hooks';
-import { DURATION } from '../../../motion/tokens';
+import { DURATION, MORPH } from '../../../motion/tokens';
 import { photosFor, PHOTO_SIZES } from '../../quiz/tinder/photos';
 import { Segmented } from '../components/Segmented';
 import type { Catalog } from '../data/catalog';
@@ -150,6 +150,7 @@ function DetailsBody({
     anchor: anchorRef,
     present: present && box !== null,
     calm,
+    fadeBelow: MORPH.cardFadeBelow,
     onReveal: () => {
       setRevealed(true);
     },
