@@ -34,6 +34,11 @@ button.seg-tab:focus-visible {
   outline: none;
   background: rgb(0 0 0 / 0.08);
 }
+/* The chosen tab and the chosen goal are filled: keyboard focus grows them a little instead of tinting. */
+button.seg-tab[aria-selected='true']:focus-visible,
+.goal-option[aria-checked='true']:focus-visible {
+  transform: scale(1.05);
+}
 @media (hover: hover) {
   button.seg-tab:hover {
     background: rgb(0 0 0 / 0.06);

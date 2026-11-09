@@ -123,11 +123,14 @@ function Page() {
   const pricingRef = useRef<HTMLButtonElement>(null);
   const pricingScrollRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  // The pointer or the focus on the toast holds it; leaving starts its time again (WCAG 2.2.1).
+  const [toastHeld, setToastHeld] = useState(false);
   const notify = useCallback((text: string, action?: ToastAction) => {
     setToast({ text, id: performance.now(), action });
   }, []);
   const toastDone = useCallback(() => {
     setToast(null);
+    setToastHeld(false);
   }, []);
   const [QuizScene, setQuizScene] = useState(lazyQuiz);
   const [MenuScene, setMenuScene] = useState(lazyMenu);
@@ -280,18 +283,19 @@ function Page() {
   }, [scene]);
 
   useEffect(() => {
-    if (!toast) return;
+    if (!toast || toastHeld) return;
     // A toast with «Отменить» stays longer: there must be time to change one's mind.
     const timer = window.setTimeout(
       () => {
         setToast(null);
+        setToastHeld(false);
       },
       toast.action ? MENU.undoToastMs : TOAST_MS,
     );
     return () => {
       window.clearTimeout(timer);
     };
-  }, [toast]);
+  }, [toast, toastHeld]);
 
   // Stable handlers: the scenes are memoised and re-render only when their own props change (audit, F3).
   const onCreateMenu = useCallback(
@@ -568,7 +572,7 @@ function Page() {
         onLanded={projectLanded}
         onNotify={notify}
       />
-      <Toast message={toast} onAction={toastDone} />
+      <Toast message={toast} onAction={toastDone} onHold={setToastHeld} />
     </div>
   );
 }

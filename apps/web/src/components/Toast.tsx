@@ -1,4 +1,5 @@
 import { AnimatePresence, m } from 'motion/react';
+import { useRef } from 'react';
 import { DURATION, EASE_OUT_EXPO } from '../motion/tokens';
 
 /** A button in the toast: «Отменить» after a change that can be undone. */
@@ -15,12 +16,31 @@ type Props = {
   readonly message: ToastMessage | null;
   /** The action was taken: the toast goes. */
   readonly onAction?: () => void;
+  /** The pointer or the focus is on the toast: it waits (true) or counts down again (false). WCAG 2.2.1. */
+  readonly onHold?: (held: boolean) => void;
 };
 
 /** Small non-modal message (role="status"): announced by screen readers, never steals focus. */
-export function Toast({ message, onAction }: Props) {
+export function Toast({ message, onAction, onHold }: Props) {
+  // Where the focus came from: «Отменить» removes the toast, and the focus goes back there (never to the page's start).
+  const cameFrom = useRef<HTMLElement | null>(null);
   return (
-    <div className="toast-region" role="status" aria-live="polite">
+    <div
+      className="toast-region"
+      role="status"
+      aria-live="polite"
+      onPointerEnter={() => onHold?.(true)}
+      onPointerLeave={() => onHold?.(false)}
+      onFocus={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          cameFrom.current =
+            event.relatedTarget instanceof HTMLElement ? event.relatedTarget : null;
+        onHold?.(true);
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) onHold?.(false);
+      }}
+    >
       {/* One at a time: the next message waits for the previous one to leave; the same text again just stays. */}
       <AnimatePresence mode="wait">
         {message && (
@@ -44,6 +64,10 @@ export function Toast({ message, onAction }: Props) {
                 onClick={() => {
                   message.action?.run();
                   onAction?.();
+                  if (cameFrom.current?.isConnected)
+                    cameFrom.current.focus({ preventScroll: true });
+                  cameFrom.current = null;
+                  onHold?.(false);
                 }}
               >
                 {message.action.label}

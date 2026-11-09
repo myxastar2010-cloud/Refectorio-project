@@ -34,9 +34,16 @@ export function SearchField({
 }: SearchFieldProps) {
   const calm = useCalmMotion();
   const input = useRef<HTMLInputElement>(null);
+  const pill = useRef<HTMLButtonElement>(null);
+  // Esc closes the field and gives the focus back to the pill it grew from (never to the page's start).
+  const refocus = useRef(false);
 
   useEffect(() => {
     if (open) input.current?.focus({ preventScroll: true });
+    else if (refocus.current) {
+      refocus.current = false;
+      pill.current?.focus({ preventScroll: true });
+    }
   }, [open]);
 
   return (
@@ -83,6 +90,7 @@ export function SearchField({
               } else if (event.key === 'Escape') {
                 event.preventDefault();
                 event.stopPropagation();
+                refocus.current = true;
                 onClose();
               }
             }}
@@ -100,6 +108,7 @@ export function SearchField({
         <m.button
           key="pill"
           type="button"
+          ref={pill}
           className="menu-pill menu-search-pill"
           aria-label={menu.search.label}
           onClick={onOpen}

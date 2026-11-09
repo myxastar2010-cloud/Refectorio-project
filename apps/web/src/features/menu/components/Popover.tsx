@@ -137,27 +137,44 @@ function PopoverBody({
 
   // Hidden until placed, and a hidden element takes no focus: the first item gets it once the popover shows.
   const placed = place !== null;
-  // A confirmation (alertdialog) is modal: focus stays in it, the page behind is inert, focus returns to the button.
+  // A dialog (a confirmation, a picker, a note) is modal: focus stays in it, the page behind is inert, focus returns
+  // to the button. A menu is not.
   useModal({
-    open: role === 'alertdialog' && placed,
+    open: role !== 'menu' && placed,
     containerRef: ref,
     onClose,
     returnFocusTo: anchor,
     background: '.menu-app, .menu-kiki-fab',
     fallbackFocusId: 'menu-title',
   });
-  // A menu or a small dialog is not: Tab out of it closes it (it never lingers behind the focus).
+  // Tab out of a menu closes it (it never lingers behind the focus).
   const onBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     const next = event.relatedTarget;
-    if (role === 'alertdialog' || !(next instanceof Node)) return;
+    if (role !== 'menu' || !(next instanceof Node)) return;
     if (!ref.current?.contains(next) && !anchor.contains(next)) onClose();
   };
   useEffect(() => {
     if (!placed) return;
-    ref.current
-      ?.querySelector<HTMLElement>(`${FOCUSABLE_ITEM}, button:not(:disabled)`)
-      ?.focus({ preventScroll: true });
+    const box = ref.current;
+    (
+      box?.querySelector<HTMLElement>('[data-autofocus]') ??
+      box?.querySelector<HTMLElement>(`${FOCUSABLE_ITEM}, button:not(:disabled)`)
+    )?.focus({ preventScroll: true });
   }, [placed]);
+
+  // Leaving with the focus inside (an item chosen, «Отмена», Tab out of a menu) or nowhere: it goes back to the button
+  // that opened it, never to the page's start.
+  useLayoutEffect(() => {
+    const box = ref.current;
+    return () => {
+      const active = document.activeElement;
+      if (
+        (active === null || active === document.body || box?.contains(active)) &&
+        anchor.isConnected
+      )
+        anchor.focus({ preventScroll: true });
+    };
+  }, [anchor]);
 
   useEffect(() => {
     const box = ref.current;
@@ -197,7 +214,9 @@ function PopoverBody({
         className={className ? `popover ${className}` : 'popover'}
         role={role}
         aria-label={label}
-        aria-modal={role === 'menu' ? undefined : role === 'alertdialog'}
+        aria-modal={role === 'menu' ? undefined : true}
+        // A note without controls takes the focus itself (Esc closes it).
+        tabIndex={role === 'menu' ? undefined : -1}
         style={
           place
             ? { left: place.left, top: place.top, transformOrigin: place.origin }

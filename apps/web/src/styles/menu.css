@@ -365,27 +365,37 @@
   gap: calc(23 * var(--m));
   list-style: none;
 }
+/* Mouse paging: round buttons over the strip's ends on hover (outside it they were clipped by the column and hidden
+   under the sidebar). Touch pages by swipe; keys by PageUp/PageDown. */
 .week-arrow {
   position: absolute;
   top: 50%;
+  z-index: 1;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--color-ink-muted);
+  border-radius: 50%;
+  background: var(--color-bg);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.16);
+  color: var(--color-ink);
   opacity: 0;
   transform: translateY(-50%);
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
 }
 .week-arrow--prev {
-  left: -30px;
+  left: -6px;
 }
 .week-arrow--next {
-  left: calc(7 * 98 * var(--m) + 6 * 23 * var(--m) + 2px);
+  left: calc(7 * 98 * var(--m) + 6 * 23 * var(--m) - 34px);
+}
+.week-arrow:hover,
+.week-arrow:focus-visible {
+  transform: translateY(-50%) scale(1.07);
 }
 .week:hover .week-arrow,
 .week-arrow:focus-visible {
@@ -704,6 +714,23 @@
 .meal-edit,
 .meal-add {
   flex: none;
+}
+/* Keyboard focus on a selected (filled) control: its fill already took the hover tint, so it grows a little instead
+   (the element's own language, no rings — stage 3 rule 4.7). */
+.day-pill[aria-selected='true']:focus-visible,
+.meal-tab[aria-selected='true']:focus-visible,
+.meal-tab[aria-current='true']:focus-visible,
+.menu-nav-tab[data-active]:focus-visible,
+.meal-edit[data-done]:focus-visible,
+.menu-kiki-fab:focus-visible {
+  outline: none;
+  transform: scale(1.07);
+}
+.day-pill,
+.meal-tab:not([data-dragging]),
+.menu-kiki-fab {
+  transition-property: background-color, color, border-color, transform;
+  transition-duration: 0.22s;
 }
 .meals[data-editing] {
   flex-wrap: wrap;
@@ -1400,6 +1427,12 @@
 }
 .meal-tab[data-dragging] {
   transition: none;
+}
+/* The «−» stays small to the eye; its touch area is 44 px (a transparent ring around it). */
+.meal-badge::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
 }
 .meal-badge {
   position: absolute;

@@ -61,7 +61,7 @@ export function RestoreSheet({ anchor, backup, onClose, onApply }: Props) {
               <button type="button" className="goal-apply" onClick={onApply}>
                 {menu.restore.apply}
               </button>
-              <button type="button" className="goal-cancel" onClick={onClose}>
+              <button type="button" className="goal-cancel" data-autofocus onClick={onClose}>
                 {menu.restore.cancel}
               </button>
             </m.div>

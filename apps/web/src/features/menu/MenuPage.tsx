@@ -942,6 +942,8 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
             </button>
             <button
               type="button"
+              // The least harmful choice comes first (a stray Enter only cancels).
+              data-autofocus
               className="menu-pill menu-pill--ghost"
               onClick={() => {
                 setWipeAt(null);
@@ -1029,6 +1031,8 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
             </button>
             <button
               type="button"
+              // The least harmful choice comes first (a stray Enter only cancels).
+              data-autofocus
               className="menu-pill menu-pill--ghost"
               onClick={() => {
                 setConfirmAt(null);

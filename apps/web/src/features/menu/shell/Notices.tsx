@@ -3,6 +3,7 @@ import { AnimatePresence, m } from 'motion/react';
 import { menu } from '../../../content/menu.ru';
 import { useCalmMotion } from '../../../motion/hooks';
 import type { Notice } from './noticeRules';
+import { focusQuietly } from '../../../lib/quietFocus';
 
 type Props = {
   readonly notices: readonly Notice[];
@@ -38,6 +39,10 @@ export function Notices({ notices, onDownload, onClose }: Props) {
                   type="button"
                   className="menu-notice-button menu-notice-button--ghost"
                   onClick={() => {
+                    // The notice goes away: the focus moves on to the week (what follows it), not to the page's start.
+                    focusQuietly(
+                      document.querySelector<HTMLElement>('.day-pill[aria-selected="true"]'),
+                    );
                     onClose(notice.id);
                   }}
                 >

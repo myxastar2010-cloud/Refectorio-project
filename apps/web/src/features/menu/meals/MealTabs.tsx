@@ -428,6 +428,8 @@ export function MealTabs(props: Props) {
               </button>
               <button
                 type="button"
+                // The least harmful choice comes first (a stray Enter only cancels).
+                data-autofocus
                 className="menu-pill menu-pill--ghost"
                 onClick={() => {
                   setConfirm(null);
