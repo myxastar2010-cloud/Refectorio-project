@@ -129,8 +129,11 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const kikiSheet = useMedia(KIKI_SHEET_MEDIA);
   const kikiRef = useRef<HTMLDivElement>(null);
   const [kikiOpener, setKikiOpener] = useState<HTMLElement | null>(null);
-  const openKiki = useCallback(() => {
-    setKikiOpener(document.activeElement instanceof HTMLElement ? document.activeElement : null);
+  // The opener gets the focus back on close: the button itself when known (Safari does not focus a clicked button).
+  const openKiki = useCallback((opener?: HTMLElement) => {
+    setKikiOpener(
+      opener ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null),
+    );
     setKikiOpen(true);
   }, []);
   const closeKiki = useCallback(() => {
@@ -776,8 +779,8 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         type="button"
         className="menu-kiki-fab"
         aria-label={menu.kiki.open}
-        onClick={() => {
-          openKiki();
+        onClick={(event) => {
+          openKiki(event.currentTarget);
         }}
       >
         <Pic picture={KIKI} alt="" />

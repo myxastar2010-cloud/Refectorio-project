@@ -34,6 +34,8 @@ test.describe('the menu shell', () => {
         async () => {
           await page.locator('.dish-row .dish-open').first().click();
           await expect(page.getByRole('dialog')).toBeVisible();
+          // The panel fades in as it grows from the card: colours are judged once it is opaque.
+          await expect(page.locator('.details-surface')).toHaveCSS('opacity', '1');
         },
       ],
       [
@@ -135,9 +137,14 @@ test.describe('the menu shell', () => {
     await expect(days.getByRole('tab', { selected: true })).toHaveAccessibleName(
       /^Среда, 22\sиюля/,
     );
-    await days.hover();
-    // One flick: many events, the inertia tail must not page twice.
-    for (let i = 0; i < 6; i += 1) await page.mouse.wheel(0, 60);
+    // One flick: many events, the inertia tail must not page twice (dispatched: page.mouse.wheel is unreliable in WebKit).
+    await days.evaluate(async (strip) => {
+      const row = strip.closest('.week-row') ?? strip;
+      for (let i = 0; i < 6; i += 1) {
+        row.dispatchEvent(new WheelEvent('wheel', { deltaY: 60, bubbles: true, cancelable: true }));
+        await new Promise((resolve) => setTimeout(resolve, 16));
+      }
+    });
     await expect(days.getByRole('tab', { name: /^Среда, 29\sиюля/ })).toBeVisible();
     await expect(days.getByRole('tab', { name: /^Среда, 5\sавгуста/ })).toHaveCount(0);
     // Another day: the row settles where it belongs (no card left mid-slide or transparent).
