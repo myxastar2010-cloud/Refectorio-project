@@ -181,12 +181,20 @@ export function letterText(
     }
     case 'tip': {
       const t = plan.targets;
+      // A letter written before the person chose «без чисел» shows its advice without grams too.
       if (d.tip === 'fibre')
-        return { ...l.tipFibre, body: fill(l.tipFibre.body, { n: formatWhole(t.fibreG.target) }) };
+        return {
+          ...l.tipFibre,
+          body: deemphasizeNumbers
+            ? l.tipFibre.bodyCalm
+            : fill(l.tipFibre.body, { n: formatWhole(t.fibreG.target) }),
+        };
       if (d.tip === 'breakfast')
         return {
           ...l.tipBreakfast,
-          body: fill(l.tipBreakfast.body, { n: formatWhole(t.mealProteinMinG) }),
+          body: deemphasizeNumbers
+            ? l.tipBreakfast.bodyCalm
+            : fill(l.tipBreakfast.body, { n: formatWhole(t.mealProteinMinG) }),
         };
       // Food water differs by day: today's menu (or the plan's last day) gives the glasses.
       const day = plan.days.find((x) => x.date === today) ?? plan.days.at(-1);

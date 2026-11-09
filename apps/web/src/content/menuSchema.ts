@@ -207,9 +207,10 @@ export const menuContentSchema = z.object({
         short: text,
         status: z.object({ done: text, partial: text, missed: text }),
       }),
-      tipFibre: letterText,
+      // bodyCalm: the same advice without grams (the person asked not to see numbers).
+      tipFibre: letterText.extend({ bodyCalm: text }),
       tipWater: letterText,
-      tipBreakfast: letterText,
+      tipBreakfast: letterText.extend({ bodyCalm: text }),
       change: letterText.extend({ goal: text, regenerate: text }),
     }),
   }),

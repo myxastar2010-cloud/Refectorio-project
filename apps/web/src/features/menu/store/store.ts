@@ -17,7 +17,7 @@ import {
   KEYS,
   letterSchema,
   PLAN_HISTORY,
-  planRecordSchema,
+  planSchema,
   profileSchema,
   settingsSchema,
   STORE_VERSION,
@@ -85,14 +85,22 @@ async function readAll(kv: KeyValue): Promise<{ data: MenuData; rev: number }> {
       KEYS.settings,
     ].map((key) => kv.get(key).catch(() => undefined)),
   );
-  const planRecord = planRecordSchema.safeParse(plan);
+  // The current plan and each undo step stand alone: one unreadable old revision never costs the menu.
+  const record = typeof plan === 'object' && plan !== null ? (plan as Record<string, unknown>) : {};
+  const current = planSchema.safeParse(record.current);
+  const history = Array.isArray(record.history)
+    ? record.history.flatMap((entry) => {
+        const step = planSchema.safeParse(entry);
+        return step.success ? [step.data] : [];
+      })
+    : [];
   const rev = typeof meta === 'object' && meta && 'rev' in meta ? Number(meta.rev) || 0 : 0;
   return {
     rev,
     data: {
       answers: parsed(profileSchema.safeParse(profile), null)?.answers ?? null,
-      plan: planRecord.success ? planRecord.data.current : null,
-      history: planRecord.success ? planRecord.data.history : [],
+      plan: current.success ? current.data : null,
+      history: current.success ? history.slice(0, PLAN_HISTORY) : [],
       tracking: parsed(trackingSchema.safeParse(tracking), EMPTY_TRACKING),
       widgets: parsed(widgetSchema.array().safeParse(widgets), []),
       letters: parsed(letterSchema.array().safeParse(letters), []),

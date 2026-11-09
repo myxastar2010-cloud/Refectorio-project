@@ -90,7 +90,8 @@ export function handle(request: MenuRequest, post: Post): void {
     }
     if (request.type === 'search') {
       const { plan } = request;
-      const key = [plan.createdAt, plan.seed, plan.revision, plan.horizonEnd].join(':');
+      // The days themselves: a revision number repeats after an undo and a different edit.
+      const key = JSON.stringify(plan.days.map((d) => [d.date, d.meals]));
       if (searchIndex?.key !== key)
         searchIndex = { key, index: buildSearchIndex(plan, loadFoods(), texts) };
       post({ id, type: 'search', hits: search(searchIndex.index, request.query) });

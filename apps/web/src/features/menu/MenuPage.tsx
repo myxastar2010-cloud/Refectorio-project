@@ -74,6 +74,8 @@ type Props = {
 };
 
 const SEARCH_LIST = 'menu-search-results';
+const MAX_BACKUP_BYTES = 5 * 1024 * 1024;
+
 /** `?demo=week`: the account menu says the synthetic history is on. */
 const DEMO_HISTORY = readTestParams(window.location.search).weekDemo;
 
@@ -457,12 +459,20 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const removeWidget = useCallback(
     (widget: WidgetConfig) => {
       const store = menuStore();
-      const before = store.get().widgets;
+      const index = store.get().widgets.findIndex((w) => w.id === widget.id);
       store.update((d) => ({ ...d, widgets: d.widgets.filter((w) => w.id !== widget.id) }));
       onNotify(fill(menu.widgets.custom.removed, { name: widgetName(widget.nutrient) }), {
         label: menu.meals.undo,
+        // Back to its place, keeping whatever changed since (a widget added meanwhile stays).
         run: () => {
-          store.update((d) => ({ ...d, widgets: before }));
+          store.update((d) =>
+            d.widgets.some((w) => w.id === widget.id) || d.widgets.length >= MAX_WIDGETS
+              ? d
+              : {
+                  ...d,
+                  widgets: [...d.widgets.slice(0, index), widget, ...d.widgets.slice(index)],
+                },
+          );
         },
       });
     },
@@ -513,6 +523,11 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   /** «Загрузить меню из файла»: read, check its format and version, then show what it holds before replacing. */
   const readBackup = useCallback(
     (file: File) => {
+      // A backup of a few months weighs a few hundred kilobytes: anything far bigger is not one (and would stall the page).
+      if (file.size > MAX_BACKUP_BYTES) {
+        onNotify(menu.restore.format);
+        return;
+      }
       file
         .text()
         .then((text) => {
@@ -800,7 +815,12 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         onClose={closePicker}
         onPick={(target, alternative) => {
           setReplacing(null);
-          replacement.replace(target.slot, target.itemId, alternative.itemId);
+          // The slot is held by its index: if the plan changed while the choice was open, it may hold another dish.
+          const now = plan.days.find((d) => d.date === target.slot.date)?.meals[target.slot.meal]?.[
+            target.slot.index
+          ];
+          if (now?.itemId !== target.itemId) onNotify(menu.errors.changed);
+          else replacement.replace(target.slot, target.itemId, alternative.itemId);
         }}
       />
       <DishDetails

@@ -2,7 +2,7 @@ import type { QuizAnswersV1 } from '@refectorio/contracts';
 import type { DayTargets, ItemView, Plan, PlannedItem, SlotRef } from '@refectorio/menu-core';
 import { IconArrowUpRight, IconCheck, IconPlus, IconReplace, IconX } from '@tabler/icons-react';
 import { AnimatePresence, m, usePresence } from 'motion/react';
-import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { menu } from '../../../content/menu.ru';
 import { useModal } from '../../../components/useModal';
@@ -108,9 +108,16 @@ function DetailsBody({
   const day = plan.days.find((d) => d.date === target.slot.date);
   const item = day?.meals[target.slot.meal]?.[target.slot.index];
   const meal = plan.structure.find((s) => s.id === target.slot.meal);
+  // The dish left its slot under the open panel (another tab, a re-plan): it closes, and its exit ends at once.
+  const gone = !view || !item;
+  useEffect(() => {
+    if (!gone) return;
+    if (present) onClose();
+    else safeToRemove();
+  }, [gone, present, onClose, safeToRemove]);
 
   useModal({
-    open: present,
+    open: present && !gone,
     containerRef: panelRef,
     onClose,
     returnFocusTo:
@@ -118,7 +125,7 @@ function DetailsBody({
     background: '.menu-app, .menu-kiki-fab',
     fallbackFocusId: 'menu-title',
   });
-  useBackCloses(present, onClose, 'details');
+  useBackCloses(present && !gone, onClose, 'details');
 
   // Wide screens: centred over the main column; phones: the CSS makes it a full-height sheet.
   useLayoutEffect(() => {

@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useModal } from '../../../components/useModal';
 import { useCalmMotion } from '../../../motion/hooks';
 import { MENU } from '../../../motion/tokens';
 
@@ -136,6 +137,21 @@ function PopoverBody({
 
   // Hidden until placed, and a hidden element takes no focus: the first item gets it once the popover shows.
   const placed = place !== null;
+  // A confirmation (alertdialog) is modal: focus stays in it, the page behind is inert, focus returns to the button.
+  useModal({
+    open: role === 'alertdialog' && placed,
+    containerRef: ref,
+    onClose,
+    returnFocusTo: anchor,
+    background: '.menu-app, .menu-kiki-fab',
+    fallbackFocusId: 'menu-title',
+  });
+  // A menu or a small dialog is not: Tab out of it closes it (it never lingers behind the focus).
+  const onBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    const next = event.relatedTarget;
+    if (role === 'alertdialog' || !(next instanceof Node)) return;
+    if (!ref.current?.contains(next) && !anchor.contains(next)) onClose();
+  };
   useEffect(() => {
     if (!placed) return;
     ref.current
@@ -181,13 +197,14 @@ function PopoverBody({
         className={className ? `popover ${className}` : 'popover'}
         role={role}
         aria-label={label}
-        aria-modal={role === 'menu' ? undefined : false}
+        aria-modal={role === 'menu' ? undefined : role === 'alertdialog'}
         style={
           place
             ? { left: place.left, top: place.top, transformOrigin: place.origin }
             : { visibility: 'hidden', left: 0, top: 0 }
         }
         onKeyDown={onKeyDown}
+        onBlur={onBlur}
         initial={calm ? { opacity: 0 } : { opacity: 0, scale: MENU.popover.scaleFrom }}
         animate={{
           opacity: 1,
