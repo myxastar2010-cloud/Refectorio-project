@@ -1,3 +1,5 @@
+// First: no zod schema may be built before zod is told the CSP forbids eval (lib/zodConfig.ts).
+import './lib/zodConfig';
 import './styles/fonts.css';
 import './styles/globals.css';
 

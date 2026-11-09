@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 /** The menu engine off the main thread (ТЗ фаза 3 §9): every request goes through `handle`. */
+import '../../../lib/zodConfig';
 import type { MenuRequest } from '@refectorio/menu-core';
 import { handle } from './handler';
 
