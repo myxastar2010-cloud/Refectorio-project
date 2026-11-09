@@ -42,7 +42,9 @@ test.describe('the menu', () => {
     await expect(calories).not.toHaveText('0');
     await page.getByRole('button', { name: /Выпит ещё стакан воды/ }).click();
     await expect(page.locator('.widget--water .widget-number')).toHaveText('1');
-    const eaten = await calories.textContent();
+    // The number counts up to its new value: read where it ends.
+    const eaten = await calories.getAttribute('data-value');
+    await expect(calories).toHaveText(eaten ?? '');
     await page.reload();
     await expect(calories).toHaveText(eaten ?? '');
     await expect(page.locator('.widget--water .widget-number')).toHaveText('1');
@@ -88,7 +90,8 @@ test.describe('the menu', () => {
   test('edit mode: remove a meal with a confirm and undo it; reorder by keys', async ({ page }) => {
     await page.goto('./?menu=demo#menu');
     await expect(title(page)).toBeVisible({ timeout: 30_000 });
-    const tabs = page.getByRole('tablist', { name: 'Приёмы пищи' }).getByRole('tab');
+    // Tabs outside edit mode, a toolbar's buttons in it (MealTabs): one locator for both.
+    const tabs = page.locator('.meal-tabs .meal-tab');
     const names = () => tabs.allTextContents();
     const before = await names();
     await page.getByRole('button', { name: 'Изменить приёмы пищи' }).click();

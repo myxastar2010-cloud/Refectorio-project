@@ -82,7 +82,7 @@ const STATES = {
       ['Витамин C', 'Коралловый'],
     ]) {
       await page.getByRole('button', { name: 'Изменить приёмы пищи' }).click();
-      await page.getByRole('button', { name: 'Добавить', exact: true }).click();
+      await page.locator('.meal-add').click();
       await page.getByRole('menuitem', { name: 'Добавить виджет' }).click();
       const picker = page.getByRole('dialog', { name: 'Новый виджет' });
       await picker.getByRole('button', { name, exact: true }).first().click();
@@ -97,7 +97,7 @@ const STATES = {
   },
   'widget-picker': async (page) => {
     await page.getByRole('button', { name: 'Изменить приёмы пищи' }).click();
-    await page.getByRole('button', { name: 'Добавить', exact: true }).click();
+    await page.locator('.meal-add').click();
     await page.getByRole('menuitem', { name: 'Добавить виджет' }).click();
     await page.getByRole('dialog', { name: 'Новый виджет' }).waitFor();
   },

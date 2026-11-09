@@ -43,8 +43,11 @@ export async function countSceneChanges(page: Page) {
     page.evaluate(() => (window as Window & { __sceneChanges?: number }).__sceneChanges ?? 0);
 }
 
-/** axe on the settled page, with no exceptions: the green palette needs none (D-065). */
-export async function seriousViolations(page: Page) {
+/**
+ * axe on the settled page. No exceptions by default: the green palette needs none (D-065). `allowContrast` — a selector
+ * whose white-on-colour text is a recorded exception (the menu's red calories and the selected day in green, D-104).
+ */
+export async function seriousViolations(page: Page, options: { allowContrast?: string } = {}) {
   // Colours are judged on the settled page: a card still fading in (slow engines) would read as low contrast.
   await page.waitForFunction(() =>
     document
@@ -84,12 +87,23 @@ export async function seriousViolations(page: Page) {
   );
   // The line under the logo is decorative and fades by design: judged by its static colours (ink on white), not mid-fade.
   const { violations } = await new AxeBuilder({ page }).exclude('.brand-bubble').analyze();
-  return violations
-    .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
-    .map(
-      (violation) =>
-        `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`,
-    );
+  const found: string[] = [];
+  for (const violation of violations) {
+    if (violation.impact !== 'serious' && violation.impact !== 'critical') continue;
+    const nodes = [];
+    for (const node of violation.nodes) {
+      const allowed =
+        violation.id === 'color-contrast' &&
+        options.allowContrast !== undefined &&
+        (await page.evaluate(
+          ([target, allow]) => document.querySelector(target)?.closest(allow) != null,
+          [String(node.target[0]), options.allowContrast] as const,
+        ));
+      if (!allowed) nodes.push(node.target.join(' '));
+    }
+    if (nodes.length > 0) found.push(`${violation.id}: ${nodes.join(', ')}`);
+  }
+  return found;
 }
 
 /** Synthetic touch swipe dispatched on window (the scene controller listens there); works in all engines. */

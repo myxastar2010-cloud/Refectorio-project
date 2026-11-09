@@ -76,7 +76,10 @@ test.describe('the menu shell', () => {
     const found: string[] = [];
     for (const [name, enter] of states) {
       await enter();
-      for (const violation of await seriousViolations(page)) found.push(`${name} → ${violation}`);
+      for (const violation of await seriousViolations(page, {
+        allowContrast: '.widget--calories',
+      }))
+        found.push(`${name} → ${violation}`);
       // Back to the plain page: Esc closes every overlay; edit mode ends with «Готово».
       await page.keyboard.press('Escape');
       await page.keyboard.press('Escape');
@@ -98,6 +101,32 @@ test.describe('the menu shell', () => {
     await expect(other.getByRole('button', { name: /^Снять отметку/ })).toHaveCount(1);
     await other.getByRole('button', { name: /^Снять отметку/ }).click();
     await expect(page.getByRole('button', { name: /^Снять отметку/ })).toHaveCount(0);
+  });
+
+  test('edit mode: a pill dragged by the mouse lands after its neighbour; «Отменить» puts it back', async ({
+    page,
+  }) => {
+    await open(page);
+    // Tabs outside edit mode, a toolbar's buttons in it (MealTabs): one locator for both.
+    const tabs = page.locator('.meal-tabs .meal-tab');
+    const names = () => tabs.allTextContents();
+    const before = await names();
+    await page.getByRole('button', { name: 'Изменить приёмы пищи' }).click();
+    const first = await tabs.nth(0).boundingBox();
+    const second = await tabs.nth(1).boundingBox();
+    if (!first || !second) throw new Error('no pills');
+    const y = first.y + first.height / 2;
+    await page.mouse.move(first.x + first.width / 2, y);
+    await page.mouse.down();
+    // Just past the neighbour's middle: the pill takes its place (further on it would pass the next one too).
+    const from = first.x + first.width / 2;
+    const to = second.x + second.width / 2 + 6;
+    for (let step = 1; step <= 8; step += 1)
+      await page.mouse.move(from + ((to - from) * step) / 8, y);
+    await page.mouse.up();
+    await expect.poll(names).toEqual([before[1], before[0], ...before.slice(2)]);
+    await page.getByRole('button', { name: 'Отменить' }).click();
+    await expect.poll(names).toEqual(before);
   });
 
   test('the wheel pages one week per gesture; the cards slide in and settle', async ({ page }) => {
@@ -133,16 +162,35 @@ test.describe('the menu on a phone', () => {
     await expect(nav).toBeVisible();
     const box = await nav.boundingBox();
     expect(box?.y ?? 0).toBeGreaterThan(844 / 2);
+    // The closed sheet is out of reach: nothing of it in the Tab order.
+    await expect(page.locator('.menu-kiki-slot')).toHaveAttribute('inert', '');
     await nav.getByRole('button', { name: 'Статистика' }).click();
     await expect(page.getByText('Демо: мы ещё работаем над этим')).toBeVisible();
     await page.getByRole('button', { name: 'Открыть Кики' }).last().click();
-    const kiki = page.getByRole('complementary', { name: 'Кики — ваш личный ИИ' });
+    const kiki = page.getByRole('dialog', { name: 'Кики — ваш личный ИИ' });
     await expect(kiki).toBeVisible();
+    // A dialog: focus inside, the page behind it out of reach.
+    await expect(kiki.locator(':focus')).toHaveCount(1);
+    await expect(page.locator('.menu-main')).toHaveAttribute('inert', '');
     await kiki.getByRole('textbox', { name: 'Спроси что угодно…' }).fill('Привет');
     await kiki.getByRole('button', { name: 'Отправить' }).click();
     await expect(page.getByText('Кики подключится совсем скоро')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.menu-kiki-slot')).toHaveAttribute('inert', '');
+    await expect(page.getByRole('button', { name: 'Открыть Кики' }).last()).toBeFocused();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
+  });
+
+  test('after the reveal from the quiz the Kiki sheet stays closed and off the screen', async ({
+    page,
+  }) => {
+    await page.goto('./?seed=11&step=finale&reveal=demo#quiz');
+    await expect(title(page)).toBeVisible({ timeout: 60_000 });
+    const slot = page.locator('.menu-kiki-slot');
+    await expect(slot).toHaveAttribute('inert', '');
+    // The intro's inline styles land on an inner box: the sheet keeps its CSS transform (below the screen).
+    await expect.poll(async () => (await slot.boundingBox())?.y ?? 0).toBeGreaterThanOrEqual(844);
   });
 });
