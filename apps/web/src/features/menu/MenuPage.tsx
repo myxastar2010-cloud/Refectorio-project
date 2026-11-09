@@ -748,9 +748,9 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
       <div
         ref={kikiRef}
         className="menu-kiki-slot"
-        role={kikiSheet ? 'dialog' : undefined}
-        aria-modal={kikiSheet || undefined}
-        aria-label={kikiSheet ? menu.kiki.label : undefined}
+        role={kikiSheet && kikiOpen ? 'dialog' : undefined}
+        aria-modal={(kikiSheet && kikiOpen) || undefined}
+        aria-label={kikiSheet && kikiOpen ? menu.kiki.label : undefined}
         inert={kikiSheet && !kikiOpen}
       >
         <m.div className="menu-kiki-intro" {...group(7)}>
