@@ -81,6 +81,10 @@
   overscroll-behavior: contain;
   padding-right: 4px;
 }
+.search-results:focus-visible {
+  outline: none;
+  background: var(--menu-focus-tint);
+}
 .search-status {
   font-size: 15px;
   font-weight: 700;

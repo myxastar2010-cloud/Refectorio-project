@@ -10,6 +10,7 @@ import {
 } from '@tabler/icons-react';
 import { AnimatePresence, m } from 'motion/react';
 import {
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -19,7 +20,7 @@ import {
 import { menu } from '../../../content/menu.ru';
 import { fill } from '../../../lib/format';
 import { useCalmMotion } from '../../../motion/hooks';
-import { MENU } from '../../../motion/tokens';
+import { EASE_OUT_EXPO, MENU } from '../../../motion/tokens';
 import { Popover } from '../components/Popover';
 
 type Props = {
@@ -42,6 +43,12 @@ type Props = {
 const TOUCH_LIFT_MS = 300;
 const DRAG_START_PX = 4;
 
+/** A pill's place in the row: its slot's left edge in the list's scrolled content (slots never move by transform). */
+function placeOf(pill: HTMLElement, list: HTMLElement): number {
+  const slot = pill.parentElement ?? pill;
+  return slot.getBoundingClientRect().left - list.getBoundingClientRect().left + list.scrollLeft;
+}
+
 /**
  * «Завтрак», «Обед», «Ужин» (+ snacks) as tabs (ТЗ фаза 4 §6, mockup «редактирование»): the active one filled black;
  * ←/→, Home, End move between them. The pencil turns on the edit mode: a dark «−» on each removable pill, a dark «+»
@@ -62,6 +69,7 @@ export function MealTabs(props: Props) {
     : meals;
 
   // FLIP: after a reorder each pill starts from where it was and slides to its new place (transform only).
+  // Places are measured on the slots (never transformed): a pill's own offsetLeft is 0 inside its slot.
   const lefts = useRef(new Map<string, number>());
   useLayoutEffect(() => {
     const list = listRef.current;
@@ -69,15 +77,12 @@ export function MealTabs(props: Props) {
     for (const pill of list.querySelectorAll<HTMLElement>('[data-meal]')) {
       const id = pill.dataset.meal ?? '';
       const before = lefts.current.get(id);
-      const now = pill.offsetLeft;
+      const now = placeOf(pill, list);
       lefts.current.set(id, now);
       if (before === undefined || before === now || calm || pill.dataset.dragging) continue;
       pill.animate(
         [{ transform: `translateX(${String(before - now)}px)` }, { transform: 'none' }],
-        {
-          duration: 220,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        },
+        { duration: MENU.reorderMs, easing: `cubic-bezier(${EASE_OUT_EXPO.join(', ')})` },
       );
     }
   });
@@ -101,28 +106,57 @@ export function MealTabs(props: Props) {
     setAnnouncement(menu.meals.drag.cancelled);
   };
 
-  // Pointer drag: the pill follows the pointer; crossing a neighbour's middle swaps them.
+  // Pointer drag: the pill follows the pointer; crossing a neighbour's middle swaps them. Moves and the drop are heard
+  // on the window: a swap moves the pills in the DOM, which drops the pointer capture (the drop would land elsewhere).
   const drag = useRef<{
     id: string;
+    pill: HTMLElement;
     pointer: number;
     startX: number;
     grab: number;
     active: boolean;
     timer: number;
+    release: () => void;
   } | null>(null);
+  const latest = useRef<{
+    move: (event: PointerEvent) => void;
+    up: (event: PointerEvent) => void;
+  } | null>(null);
+  useEffect(
+    () => () => {
+      drag.current?.release();
+    },
+    [],
+  );
   const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>, meal: Meal) => {
     if (!editing || busy || event.button !== 0) return;
     const pill = event.currentTarget;
     const start = event.clientX;
+    const move = (e: PointerEvent) => {
+      latest.current?.move(e);
+    };
+    const up = (e: PointerEvent) => {
+      latest.current?.up(e);
+    };
     const d = {
       id: meal.id,
+      pill,
       pointer: event.pointerId,
       startX: start,
       grab: start - pill.getBoundingClientRect().left,
       active: false,
       timer: 0,
+      release: () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+      },
     };
+    drag.current?.release();
     drag.current = d;
+    window.addEventListener('pointermove', move, { passive: false });
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
     if (event.pointerType === 'touch') {
       d.timer = window.setTimeout(() => {
         d.active = true;
@@ -133,11 +167,11 @@ export function MealTabs(props: Props) {
       }, TOUCH_LIFT_MS);
     }
   };
-  const onPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const onPointerMove = (event: PointerEvent) => {
     const d = drag.current;
     const list = listRef.current;
     if (!d || d.pointer !== event.pointerId || !list) return;
-    const pill = event.currentTarget;
+    const { pill } = d;
     if (!d.active) {
       if (event.pointerType === 'touch') {
         // A swipe before the lift scrolls the row instead.
@@ -153,20 +187,21 @@ export function MealTabs(props: Props) {
     event.preventDefault();
     const listLeft = list.getBoundingClientRect().left - list.scrollLeft;
     const x = event.clientX - d.grab - listLeft;
-    pill.style.transform = `translateX(${String(x - pill.offsetLeft)}px) scale(1.04)`;
+    pill.style.transform = `translateX(${String(x - placeOf(pill, list))}px) scale(1.04)`;
     const middle = x + pill.offsetWidth / 2;
     const others = [...list.querySelectorAll<HTMLElement>('[data-meal]')].filter(
       (el) => el !== pill,
     );
-    const to = others.filter((el) => el.offsetLeft + el.offsetWidth / 2 < middle).length;
+    const to = others.filter((el) => placeOf(el, list) + el.offsetWidth / 2 < middle).length;
     if (to !== indexOf(d.id)) reorder(d.id, to);
   };
-  const onPointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const onPointerUp = (event: PointerEvent) => {
     const d = drag.current;
+    if (!d || d.pointer !== event.pointerId) return;
     drag.current = null;
-    if (!d) return;
+    d.release();
     window.clearTimeout(d.timer);
-    const pill = event.currentTarget;
+    const { pill } = d;
     delete pill.dataset.dragging;
     pill.style.transform = '';
     if (!d.active) return;
@@ -174,6 +209,11 @@ export function MealTabs(props: Props) {
     if (event.type === 'pointercancel') cancel();
     else commit(d.id);
   };
+
+  // The window's listeners call this render's handlers (they read this render's order).
+  useLayoutEffect(() => {
+    latest.current = { move: onPointerMove, up: onPointerUp };
+  });
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const focusedId = (document.activeElement as HTMLElement | null)?.dataset.meal;
@@ -246,7 +286,8 @@ export function MealTabs(props: Props) {
       <div
         ref={listRef}
         className="meal-tabs"
-        role="tablist"
+        // Editing, the pills sit with their «−» badges and «+»: a toolbar of controls (a tablist holds tabs only).
+        role={editing ? 'toolbar' : 'tablist'}
         aria-label={menu.meals.label}
         aria-describedby={editing ? 'meal-drag-hint' : undefined}
         onKeyDown={onKeyDown}
@@ -258,11 +299,12 @@ export function MealTabs(props: Props) {
             <span key={meal.id} className="meal-tab-slot" data-meal-slot={meal.id}>
               <button
                 type="button"
-                role="tab"
+                role={editing ? undefined : 'tab'}
                 className="meal-tab"
                 data-meal={meal.id}
                 data-lifted={lifted === meal.id || undefined}
-                aria-selected={active}
+                aria-selected={editing ? undefined : active}
+                aria-current={editing && active ? 'true' : undefined}
                 aria-controls="menu-dishes"
                 tabIndex={active ? 0 : -1}
                 title={lock ?? undefined}
@@ -272,9 +314,6 @@ export function MealTabs(props: Props) {
                 onPointerDown={(event) => {
                   onPointerDown(event, meal);
                 }}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerUp}
-                onPointerCancel={onPointerUp}
               >
                 {meal.titleRu}
               </button>

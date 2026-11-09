@@ -59,6 +59,8 @@ export function Nav({ avatar, onHome, onNotify, onAccount }: Props) {
               <button
                 type="button"
                 className="menu-nav-tab"
+                // The label is a tooltip on wide screens and hidden on phones: the name stays on the button.
+                aria-label={tab.label}
                 aria-current={active ? 'page' : undefined}
                 data-active={active || undefined}
                 onClick={() => {
@@ -68,7 +70,9 @@ export function Nav({ avatar, onHome, onNotify, onAccount }: Props) {
                 <span className="menu-nav-icon" aria-hidden>
                   <TabIcon stroke={1.8} />
                 </span>
-                <span className="menu-nav-text">{tab.label}</span>
+                <span className="menu-nav-text" aria-hidden>
+                  {tab.label}
+                </span>
               </button>
             </li>
           );

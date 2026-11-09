@@ -67,7 +67,9 @@ export function SearchResults({
   const firstPast = result?.groups.findIndex((g) => compareDates(g.date, today) < 0) ?? -1;
 
   return (
-    <div className="search-results">
+    // A long list scrolls: the region is a Tab stop so the keyboard can scroll it too (the arrows in the field move
+    // through the options themselves).
+    <div className="search-results" role="region" aria-label={menu.search.results} tabIndex={0}>
       <p className="search-status" role="status">
         {result === null || (searching && shown === 0)
           ? menu.search.searching

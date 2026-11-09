@@ -8,6 +8,8 @@
   --menu-line: var(--color-ink-muted);
   --menu-border: calc(2.4 * var(--m));
   --menu-panel-line: #ddd5d0;
+  /* Keyboard focus on a plain scrolling area: a faint wash of the accent (no rings, stage 3 rule 4.7). */
+  --menu-focus-tint: color-mix(in srgb, var(--color-accent) 8%, transparent);
   position: fixed;
   inset: 0;
   z-index: var(--z-menu);
@@ -464,8 +466,9 @@
   background-color: var(--color-surface-beige);
 }
 .day-pill[aria-selected='true'] {
-  border-color: var(--color-accent);
-  background-color: var(--color-accent);
+  /* The fill tone: small white text on it 4.55:1 (D-065). */
+  border-color: var(--color-accent-fill);
+  background-color: var(--color-accent-fill);
   color: var(--color-on-accent);
 }
 .day-pill[aria-selected='true'] .day-pill-weekday {
@@ -902,6 +905,11 @@
 
 /* ——— Kiki ——— */
 
+/* The menu's intro moves this box; the slot keeps its own transform for the sheet below 1280 px. */
+.menu-kiki-intro {
+  height: 100%;
+}
+
 .kiki-panel {
   position: relative;
   display: flex;
@@ -928,7 +936,8 @@
 }
 .kiki-name {
   margin-top: calc(2 * var(--m));
-  color: var(--color-accent);
+  /* A title in the accent: the fill tone (D-065), like «О проекте» and «Цены». */
+  color: var(--color-accent-fill);
   font-size: calc(40 * var(--m));
   font-weight: 800;
 }

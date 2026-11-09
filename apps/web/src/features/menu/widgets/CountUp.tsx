@@ -24,5 +24,10 @@ export function CountUp({ value, format, calm, className }: Props) {
       controls.stop();
     };
   }, [value, calm, shown]);
-  return <m.span className={className}>{text}</m.span>;
+  // data-value: the number the count ends on (tests wait for the text to reach it).
+  return (
+    <m.span className={className} data-value={format(value)}>
+      {text}
+    </m.span>
+  );
 }

@@ -411,6 +411,8 @@ export const MENU = {
   day: { slidePx: 24, durationS: 0.34 },
   /** «Съедено»: the check draws on while the accent fill springs out from the centre. */
   eaten: { checkS: 0.28, fillFromScale: 0.35 },
+  /** Meal pills reordered: each slides from its old place to the new one (FLIP). */
+  reorderMs: 220,
   /** Widget numbers count to their new value. */
   countS: 0.45,
   /** Context menus: scale from the origin 0.96 → 1 with a fade; submenus slide 8 px. */
