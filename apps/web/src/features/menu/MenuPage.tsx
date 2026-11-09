@@ -23,6 +23,7 @@ import { KIKI } from './data/pictures';
 import { DishCard } from './dishes/DishCard';
 import { DishMenu, ReplacePicker, type DishTarget } from './dishes/DishMenu';
 import { DishDetails, type DetailsTarget } from './details/DishDetails';
+import { cardVariants, rowVariants, useRowSlide } from './dishes/rowMotion';
 import { useReplace } from './dishes/useReplace';
 import { menuClient } from './engine/client';
 import { KikiPanel } from './kiki/KikiPanel';
@@ -360,6 +361,13 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   );
 
   const items = day?.meals[mealId] ?? [];
+  const rowSlide = useRowSlide(
+    date,
+    mealId,
+    meals.findIndex((meal) => meal.id === mealId),
+  );
+  const rowMotion = useMemo(() => rowVariants(calm), [calm]);
+  const cardMotion = useMemo(() => cardVariants(calm), [calm]);
   const lock = editable(date, today);
   const lockedReason = lock ? (TRACKING_ERRORS[lock.code] ?? menu.errors.generic) : null;
   const closeDishMenu = useCallback(() => {
@@ -628,17 +636,15 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           ) : items.length === 0 ? (
             <p className="dishes-note">{menu.dish.empty}</p>
           ) : (
-            <AnimatePresence mode="popLayout" initial={false}>
+            <AnimatePresence mode="popLayout" initial={false} custom={rowSlide}>
               <m.ul
                 key={`${date}:${mealId}`}
                 className="dish-row"
-                initial={calm ? { opacity: 0 } : { opacity: 0, x: MENU.tab.slidePx }}
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                  transition: { duration: MENU.tab.durationS, ease: [0.16, 1, 0.3, 1] },
-                }}
-                exit={{ opacity: 0, transition: { duration: MENU.tab.durationS / 2 } }}
+                variants={rowMotion}
+                custom={rowSlide}
+                initial="enter"
+                animate="show"
+                exit="exit"
               >
                 {items.map((planned, index) => {
                   const view = catalog.get(planned.itemId);
@@ -646,7 +652,12 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
                   const slot = { date, meal: mealId, index };
                   const eaten = isEaten(slot, planned.itemId);
                   return (
-                    <li key={`${planned.itemId}:${String(index)}`} className="dish-cell">
+                    <m.li
+                      key={`${planned.itemId}:${String(index)}`}
+                      className="dish-cell"
+                      variants={cardMotion}
+                      custom={rowSlide}
+                    >
                       <DishCard
                         item={view}
                         eaten={eaten}
@@ -663,7 +674,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
                         }}
                         onRecipe={soon}
                       />
-                    </li>
+                    </m.li>
                   );
                 })}
               </m.ul>

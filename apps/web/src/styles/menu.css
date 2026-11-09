@@ -873,8 +873,20 @@
   outline: none;
   transform: scale(1.07);
 }
-.dish-eat[aria-pressed='true'] {
+.dish-eat {
+  position: relative;
+}
+/* The accent fill springs out under the check (motion: MENU.eaten). */
+.dish-eat-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
   background: var(--color-accent);
+}
+.dish-eat svg {
+  position: relative;
+}
+.dish-eat[aria-pressed='true'] {
   color: #fff;
 }
 .dish-eat[aria-disabled='true'] {

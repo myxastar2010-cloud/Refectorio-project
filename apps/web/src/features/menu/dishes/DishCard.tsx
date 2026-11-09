@@ -1,10 +1,11 @@
 import type { ItemView } from '@refectorio/menu-core';
 import { IconArrowUpRight, IconDots, IconPlus } from '@tabler/icons-react';
-import { m } from 'motion/react';
+import { AnimatePresence, m } from 'motion/react';
 import { memo } from 'react';
 import { menu } from '../../../content/menu.ru';
 import { fill } from '../../../lib/format';
 import { useCalmMotion } from '../../../motion/hooks';
+import { EASE_OUT_EXPO, MENU } from '../../../motion/tokens';
 import { photosFor, PHOTO_SIZES } from '../../quiz/tinder/photos';
 import { ROLE_ICONS } from './roleIcons';
 
@@ -135,13 +136,25 @@ export const DishCard = memo(function DishCard({
           title={lockedReason ?? undefined}
           onClick={onToggle}
         >
+          <AnimatePresence initial={false}>
+            {eaten && (
+              <m.span
+                key="fill"
+                className="dish-eat-fill"
+                aria-hidden
+                initial={calm ? { opacity: 0 } : { scale: MENU.eaten.fillFromScale, opacity: 0 }}
+                animate={calm ? { opacity: 1 } : { scale: 1, opacity: 1, transition: MENU.spring }}
+                exit={{ opacity: 0, transition: { duration: MENU.eaten.checkS / 2 } }}
+              />
+            )}
+          </AnimatePresence>
           {eaten ? (
             <svg viewBox="0 0 24 24" className="dish-check" aria-hidden>
               <m.path
                 d="M5 12.5l4.5 4.5L19 7.5"
                 initial={calm ? false : { pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: MENU.eaten.checkS, ease: EASE_OUT_EXPO }}
               />
             </svg>
           ) : (

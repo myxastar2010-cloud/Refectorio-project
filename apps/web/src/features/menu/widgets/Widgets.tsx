@@ -12,8 +12,8 @@ import { useState } from 'react';
 import { menu } from '../../../content/menu.ru';
 import { fill, formatWhole, pluralRu } from '../../../lib/format';
 import { useCalmMotion } from '../../../motion/hooks';
-import { MENU } from '../../../motion/tokens';
 import { Popover } from '../components/Popover';
+import { CountUp } from './CountUp';
 import type { DayKind } from '../week/dates';
 
 type Props = {
@@ -177,14 +177,7 @@ export function Widgets({
           </p>
         ) : (
           <p className="widget-value">
-            <m.span
-              key={Math.round(eaten)}
-              className="widget-number"
-              initial={calm ? false : { y: -6, opacity: 0 }}
-              animate={{ y: 0, opacity: 1, transition: { duration: MENU.tab.durationS } }}
-            >
-              {formatWhole(eaten)}
-            </m.span>
+            <CountUp className="widget-number" value={eaten} format={formatWhole} calm={calm} />
             <span className="widget-of">
               {fill(menu.widgets.calories.of, { n: formatWhole(target) })}
             </span>
