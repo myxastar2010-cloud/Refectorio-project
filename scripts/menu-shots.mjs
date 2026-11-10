@@ -41,9 +41,122 @@ const WINDOWS = [
 
 const firstDish = (page) => page.locator('.dish-card').first();
 
+// ---------- Kiki (ТЗ 07 §10): a scripted server, so the shots never depend on the live model ----------
+const usage = { promptTokens: 1, completionTokens: 1, cachedTokens: 0 };
+const sse = (frames) =>
+  frames.map((e) => `event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join('');
+const final = (text) => ({
+  type: 'final',
+  text,
+  replaced: false,
+  messages: [{ role: 'assistant', content: text }],
+  model: 'mock',
+  usage,
+});
+const call = (name, args) => [
+  {
+    type: 'continue',
+    messages: [
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [{ id: `c-${name}`, name, args: JSON.stringify(args) }],
+      },
+    ],
+  },
+  { type: 'tool-call', callId: `c-${name}`, name, args },
+];
+/** Replies in order; `hang` leaves the request open (the thinking state). */
+async function scriptKiki(page, replies) {
+  await page.route('**/api/health', (route) => route.fulfill({ json: { ok: true } }));
+  await page.route('**/api/kiki/chat', (route) => {
+    const reply = replies.shift();
+    if (!reply || reply === 'hang') return undefined;
+    return route.fulfill({ headers: { 'content-type': 'text/event-stream' }, body: sse(reply) });
+  });
+}
+async function openKiki(page) {
+  const panel = page.locator('.kiki-panel');
+  const opener = page.getByRole('button', { name: 'Открыть Кики' });
+  if ((await opener.count()) > 0 && !(await page.locator('.menu-app[data-kiki-open]').count()))
+    if (await opener.last().isVisible()) await opener.last().click();
+  await panel.getByRole('textbox').waitFor();
+  return panel;
+}
+async function ask(page, text) {
+  const box = page.locator('.kiki-panel').getByRole('textbox');
+  await box.fill(text);
+  await box.press('Enter');
+}
+const KIKI_CONVERSATION = [
+  [...call('find_in_menu', { query: 'блины' })],
+  [
+    { type: 'ui', ui: { kind: 'open', target: 'search' } },
+    final(
+      'Блины в меню дважды:\n\n- **четверг**, завтрак — по данным меню;\n- **воскресенье**, завтрак — порция побольше.\n\nКБЖУ — в карточке блюда, вкладка «КБЖУ».',
+    ),
+  ],
+  call('propose_menu_change', {
+    rules: [{ kind: 'excludeIngredient', target: { category: 'garlic' }, textRu: 'Без чеснока' }],
+    reasonRu: 'аллергия на чеснок',
+  }),
+  [final('Подготовила меню без чеснока — посмотрите предпросмотр и примените, если всё подходит.')],
+  [
+    {
+      type: 'ui',
+      ui: {
+        kind: 'choice',
+        questionRu: 'В какие дни яйца на завтрак?',
+        options: ['Каждый день', 'Только пн и ср', 'По выходным'],
+      },
+    },
+    final('В какие дни добавить яйца на завтрак?'),
+  ],
+];
+async function kikiConversation(page) {
+  await scriptKiki(
+    page,
+    KIKI_CONVERSATION.map((r) => r),
+  );
+  const panel = await openKiki(page);
+  await ask(page, 'Сколько калорий в блинах?');
+  await panel.getByText('КБЖУ — в карточке блюда').first().waitFor();
+  await ask(page, 'У меня аллергия на чеснок');
+  await panel.getByRole('button', { name: /Изменения меню/ }).waitFor();
+  await ask(page, 'Хочу яйца на завтрак');
+  await panel.getByRole('button', { name: 'Только пн и ср' }).waitFor();
+  return panel;
+}
+
 /** Each state: what to do after the page is up. */
 const STATES = {
   base: async () => {},
+  'kiki-empty': async (page) => {
+    await scriptKiki(page, []);
+    await openKiki(page);
+  },
+  'kiki-thinking': async (page) => {
+    await scriptKiki(page, ['hang']);
+    const panel = await openKiki(page);
+    await ask(page, 'Что у меня сегодня на ужин?');
+    await panel.locator('.kiki-dots').waitFor();
+    await page.waitForTimeout(2200);
+  },
+  'kiki-chat': async (page) => {
+    await kikiConversation(page);
+  },
+  'kiki-preview': async (page) => {
+    const panel = await kikiConversation(page);
+    await panel.getByRole('button', { name: /Изменения меню/ }).click();
+    await page.getByRole('dialog', { name: 'Предпросмотр изменений' }).waitFor();
+    await page.waitForTimeout(400);
+  },
+  privacy: async (page) => {
+    await page.getByRole('button', { name: 'Аккаунт' }).first().click();
+    await page.getByRole('menuitem', { name: 'Как мы используем данные' }).click();
+    await page.getByRole('dialog', { name: 'Как мы используем ваши данные' }).waitFor();
+    await page.waitForTimeout(500);
+  },
   'dish-menu': async (page, touch) => {
     await firstDish(page).locator('.dish-more').click();
     const item = page.getByRole('menuitem', { name: 'Заменить блюдо' });
