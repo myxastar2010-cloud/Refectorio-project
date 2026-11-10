@@ -365,37 +365,46 @@
   gap: calc(23 * var(--m));
   list-style: none;
 }
-/* Mouse paging: round buttons over the strip's ends on hover (outside it they were clipped by the column and hidden
-   under the sidebar). Touch pages by swipe; keys by PageUp/PageDown. */
+/* Mouse paging: a pair of small round buttons right after Sunday, ‹ over › (left of the strip they were clipped by
+   the column and hidden under the sidebar; over its ends they covered Monday). Touch pages by swipe; keys by PageUp/Down.
+   28 px fit the column gap at 1920; they exist only for a pointer that hovers. */
 .week-arrow {
   position: absolute;
   top: 50%;
+  left: calc(7 * 98 * var(--m) + 6 * 23 * var(--m) + 2px);
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   border: 0;
   border-radius: 50%;
   background: var(--color-bg);
-  box-shadow: 0 4px 14px rgb(0 0 0 / 0.16);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.16);
   color: var(--color-ink);
   opacity: 0;
-  transform: translateY(-50%);
   cursor: pointer;
   transition:
     opacity 0.2s,
     transform 0.2s;
 }
+.week-arrow svg {
+  width: 16px;
+  height: 16px;
+}
 .week-arrow--prev {
-  left: -6px;
+  transform: translateY(calc(-100% - 2px));
 }
 .week-arrow--next {
-  left: calc(7 * 98 * var(--m) + 6 * 23 * var(--m) - 34px);
+  transform: translateY(2px);
 }
-.week-arrow:hover,
-.week-arrow:focus-visible {
-  transform: translateY(-50%) scale(1.07);
+.week-arrow--prev:hover,
+.week-arrow--prev:focus-visible {
+  transform: translateY(calc(-100% - 2px)) scale(1.1);
+}
+.week-arrow--next:hover,
+.week-arrow--next:focus-visible {
+  transform: translateY(2px) scale(1.1);
 }
 .week:hover .week-arrow,
 .week-arrow:focus-visible {

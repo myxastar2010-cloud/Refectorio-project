@@ -33,10 +33,10 @@ async function walk(page, phone) {
   await pause(page);
   await page.getByRole('button', { name: /Выпит ещё стакан воды/ }).click();
   await pause(page);
-  // Another meal and another day.
-  await page.getByRole('tab').nth(1).click();
+  // Another meal, then back (the day pills are tabs too: the meals are picked by their class).
+  await page.locator('.meal-tabs .meal-tab').nth(1).click();
   await pause(page);
-  await page.getByRole('tab').first().click();
+  await page.locator('.meal-tabs .meal-tab').first().click();
   await pause(page);
   // A dish in detail: its tabs.
   await page.locator('.dish-row .dish-open').first().click();
@@ -48,7 +48,8 @@ async function walk(page, phone) {
   await page.keyboard.press('Escape');
   await pause(page);
   // The dish's ⋯ → «Заменить с ИИ» → the engine's choices.
-  await page.locator('.dish-card').first().locator('.dish-more').click();
+  // The second dish: the first one was marked eaten above, and an eaten dish is not replaced.
+  await page.locator('.dish-card').nth(1).locator('.dish-more').click();
   await page.getByRole('menuitem', { name: 'Заменить блюдо' }).click();
   await pause(page, 600);
   await page.getByRole('menuitem', { name: 'Заменить с ИИ' }).click();
