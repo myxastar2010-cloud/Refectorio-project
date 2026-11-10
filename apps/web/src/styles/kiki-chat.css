@@ -1056,3 +1056,10 @@
 .menu-kiki-slot[data-keyboard] .kiki-quick {
   display: none;
 }
+
+/* An applied or dismissed proposal opens read-only: its status instead of the buttons */
+.kiki-preview-settled {
+  margin-right: auto;
+  color: var(--color-ink-muted);
+  font-weight: 600;
+}

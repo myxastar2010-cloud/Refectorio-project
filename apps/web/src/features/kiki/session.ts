@@ -57,6 +57,10 @@ export type PreviewRecord = {
   readonly rulesRemoved: readonly string[];
   readonly mealChanges: readonly MealChange[];
   readonly baseRevision: number;
+  /** planKey of the menu it was computed from (absent in chats saved before 11.11: compared by revision). */
+  readonly baseKey?: string;
+  /** The proposing call, re-run on a changed menu (Preview.call). */
+  readonly call?: { readonly name: string; readonly args: unknown };
   readonly status: 'pending' | 'applied' | 'dismissed';
 };
 
@@ -407,6 +411,8 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
                 rulesRemoved: p.rulesRemoved,
                 mealChanges: p.mealChanges,
                 baseRevision: p.baseRevision,
+                baseKey: p.baseKey,
+                ...(p.call ? { call: p.call } : {}),
                 status: 'pending',
               },
             };

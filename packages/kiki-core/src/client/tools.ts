@@ -660,9 +660,29 @@ export function executeTool(env: ToolEnv, name: ToolName, args: unknown): ToolOu
   };
 }
 
+/** Proposals that can be re-run on a changed menu from their call (alternatives keep their exact slot instead). */
+const RERUNNABLE = new Set<ToolName>([
+  'propose_menu_change',
+  'propose_goal_change',
+  'propose_meal_structure',
+]);
+
 function runTool(env: ToolEnv, name: ToolName, args: unknown): ToolOutcome {
   const parsed = parseToolArgs(name, typeof args === 'string' ? args : JSON.stringify(args ?? {}));
   if (!parsed.ok) return err(parsed.error);
+  const outcome = runParsed(env, name, parsed);
+  if (!RERUNNABLE.has(name) || !outcome.previews) return outcome;
+  return {
+    ...outcome,
+    previews: outcome.previews.map((p) => ({ ...p, call: { name, args: parsed.args } })),
+  };
+}
+
+function runParsed(
+  env: ToolEnv,
+  name: ToolName,
+  parsed: Extract<ReturnType<typeof parseToolArgs>, { ok: true }>,
+): ToolOutcome {
   try {
     switch (name) {
       case 'get_menu':

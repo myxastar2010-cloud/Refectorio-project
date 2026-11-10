@@ -227,3 +227,52 @@ test.describe('Kiki on a phone', () => {
     expect(Math.min(plus?.width ?? 0, plus?.height ?? 0)).toBeGreaterThanOrEqual(44);
   });
 });
+
+test.describe('Kiki: an older proposal after a newer one', () => {
+  test.use({ viewport: { width: 1536, height: 730 } });
+
+  test('applied later, it adds only its own rule — the newer one stays; an applied card never applies again', async ({
+    page,
+  }) => {
+    const rule = (category: string, textRu: string) =>
+      toolCall('propose_menu_change', {
+        rules: [{ kind: 'excludeIngredient', target: { category }, textRu }],
+        reasonRu: 'по просьбе',
+      });
+    const sent = await mockKiki(page, [
+      rule('garlic', 'Без чеснока'),
+      [final('Подготовила: без чеснока.')],
+      rule('fish', 'Без рыбы'),
+      [final('Подготовила: без рыбы.')],
+      [final('Хорошо.')],
+    ]);
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    await ask(page, 'без чеснока');
+    await expect(log(page).getByText('Подготовила: без чеснока.')).toBeVisible();
+    await ask(page, 'без рыбы');
+    await expect(log(page).getByText('Подготовила: без рыбы.')).toBeVisible();
+    const cards = panel(page).getByRole('button', { name: /Изменения меню/ });
+    const preview = page.getByRole('dialog', { name: 'Предпросмотр изменений' });
+    // The newer one first…
+    await cards.nth(1).click();
+    await preview.getByRole('button', { name: 'Применить' }).click();
+    await expect(cards.nth(1)).toContainText('Применено');
+    // …then the older one: the menu changed since, it re-runs on the current menu.
+    await cards.nth(0).click();
+    await expect(preview.getByText('Меню изменилось после этого предложения')).toBeVisible();
+    await preview.getByRole('button', { name: 'Применить' }).click();
+    await expect(cards.nth(0)).toContainText('Применено');
+    // An applied card opens read-only.
+    await cards.nth(0).click();
+    await expect(preview.getByRole('button', { name: 'Применить' })).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(preview).toBeHidden();
+    // The next request's digest lists both rules.
+    await ask(page, 'спасибо');
+    await expect(log(page).getByText('Хорошо.')).toBeVisible();
+    const digest = sent.at(-1)?.digest ?? '';
+    expect(digest).toContain('Без чеснока');
+    expect(digest).toContain('Без рыбы');
+  });
+});

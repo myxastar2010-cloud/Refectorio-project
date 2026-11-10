@@ -5,7 +5,7 @@
  */
 export * from './types';
 export * from './dates';
-export { canonicalJson, stableHash } from './hash';
+export { canonicalJson, planKey, stableHash } from './hash';
 export {
   RULES,
   RULES_FINGERPRINT,

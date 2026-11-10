@@ -13,7 +13,7 @@ import type {
   Rule,
   SlotRef,
 } from '@refectorio/menu-core';
-import { weekdayIndex } from '@refectorio/menu-core';
+import { planKey, weekdayIndex } from '@refectorio/menu-core';
 
 export type PreviewOp =
   | { readonly kind: 'rules'; readonly rules: readonly Rule[] }
@@ -56,6 +56,13 @@ export type Preview = {
   readonly op: PreviewOp;
   /** Revision of the plan the preview was computed from. */
   readonly baseRevision: number;
+  /** planKey of that plan: a different key means the menu changed since. */
+  readonly baseKey: string;
+  /**
+   * The proposing call itself (tool + its checked arguments): on a changed menu «Применить» re-runs it on the current
+   * plan and answers instead of replaying the old snapshot — later rules, meals and answers are never lost.
+   */
+  readonly call?: { readonly name: string; readonly args: unknown };
   readonly plan: Plan;
   readonly diff: PlanDiff;
   readonly summaryRu: string;
@@ -156,6 +163,7 @@ export function buildPreview(input: BuildPreviewInput): Preview {
     id: input.id,
     op: input.op,
     baseRevision: base.revision,
+    baseKey: planKey(base),
     plan,
     diff,
     summaryRu,

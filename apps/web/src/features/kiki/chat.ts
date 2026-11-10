@@ -6,6 +6,7 @@
 import { memorySchema, wireMessageSchema, type ChatRequest } from '@refectorio/kiki-core';
 import type { Preview } from '@refectorio/kiki-core/client';
 import type { Plan, PlanDiff } from '@refectorio/menu-core';
+import { planKey } from '@refectorio/menu-core/hash';
 import { useSyncExternalStore } from 'react';
 import { z } from 'zod';
 import { kiki } from '../../content/kiki.ru';
@@ -58,7 +59,14 @@ const storedSchema = z.object({
 export { chatUi } from './uiState';
 
 /** Proposed plans of this visit, by preview id. */
-export type ComputedPreview = { readonly plan: Plan; readonly diff: PlanDiff | null };
+export type ComputedPreview = {
+  readonly plan: Plan;
+  readonly diff: PlanDiff | null;
+  /** planKey of the menu this was computed on. */
+  readonly key: string;
+  /** A proposal re-run on a changed menu: its fresh operation (a goal's answers) and rule labels. */
+  readonly fresh?: Pick<Preview, 'op' | 'rulesAdded' | 'rulesRemoved' | 'summaryRu'>;
+};
 const previewPlans = new Map<string, ComputedPreview>();
 const previewPrefix = `k${Math.random().toString(36).slice(2, 6)}-`;
 let idCounter = 0;
@@ -103,7 +111,8 @@ export function chatSession(): ChatSession {
       });
       if (answer.type !== 'kiki') return { result: { error: 'tool failed' }, previews: [] };
       const previews = answer.previews as Preview[];
-      for (const p of previews) previewPlans.set(p.id, { plan: p.plan, diff: p.diff });
+      for (const p of previews)
+        previewPlans.set(p.id, { plan: p.plan, diff: p.diff, key: p.baseKey });
       return { result: answer.result, previews };
     },
     digest: async () => {
@@ -182,39 +191,70 @@ export type ApplyOutcome = 'applied' | 'failed';
  * «Применить» (ТЗ 07 §7): the computed plan when the menu is still the one it was computed from; otherwise the same
  * operation re-runs on the current menu. A goal also brings its answers. «Отменить» in the toast undoes it.
  */
-/** Is the menu still the one the proposal was computed from? */
-export const isStale = (record: PreviewRecord): boolean =>
-  menuStore().get().plan?.revision !== record.baseRevision;
+const keyOf = (record: PreviewRecord, plan: Plan): boolean =>
+  record.baseKey ? planKey(plan) === record.baseKey : plan.revision === record.baseRevision;
+
+/** Is the menu still the one the proposal was computed from? (By content: revisions repeat after undo or a restore.) */
+export const isStale = (record: PreviewRecord): boolean => {
+  const plan = menuStore().get().plan;
+  return !plan || !keyOf(record, plan);
+};
 
 /**
- * The proposed plan on the current menu: the computed one while the menu is unchanged (this visit), otherwise the same
- * operation re-runs in the worker (nothing is committed). Null — the operation no longer works on this menu.
+ * The proposed plan on the current menu (ТЗ 07 §7): the computed one while the menu is unchanged, otherwise the
+ * proposing call re-runs on the current plan and answers in the worker — only its own change is added, later rules,
+ * meals and answers stay (review of phase 5, C1). A replacement keeps its exact slot. Null — it no longer applies.
  */
 export async function previewPlan(record: PreviewRecord): Promise<ComputedPreview | null> {
   const { plan, answers, tracking } = menuStore().get();
   if (!plan || !answers) return null;
+  const key = planKey(plan);
   const cached = previewPlans.get(record.id);
-  if (cached && plan.revision === record.baseRevision) return cached;
-  const op = record.op;
-  const base = {
-    type: 'apply' as const,
-    answers: op.kind === 'goal' ? op.answers : answers,
-    plan,
-    today: chatUi.today ?? localIsoDate(),
-    tracking,
-  };
+  if (cached && cached.key === key && (cached.fresh || keyOf(record, plan))) return cached;
+  const today = chatUi.today ?? localIsoDate();
   try {
-    const answer = await menuClient().request(
-      op.kind === 'rules'
-        ? { ...base, op: 'applyRules', rules: op.rules }
-        : op.kind === 'structure'
-          ? { ...base, op: 'setStructure', structure: op.structure }
-          : op.kind === 'replace'
-            ? { ...base, op: 'replaceItem', slot: op.slot, itemId: op.itemId }
-            : { ...base, op: 'regenerate' },
-    );
+    if (record.call) {
+      const answer = await menuClient().request({
+        type: 'kiki',
+        tool: record.call.name,
+        args: record.call.args,
+        answers,
+        plan,
+        tracking,
+        today,
+        previewPrefix,
+      });
+      const p = answer.type === 'kiki' ? (answer.previews as Preview[])[0] : undefined;
+      if (!p) return null;
+      const computed: ComputedPreview = {
+        plan: p.plan,
+        diff: p.diff,
+        key,
+        fresh: {
+          op: p.op,
+          rulesAdded: p.rulesAdded,
+          rulesRemoved: p.rulesRemoved,
+          summaryRu: p.summaryRu,
+        },
+      };
+      previewPlans.set(record.id, computed);
+      return computed;
+    }
+    const op = record.op;
+    // Chats saved before 11.11 hold a whole snapshot: on a changed menu it would undo later changes — never replayed.
+    if (op.kind !== 'replace') return null;
+    const answer = await menuClient().request({
+      type: 'apply',
+      answers,
+      plan,
+      today,
+      tracking,
+      op: 'replaceItem',
+      slot: op.slot,
+      itemId: op.itemId,
+    });
     if (answer.type !== 'plan') return null;
-    const computed = { plan: answer.plan, diff: answer.diff };
+    const computed: ComputedPreview = { plan: answer.plan, diff: answer.diff, key };
     previewPlans.set(record.id, computed);
     return computed;
   } catch {
@@ -222,32 +262,46 @@ export async function previewPlan(record: PreviewRecord): Promise<ComputedPrevie
   }
 }
 
+const applying = new Set<string>();
+
 export async function applyPreview(record: PreviewRecord, notify: Notify): Promise<ApplyOutcome> {
-  const store = menuStore();
-  const { plan, answers } = store.get();
-  if (!plan || !answers) return 'failed';
-  const op = record.op;
-  const nextAnswers = op.kind === 'goal' ? (op.answers as typeof answers) : answers;
-  if (isStale(record)) previewPlans.delete(record.id);
-  const next = (await previewPlan(record))?.plan;
-  if (!next) return 'failed';
-  const before = answers;
-  const applied = next;
-  const written = store.commitPlanIf(plan, applied, (data) => ({
-    ...(op.kind === 'goal' ? { answers: nextAnswers } : {}),
-    letters: [
-      ...data.letters,
-      changeLetter(data.letters, record.summaryRu || kiki.preview.done, new Date(), Math.random),
-    ],
-  }));
-  if (!written) return 'failed';
-  previewPlans.delete(record.id);
-  notify(kiki.preview.done, {
-    label: menu.meals.undo,
-    run: () => {
-      if (store.undoPlan(applied) && op.kind === 'goal')
-        store.update((data) => ({ ...data, answers: before }));
-    },
-  });
-  return 'applied';
+  // Once only: an applied or dismissed card never applies again; a second click while it runs is ignored.
+  if (record.status !== 'pending' || applying.has(record.id)) return 'failed';
+  applying.add(record.id);
+  try {
+    const store = menuStore();
+    const { plan, answers } = store.get();
+    if (!plan || !answers) return 'failed';
+    const computed = await previewPlan(record);
+    if (!computed) return 'failed';
+    const op = computed.fresh?.op ?? record.op;
+    const before = answers;
+    const nextAnswers = op.kind === 'goal' ? (op.answers as typeof answers) : answers;
+    const applied = computed.plan;
+    // Committed only if the menu is still the one it was computed on (another tab, a mark in between → recompute).
+    const written = store.commitPlanIf(plan, applied, (data) => ({
+      ...(op.kind === 'goal' ? { answers: nextAnswers } : {}),
+      letters: [
+        ...data.letters,
+        changeLetter(
+          data.letters,
+          computed.fresh?.summaryRu || record.summaryRu || kiki.preview.done,
+          new Date(),
+          Math.random,
+        ),
+      ],
+    }));
+    if (!written) return 'failed';
+    previewPlans.delete(record.id);
+    notify(kiki.preview.done, {
+      label: menu.meals.undo,
+      run: () => {
+        if (store.undoPlan(applied) && op.kind === 'goal')
+          store.update((data) => ({ ...data, answers: before }));
+      },
+    });
+    return 'applied';
+  } finally {
+    applying.delete(record.id);
+  }
 }

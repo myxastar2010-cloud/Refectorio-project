@@ -98,6 +98,10 @@ export function PreviewOverlay({
   const mealTitle = (mealId: string) =>
     plan?.structure.find((m) => m.id === mealId)?.titleRu ?? mealId;
   const plan = computed?.plan ?? null;
+  // An applied or dismissed card opens read-only; a re-run proposal shows the rules of its fresh run (review C1).
+  const settled = record.status !== 'pending';
+  const rulesAdded = computed?.fresh?.rulesAdded ?? record.rulesAdded;
+  const rulesRemoved = computed?.fresh?.rulesRemoved ?? record.rulesRemoved;
   // The fresh diff (a recomputed proposal) wins over the one stored with the message.
   const fresh = computed?.diff;
   const days = fresh
@@ -157,14 +161,14 @@ export function PreviewOverlay({
           role="region"
           aria-labelledby={`${record.id}-title`}
         >
-          {record.rulesAdded.length > 0 || record.rulesRemoved.length > 0 ? (
+          {rulesAdded.length > 0 || rulesRemoved.length > 0 ? (
             <section className="kiki-preview-rules">
               <h3>{kiki.preview.rules}</h3>
               <ul>
-                {record.rulesAdded.map((r) => (
+                {rulesAdded.map((r) => (
                   <li key={`+${r}`}>{r}</li>
                 ))}
-                {record.rulesRemoved.map((r) => (
+                {rulesRemoved.map((r) => (
                   <li key={`-${r}`} className="is-removed">
                     {kiki.preview.rulesRemoved}: {r}
                   </li>
@@ -258,25 +262,33 @@ export function PreviewOverlay({
         </div>
 
         <footer className="kiki-preview-actions">
-          <button
-            type="button"
-            className="kiki-button kiki-button--ghost"
-            onClick={() => {
-              leave(onDismiss);
-            }}
-          >
-            {kiki.preview.cancel}
-          </button>
-          <button
-            type="button"
-            className="kiki-button"
-            onClick={() => {
-              leave(onApply);
-            }}
-            disabled={failed}
-          >
-            {kiki.preview.apply}
-          </button>
+          {settled ? (
+            <p className="kiki-preview-settled">
+              {record.status === 'applied' ? kiki.preview.applied : kiki.preview.dismissed}
+            </p>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="kiki-button kiki-button--ghost"
+                onClick={() => {
+                  leave(onDismiss);
+                }}
+              >
+                {kiki.preview.cancel}
+              </button>
+              <button
+                type="button"
+                className="kiki-button"
+                onClick={() => {
+                  leave(onApply);
+                }}
+                disabled={failed}
+              >
+                {kiki.preview.apply}
+              </button>
+            </>
+          )}
         </footer>
       </div>
     </dialog>

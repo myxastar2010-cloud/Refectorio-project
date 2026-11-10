@@ -286,3 +286,23 @@ describe('deemphasizeNumbers: tools never hand the model calories or grams', () 
     ).toEqual({ days: 2, glasses: 8, summaryRu: 'Уберу чеснок из трёх блюд.' });
   });
 });
+
+describe('proposals carry what a re-run needs (review of phase 5, C1)', () => {
+  it('the call and the base plan key ride with the preview', () => {
+    const args = {
+      rules: [{ kind: 'excludeIngredient', target: { category: 'garlic' }, textRu: 'Без чеснока' }],
+      reasonRu: 'аллергия на чеснок',
+    };
+    const out = executeTool(env, 'propose_menu_change', args);
+    const preview = out.previews?.[0];
+    expect(preview?.call?.name).toBe('propose_menu_change');
+    expect(preview?.baseKey).toMatch(/^\d+:\d+:[0-9a-f]{8}$/);
+    // Re-run on the proposed plan: only its own rule is added again on top — nothing of the newer menu is replaced.
+    const again = executeTool(
+      { ...env, plan: preview?.plan ?? env.plan },
+      'propose_menu_change',
+      args,
+    );
+    expect(again.previews?.[0]?.baseKey).not.toBe(preview?.baseKey);
+  });
+});
