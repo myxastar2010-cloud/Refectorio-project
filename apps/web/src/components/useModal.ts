@@ -61,6 +61,9 @@ export function useModal({
     });
 
     const onKeyDown = (event: KeyboardEvent) => {
+      // A modal <dialog> opened inside (Kiki's preview) owns its keys: Esc closes it, not this panel, and Tab stays in it.
+      const nested = (event.target as Element | null)?.closest('dialog[open]');
+      if (nested && nested !== container && container?.contains(nested)) return;
       if (event.key === 'Escape') {
         // A field that handles Escape itself (typing a number into the wheel) cancels only its own edit.
         if ((event.target as Element | null)?.closest('[data-own-escape]')) return;

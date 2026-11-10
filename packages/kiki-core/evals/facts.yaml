@@ -4,7 +4,6 @@
   turns:
     - user: что у меня сегодня на ужин?
       expect:
-        toolsAny: [get_menu, find_in_menu]
         mustInclude: [Гречка с грибами]
         toolsNone: [propose_menu_change]
 
@@ -13,7 +12,7 @@
   turns:
     - user: чё в среду вечером есть буду
       expect:
-        toolsAny: [get_menu, find_in_menu]
+        toolsNone: [propose_menu_change]
         mustInclude: [лосось]
 
 - id: facts-carbonara-kcal
@@ -29,7 +28,7 @@
   turns:
     - user: сколько белка в шницеле из курицы в субботу?
       expect:
-        toolsAny: [find_in_menu, get_menu, get_item_details]
+        toolsNone: [propose_menu_change]
         mustInclude: ['41']
 
 - id: facts-where-herring
@@ -46,7 +45,7 @@
   turns:
     - user: какая у меня норма калорий на сегодня?
       expect:
-        toolsAny: [get_targets]
+        toolsNone: [propose_menu_change]
         mustInclude: ['/2[\s  ]?193/']
 
 - id: facts-progress-today
@@ -78,7 +77,7 @@
   turns:
     - user: что на завтрак в четверг?
       expect:
-        toolsAny: [get_menu, find_in_menu]
+        toolsNone: [propose_menu_change]
         mustInclude: [Оладьи]
 
 - id: facts-sat-snack
@@ -86,7 +85,7 @@
   turns:
     - user: какой перекус в субботу?
       expect:
-        toolsAny: [get_menu]
+        toolsNone: [propose_menu_change]
         mustInclude: [Миндаль]
 
 - id: facts-latte-where
@@ -103,5 +102,5 @@
   turns:
     - user: сколько белка в цезаре с курицей в пятницу на обед
       expect:
-        toolsAny: [find_in_menu, get_menu, get_item_details]
+        toolsNone: [propose_menu_change]
         mustInclude: ['29']

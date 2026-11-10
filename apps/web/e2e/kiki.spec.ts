@@ -130,6 +130,12 @@ test.describe('Kiki on the laptop', () => {
     await card.click();
     const preview = page.getByRole('dialog', { name: 'Предпросмотр изменений' });
     await expect(preview).toBeVisible();
+    // Esc closes the preview and gives the focus back to its card.
+    await page.keyboard.press('Escape');
+    await expect(preview).toBeHidden();
+    await expect(card).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(preview).toBeVisible();
     await expect(preview.getByText('Без чеснока')).toBeVisible();
     expect(await seriousViolations(page)).toEqual([]);
     await preview.getByRole('button', { name: 'Применить' }).click();
@@ -184,5 +190,40 @@ test.describe('Kiki on the laptop', () => {
     await expect(log(page).getByText('Кики сейчас недоступна.', { exact: false })).toBeVisible();
     await panel(page).getByRole('button', { name: 'Повторить' }).last().click();
     await expect(log(page).getByText('Теперь получилось.')).toBeVisible();
+  });
+});
+
+test.describe('Kiki on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+  test('Esc in the preview closes only the preview; the sheet and its focus stay', async ({
+    page,
+  }) => {
+    await mockKiki(page, [
+      toolCall('propose_menu_change', {
+        rules: [
+          { kind: 'excludeIngredient', target: { category: 'garlic' }, textRu: 'Без чеснока' },
+        ],
+        reasonRu: 'аллергия на чеснок',
+      }),
+      [final('Подготовила меню без чеснока.')],
+    ]);
+    await page.goto('./?menu=demo#menu');
+    await expect(title(page)).toBeVisible({ timeout: 30_000 });
+    await page.getByRole('button', { name: 'Открыть Кики' }).last().click();
+    const sheet = page.getByRole('dialog', { name: 'Кики — ваш личный ИИ' });
+    await expect(sheet).toBeVisible();
+    await ask(page, 'У меня аллергия на чеснок');
+    const card = sheet.getByRole('button', { name: /Изменения меню/ });
+    await card.click();
+    const preview = page.getByRole('dialog', { name: 'Предпросмотр изменений' });
+    await expect(preview).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(preview).toBeHidden();
+    await expect(sheet).toBeVisible();
+    await expect(card).toBeFocused();
+    // The «+» is a full touch target.
+    const plus = await sheet.getByRole('button', { name: 'Прикрепить фото' }).boundingBox();
+    expect(Math.min(plus?.width ?? 0, plus?.height ?? 0)).toBeGreaterThanOrEqual(44);
   });
 });

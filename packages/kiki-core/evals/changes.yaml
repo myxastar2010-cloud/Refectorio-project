@@ -141,10 +141,10 @@
         args:
           propose_menu_change: { rules.0.target.category: tea }
     - user: хотя нет, верни чай обратно
+      # The first proposal was never applied (the eval applies nothing): nothing to undo — just leave the preview.
       expect:
-        tools: [propose_menu_change]
-        args:
-          propose_menu_change: { removeRuleIds: { exists: true } }
+        toolsNone: [propose_goal_change]
+        mustIncludeAny: [предпросмотр, не применя, не применен, отмен]
 
 - id: change-two-wishes
   tags: [change]

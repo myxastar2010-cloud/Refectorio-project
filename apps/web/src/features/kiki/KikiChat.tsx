@@ -96,6 +96,9 @@ export function KikiChat({
   const stick = useRef(true);
   const lastRequest = useRef<number | null>(null);
   const root = useRef<HTMLDivElement>(null);
+  const moreButton = useRef<HTMLButtonElement>(null);
+  /** The card that opened the preview: focus goes back to it when the preview closes. */
+  const previewOpener = useRef<HTMLElement | null>(null);
   useKeyboardInset(root);
 
   useEffect(() => {
@@ -151,8 +154,11 @@ export function KikiChat({
     const el = input.current;
     if (!el) return;
     el.style.height = 'auto';
-    const line = parseFloat(getComputedStyle(el).lineHeight) || 24;
-    el.style.height = `${Math.min(el.scrollHeight, line * MAX_LINES)}px`;
+    const style = getComputedStyle(el);
+    const line = parseFloat(style.lineHeight) || 24;
+    // The field's own padding (a 44 px tap area on phones) is not a line of text.
+    const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) || 0;
+    el.style.height = `${Math.min(el.scrollHeight, line * MAX_LINES + padding)}px`;
     // A taller composer shrinks the log: keep its end in view while following the conversation.
     const list = log.current;
     if (list && stick.current) list.scrollTop = list.scrollHeight;
@@ -188,17 +194,56 @@ export function KikiChat({
 
   const busy = chat.busy;
   const lastKiki = [...chat.items].reverse().find((i) => i.kind === 'kiki');
+  const lastItem = chat.items.at(-1);
+
+  // The live region: the thinking status until text streams, Kiki's sentences, and errors of this visit (an old one
+  // in the stored history is not news).
+  const [lastAtMount] = useState(() => chat.items.at(-1)?.id);
+  const lastError = lastItem?.kind === 'error' && lastItem.id !== lastAtMount ? lastItem : null;
+  const announced = busy
+    ? busy.text
+      ? spoken
+      : kiki.status[busy.phase]
+    : lastError
+      ? errorText(lastError)
+      : spoken;
+
+  const focusInput = () => {
+    window.requestAnimationFrame(() => {
+      input.current?.focus();
+    });
+  };
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setConfirming(false);
+    moreButton.current?.focus();
+  };
+  const openPreview = (record: PreviewRecord) => {
+    previewOpener.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setOverlay(record);
+  };
+  const closePreview = () => {
+    setOverlay(null);
+    const back = previewOpener.current;
+    previewOpener.current = null;
+    // After the dialog leaves the page: its own close() would otherwise drop the focus on <body>.
+    window.requestAnimationFrame(() => {
+      if (back?.isConnected) back.focus();
+      else input.current?.focus();
+    });
+  };
   const empty = chat.items.length === 0 && !busy;
   const disabled = !online || !hasMenu;
 
   const apply = async (record: PreviewRecord) => {
-    setOverlay(null);
+    closePreview();
     const outcome = await applyPreview(record, onNotify);
     if (outcome === 'applied') session.settle(record.id, 'applied', kiki.preview.applied);
     else onNotify(kiki.preview.failed);
   };
   const dismiss = (record: PreviewRecord) => {
-    setOverlay(null);
+    closePreview();
     session.settle(record.id, 'dismissed', kiki.preview.dismissed);
   };
 
@@ -207,6 +252,7 @@ export function KikiChat({
       <div className="kiki-more-wrap">
         <button
           type="button"
+          ref={moreButton}
           className="kiki-more"
           aria-label={kiki.more}
           aria-haspopup="menu"
@@ -219,7 +265,17 @@ export function KikiChat({
           <IconDots stroke={2} aria-hidden />
         </button>
         {menuOpen ? (
-          <div className="kiki-more-menu" role="menu" aria-label={kiki.more}>
+          <div
+            className="kiki-more-menu"
+            role="menu"
+            aria-label={kiki.more}
+            data-own-escape
+            onKeyDown={(event) => {
+              if (event.key !== 'Escape') return;
+              event.stopPropagation();
+              closeMenu();
+            }}
+          >
             {confirming ? (
               <div className="kiki-confirm" role="group" aria-label={kiki.clearConfirm.title}>
                 <p>
@@ -232,8 +288,7 @@ export function KikiChat({
                     className="kiki-button kiki-button--small"
                     onClick={() => {
                       session.clear();
-                      setMenuOpen(false);
-                      setConfirming(false);
+                      closeMenu();
                       onNotify(kiki.cleared);
                     }}
                   >
@@ -245,10 +300,7 @@ export function KikiChat({
                     className="kiki-button kiki-button--ghost kiki-button--small"
                     // The safe choice takes the focus (as the menu's other confirmations).
                     autoFocus
-                    onClick={() => {
-                      setConfirming(false);
-                      setMenuOpen(false);
-                    }}
+                    onClick={closeMenu}
                   >
                     {kiki.clearConfirm.no}
                   </button>
@@ -264,9 +316,6 @@ export function KikiChat({
                 onClick={() => {
                   setConfirming(true);
                 }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Escape') setMenuOpen(false);
-                }}
               >
                 {kiki.clear}
               </button>
@@ -275,7 +324,14 @@ export function KikiChat({
         ) : null}
       </div>
 
-      <div className="kiki-log" ref={log} onScroll={onScroll} aria-label={kiki.log} tabIndex={-1}>
+      <div
+        className="kiki-log"
+        ref={log}
+        onScroll={onScroll}
+        role="region"
+        aria-label={kiki.log}
+        tabIndex={-1}
+      >
         {empty ? (
           <div className="kiki-empty">
             <p className="kiki-greeting">{hasMenu ? kiki.greeting : kiki.errors.noMenu}</p>
@@ -318,13 +374,14 @@ export function KikiChat({
               latest={item === lastKiki}
               busy={busy !== null}
               onPick={(option) => {
+                focusInput();
                 void session.pick(item.id, option);
               }}
               onRetry={() => {
                 void session.retry(item.id);
               }}
               onOpen={onOpen}
-              onPreview={setOverlay}
+              onPreview={openPreview}
               onNotify={onNotify}
             />
           ))}
@@ -341,7 +398,7 @@ export function KikiChat({
         </ol>
       </div>
       <div className="kiki-sr" role="status" aria-live="polite">
-        {spoken}
+        {announced}
       </div>
       {unseen ? (
         <button type="button" className="kiki-new" onClick={toBottom}>
@@ -414,6 +471,7 @@ export function KikiChat({
             aria-label={kiki.stop}
             onClick={() => {
               session.stop();
+              focusInput();
             }}
           >
             <IconPlayerStopFilled aria-hidden />
@@ -441,9 +499,7 @@ export function KikiChat({
           onDismiss={() => {
             dismiss(overlay);
           }}
-          onClose={() => {
-            setOverlay(null);
-          }}
+          onClose={closePreview}
         />
       ) : null}
     </div>

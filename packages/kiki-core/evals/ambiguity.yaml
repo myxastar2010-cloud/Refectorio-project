@@ -8,7 +8,8 @@
   tags: [ambiguity]
   turns:
     - user: не хочу это больше есть
-      expect: { askChoice: true, toolsNone: [propose_menu_change] }
+      # «это» is unknown (no dish open): a question — chips of likely dishes or a short question in words.
+      expect: { toolsNone: [propose_menu_change], mustInclude: ['?'] }
 
 - id: ambiguity-change-snack
   tags: [ambiguity]

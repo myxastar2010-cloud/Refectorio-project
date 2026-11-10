@@ -623,6 +623,20 @@
   line-height: 1.35;
   outline: none;
 }
+/* Keyboard focus in the field: the composer's outline turns accent (no rings, stage 3 rule 4.7) */
+.kiki-chat .kiki-input:focus-within {
+  border-color: var(--color-accent);
+}
+/* A wide table scrolls by keyboard: focus shows as a beige wash */
+.kiki-md-table:focus-visible {
+  outline: none;
+  background: rgb(242 228 216 / 0.45);
+}
+.kiki-new:hover,
+.kiki-new:focus-visible {
+  outline: none;
+  background: var(--color-accent-fill);
+}
 .kiki-input textarea::placeholder {
   color: #9b9592;
 }
@@ -944,7 +958,20 @@
     font-size: 15px;
   }
   .kiki-input textarea {
+    min-height: 44px;
+    padding-block: 10px;
     font-size: 17px;
+  }
+  .kiki-attach {
+    width: 44px;
+    height: 44px;
+  }
+  .kiki-new {
+    min-height: 44px;
+  }
+  .kiki-close:focus-visible,
+  .kiki-more:focus-visible {
+    background: var(--color-accent-soft);
   }
   .kiki-status {
     font-size: 15px;
