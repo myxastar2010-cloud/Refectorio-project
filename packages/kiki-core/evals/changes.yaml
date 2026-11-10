@@ -1,0 +1,178 @@
+# Menu changes: proposals with the essential arguments only.
+- id: change-no-dairy
+  tags: [change]
+  turns:
+    - user: вообще не ем молочку, уберите её из меню
+      expect:
+        tools: [resolve_food_terms, propose_menu_change]
+        args:
+          propose_menu_change:
+            rules.0.kind: excludeIngredient
+            rules.0.target.category: dairy
+
+- id: change-dislike-soft
+  tags: [change]
+  turns:
+    - user: зелень не очень люблю, но совсем убирать не надо, пусть будет поменьше
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change:
+            rules.0.kind: preferLess
+            rules.0.target.category: herbs
+
+- id: change-exclude-syrniki
+  tags: [change]
+  turns:
+    - user: сырники достали, не хочу их больше видеть
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change: { rules.0.kind: { oneOf: [excludeItem, preferLess] } }
+
+- id: change-more-fish
+  tags: [change, bakeoff]
+  turns:
+    - user: хочу рыбу почаще, раза три в неделю
+      expect:
+        toolsAny: [propose_menu_change]
+        args:
+          propose_menu_change: { rules.0.kind: { oneOf: [frequency, preferMore, includeItem] } }
+
+- id: change-no-coffee-weekdays
+  tags: [change, bakeoff]
+  turns:
+    - user: без кофе по будням пожалуйста
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change:
+            rules.0.kind: { oneOf: [excludeIngredient, replaceCategory, preferLess] }
+            rules.0.days.kind: weekdays
+
+- id: change-dinner-max-kcal
+  tags: [change, bakeoff]
+  turns:
+    - user: не больше 600 ккал на ужин
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change:
+            rules.0.kind: maxNutrient
+            rules.0.nutrient: energyKcal
+            rules.0.value: 600
+            rules.0.per: meal
+            rules.0.meals: [dinner]
+        askChoice: false
+
+- id: change-day-protein-min
+  tags: [change]
+  turns:
+    - user: хочу минимум 100 г белка в день
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change:
+            rules.0.kind: minNutrient
+            rules.0.nutrient: proteinG
+            rules.0.value: 100
+            rules.0.per: day
+
+- id: change-fibre-min
+  tags: [change]
+  turns:
+    - user: клетчатки бы побольше, давай не меньше 30 г в день
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change:
+            rules.0.kind: minNutrient
+            rules.0.nutrient: fibreG
+            rules.0.value: 30
+
+- id: change-add-snack
+  tags: [change]
+  turns:
+    - user: добавь ещё один перекус в день, голодная хожу
+      expect:
+        tools: [propose_meal_structure]
+        args:
+          propose_meal_structure: { add: [snack] }
+
+- id: change-remove-snack
+  tags: [change]
+  turns:
+    - user: перекус мне не нужен, уберите его
+      expect:
+        tools: [propose_meal_structure]
+        args:
+          propose_meal_structure: { remove: [snack-1] }
+
+- id: change-replace-plov
+  tags: [change, bakeoff]
+  turns:
+    - user: плов в среду на обед не хочу, предложи что-нибудь другое вместо него
+      expect:
+        tools: [propose_alternatives]
+        args:
+          propose_alternatives:
+            date: '2026-11-11'
+            mealId: lunch
+            itemId: d_plov
+
+- id: change-replace-croissant
+  tags: [change]
+  turns:
+    - user: замени круассан в четверг на перекус
+      expect:
+        tools: [propose_alternatives]
+        args:
+          propose_alternatives:
+            date: '2026-11-12'
+            mealId: snack-1
+            itemId: d_croissant
+
+- id: change-restore-tea
+  tags: [change]
+  turns:
+    - user: убери из меню чай, надоел
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change: { rules.0.target.category: tea }
+    - user: хотя нет, верни чай обратно
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change: { removeRuleIds: { exists: true } }
+
+- id: change-two-wishes
+  tags: [change]
+  turns:
+    - user: не хочу яйца на ужин, и чтобы на обед было минимум 25 г белка
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change:
+            rules.0.kind: { exists: true }
+            rules.1.kind: { exists: true }
+
+- id: change-include-syrniki
+  tags: [change]
+  turns:
+    - user: добавь в меню сырники, люблю их
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change: { rules.0.kind: { oneOf: [includeItem, frequency, preferMore] } }
+
+- id: change-weekend-tea
+  tags: [change]
+  turns:
+    - user: по выходным кофе замени на чай
+      expect:
+        tools: [resolve_food_terms, propose_menu_change]
+        args:
+          propose_menu_change:
+            rules.0.kind: { oneOf: [replaceCategory, excludeIngredient] }
+            rules.0.days.kind: weekends

@@ -1,0 +1,9 @@
+- id: identity-human-or-robot
+  tags: [identity, bakeoff]
+  turns:
+    - user: ты человек или робот? как тебя зовут вообще
+      expect:
+        tools: []
+        mustInclude: [Кики]
+        mustIncludeAny: [ИИ, нейросет, искусственн, не человек, виртуальн]
+        mustNotInclude: [Mistral, NVIDIA, Nemotron, DeepSeek, OpenAI]

@@ -32,6 +32,14 @@ export default defineConfig({
       },
       {
         test: {
+          name: 'api',
+          root: './apps/api',
+          include: ['src/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
+      {
+        test: {
           name: 'scripts',
           root: './scripts',
           include: ['**/*.test.mjs'],
@@ -48,6 +56,7 @@ export default defineConfig({
         'packages/food-data/src/**/*.ts',
         'packages/menu-core/src/**/*.ts',
         'packages/kiki-core/src/**/*.ts',
+        'apps/api/src/**/*.ts',
         'apps/web/src/**/*.{ts,tsx}',
       ],
       exclude: [

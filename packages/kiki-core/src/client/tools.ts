@@ -119,6 +119,9 @@ function dayView(env: ToolEnv, day: DayPlan, meals?: readonly string[]) {
   };
 }
 
+/** Search scores below this are single description words (menu-core search: name 3, ingredient 1.5, description 0.4). */
+const MIN_HIT_SCORE = 1;
+
 const err = (error: string, hint?: string) => ({ result: { error, ...(hint ? { hint } : {}) } });
 
 function getMenu(env: ToolEnv, args: ToolArgs<'get_menu'>): ToolOutcome {
@@ -132,7 +135,10 @@ function getMenu(env: ToolEnv, args: ToolArgs<'get_menu'>): ToolOutcome {
 }
 
 function findInMenu(env: ToolEnv, args: ToolArgs<'find_in_menu'>): ToolOutcome {
-  const hits = env.search(args.query).slice(0, 6);
+  // Weak hits (one word of a description) mislead more than they help: «лазанья» found «плов» by its description.
+  const all = env.search(args.query);
+  const top = all[0]?.score ?? 0;
+  const hits = all.filter((h) => h.score >= MIN_HIT_SCORE && h.score >= top / 2).slice(0, 6);
   const found = hits.flatMap((hit) =>
     hit.occurrences.slice(0, 14).map((o) => {
       const item = env.plan.days
@@ -145,6 +151,7 @@ function findInMenu(env: ToolEnv, args: ToolArgs<'find_in_menu'>): ToolOutcome {
         mealId: o.mealId,
         itemId: hit.itemId,
         name: nameOf(env, hit.itemId),
+        matchedIn: [...new Set(hit.spans.map((s) => s.field))].join(',') || 'category',
         ...(item ? { portion: portionText(item), ...macros(item.nutrients) } : {}),
       };
     }),

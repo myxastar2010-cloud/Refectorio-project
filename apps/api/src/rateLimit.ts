@@ -23,7 +23,10 @@ export type Limiter = {
   sweep(): void;
 };
 
-export function createLimiter(now: () => number = Date.now, limits = LIMITS): Limiter {
+export function createLimiter(
+  now: () => number = Date.now,
+  limits: Readonly<Record<Bucket, readonly Window[]>> = LIMITS,
+): Limiter {
   const counters = new Map<string, Counter>();
   const keyOf = (bucket: string, i: number, ip: string) => `${bucket}:${i}:${ip}`;
   return {

@@ -1,0 +1,51 @@
+- id: ambiguity-replace-wed-lunch
+  tags: [ambiguity, bakeoff]
+  turns:
+    - user: замени обед в среду
+      expect: { askChoice: true, toolsNone: [propose_menu_change] }
+
+- id: ambiguity-dont-want-this
+  tags: [ambiguity]
+  turns:
+    - user: не хочу это больше есть
+      expect: { askChoice: true, toolsNone: [propose_menu_change] }
+
+- id: ambiguity-change-snack
+  tags: [ambiguity]
+  turns:
+    - user: поменяй перекус
+      expect: { askChoice: true, toolsNone: [propose_menu_change] }
+
+- id: ambiguity-lighter-menu
+  tags: [ambiguity, bakeoff]
+  turns:
+    - user: сделай меню полегче
+      expect: { askChoice: true }
+
+- id: ambiguity-something-tasty
+  tags: [ambiguity]
+  turns:
+    - user: добавь что-нибудь вкусненькое
+      expect: { askChoice: true, toolsNone: [propose_menu_change] }
+
+- id: ambiguity-yes-to-options
+  tags: [ambiguity, bakeoff]
+  turns:
+    - user: хочу изменить ужины
+      expect: { askChoice: true }
+    - user: Да
+      expect: { askChoice: true }
+
+- id: ambiguity-clear-max-lunch
+  tags: [ambiguity]
+  turns:
+    - user: не больше 500 ккал на обед каждый день
+      expect:
+        askChoice: false
+        tools: [propose_menu_change]
+
+- id: ambiguity-clear-howto-pdf
+  tags: [ambiguity, howto]
+  turns:
+    - user: как скачать меню в PDF?
+      expect: { askChoice: false, mustInclude: [Скачать меню] }
