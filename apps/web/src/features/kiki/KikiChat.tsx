@@ -225,21 +225,24 @@ export function KikiChat({
     setConfirming(false);
     moreButton.current?.focus();
   };
-  const openPreview = (record: PreviewRecord) => {
-    previewOpener.current =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  // The card itself, not document.activeElement: Safari and Firefox do not focus a button on click.
+  const openPreview = (record: PreviewRecord, card: HTMLElement) => {
+    previewOpener.current = card;
     setOverlay(record);
   };
   const closePreview = () => {
     setOverlay(null);
-    const back = previewOpener.current;
-    previewOpener.current = null;
-    // After the dialog leaves the page: its own close() would otherwise drop the focus on <body>.
-    window.requestAnimationFrame(() => {
-      if (back?.isConnected) back.focus();
-      else input.current?.focus();
-    });
   };
+  // Focus goes back once the preview has left: a passive effect of this component runs after the dialog's own cleanup
+  // (close()), and before that the page behind the modal is inert — Firefox and Safari would drop the focus on <body>.
+  useEffect(() => {
+    if (overlay) return;
+    const back = previewOpener.current;
+    if (!back) return;
+    previewOpener.current = null;
+    if (back.isConnected) back.focus();
+    else input.current?.focus();
+  }, [overlay]);
   const empty = chat.items.length === 0 && !busy;
   const disabled = !online || !hasMenu;
 
@@ -521,7 +524,7 @@ type MessageProps = {
   readonly onPick: (option: string) => void;
   readonly onRetry: () => void;
   readonly onOpen: (ui: OpenUi) => void;
-  readonly onPreview: (record: PreviewRecord) => void;
+  readonly onPreview: (record: PreviewRecord, card: HTMLElement) => void;
   readonly onNotify: Notify;
 };
 
@@ -573,8 +576,8 @@ function Message({
                 key={id}
                 type="button"
                 className={clsx('kiki-card', record.status !== 'pending' && 'is-settled')}
-                onClick={() => {
-                  onPreview(record);
+                onClick={(event) => {
+                  onPreview(record, event.currentTarget);
                 }}
               >
                 <span className="kiki-card-title">{kiki.preview.pill[record.kind]}</span>
