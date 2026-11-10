@@ -654,6 +654,12 @@
 .kiki-preview-body {
   overflow-y: auto;
   padding: 0 28px 18px;
+  outline: none;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Keyboard focus on the scrolling list: a faint beige wash (no rings, stage 3 rule 4.7) */
+.kiki-preview-body:focus-visible {
+  background: rgb(242 228 216 / 0.35);
 }
 .kiki-preview-rules {
   margin-bottom: 14px;
@@ -731,8 +737,14 @@
   border-color: var(--color-accent);
   background: var(--color-bg);
 }
+/* Faded by colour, not opacity: the name and its tag keep readable contrast */
 .kiki-preview-meal li.is-removed {
-  opacity: 0.55;
+  border-color: var(--color-surface-beige);
+  background: none;
+  color: var(--color-ink-muted);
+}
+.kiki-preview-meal li.is-removed .kiki-tag {
+  color: var(--color-ink-muted);
 }
 .kiki-badge {
   color: var(--color-ink-muted);
@@ -884,4 +896,14 @@
   50% {
     opacity: 0.4;
   }
+}
+
+/* Short screens and an open on-screen keyboard: the quick cards step aside for the conversation */
+@media (max-height: 520px) {
+  .kiki-chat .kiki-quick {
+    display: none;
+  }
+}
+.menu-kiki-slot[data-keyboard] .kiki-quick {
+  display: none;
 }

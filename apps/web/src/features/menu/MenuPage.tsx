@@ -49,6 +49,7 @@ import { newLetters } from './news/letters';
 import { NewsPanel } from './news/NewsPanel';
 import { GoalSheet } from './top/GoalSheet';
 import { MoreMenu } from './top/MoreMenu';
+import { PrivacySheet } from './shell/PrivacySheet';
 import { RestoreSheet } from './top/RestoreSheet';
 import { TopBar } from './top/TopBar';
 import { usePlanOps } from './top/usePlanOps';
@@ -112,6 +113,7 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const durable = useMenu((s) => s.durable);
   const { avatar } = settings;
   const [accountAt, setAccountAt] = useState<HTMLElement | null>(null);
+  const [privacyAt, setPrivacyAt] = useState<HTMLElement | null>(null);
   const [wipeAt, setWipeAt] = useState<HTMLElement | null>(null);
   const letters = useMenu((s) => s.letters);
   const customWidgets = useMenu((s) => s.widgets);
@@ -352,8 +354,10 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           if (anchor) setNews({ anchor, pinned: true, keys: false });
           return;
         case 'account':
-        case 'privacy':
           setAccountAt(anchor);
+          return;
+        case 'privacy':
+          setPrivacyAt(anchor);
           return;
         case 'recipes':
           soon();
@@ -993,6 +997,11 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           closeAccount();
           openKiki();
         }}
+        onPrivacy={() => {
+          const anchor = accountAt;
+          closeAccount();
+          setPrivacyAt(anchor);
+        }}
         onDownload={() => {
           closeAccount();
           download('json');
@@ -1150,6 +1159,12 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         onClose={closeGoal}
         onApply={(next) => {
           ops.changeGoal(next, closeGoal);
+        }}
+      />
+      <PrivacySheet
+        anchor={privacyAt}
+        onClose={() => {
+          setPrivacyAt(null);
         }}
       />
       <RestoreSheet

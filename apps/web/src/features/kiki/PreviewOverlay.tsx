@@ -118,7 +118,13 @@ export function PreviewOverlay({
           </button>
         </header>
 
-        <div className="kiki-preview-body">
+        {/* Scrolls with the keyboard too (a focusable region, named by the title). */}
+        <div
+          className="kiki-preview-body"
+          tabIndex={0}
+          role="region"
+          aria-labelledby={`${record.id}-title`}
+        >
           {record.rulesAdded.length > 0 || record.rulesRemoved.length > 0 ? (
             <section className="kiki-preview-rules">
               <h3>{kiki.preview.rules}</h3>
