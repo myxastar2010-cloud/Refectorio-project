@@ -142,7 +142,8 @@ export function KikiChat({
     if (!el) return;
     stick.current = true;
     setUnseen(false);
-    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollTo({ top: el.scrollHeight, behavior: calm ? 'auto' : 'smooth' });
   };
 
   // Autosize the composer up to six lines.
@@ -152,6 +153,9 @@ export function KikiChat({
     el.style.height = 'auto';
     const line = parseFloat(getComputedStyle(el).lineHeight) || 24;
     el.style.height = `${Math.min(el.scrollHeight, line * MAX_LINES)}px`;
+    // A taller composer shrinks the log: keep its end in view while following the conversation.
+    const list = log.current;
+    if (list && stick.current) list.scrollTop = list.scrollHeight;
   }, [draft]);
 
   const send = useCallback(
@@ -291,7 +295,18 @@ export function KikiChat({
                 ))}
               </div>
             ) : null}
-            <p className="kiki-privacy">{kiki.privacy}</p>
+            <p className="kiki-privacy">
+              {kiki.privacy}{' '}
+              <button
+                type="button"
+                className="kiki-privacy-more"
+                onClick={() => {
+                  onOpen({ kind: 'open', target: 'privacy' });
+                }}
+              >
+                {kiki.privacyMore}
+              </button>
+            </p>
           </div>
         ) : null}
         <ol className="kiki-messages">
@@ -481,7 +496,7 @@ function Message({
       );
     case 'kiki':
       return (
-        <li className="kiki-msg kiki-msg--kiki">
+        <li className={clsx('kiki-msg kiki-msg--kiki', latest && 'is-latest')}>
           <span className="kiki-sr">{menu.kiki.name}: </span>
           <div className="kiki-text">
             <Markdown text={item.text} />

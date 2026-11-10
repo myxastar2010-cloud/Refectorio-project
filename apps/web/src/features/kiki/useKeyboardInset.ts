@@ -15,13 +15,20 @@ export function useKeyboardInset(ref: RefObject<HTMLElement | null>) {
     const sheet = ref.current?.closest<HTMLElement>('.menu-kiki-slot');
     if (!viewport || !sheet) return undefined;
     let frame = 0;
+    let last = '';
     const update = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         // A pinch zoom also shrinks the visual viewport; only the keyboard (scale 1) moves the sheet.
-        const zoomed = viewport.scale > 1.01;
-        const top = zoomed ? 0 : Math.max(0, viewport.offsetTop);
-        const bottom = zoomed ? 0 : Math.max(0, window.innerHeight - viewport.height - top);
+        // A closed sheet (inert, off the screen) keeps its full height: its slide never depends on a keyboard opened
+        // for another field.
+        const still = viewport.scale > 1.01 || sheet.hasAttribute('inert');
+        const top = still ? 0 : Math.max(0, viewport.offsetTop);
+        const bottom = still ? 0 : Math.max(0, window.innerHeight - viewport.height - top);
+        // Unchanged values are not written again: no style recalculation on every scroll tick.
+        const next = `${Math.round(top)} ${Math.round(bottom)}`;
+        if (next === last) return;
+        last = next;
         sheet.style.setProperty('--kiki-vv-top', `${Math.round(top)}px`);
         sheet.style.setProperty('--kiki-vv-bottom', `${Math.round(bottom)}px`);
         sheet.toggleAttribute('data-keyboard', bottom > KEYBOARD_MIN_PX);

@@ -20,6 +20,7 @@ export const kiki = {
     'Здравствуйте! Я Кики, ваш ИИ-диетолог. Спросите про меню, блюда или привычки — помогу и, если нужно, подготовлю изменения.',
   privacy:
     'Сообщения обрабатывает ИИ-сервис через наш сервер, мы их не храним. Не пишите ФИО, телефоны и номера документов.',
+  privacyMore: 'Подробнее',
   suggestionsLabel: 'Можно спросить',
   suggestions: {
     today: 'Что у меня сегодня на {meal}?',
@@ -115,6 +116,7 @@ export const kikiContentSchema = z.object({
   cleared: text,
   greeting: text,
   privacy: text,
+  privacyMore: text,
   suggestionsLabel: text,
   suggestions: record(['today', 'protein', 'fish', 'swap']),
   status: record(['thinking', 'searching', 'reading', 'planning', 'checking', 'waking']),

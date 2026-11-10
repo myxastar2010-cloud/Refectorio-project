@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { kiki } from '../../content/kiki.ru';
 
 /**
@@ -120,7 +120,8 @@ function inline(text: string, key = 'i'): ReactNode[] {
   return out;
 }
 
-export function Markdown({ text }: { readonly text: string }) {
+/** Memoised: while Kiki streams, only the live message re-parses — the history keeps its rendered text. */
+export const Markdown = memo(function Markdown({ text }: { readonly text: string }) {
   return (
     <>
       {parseBlocks(text).map((block, b) => {
@@ -189,4 +190,4 @@ export function Markdown({ text }: { readonly text: string }) {
       })}
     </>
   );
-}
+});

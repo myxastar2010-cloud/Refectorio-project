@@ -23,6 +23,9 @@ function dayTitle(date: string): string {
   return `${menu.week.weekdaysLong[(d.getDay() + 6) % 7] ?? ''}, ${d.getDate()} ${menu.week.monthsGenitive[d.getMonth()] ?? ''}`;
 }
 
+/** Longer than the exit animation (0.22 s): the hand-over never waits on an animation that did not run. */
+const EXIT_FALLBACK_MS = 400;
+
 const grams = (item: PlannedItem) => `${formatWhole(item.grams)} ${menu.units.g}`;
 
 /**
@@ -51,6 +54,33 @@ export function PreviewOverlay({
       d?.close();
     };
   }, []);
+
+  // Leaving plays the exit (kiki-chat.css, `[data-closing]`) and then hands over; a timer covers a skipped animation.
+  const leaving = useRef(false);
+  const leave = (then: () => void) => {
+    const d = dialog.current;
+    if (leaving.current) return;
+    leaving.current = true;
+    if (!d) {
+      then();
+      return;
+    }
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      then();
+    };
+    d.addEventListener(
+      'animationend',
+      (event) => {
+        if (event.target === d) finish();
+      },
+      { once: true },
+    );
+    window.setTimeout(finish, EXIT_FALLBACK_MS);
+    d.dataset.closing = '';
+  };
 
   useEffect(() => {
     let alive = true;
@@ -98,10 +128,10 @@ export function PreviewOverlay({
       aria-labelledby={`${record.id}-title`}
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        leave(onClose);
       }}
       onClick={(event) => {
-        if (event.target === dialog.current) onClose();
+        if (event.target === dialog.current) leave(onClose);
       }}
     >
       <div className="kiki-preview-sheet">
@@ -112,7 +142,9 @@ export function PreviewOverlay({
             type="button"
             className="kiki-preview-close"
             aria-label={kiki.preview.close}
-            onClick={onClose}
+            onClick={() => {
+              leave(onClose);
+            }}
           >
             <IconX stroke={2} aria-hidden />
           </button>
@@ -226,10 +258,23 @@ export function PreviewOverlay({
         </div>
 
         <footer className="kiki-preview-actions">
-          <button type="button" className="kiki-button kiki-button--ghost" onClick={onDismiss}>
+          <button
+            type="button"
+            className="kiki-button kiki-button--ghost"
+            onClick={() => {
+              leave(onDismiss);
+            }}
+          >
             {kiki.preview.cancel}
           </button>
-          <button type="button" className="kiki-button" onClick={onApply} disabled={failed}>
+          <button
+            type="button"
+            className="kiki-button"
+            onClick={() => {
+              leave(onApply);
+            }}
+            disabled={failed}
+          >
             {kiki.preview.apply}
           </button>
         </footer>

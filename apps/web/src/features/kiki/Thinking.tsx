@@ -5,8 +5,9 @@ import type { Busy } from './session';
 
 /**
  * Kiki's «thinking» state (ТЗ 07 §10, the reference video): four accent dots in a 2×2 grid that shuffle into lines,
- * diagonals and clusters (CSS keyframes on transform only), a status line with a travelling shimmer and the elapsed
- * seconds. Reduced motion → the dots rest in the grid and pulse softly (kiki-chat.css).
+ * diagonals and clusters (CSS keyframes on transform only), a status line with a travelling shimmer (a band window and
+ * an accent copy moving in opposite directions — transform only) and the elapsed seconds. Reduced motion → the dots
+ * rest in the grid and pulse softly, no shimmer (kiki-chat.css).
  */
 export function Thinking({ busy }: { readonly busy: Busy }) {
   const [seconds, setSeconds] = useState(0);
@@ -33,7 +34,12 @@ export function Thinking({ busy }: { readonly busy: Busy }) {
         <i />
         <i />
       </span>
-      <span className="kiki-status">{label}</span>
+      <span className="kiki-status">
+        {label}
+        <span className="kiki-shine" aria-hidden>
+          <span>{label}</span>
+        </span>
+      </span>
       {seconds >= 2 ? (
         <span className="kiki-elapsed">{fill(kiki.elapsed, { s: seconds })}</span>
       ) : null}

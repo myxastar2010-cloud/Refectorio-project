@@ -144,7 +144,7 @@
     opacity 0.25s;
 }
 .kiki-card-open {
-  color: var(--color-accent-soft);
+  color: var(--color-accent);
   font-size: calc(22 * var(--m));
 }
 .kiki-card:hover,
@@ -175,7 +175,7 @@
   background: var(--color-bg);
   color: var(--color-ink);
   font: inherit;
-  font-size: calc(19 * var(--m));
+  font-size: max(14px, calc(19 * var(--m)));
   font-weight: 600;
   text-align: left;
   cursor: pointer;
@@ -199,13 +199,21 @@
   cursor: default;
 }
 
-/* Copy on hover / focus inside the message */
+/* Copy on hover / focus inside the message. It hangs below the text and takes no space (the rhythm between messages
+   stays even); only the latest answer keeps it in the flow. */
 .kiki-tools {
+  position: absolute;
+  top: 100%;
+  left: -10px;
+  z-index: 1;
   display: flex;
   gap: 4px;
-  margin-top: calc(6 * var(--m));
   opacity: 0;
   transition: opacity 0.2s;
+}
+.kiki-msg--kiki.is-latest .kiki-tools {
+  position: static;
+  margin: calc(4 * var(--m)) 0 0 -10px;
 }
 .kiki-msg--kiki:hover .kiki-tools,
 .kiki-msg--kiki:focus-within .kiki-tools {
@@ -213,6 +221,10 @@
 }
 @media (hover: none) {
   .kiki-tools {
+    display: none;
+  }
+  .kiki-msg--kiki.is-latest .kiki-tools {
+    display: flex;
     opacity: 1;
   }
 }
@@ -275,7 +287,7 @@
 }
 .kiki-privacy {
   color: var(--color-ink-muted);
-  font-size: calc(16 * var(--m));
+  font-size: max(12px, calc(16 * var(--m)));
   line-height: 1.4;
 }
 
@@ -290,8 +302,8 @@
 .kiki-dots {
   position: relative;
   flex: none;
-  width: 22px;
-  height: 22px;
+  width: 40px;
+  height: 40px;
 }
 .kiki-dots i {
   position: absolute;
@@ -301,9 +313,10 @@
   height: 8px;
   border-radius: 50%;
   background: var(--color-accent);
-  animation: 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  animation: 3.6s var(--ease-in-out) infinite;
 }
-/* Every dot walks: grid → row → diagonal → cluster → column → grid (offsets in px of a 14 px step). */
+/* Every dot walks: grid → row → diagonal → cluster → column → anti-diagonal → grid. Centres of 8 px dots in a 40 px box,
+   edge gaps ≥ 3 px in every formation (they never merge into a blob); 40 % of each step is a rest. */
 .kiki-dots i:nth-child(1) {
   animation-name: kiki-dot-1;
 }
@@ -318,124 +331,163 @@
 }
 @keyframes kiki-dot-1 {
   0%,
-  12%,
+  6.67%,
   100% {
-    transform: translate(0, 0);
+    transform: translate(10px, 10px);
   }
-  20%,
-  32% {
-    transform: translate(-7px, 7px);
+  16.67%,
+  23.33% {
+    transform: translate(0px, 16px);
   }
-  40%,
-  52% {
-    transform: translate(0, 0);
-  }
-  60%,
-  72% {
+  33.33%,
+  40% {
     transform: translate(4px, 4px);
   }
-  80%,
-  92% {
-    transform: translate(7px, -7px);
+  50%,
+  56.67% {
+    transform: translate(11px, 11px);
+  }
+  66.67%,
+  73.33% {
+    transform: translate(16px, 0px);
+  }
+  83.33%,
+  90% {
+    transform: translate(28px, 4px);
   }
 }
 @keyframes kiki-dot-2 {
   0%,
-  12%,
+  6.67%,
   100% {
-    transform: translate(14px, 0);
+    transform: translate(22px, 10px);
   }
-  20%,
-  32% {
-    transform: translate(21px, 7px);
+  16.67%,
+  23.33% {
+    transform: translate(21.33px, 16px);
   }
-  40%,
-  52% {
-    transform: translate(4.7px, 4.7px);
+  33.33%,
+  40% {
+    transform: translate(20px, 20px);
   }
-  60%,
-  72% {
-    transform: translate(10px, 4px);
+  50%,
+  56.67% {
+    transform: translate(21px, 11px);
   }
-  80%,
-  92% {
-    transform: translate(7px, 0);
+  66.67%,
+  73.33% {
+    transform: translate(16px, 10.67px);
+  }
+  83.33%,
+  90% {
+    transform: translate(20px, 12px);
   }
 }
 @keyframes kiki-dot-3 {
   0%,
-  12%,
+  6.67%,
   100% {
-    transform: translate(0, 14px);
+    transform: translate(10px, 22px);
   }
-  20%,
-  32% {
-    transform: translate(7px, 7px);
+  16.67%,
+  23.33% {
+    transform: translate(10.67px, 16px);
   }
-  40%,
-  52% {
-    transform: translate(9.3px, 9.3px);
+  33.33%,
+  40% {
+    transform: translate(12px, 12px);
   }
-  60%,
-  72% {
-    transform: translate(4px, 10px);
+  50%,
+  56.67% {
+    transform: translate(11px, 21px);
   }
-  80%,
-  92% {
-    transform: translate(7px, 14px);
+  66.67%,
+  73.33% {
+    transform: translate(16px, 21.33px);
+  }
+  83.33%,
+  90% {
+    transform: translate(12px, 20px);
   }
 }
 @keyframes kiki-dot-4 {
   0%,
-  12%,
+  6.67%,
   100% {
-    transform: translate(14px, 14px);
+    transform: translate(22px, 22px);
   }
-  20%,
-  32% {
-    transform: translate(14px, 7px);
+  16.67%,
+  23.33% {
+    transform: translate(32px, 16px);
   }
-  40%,
-  52% {
-    transform: translate(14px, 14px);
+  33.33%,
+  40% {
+    transform: translate(28px, 28px);
   }
-  60%,
-  72% {
-    transform: translate(10px, 10px);
+  50%,
+  56.67% {
+    transform: translate(21px, 21px);
   }
-  80%,
-  92% {
-    transform: translate(7px, 21px);
+  66.67%,
+  73.33% {
+    transform: translate(16px, 32px);
+  }
+  83.33%,
+  90% {
+    transform: translate(4px, 28px);
   }
 }
+
+/* The status: muted text with an accent band travelling over it. Transform only: the band's window moves one way
+   and the accent copy inside it the other way, so the letters stay put (no background-position repaint). */
 .kiki-status {
-  background: linear-gradient(
-      90deg,
-      var(--color-ink-muted) 0%,
-      var(--color-ink-muted) 40%,
-      var(--color-accent) 50%,
-      var(--color-ink-muted) 60%,
-      var(--color-ink-muted) 100%
-    )
-    0 0 / 300% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  font-size: calc(19 * var(--m));
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  color: var(--color-ink-muted);
+  font-size: max(14px, calc(22 * var(--m)));
   font-weight: 600;
-  animation: kiki-shimmer 2.2s linear infinite;
+  white-space: nowrap;
 }
-@keyframes kiki-shimmer {
+.kiki-shine {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 35%, #000 50%, transparent 65%);
+  mask-image: linear-gradient(90deg, transparent 35%, #000 50%, transparent 65%);
+  animation: kiki-shine-window 2.2s linear infinite;
+  will-change: transform;
+}
+.kiki-shine > span {
+  display: block;
+  color: var(--color-accent-deep);
+  animation: kiki-shine-text 2.2s linear infinite;
+  will-change: transform;
+}
+@keyframes kiki-shine-window {
   from {
-    background-position: 100% 0;
+    transform: translateX(-100%);
   }
   to {
-    background-position: 0 0;
+    transform: translateX(100%);
   }
+}
+@keyframes kiki-shine-text {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+/* A closed sheet (phones, tablets) is off the screen: its thinking state rests. */
+.menu-kiki-slot[inert] .kiki-dots i,
+.menu-kiki-slot[inert] .kiki-shine,
+.menu-kiki-slot[inert] .kiki-shine > span {
+  animation-play-state: paused;
 }
 .kiki-elapsed {
   color: var(--color-ink-muted);
-  font-size: calc(16 * var(--m));
+  font-size: max(13px, calc(18 * var(--m)));
   font-variant-numeric: tabular-nums;
 }
 
@@ -456,6 +508,25 @@
   background: none;
   color: var(--color-ink-muted);
   cursor: pointer;
+}
+/* «Подробнее» in the privacy line: an underlined text button (the line's own colour) */
+.kiki-privacy-more {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.kiki-privacy-more:hover,
+.kiki-privacy-more:focus-visible {
+  outline: none;
+  color: var(--color-accent-deep);
+  text-decoration-thickness: 2px;
 }
 .kiki-more:hover,
 .kiki-more:focus-visible,
@@ -601,13 +672,49 @@
 .kiki-preview::backdrop {
   background: rgb(30 26 24 / 0.35);
 }
+/* In: rise and fade (a sheet from the bottom on phones); out: the same way back; the backdrop fades with it. */
 .kiki-preview[open] {
-  animation: kiki-preview-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: kiki-preview-in 0.32s var(--ease-out-expo);
+}
+.kiki-preview[open]::backdrop {
+  animation: kiki-fade-in 0.32s var(--ease-out-expo);
+}
+.kiki-preview[data-closing] {
+  animation: kiki-preview-out 0.22s var(--ease-in-out) forwards;
+}
+.kiki-preview[data-closing]::backdrop {
+  animation: kiki-fade-out 0.22s var(--ease-in-out) forwards;
 }
 @keyframes kiki-preview-in {
   from {
     opacity: 0;
     transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes kiki-preview-out {
+  to {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes kiki-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes kiki-sheet-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes kiki-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes kiki-fade-out {
+  to {
+    opacity: 0;
   }
 }
 .kiki-preview-sheet {
@@ -813,6 +920,11 @@
   }
 }
 @media (max-width: 1023.98px) {
+  /* Beside the sheet's beige close button: the same round beige plate */
+  .kiki-more {
+    background: var(--color-surface-beige);
+    color: var(--color-ink);
+  }
   .kiki-msg,
   .kiki-greeting {
     font-size: 16px;
@@ -847,6 +959,12 @@
   .kiki-new {
     bottom: 200px;
   }
+  .kiki-preview[open] {
+    animation-name: kiki-sheet-in;
+  }
+  .kiki-preview[data-closing] {
+    animation-name: kiki-sheet-out;
+  }
   .kiki-preview {
     width: 100vw;
     max-width: none;
@@ -863,27 +981,31 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kiki-dots i {
-    animation: kiki-dot-calm 1.6s ease-in-out infinite;
-  }
   .kiki-dots i:nth-child(1) {
-    transform: translate(0, 0);
+    transform: translate(10px, 10px);
+    animation: kiki-dot-calm 1.6s var(--ease-in-out) infinite;
   }
   .kiki-dots i:nth-child(2) {
-    transform: translate(14px, 0);
+    transform: translate(22px, 10px);
+    animation: kiki-dot-calm 1.6s var(--ease-in-out) infinite;
   }
   .kiki-dots i:nth-child(3) {
-    transform: translate(0, 14px);
+    transform: translate(10px, 22px);
+    animation: kiki-dot-calm 1.6s var(--ease-in-out) infinite;
   }
   .kiki-dots i:nth-child(4) {
-    transform: translate(14px, 14px);
+    transform: translate(22px, 22px);
+    animation: kiki-dot-calm 1.6s var(--ease-in-out) infinite;
   }
-  .kiki-status {
-    animation: none;
-    background: none;
-    color: var(--color-ink-muted);
+  .kiki-shine {
+    display: none;
   }
-  .kiki-preview[open],
+  .kiki-preview[open] {
+    animation: kiki-fade-in 0.2s var(--ease-in-out);
+  }
+  .kiki-preview[data-closing] {
+    animation: kiki-fade-out 0.2s var(--ease-in-out) forwards;
+  }
   .kiki-attach.is-highlighted {
     animation: none;
   }
