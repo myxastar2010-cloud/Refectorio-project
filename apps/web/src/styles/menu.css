@@ -1088,7 +1088,8 @@
   }
   .menu-kiki-slot {
     position: fixed;
-    inset: 0 0 0 auto;
+    /* The visible band above an on-screen keyboard (useKeyboardInset) */
+    inset: var(--kiki-vv-top, 0) 0 var(--kiki-vv-bottom, 0) auto;
     z-index: var(--z-dialog);
     width: min(520px, 92vw);
     transform: translateX(105%);
@@ -1332,7 +1333,7 @@
   }
   .menu-kiki-slot {
     position: fixed;
-    inset: 0;
+    inset: var(--kiki-vv-top, 0) 0 var(--kiki-vv-bottom, 0);
     z-index: var(--z-dialog);
     width: auto;
     transform: translateY(105%);

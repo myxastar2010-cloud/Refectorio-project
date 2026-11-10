@@ -29,6 +29,7 @@ import { Markdown } from './Markdown';
 import { PreviewOverlay } from './PreviewOverlay';
 import type { ChatItem, PreviewRecord } from './session';
 import { Thinking } from './Thinking';
+import { useKeyboardInset } from './useKeyboardInset';
 
 type Props = {
   readonly catalog: Catalog | null;
@@ -94,6 +95,8 @@ export function KikiChat({
   const input = useRef<HTMLTextAreaElement>(null);
   const stick = useRef(true);
   const lastRequest = useRef<number | null>(null);
+  const root = useRef<HTMLDivElement>(null);
+  useKeyboardInset(root);
 
   useEffect(() => {
     warmKiki();
@@ -196,7 +199,7 @@ export function KikiChat({
   };
 
   return (
-    <div className="kiki-chat">
+    <div className="kiki-chat" ref={root}>
       <div className="kiki-more-wrap">
         <button
           type="button"
