@@ -48,7 +48,9 @@
     "food-data": "node packages/food-data/build/run.mjs",
     "secrets:check": "node scripts/secrets/check.mjs",
     "girl-video": "node scripts/girl-video/build.mjs",
-    "menu:sim": "node packages/menu-core/sim/run.mjs"
+    "menu:sim": "node packages/menu-core/sim/run.mjs",
+    "kiki:kb": "node scripts/lib/run-ts.mjs packages/kiki-core/build/knowledge.ts",
+    "dev:api": "node scripts/api/dev.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
