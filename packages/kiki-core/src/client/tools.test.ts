@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { estimateTokens } from '../messages';
 import { buildDigest } from './digest';
 import { fixtureEnv, FIXTURE_TODAY } from './fixture';
-import { executeTool } from './tools';
+import { executeTool, withoutNutritionNumbers } from './tools';
 
 const { env, plan } = fixtureEnv();
 const json = (v: unknown) => JSON.stringify(v);
@@ -242,5 +242,47 @@ describe('digest', () => {
     expect(quiet.env.engine.profile.safety.deemphasizeNumbers).toBe(true);
     expect(digest).not.toContain('ккал');
     expect(digest).toContain('deemphasizeNumbers=да');
+  });
+});
+
+describe('deemphasizeNumbers: tools never hand the model calories or grams', () => {
+  const quiet = fixtureEnv({
+    overrides: {
+      health: {
+        flags: ['eatingDisorderHistory'],
+        pregnancy: 'none',
+        lactation: 'none',
+        custom: [],
+      },
+    },
+  }).env;
+
+  it('the quiet fixture is quiet', () => {
+    expect(quiet.engine.profile.safety.deemphasizeNumbers).toBe(true);
+  });
+
+  it.each([
+    ['get_targets', { date: FIXTURE_TODAY }],
+    ['get_progress', { date: FIXTURE_TODAY }],
+    ['get_menu', { from: FIXTURE_TODAY, to: FIXTURE_TODAY }],
+    ['find_in_menu', { query: 'каша' }],
+  ] as const)('%s', (name, args) => {
+    const out = executeTool(quiet, name, args);
+    const text = JSON.stringify(out.result);
+    expect(text).not.toMatch(/"[A-Za-z]*(kcal|Kcal|energy|protein|Protein)[A-Za-z]*":\d/);
+    expect(text).not.toMatch(/\d\s?ккал/);
+    expect(text).toContain('numbersHidden');
+  });
+
+  it('keeps counts and drops sentences with units', () => {
+    expect(
+      withoutNutritionNumbers({
+        days: 2,
+        energyKcal: 1800,
+        proteinG: 90,
+        glasses: 8,
+        summaryRu: 'Уберу чеснок из трёх блюд. Калории в день: 1 800 → 1 750 ккал.',
+      }),
+    ).toEqual({ days: 2, glasses: 8, summaryRu: 'Уберу чеснок из трёх блюд.' });
   });
 });

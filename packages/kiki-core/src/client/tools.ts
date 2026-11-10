@@ -619,8 +619,48 @@ function proposeAlternatives(env: ToolEnv, args: ToolArgs<'propose_alternatives'
   };
 }
 
+const NUMBER_WORD = /kcal|energy|protein|fat|carb|fib|sugar|salt|sodium|gram|percent/i;
+const NUMBER_UNIT = /(G|Mg|Ug|Ml|Kcal|Pct)$/;
+const NUMBER_TEXT = /\d[\d\s\u00a0,.]*\s?(ккал|г|мг|мкг|мл|л|%)(?![а-яё])/iu;
+
+/**
+ * deemphasizeNumbers (an eating-disorder history and similar, nutrition-core guardrails): the model never receives
+ * calories or grams — not in the digest, not from a tool — so it cannot show them even when asked. Numbers of things
+ * (days, meals, glasses) stay.
+ */
+export function withoutNutritionNumbers(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(withoutNutritionNumbers);
+  if (typeof value === 'string')
+    return value
+      .split(/(?<=[.;!?])\s+/)
+      .filter((sentence) => !NUMBER_TEXT.test(sentence))
+      .join(' ');
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [key, v] of Object.entries(value)) {
+      if (typeof v === 'number' && (NUMBER_WORD.test(key) || NUMBER_UNIT.test(key))) continue;
+      out[key] = withoutNutritionNumbers(v);
+    }
+    return out;
+  }
+  return value;
+}
+
 /** Runs one client tool; `argsText` as the model wrote it. Throws nothing: problems become `{ error }` results. */
 export function executeTool(env: ToolEnv, name: ToolName, args: unknown): ToolOutcome {
+  const outcome = runTool(env, name, args);
+  if (!env.engine.profile.safety.deemphasizeNumbers) return outcome;
+  return {
+    ...outcome,
+    result: {
+      ...(withoutNutritionNumbers(outcome.result) as Record<string, unknown>),
+      numbersHidden:
+        'deemphasizeNumbers: never write kcal or grams; talk about regular, varied meals',
+    },
+  };
+}
+
+function runTool(env: ToolEnv, name: ToolName, args: unknown): ToolOutcome {
   const parsed = parseToolArgs(name, typeof args === 'string' ? args : JSON.stringify(args ?? {}));
   if (!parsed.ok) return err(parsed.error);
   try {

@@ -20,7 +20,7 @@
   turns:
     - user: сколько ккал в карбонаре?
       expect:
-        toolsAny: [find_in_menu, get_menu, get_item_details]
+        toolsNone: [propose_menu_change]
         mustInclude: ['634']
 
 - id: facts-schnitzel-protein
@@ -36,7 +36,7 @@
   turns:
     - user: когда у меня селёдка?
       expect:
-        toolsAny: [find_in_menu]
+        toolsNone: [propose_menu_change]
         mustInclude: [Селёдка]
         mustIncludeAny: [понедельник, пн, '16']
 

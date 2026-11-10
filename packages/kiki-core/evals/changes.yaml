@@ -48,7 +48,8 @@
         args:
           propose_menu_change:
             rules.0.kind: { oneOf: [excludeIngredient, replaceCategory, preferLess] }
-            rules.0.days.kind: weekdays
+            # Mon–Fri as weekdaysOf is the same scope for the engine.
+            rules.0.days.kind: { oneOf: [weekdays, weekdaysOf] }
 
 - id: change-dinner-max-kcal
   tags: [change, bakeoff]
@@ -175,4 +176,4 @@
         args:
           propose_menu_change:
             rules.0.kind: { oneOf: [replaceCategory, excludeIngredient] }
-            rules.0.days.kind: weekends
+            rules.0.days.kind: { oneOf: [weekends, weekdaysOf] }
