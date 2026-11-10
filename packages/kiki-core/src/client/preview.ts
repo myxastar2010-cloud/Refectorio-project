@@ -43,6 +43,14 @@ export type PreviewStats = {
   };
 };
 
+/** Per meal of a changed day, for the overlay (not sent to the model). */
+export type MealChange = {
+  readonly date: IsoDate;
+  readonly mealId: string;
+  readonly addedIds: readonly string[];
+  readonly removedIds: readonly string[];
+};
+
 export type Preview = {
   readonly id: string;
   readonly op: PreviewOp;
@@ -55,6 +63,7 @@ export type Preview = {
   /** Rule labels added / removed (for the overlay's «правила простыми словами»). */
   readonly rulesAdded: readonly string[];
   readonly rulesRemoved: readonly string[];
+  readonly mealChanges: readonly MealChange[];
   readonly reasonRu?: string;
 };
 
@@ -153,6 +162,11 @@ export function buildPreview(input: BuildPreviewInput): Preview {
     stats: { changedDays: days.length, days, ...(targets ? { targets } : {}) },
     rulesAdded,
     rulesRemoved,
+    mealChanges: diff.days.flatMap((d) =>
+      d.meals
+        .filter((m) => m.added.length > 0 || m.removed.length > 0)
+        .map((m) => ({ date: d.date, mealId: m.mealId, addedIds: m.added, removedIds: m.removed })),
+    ),
     ...(input.reasonRu ? { reasonRu: input.reasonRu } : {}),
   };
 }

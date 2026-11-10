@@ -20,6 +20,7 @@
   "dependencies": {
     "@refectorio/contracts": "*",
     "@refectorio/food-data": "*",
+    "@refectorio/kiki-core": "*",
     "@refectorio/menu-core": "*",
     "@refectorio/nutrition-core": "*",
     "@refectorio/taste-core": "*",

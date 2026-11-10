@@ -146,6 +146,8 @@ export { catalogView, type ItemView } from './view';
 export type {
   AlternativesMessage,
   ApplyMessage,
+  DigestMessage,
+  KikiToolMessage,
   GenerateMessage,
   MenuError,
   MenuRequest,

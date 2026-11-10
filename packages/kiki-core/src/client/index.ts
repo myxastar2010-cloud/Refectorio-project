@@ -6,3 +6,4 @@ export * from './tools';
 export * from './preview';
 export * from './digest';
 export * from './env';
+export { isToolName, type ToolName } from '../tools';

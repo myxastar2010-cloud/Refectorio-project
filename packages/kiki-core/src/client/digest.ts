@@ -12,6 +12,12 @@ export type UiState = {
   readonly selectedDate?: IsoDate;
   readonly openItemId?: string;
   readonly openPreviewId?: string;
+  /** «Заменить с ИИ» on a dish card: the exact slot the person asks about. */
+  readonly replaceSlot?: {
+    readonly date: IsoDate;
+    readonly mealId: string;
+    readonly itemId: string;
+  };
   /** Where the person is: the menu page or the full-screen chat on a phone. */
   readonly screen?: 'menu' | 'chat';
 };
@@ -54,6 +60,10 @@ export function buildDigest(env: ToolEnv, ui: UiState = {}): string {
       `открыто блюдо «${env.items.get(ui.openItemId)?.nameRu ?? ui.openItemId}» [${ui.openItemId}]`,
     );
   if (ui.openPreviewId) where.push(`открыт предпросмотр ${ui.openPreviewId}`);
+  if (ui.replaceSlot)
+    where.push(
+      `просит замену блюда «${env.items.get(ui.replaceSlot.itemId)?.nameRu ?? ui.replaceSlot.itemId}» [${ui.replaceSlot.itemId}] — ${weekdayRu(ui.replaceSlot.date)} ${ui.replaceSlot.date}, приём [${ui.replaceSlot.mealId}] (propose_alternatives)`,
+    );
   if (where.length > 0) lines.push(`Экран: ${where.join('; ')}.`);
 
   lines.push(

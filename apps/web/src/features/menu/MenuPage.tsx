@@ -28,6 +28,9 @@ import { useReplace } from './dishes/useReplace';
 import { menuClient } from './engine/client';
 import { planError } from './engine/opError';
 import { KikiPanel } from './kiki/KikiPanel';
+import { chatUi } from '../kiki/uiState';
+import { kiki } from '../../content/kiki.ru';
+import type { OpenUi } from '@refectorio/kiki-core';
 import { MealTabs } from './meals/MealTabs';
 import { useStructure } from './meals/useStructure';
 import type { Notify } from './notify';
@@ -129,6 +132,8 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const kikiSheet = useMedia(KIKI_SHEET_MEDIA);
   const kikiRef = useRef<HTMLDivElement>(null);
   const [kikiOpener, setKikiOpener] = useState<HTMLElement | null>(null);
+  /** «Заменить с ИИ»: a request the chat sends once it is ready (key: a new request each time). */
+  const [kikiRequest, setKikiRequest] = useState<{ text: string; key: number } | null>(null);
   // The opener gets the focus back on close: the button itself when known (Safari does not focus a clicked button).
   const openKiki = useCallback((opener?: HTMLElement) => {
     setKikiOpener(
@@ -292,6 +297,71 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const soon = useCallback(() => {
     onNotify(menu.demoSoon);
   }, [onNotify]);
+
+  /** The empty chat's suggestions from the person's own day (ТЗ 07 §10). */
+  const kikiSuggestions = useMemo(() => {
+    const day = plan.days.find((d) => d.date === today);
+    const dinner = meals.find((m) => m.kind === 'dinner') ?? meals.at(-1);
+    const lunchItem = day?.meals[meals.find((m) => m.kind === 'lunch')?.id ?? '']?.[0];
+    const out = [
+      ...(dinner ? [fill(kiki.suggestions.today, { meal: dinner.titleRu.toLowerCase() })] : []),
+      kiki.suggestions.fish,
+    ];
+    const dish = lunchItem ? catalog.get(lunchItem.itemId)?.nameRu : undefined;
+    if (dish) out.push(fill(kiki.suggestions.swap, { dish }));
+    return out;
+  }, [plan.days, today, meals, catalog]);
+
+  /** «Открыть …» buttons in Kiki's answers (they never navigate by themselves; ТЗ 07 §6). */
+  const openFromKiki = useCallback(
+    (ui: OpenUi) => {
+      const anchor = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      const firstDateOf = (itemId: string) =>
+        plan.days.find(
+          (d) =>
+            d.date >= today &&
+            Object.values(d.meals).some((items) => items.some((i) => i.itemId === itemId)),
+        )?.date;
+      if (kikiSheet) closeKiki();
+      switch (ui.target) {
+        case 'day':
+          if (ui.id && plan.days.some((d) => d.date === ui.id)) setDate(ui.id);
+          return;
+        case 'dish': {
+          const at = ui.id ? firstDateOf(ui.id) : undefined;
+          if (at) setDate(at);
+          return;
+        }
+        case 'search':
+          openSearch();
+          return;
+        case 'goal':
+          setGoalAt(anchor);
+          return;
+        case 'download':
+        case 'restore':
+          setMoreAt(anchor);
+          return;
+        case 'widgets':
+          setPickerAt(anchor);
+          return;
+        case 'mealEdit':
+          setEditing(true);
+          return;
+        case 'news':
+          if (anchor) setNews({ anchor, pinned: true, keys: false });
+          return;
+        case 'account':
+        case 'privacy':
+          setAccountAt(anchor);
+          return;
+        case 'recipes':
+          soon();
+          return;
+      }
+    },
+    [plan.days, today, kikiSheet, closeKiki, openSearch, soon],
+  );
 
   // Marks write into the stored tracking (never into the `?demo=week` overlay).
   const changeTracking = useCallback(
@@ -772,7 +842,19 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         inert={kikiSheet && !kikiOpen}
       >
         <m.div className="menu-kiki-intro" {...group(7)}>
-          <KikiPanel open={kikiOpen} onClose={closeKiki} onNotify={onNotify} />
+          <KikiPanel
+            open={kikiOpen}
+            onClose={closeKiki}
+            onNotify={onNotify}
+            catalog={catalog}
+            deemphasizeNumbers={deemphasizeNumbers}
+            hasMenu={answers !== null}
+            selectedDate={date}
+            today={today}
+            suggestions={kikiSuggestions}
+            onOpen={openFromKiki}
+            request={kikiRequest}
+          />
         </m.div>
       </div>
       <button
@@ -799,7 +881,21 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
         }}
         onReplaceAi={(target) => {
           setDishMenu(null);
-          setReplacing(target);
+          // Through Kiki when the network is there (ТЗ 07 §10); offline — the engine's own ranked list (phase 4).
+          if (!navigator.onLine) {
+            setReplacing(target);
+            return;
+          }
+          chatUi.replaceSlot = {
+            date: target.slot.date,
+            mealId: target.slot.meal,
+            itemId: target.itemId,
+          };
+          setKikiRequest({
+            text: fill(kiki.suggestions.swap, { dish: catalog.get(target.itemId)?.nameRu ?? '' }),
+            key: Date.now(),
+          });
+          openKiki(target.anchor);
         }}
         onReplaceSelf={() => {
           setDishMenu(null);
