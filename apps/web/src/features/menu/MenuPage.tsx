@@ -135,7 +135,11 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
   const kikiRef = useRef<HTMLDivElement>(null);
   const [kikiOpener, setKikiOpener] = useState<HTMLElement | null>(null);
   /** «Заменить с ИИ»: a request the chat sends once it is ready (key: a new request each time). */
-  const [kikiRequest, setKikiRequest] = useState<{ text: string; key: number } | null>(null);
+  const [kikiRequest, setKikiRequest] = useState<{
+    text: string;
+    key: number;
+    onFail?: () => void;
+  } | null>(null);
   // The opener gets the focus back on close: the button itself when known (Safari does not focus a clicked button).
   const openKiki = useCallback((opener?: HTMLElement) => {
     setKikiOpener(
@@ -898,6 +902,11 @@ export function MenuPage({ plan, tracking, catalog, today, intro, onHome, onNoti
           setKikiRequest({
             text: fill(kiki.suggestions.swap, { dish: catalog.get(target.itemId)?.nameRu ?? '' }),
             key: Date.now(),
+            // Kiki could not answer (asleep, down): the engine's own list, as offline.
+            onFail: () => {
+              closeKiki();
+              setReplacing(target);
+            },
           });
           openKiki(target.anchor);
         }}

@@ -136,7 +136,11 @@ test.describe('the menu', () => {
     await expect(dishMenu.getByRole('menuitem', { name: 'Заменить блюдо' })).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(dishMenu).toHaveCount(0);
-    // Right click on the card opens the same menu; hover opens the submenu; the picker lists the engine's choices.
+    // Right click on the card opens the same menu; hover opens the submenu. Kiki's server is down here: «Заменить с ИИ»
+    // falls back to the picker with the engine's choices (D-111) — the action never depends on the network.
+    await page.route('**/api/kiki/chat', (route) =>
+      route.fulfill({ status: 503, json: { code: 'provider_unavailable' } }),
+    );
     await page.locator('.dish-card').first().click({ button: 'right' });
     await dishMenu.getByRole('menuitem', { name: 'Заменить блюдо' }).hover();
     await sub.getByRole('menuitem', { name: 'Заменить с ИИ' }).click();

@@ -41,8 +41,12 @@ type Props = {
   readonly suggestions: readonly string[];
   readonly onOpen: (ui: OpenUi) => void;
   readonly onNotify: Notify;
-  /** A request to send as soon as the chat is ready («Заменить с ИИ»). */
-  readonly request?: { readonly text: string; readonly key: number } | null;
+  /** A request to send as soon as the chat is ready («Заменить с ИИ»); `onFail` runs when Kiki could not answer it. */
+  readonly request?: {
+    readonly text: string;
+    readonly key: number;
+    readonly onFail?: () => void;
+  } | null;
 };
 
 const MAX_LINES = 6;
@@ -181,9 +185,12 @@ export function KikiChat({
       // The slot of «Заменить с ИИ» belongs to this one turn.
       void send(request.text).finally(() => {
         chatUi.replaceSlot = undefined;
+        // Kiki asleep, down or offline: the action still works without her (D-111).
+        const last = session.get().items.at(-1);
+        if (last?.kind === 'error' && last.code !== 'stopped') request.onFail?.();
       });
     }
-  }, [request, hasMenu, send]);
+  }, [request, hasMenu, send, session]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
