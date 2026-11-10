@@ -14,8 +14,9 @@ import { createLimiter } from './rateLimit';
 // fetch() ignores HTTPS_PROXY unless asked (the team's VPN is the only way out to NVIDIA from Russia; Render has none).
 if (process.env.HTTPS_PROXY) http.setGlobalProxyFromEnv();
 
+/** The bake-off's order (ADR 0013, D-116): the fast Nemotron first, Mistral Large 4 as the fallback. */
 export const DEFAULT_PROVIDERS =
-  'nvidia:mistralai/mistral-large-4-1t-a52b?reasoning_effort=low,nvidia:nvidia/nemotron-3.5-super-vl-120b-a12b';
+  'nvidia:nvidia/nemotron-3.5-super-vl-120b-a12b,nvidia:mistralai/mistral-large-4-1t-a52b?reasoning_effort=low';
 
 const log = (entry: Record<string, unknown>) => {
   console.log(JSON.stringify({ t: new Date().toISOString(), ...entry }));

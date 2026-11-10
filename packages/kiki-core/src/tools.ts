@@ -21,8 +21,16 @@ const nutrient = z.enum(NUTRIENT_KEYS as [NutrientKey, ...NutrientKey[]]);
 const daysScope = z
   .object({
     kind: z.enum(['all', 'weekdays', 'weekends', 'weekdaysOf', 'dates']),
-    days: z.array(z.int().min(0).max(6)).optional().describe('weekdaysOf: 0 = Monday … 6 = Sunday'),
-    dates: z.array(isoDate).optional().describe('dates: exact days'),
+    days: z
+      .array(z.int().min(0).max(6))
+      .optional()
+      .describe('weekdaysOf: 0 = Monday … 6 = Sunday; every week («по средам», «в пн и ср»)'),
+    dates: z
+      .array(isoDate)
+      .optional()
+      .describe(
+        'dates: exact calendar days only («завтра», «15 ноября»), never for named weekdays',
+      ),
   })
   .describe('Which days; omit = every day');
 

@@ -66,8 +66,9 @@
   tags: [anchor, facts, bakeoff]
   turns:
     - user: Сколько калорий в блинах?
+      # The week in CONTEXT already has them (D-115): a tool or the digest, both places named.
       expect:
-        toolsAny: [find_in_menu, get_menu]
+        toolsNone: [propose_menu_change]
         mustInclude: ['552']
         mustIncludeAny: [вторник, вт]
 
