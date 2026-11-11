@@ -42,10 +42,11 @@ jobs:
       # e2e smoke runs in the Google Chrome the runner image ships — a failed download must not hide a green suite.
       - name: Browser for the e2e smoke
         run: |
-          if ! npx playwright install --with-deps chromium; then
+          # A stuck download counts as a failed one (the job's 30 min would otherwise run out here).
+          if ! timeout 420 npx playwright install --with-deps chromium; then
             echo "::warning::Playwright's Chromium could not be downloaded; the e2e smoke uses the runner's Chrome"
             echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"
-            npx playwright install-deps chromium || true
+            timeout 300 npx playwright install-deps chromium || true
           fi
       - name: E2E smoke (Chromium)
         run: npm run test:e2e -- --project=chromium
