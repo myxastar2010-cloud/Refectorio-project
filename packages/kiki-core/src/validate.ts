@@ -62,8 +62,9 @@ function sentences(text: string): string[] {
 
 export function groundingPool(sources: GroundingSources): Set<number> {
   const pool = new Set<number>();
+  // Dates («2026-11-11») are not amounts: their parts would ground any «11 %» (review of phase 5, M2).
   for (const text of [...sources.toolResults, sources.digest, ...sources.userTexts])
-    for (const n of extractNumbers(text)) pool.add(n);
+    for (const n of extractNumbers(text.replace(/\b\d{4}-\d{2}-\d{2}\b/g, ' '))) pool.add(n);
   return pool;
 }
 

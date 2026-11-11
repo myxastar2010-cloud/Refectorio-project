@@ -166,3 +166,31 @@ describe('repair texts', () => {
     expect(sanitizeMarkdown('<b>Привет</b>\n\n\n<script>x</script>')).toBe('Привет\n\nx');
   });
 });
+
+describe('grounding: the bypasses found in the review of phase 5 (M2)', () => {
+  const sources = {
+    toolResults: ['{"kcal":1800,"proteinG":95,"date":"2026-11-11"}'],
+    digest: 'Сегодня 2026-11-11, ср. Обед: Паста 520/30.',
+    userTexts: ['что у меня на неделе?'],
+  };
+  it.each([
+    ['a table with the unit in its header', '| День | ккал |\n|---|---|\n| пн | 2450 |'],
+    ['the unit before the number', 'ккал — 2450.'],
+    ['a kcal/protein pair', 'Обед: 650/40 (ккал/белок).'],
+    ['kilograms', 'Сбросьте 5 кг за месяц.'],
+    ['thousands', 'Около 2 тыс. ккал в день.'],
+    ['a latin unit', 'Норма 2450 kcal.'],
+    ['a percent from a date', 'Норма — 11 % белка.'],
+  ])('%s is caught', (_name, text) => {
+    expect(ungroundedNumbers(text, sources).length).toBeGreaterThan(0);
+  });
+  it.each([
+    ['grounded table', '| День | ккал | белок |\n|---|---|---|\n| ср | 1800 | 95 |'],
+    ['a grounded pair', 'Паста — 520/30.'],
+    ['dates and times', 'В среду, 11 ноября, в 12:30 — паста.'],
+    ['list numbers and small counts', '1. Паста\n2. Салат\nВсего 3 блюда.'],
+    ['thousands that are there', 'Около 1,8 тыс. ккал.'],
+  ])('%s passes', (_name, text) => {
+    expect(ungroundedNumbers(text, sources)).toEqual([]);
+  });
+});

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  groundingSources,
   runTurn,
   toProviderMessages,
   type Complete,
@@ -157,6 +158,79 @@ describe('runTurn', () => {
       ui: { kind: 'open', target: 'recipes' },
     });
     expect(final(events).text).toBe('Рецепты — в боковой панели.');
+  });
+
+  it('chips with an invented number go back to the model; the clean question is shown (M1)', async () => {
+    const { events, requests } = await run(request([{ role: 'user', content: 'Ужин поменьше' }]), [
+      call('ask_choice', { questionRu: 'Сколько оставить?', options: ['2 450 ккал', 'Как есть'] }),
+      call('ask_choice', { questionRu: 'Уменьшить ужин?', options: ['Да', 'Нет'] }, 'c-2'),
+    ]);
+    expect(requests.length).toBe(2);
+    const error = requests[1]?.messages.at(-1);
+    expect(error).toMatchObject({ role: 'tool', name: 'ask_choice' });
+    expect(JSON.stringify(error)).toContain('not shown');
+    expect(final(events).text).toBe('Уменьшить ужин?');
+  });
+
+  it('the words beside chips pass the number check; on failure the question replaces them (M1)', async () => {
+    const { events } = await run(request([{ role: 'user', content: 'Ужин поменьше' }]), [
+      {
+        ...call('ask_choice', { questionRu: 'Уменьшить ужин?', options: ['Да', 'Нет'] }),
+        content: 'Ваша норма — 2 450 ккал. Уменьшить ужин?',
+      },
+    ]);
+    expect(final(events)).toMatchObject({ text: 'Уменьшить ужин?', replaced: true });
+  });
+
+  it('a proposal with an amount the user never said goes back to the model (M3)', async () => {
+    const rule = {
+      kind: 'minNutrient',
+      nutrient: 'proteinG',
+      per: 'meal',
+      meals: ['dinner'],
+      value: 35,
+      textRu: 'Ужин — от 35 г белка',
+    };
+    const asked = await run(request([{ role: 'user', content: 'Хочу больше белка на ужин' }]), [
+      call('propose_menu_change', { rules: [rule], reasonRu: 'больше белка' }),
+      say('Сколько граммов белка на ужин вы хотите?'),
+    ]);
+    expect(types(asked.events)).not.toContain('tool-call');
+    expect(JSON.stringify(asked.requests[1]?.messages.at(-1))).toContain(
+      'amounts not from the user',
+    );
+
+    const said = await run(request([{ role: 'user', content: 'Хочу от 35 г белка на ужин' }]), [
+      call('propose_menu_change', { rules: [rule], reasonRu: 'больше белка' }),
+    ]);
+    expect(types(said.events)).toContain('tool-call');
+  });
+
+  it('echoed arguments and the model-written summary never ground a number (M3)', () => {
+    const sources = groundingSources(
+      [
+        { role: 'user', content: 'Без творога' },
+        {
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            { id: 'c1', name: 'resolve_food_terms', args: '{"terms":["350 г творога"]}' },
+          ],
+        },
+        {
+          role: 'tool',
+          callId: 'c1',
+          name: 'resolve_food_terms',
+          content: '{"matched":[{"term":"350 г творога","category":"cottage_cheese"}],"kcal":120}',
+        },
+      ],
+      '',
+      { memory: { summary: 'Норма 2450 ккал.', facts: ['Не ест творог'] } },
+    );
+    const all = [...sources.toolResults, ...sources.userTexts].join(' ');
+    expect(all).not.toContain('350');
+    expect(all).not.toContain('2450');
+    expect(all).toContain('120');
   });
 
   it('bad arguments and unknown tools go back to the model as errors', async () => {

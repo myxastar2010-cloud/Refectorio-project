@@ -33,13 +33,79 @@ import {
   type ProviderTool,
   type ToolName,
 } from './tools';
+import { extractQuantities, isGrounded } from './numbers';
 import {
   correctionPrompt,
   fallbackAnswer,
+  groundingPool,
   sanitizeMarkdown,
   validateAnswer,
   type GroundingSources,
+  type Issue,
 } from './validate';
+
+/** Checks that matter for chips and short questions (length and language do not). */
+const SHORT_TEXT_CODES = new Set<Issue['code']>([
+  'ungroundedNumber',
+  'identity',
+  'diagnosis',
+  'dosing',
+  'link',
+]);
+const shortTextIssues = (texts: readonly string[], sources: GroundingSources): Issue[] =>
+  texts.flatMap((t) => validateAnswer(t, sources)).filter((i) => SHORT_TEXT_CODES.has(i.code));
+
+/** Keys whose text the model wrote itself: never a source for grounding (review of phase 5, M3). */
+const ECHO_KEYS = new Set([
+  'term',
+  'terms',
+  'textRu',
+  'summaryRu',
+  'reasonRu',
+  'rulesAdded',
+  'rulesRemoved',
+  'questionRu',
+]);
+function withoutEcho(content: string): string {
+  try {
+    return JSON.stringify(
+      JSON.parse(content, (key: string, value: unknown) =>
+        ECHO_KEYS.has(key) ? undefined : value,
+      ),
+    );
+  } catch {
+    return content;
+  }
+}
+
+/**
+ * Numbers a proposal would make the engine hold (a rule's amount, its label, a target weight) must come from the
+ * person's words, tool results or the digest — the model never picks an amount itself (review of phase 5, M3).
+ */
+function proposalNumbers(
+  name: string,
+  args: unknown,
+): { value: number; raw: string; unit: string }[] {
+  const out: { value: number; raw: string; unit: string }[] = [];
+  const a = args as {
+    rules?: { value?: number; textRu?: string; nutrient?: string }[];
+    targetWeightKg?: number;
+  };
+  if (name === 'propose_menu_change')
+    for (const r of a.rules ?? []) {
+      if (typeof r.value === 'number')
+        out.push({
+          value: r.value,
+          raw: String(r.value),
+          unit: r.nutrient === 'energyKcal' ? 'kcal' : 'g',
+        });
+      for (const q of extractQuantities(r.textRu ?? ''))
+        out.push({ value: q.value, raw: q.raw, unit: q.unit });
+    }
+  if (name === 'propose_goal_change' && typeof a.targetWeightKg === 'number')
+    out.push({ value: a.targetWeightKg, raw: `${String(a.targetWeightKg)} кг`, unit: 'kg' });
+  return out;
+}
 
 export type ProviderMessage =
   | { readonly role: 'system' | 'user'; readonly content: string }
@@ -137,11 +203,12 @@ export function groundingSources(
   const userTexts: string[] = [];
   for (let i = start; i < messages.length; i++) {
     const m = messages[i];
-    if (m?.role === 'tool') toolResults.push(m.content);
+    if (m?.role === 'tool') toolResults.push(withoutEcho(m.content));
     if (m?.role === 'user') userTexts.push(m.content);
   }
   if (extra.knowledge) toolResults.push(extra.knowledge);
-  if (extra.memory) userTexts.push(extra.memory.facts.join('\n'), extra.memory.summary);
+  // Pinned facts are the person's own; the rolling summary is the model's prose — never a source (M3).
+  if (extra.memory) userTexts.push(extra.memory.facts.join('\n'));
   return { toolResults, digest, userTexts };
 }
 
@@ -286,6 +353,20 @@ export async function runTurn(
         } else if (kind === 'ui') {
           if (call.name === 'ask_choice') {
             const args = parsed.args as { questionRu: string; options: string[] };
+            // Chips are Kiki's words too: an invented number or a vendor in them goes back to the model (M1).
+            const issues = shortTextIssues(
+              [args.questionRu, ...args.options],
+              groundingSources(working, request.digest, { knowledge: knowledge.text, memory }),
+            );
+            if (issues.length > 0) {
+              const message = toolResult(call, {
+                error: `not shown: ${issues.map((i) => `${i.code} ${i.detail ?? ''}`).join('; ')}. Ask again without them.`,
+              });
+              working.push(message);
+              produced.push(message);
+              onlyUi = false;
+              continue;
+            }
             question = args.questionRu;
             emit({
               type: 'ui',
@@ -303,6 +384,23 @@ export async function runTurn(
           produced.push(message);
         } else {
           onlyUi = false;
+          const invented = proposalNumbers(call.name, parsed.args).filter(
+            (n) =>
+              !isGrounded(
+                { value: n.value, unit: n.unit as never, raw: n.raw, decimals: 0 },
+                groundingPool(
+                  groundingSources(working, request.digest, { knowledge: knowledge.text }),
+                ),
+              ),
+          );
+          if (invented.length > 0) {
+            const message = toolResult(call, {
+              error: `amounts not from the user: ${invented.map((n) => n.raw).join(', ')}. Ask the user how much, or propose without an amount.`,
+            });
+            working.push(message);
+            produced.push(message);
+            continue;
+          }
           client.push({ call, args: parsed.args });
         }
       }
@@ -316,11 +414,19 @@ export async function runTurn(
       }
       if (onlyUi) {
         // A question with chips or a button ends the turn: no second model call for a sentence it already wrote.
-        const text = sanitizeMarkdown(result.content) || question;
+        let text = sanitizeMarkdown(result.content) || question;
         if (text) {
+          // The words beside the chips pass the same checks as any answer (M1); the checked question replaces them.
+          const sources = groundingSources(working, request.digest, {
+            knowledge: knowledge.text,
+            memory,
+          });
+          const issues = validateAnswer(text, sources).filter((i) => SHORT_TEXT_CODES.has(i.code));
+          const replaced = issues.length > 0;
+          if (replaced) text = question || fallbackAnswer(issues);
           const answer: WireMessage = { role: 'assistant', content: text };
           produced.push(answer);
-          emit({ type: 'final', text, replaced: false, messages: produced, model, usage });
+          emit({ type: 'final', text, replaced, messages: produced, model, usage });
           return;
         }
       }
