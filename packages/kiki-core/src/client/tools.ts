@@ -541,12 +541,24 @@ function proposeMenuChange(env: ToolEnv, args: ToolArgs<'propose_menu_change'>):
     return err(`unknown rule ids ${unknown.join(', ')}`, 'see get_profile_summary');
   if (args.rules.length === 0 && remove.size === 0) return err('nothing to change');
   const added: Rule[] = [];
+  // The same rule proposed again (its id is a hash of the request) is already in effect: never twice in the plan
+  // (review of phase 5, minor 8).
+  const kept = env.plan.rules.filter((r) => !remove.has(r.id));
+  const sameAs = (a: Rule, b: Rule) => a.id.replace(/-\d+$/u, '') === b.id.replace(/-\d+$/u, '');
+  let repeated = 0;
   for (const [i, input] of args.rules.entries()) {
     const r = toRule(env, input, i);
     if (!r.ok) return err(r.error);
-    added.push(r.rule);
+    if (kept.some((k) => k.active && sameAs(k, r.rule)) || added.some((a) => sameAs(a, r.rule)))
+      repeated++;
+    else added.push(r.rule);
   }
-  const rules = [...env.plan.rules.filter((r) => !remove.has(r.id)), ...added];
+  if (added.length === 0 && remove.size === 0 && repeated > 0)
+    return err(
+      'this rule is already in effect',
+      'tell the user it already works; nothing to change',
+    );
+  const rules = [...kept, ...added];
   return propose(
     env,
     { kind: 'rules', rules },

@@ -266,10 +266,10 @@ export async function streamChat(options: StreamOptions): Promise<ProviderResult
     .map((c) => ({ id: c.id || fallbackId(), name: c.name, args: c.args }));
   if (toolCalls.length === 0 && looksLikeCallStart(content)) {
     const recovered = recoverToolCalls(content);
-    if (recovered) {
-      toolCalls = recovered;
-      content = '';
-    }
+    if (recovered) toolCalls = recovered;
+    // A call written as text that could not be read is never shown as an answer (raw JSON): the text is dropped,
+    // and with nothing else the next model in the chain answers (review of phase 5, minor 10).
+    content = '';
   }
   if (!content.trim() && toolCalls.length === 0)
     throw new ProviderError('empty', null, flags.streamed, 'empty answer');

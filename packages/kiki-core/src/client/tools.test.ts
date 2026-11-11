@@ -137,6 +137,18 @@ describe('propose tools', () => {
     expect(withGarlic.length).toBe(0);
   });
 
+  it('a rule already in effect is never added twice (minor 8)', () => {
+    const args = {
+      rules: [{ kind: 'excludeIngredient', target: { category: 'garlic' }, textRu: 'Без чеснока' }],
+      reasonRu: 'не ем чеснок',
+    };
+    const first = executeTool(env, 'propose_menu_change', args).previews?.[0];
+    if (!first) throw new Error('no preview');
+    const again = executeTool({ ...env, plan: first.plan }, 'propose_menu_change', args);
+    expect(json(again.result)).toContain('already in effect');
+    expect(again.previews ?? []).toEqual([]);
+  });
+
   it('invented ids and unknown rules are refused with a hint', () => {
     expect(
       json(

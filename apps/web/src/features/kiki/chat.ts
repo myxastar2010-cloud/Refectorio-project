@@ -75,7 +75,13 @@ export type ComputedPreview = {
   readonly fresh?: Pick<Preview, 'op' | 'rulesAdded' | 'rulesRemoved' | 'summaryRu'>;
 };
 const previewPlans = new Map<string, ComputedPreview>();
-const previewPrefix = `k${Math.random().toString(36).slice(2, 6)}-`;
+const visitPrefix = `k${Math.random().toString(36).slice(2, 6)}-`;
+let prefixCounter = 0;
+/**
+ * A fresh prefix per tool run: the worker's own counter starts over when the worker is recreated after a time-out, so
+ * ids are made unique here, in the main thread (review of phase 5, minor 4).
+ */
+const nextPreviewPrefix = () => `${visitPrefix}${(prefixCounter++).toString(36)}.`;
 let idCounter = 0;
 const newId = () => `${Date.now().toString(36)}${(idCounter++).toString(36)}`;
 
@@ -117,7 +123,7 @@ export function chatSession(): ChatSession {
         plan,
         tracking,
         today,
-        previewPrefix,
+        previewPrefix: nextPreviewPrefix(),
       });
       if (answer.type !== 'kiki') return { result: { error: 'tool failed' }, previews: [] };
       const previews = answer.previews as Preview[];
@@ -157,7 +163,7 @@ export function chatSession(): ChatSession {
     newId,
     online: () => typeof navigator === 'undefined' || navigator.onLine,
     announce: (text) => {
-      announcer?.(text);
+      announceSoon(text);
     },
   });
   session = created;
@@ -188,6 +194,26 @@ export function chatSession(): ChatSession {
 let announcer: ((text: string) => void) | null = null;
 export function setAnnouncer(fn: ((text: string) => void) | null): void {
   announcer = fn;
+}
+
+/** The polite live region changes at most this often: sentences in between are joined (`.claude/rules/kiki.md`). */
+export const ANNOUNCE_EVERY_MS = 1500;
+let pendingSpeech = '';
+let speechTimer: ReturnType<typeof setTimeout> | null = null;
+let lastSpokenAt = Number.NEGATIVE_INFINITY;
+function flushSpeech() {
+  speechTimer = null;
+  if (!pendingSpeech) return;
+  lastSpokenAt = performance.now();
+  announcer?.(pendingSpeech);
+  pendingSpeech = '';
+}
+/** Queues text for the screen reader; streamed sentences are spoken in batches, never more than once a 1,5 s (minor 9). */
+function announceSoon(text: string) {
+  pendingSpeech = pendingSpeech ? `${pendingSpeech} ${text}` : text;
+  if (speechTimer) return;
+  const wait = Math.max(0, lastSpokenAt + ANNOUNCE_EVERY_MS - performance.now());
+  speechTimer = setTimeout(flushSpeech, wait);
 }
 
 export function useChat(): ChatState {
@@ -236,7 +262,7 @@ export async function previewPlan(record: PreviewRecord): Promise<ComputedPrevie
         plan,
         tracking,
         today,
-        previewPrefix,
+        previewPrefix: nextPreviewPrefix(),
       });
       const p = answer.type === 'kiki' ? (answer.previews as Preview[])[0] : undefined;
       if (!p) return null;

@@ -314,6 +314,20 @@ describe('provider', () => {
     expect(out.model).toBe('served');
   });
 
+  it('a call written as text that cannot be read is never an answer (minor 10)', async () => {
+    const text: string[] = [];
+    await expect(
+      streamChat({
+        ...base,
+        fetchImpl: fakeFetch(
+          sse([{ choices: [{ delta: { content: '[TOOL_CALLS][{"name": get_menu, oops' } }] }]),
+        ),
+        request: { messages: [], maxTokens: 10, onText: (t) => text.push(t) },
+      }),
+    ).rejects.toMatchObject({ code: 'empty' });
+    expect(text).toEqual([]);
+  });
+
   it('recovers calls written as text and never shows them', async () => {
     const text: string[] = [];
     const out = await streamChat({

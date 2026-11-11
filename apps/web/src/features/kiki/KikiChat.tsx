@@ -182,12 +182,16 @@ export function KikiChat({
   useEffect(() => {
     if (request && request.key !== lastRequest.current && hasMenu) {
       lastRequest.current = request.key;
+      // Kiki is busy with another answer: the click still works — the engine's own list at once, and the slot never
+      // leaks into the running turn (review of phase 5, minor 2).
+      const busy = session.get().busy !== null;
       // The slot of «Заменить с ИИ» belongs to this one turn.
+      // (`send` does nothing while a turn runs.)
       void send(request.text).finally(() => {
         chatUi.replaceSlot = undefined;
         // Kiki asleep, down or offline: the action still works without her (D-111).
         const last = session.get().items.at(-1);
-        if (last?.kind === 'error' && last.code !== 'stopped') request.onFail?.();
+        if (busy || (last?.kind === 'error' && last.code !== 'stopped')) request.onFail?.();
       });
     }
   }, [request, hasMenu, send, session]);
