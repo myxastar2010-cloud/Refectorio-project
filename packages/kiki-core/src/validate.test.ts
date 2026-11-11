@@ -19,7 +19,7 @@ const src = (toolResults: string[], digest = '', userTexts: string[] = []): Grou
 describe('numbers', () => {
   it('parses Russian numbers', () => {
     expect(parseRuNumber('1 500')).toBe(1500);
-    expect(parseRuNumber('1 500')).toBe(1500);
+    expect(parseRuNumber('1\u00a0500')).toBe(1500);
     expect(parseRuNumber('1,5')).toBe(1.5);
   });
 
@@ -124,6 +124,28 @@ describe('validateAnswer', () => {
       validateAnswer('Смотрите https://example.com/x', src(['url: https://example.com/x'])),
     ).toEqual([]);
     expect(validateAnswer('Сайт: https://refectorio.onrender.com/#menu', src([]))).toEqual([]);
+    // Minor 1: no other *.github.io page, no prefix of an allowed link.
+    expect(validateAnswer('См. https://evil.github.io/x', src([]))[0]?.code).toBe('link');
+    expect(
+      validateAnswer('См. https://example.com/x', src(['url: https://example.com/x/y']))[0]?.code,
+    ).toBe('link');
+    expect(
+      validateAnswer('Источник: https://example.com/x.', src(['{"url":"https://example.com/x"}'])),
+    ).toEqual([]);
+  });
+
+  it('quiet mode: no calories, grams or percent even when grounded (M10)', () => {
+    const quiet = {
+      toolResults: ['{"kcal":520,"proteinG":30}'],
+      digest: 'Флаги: audience=adult; deemphasizeNumbers=да; noWeightGoals=да.',
+      userTexts: ['сколько калорий в пасте?'],
+    };
+    expect(validateAnswer('В пасте 520 ккал.', quiet).map((i) => i.code)).toContain('quietNumbers');
+    expect(validateAnswer('Паста — сытный обед. Выпейте 2 стакана воды.', quiet)).toEqual([]);
+    expect(
+      validateAnswer('В пасте 520 ккал.', { ...quiet, digest: 'deemphasizeNumbers=нет' }),
+    ).toEqual([]);
+    expect(fallbackAnswer([{ code: 'quietNumbers' }])).not.toMatch(/\d/);
   });
 
   it('caps length and asks for Russian', () => {

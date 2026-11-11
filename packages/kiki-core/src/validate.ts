@@ -14,6 +14,7 @@ export const ISSUE_CODES = [
   'tooLong',
   'notRussian',
   'empty',
+  'quietNumbers',
 ] as const;
 export type IssueCode = (typeof ISSUE_CODES)[number];
 export type Issue = { readonly code: IssueCode; readonly detail?: string };
@@ -44,7 +45,19 @@ const NUMBER_WITH_MASS = /\d[\d\s.,]*\s*(мг|мкг|г)(?![а-яё])/iu;
 
 const URL = /https?:\/\/[^\s)<>»"']+/giu;
 /** The site itself: links to it are always fine. */
-export const SITE_HOSTS = ['refectorio.onrender.com', 'localhost', '127.0.0.1'];
+export const SITE_HOSTS = [
+  'refectorio.onrender.com',
+  'myxastar2010-cloud.github.io',
+  'localhost',
+  '127.0.0.1',
+];
+/** A URL as written in prose or JSON: without the sentence's last dot or comma. */
+const trimUrl = (url: string) => url.replace(/[.,;:!?]+$/u, '');
+
+/** The digest's flag line (client/digest.ts) for people who asked not to see numbers. */
+const QUIET_FLAG = /deemphasizeNumbers=да/u;
+/** Water (мл, л, стаканы) and counts stay: they are not what the screening flag is about. */
+const QUIET_UNITS = new Set<string>(['kcal', 'g', 'kg', 'mg', 'mcg', 'percent', 'any']);
 
 export const MAX_ANSWER_CHARS = 1500;
 export const MAX_TABLE_ANSWER_CHARS = 3000;
@@ -91,6 +104,15 @@ export function validateAnswer(text: string, sources: GroundingSources): Issue[]
   for (const raw of ungroundedNumbers(clean, sources))
     issues.push({ code: 'ungroundedNumber', detail: raw });
 
+  // The screening flag (eating-disorder history): no calories, grams or percent at all, even grounded or asked for —
+  // the guardrail never rests on the prompt alone (review of phase 5, M10).
+  if (QUIET_FLAG.test(sources.digest))
+    for (const q of extractQuantities(clean))
+      if (QUIET_UNITS.has(q.unit)) {
+        issues.push({ code: 'quietNumbers', detail: q.raw });
+        break;
+      }
+
   const vendor = VENDOR.exec(clean);
   if (vendor) issues.push({ code: 'identity', detail: vendor[0] });
 
@@ -108,12 +130,12 @@ export function validateAnswer(text: string, sources: GroundingSources): Issue[]
     }
   }
 
-  const allowed = sources.toolResults.join('\n');
+  // Links: the site's own hosts, or a URL exactly as a tool of this turn returned it — not any *.github.io page and
+  // not a prefix of an allowed link (review of phase 5, minor 1).
+  const allowed = new Set(sources.toolResults.flatMap((t) => t.match(URL) ?? []).map(trimUrl));
   for (const url of clean.match(URL) ?? []) {
     const host = hostOf(url);
-    const fine =
-      host !== null &&
-      (SITE_HOSTS.includes(host) || host.endsWith('.github.io') || allowed.includes(url));
+    const fine = host !== null && (SITE_HOSTS.includes(host) || allowed.has(trimUrl(url)));
     if (!fine) issues.push({ code: 'link', detail: url });
   }
 
@@ -151,6 +173,10 @@ export function correctionPrompt(issues: readonly Issue[]): string {
     lines.push('Remove links that did not come from this turn’s tool results.');
   if (issues.some((i) => i.code === 'tooLong'))
     lines.push('Make the answer much shorter: 1–4 sentences, a list only if needed.');
+  if (issues.some((i) => i.code === 'quietNumbers'))
+    lines.push(
+      'This person asked not to see numbers: no calories, grams, kilograms or percent at all, even if asked — describe food and portions in words.',
+    );
   if (issues.some((i) => i.code === 'notRussian')) lines.push('Answer in Russian.');
   if (issues.some((i) => i.code === 'empty')) lines.push('Write a short answer in Russian.');
   return `Your previous answer failed an automatic check. Rewrite it (no tool calls), keep everything else:\n- ${lines.join('\n- ')}`;
@@ -161,6 +187,8 @@ export function fallbackAnswer(issues: readonly Issue[]): string {
   if (issues.some((i) => i.code === 'identity')) return IDENTITY_RU;
   if (issues.some((i) => i.code === 'dosing' || i.code === 'diagnosis'))
     return 'С этим вопросом лучше к врачу: он учтёт ваше здоровье и анализы. А с меню и привычками я помогу.';
+  if (issues.some((i) => i.code === 'quietNumbers'))
+    return 'Давайте без цифр: меню уже собрано под вас. Могу рассказать, что в нём, или помочь что-то поменять.';
   if (issues.some((i) => i.code === 'ungroundedNumber'))
     return 'Не хочу называть цифры наугад. Точные значения — в подробностях блюда, во вкладке «КБЖУ», и в карточке дня.';
   return 'Не получилось ответить как следует. Попробуйте переформулировать вопрос.';

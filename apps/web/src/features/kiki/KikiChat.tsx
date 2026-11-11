@@ -248,7 +248,7 @@ export function KikiChat({
 
   const apply = async (record: PreviewRecord) => {
     closePreview();
-    const outcome = await applyPreview(record, onNotify);
+    const outcome = await applyPreview(record, onNotify, { deemphasizeNumbers });
     if (outcome === 'applied') session.settle(record.id, 'applied', kiki.preview.applied);
     else onNotify(kiki.preview.failed);
   };

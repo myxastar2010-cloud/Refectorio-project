@@ -53,6 +53,7 @@ const SHORT_TEXT_CODES = new Set<Issue['code']>([
   'diagnosis',
   'dosing',
   'link',
+  'quietNumbers',
 ]);
 const shortTextIssues = (texts: readonly string[], sources: GroundingSources): Issue[] =>
   texts.flatMap((t) => validateAnswer(t, sources)).filter((i) => SHORT_TEXT_CODES.has(i.code));

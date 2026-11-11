@@ -278,7 +278,20 @@ export async function previewPlan(record: PreviewRecord): Promise<ComputedPrevie
 
 const applying = new Set<string>();
 
-export async function applyPreview(record: PreviewRecord, notify: Notify): Promise<ApplyOutcome> {
+/** Sentences with calories, grams or percent — left out of a letter for someone who asked not to see numbers. */
+const NUMBER_SENTENCE = /\d[\d\s\u00a0\u202f.,→-]*\s*(ккал|г|мг|мкг|%)(?![а-яё])/iu;
+export function quietLetterText(text: string): string {
+  return text
+    .split(/(?<=[.;!?])\s+/u)
+    .filter((sentence) => !NUMBER_SENTENCE.test(sentence))
+    .join(' ');
+}
+
+export async function applyPreview(
+  record: PreviewRecord,
+  notify: Notify,
+  { deemphasizeNumbers = false }: { readonly deemphasizeNumbers?: boolean } = {},
+): Promise<ApplyOutcome> {
   // Once only: an applied or dismissed card never applies again; a second click while it runs is ignored.
   if (record.status !== 'pending' || applying.has(record.id)) return 'failed';
   applying.add(record.id);
@@ -292,18 +305,14 @@ export async function applyPreview(record: PreviewRecord, notify: Notify): Promi
     const before = answers;
     const nextAnswers = op.kind === 'goal' ? (op.answers as typeof answers) : answers;
     const applied = computed.plan;
+    const summary = computed.fresh?.summaryRu || record.summaryRu || '';
+    // The receipt letter: no calories or grams for someone who asked not to see numbers (review of phase 5, M10).
+    const letterText =
+      (deemphasizeNumbers ? quietLetterText(summary) : summary) || kiki.preview.done;
     // Committed only if the menu is still the one it was computed on (another tab, a mark in between → recompute).
     const written = store.commitPlanIf(plan, applied, (data) => ({
       ...(op.kind === 'goal' ? { answers: nextAnswers } : {}),
-      letters: [
-        ...data.letters,
-        changeLetter(
-          data.letters,
-          computed.fresh?.summaryRu || record.summaryRu || kiki.preview.done,
-          new Date(),
-          Math.random,
-        ),
-      ],
+      letters: [...data.letters, changeLetter(data.letters, letterText, new Date(), Math.random)],
     }));
     if (!written) return 'failed';
     previewPlans.delete(record.id);
