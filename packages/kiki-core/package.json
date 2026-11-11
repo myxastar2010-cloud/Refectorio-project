@@ -1,0 +1,23 @@
+{
+  "name": "@refectorio/kiki-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ПроЛанч — ядро Кики: протокол чата, инструменты, сводка контекста, память, валидаторы ответа, база знаний. Чистый TypeScript, общий для сайта и сервера.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./knowledge/kb.json": "./knowledge/kb.json",
+    "./client/fixture": "./src/client/fixture.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@refectorio/food-data": "*",
+    "@refectorio/menu-core": "*",
+    "@refectorio/nutrition-core": "*",
+    "zod": "^4.6.5"
+  }
+}

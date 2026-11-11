@@ -1,0 +1,89 @@
+# The user's behaviour anchors (ТЗ 07 §1), adapted to the fixture plan (Tue 2026-11-10, seed 7). Scenarios 7 and 8 need
+# web search and recipe edits (Part II) — they live in part2.yaml later.
+- id: anchor-1-arithmetic
+  tags: [anchor, offtopic, bakeoff]
+  turns:
+    - user: Сколько будет 3+64?
+      expect: { tools: [], mustInclude: ['67'], maxChars: 200 }
+
+- id: anchor-2-dinner-protein
+  tags: [anchor, change, bakeoff]
+  turns:
+    - user: Хочу, чтобы все ужины каждый день были минимум с 20 г белка
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change:
+            rules.0.kind: minNutrient
+            rules.0.nutrient: proteinG
+            rules.0.value: 20
+            rules.0.per: meal
+            rules.0.meals: [dinner]
+        askChoice: false
+
+- id: anchor-3-garlic-then-millet
+  tags: [anchor, change, bakeoff]
+  turns:
+    - user: 'Забыл указать: у меня аллергия на чеснок'
+      expect:
+        tools: [resolve_food_terms, propose_menu_change]
+        args:
+          propose_menu_change: { rules.0.kind: excludeIngredient, rules.0.target.category: garlic }
+    - user: ещё я не люблю пшёнку
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change: { rules.0.target.category: millet }
+
+- id: anchor-4-eggs-then-days
+  tags: [anchor, change, bakeoff]
+  turns:
+    - user: Хочу каждый завтрак — яйца
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change:
+            {
+              rules.0.kind: { oneOf: [includeItem, frequency, preferMore] },
+              rules.0.meals: [breakfast],
+            }
+        mustIncludeAny: [разнообраз, врач, ЛПНП, холестерин]
+    - user: тогда только в понедельник и среду
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change: { rules.0.days.kind: weekdaysOf, rules.0.days.days: [0, 2] }
+
+- id: anchor-5-download-thanks
+  tags: [anchor, howto, bakeoff]
+  turns:
+    - user: Как скачать меню?
+      expect: { toolsNone: [propose_menu_change], mustInclude: [Скачать меню] }
+    - user: Спасибо!
+      expect: { tools: [], maxChars: 160 }
+
+- id: anchor-6-blini-kcal
+  tags: [anchor, facts, bakeoff]
+  turns:
+    - user: Сколько калорий в блинах?
+      # The week in CONTEXT already has them (D-115): a tool or the digest, both places named.
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: ['552']
+        mustIncludeAny: [вторник, вт]
+
+- id: anchor-9-maintain-then-tweaks
+  tags: [anchor, goal, change, bakeoff]
+  fixture: lose
+  turns:
+    - user: Решила не худеть, а поддерживать вес
+      expect:
+        tools: [propose_goal_change]
+        args: { propose_goal_change: { goal: maintain } }
+    - user: и ещё — меньше зелени, кофе замени на чай, и как посмотреть рецепты?
+      expect:
+        tools: [propose_menu_change]
+        args:
+          propose_menu_change:
+            { rules.0.kind: { oneOf: [preferLess, replaceCategory, excludeIngredient] } }
+        mustInclude: [Рецепт]

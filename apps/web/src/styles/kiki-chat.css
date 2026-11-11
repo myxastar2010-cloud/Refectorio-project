@@ -1,0 +1,1065 @@
+/* Kiki's chat (ТЗ 07 §10, the right panel of «дизайн меню.jpg»): user messages are accent bubbles on the right, Kiki's
+   are plain text on the left; the log fades out under the header; the proposal card is the black pill with «открыть»
+   in the accent. Sizes in the panel's --m unit (styles/menu.css). */
+
+.kiki-chat {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.kiki-chat .kiki-log {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(28 * var(--m)) 0 calc(18 * var(--m));
+  /* Messages fade out under the header (the mockup's soft top edge). */
+  mask-image: linear-gradient(to bottom, transparent 0, #000 calc(56 * var(--m)));
+  scrollbar-width: thin;
+  outline: none;
+}
+
+.kiki-messages {
+  display: flex;
+  flex-direction: column;
+  gap: calc(22 * var(--m));
+  list-style: none;
+}
+
+.kiki-msg {
+  position: relative;
+  font-size: calc(22 * var(--m));
+  font-weight: 500;
+  line-height: 1.35;
+}
+.kiki-msg--user {
+  display: flex;
+  justify-content: flex-end;
+}
+.kiki-bubble {
+  max-width: 82%;
+  padding: calc(16 * var(--m)) calc(30 * var(--m));
+  border-radius: calc(40 * var(--m));
+  /* White text on the accent: the fill tone for contrast (D-065, D-104). */
+  background: var(--color-accent-fill);
+  color: #fff;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.kiki-msg--kiki {
+  max-width: 94%;
+  color: var(--color-ink);
+}
+.kiki-msg--note {
+  align-self: center;
+  color: var(--color-ink-muted);
+  font-size: calc(18 * var(--m));
+}
+.kiki-msg--error {
+  color: var(--color-ink);
+}
+.kiki-msg--error p {
+  color: var(--color-ink-muted);
+}
+
+/* Markdown inside Kiki's replies */
+.kiki-text > * + * {
+  margin-top: calc(10 * var(--m));
+}
+.kiki-text ul,
+.kiki-text ol {
+  padding-left: 1.2em;
+}
+.kiki-text ul {
+  list-style: disc;
+}
+.kiki-text ol {
+  list-style: decimal;
+}
+.kiki-text li + li {
+  margin-top: calc(4 * var(--m));
+}
+.kiki-text strong {
+  font-weight: 700;
+}
+.kiki-text a {
+  color: var(--color-accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.kiki-text code {
+  padding: 0 0.25em;
+  border-radius: 0.3em;
+  background: var(--color-surface-beige);
+  font-size: 0.92em;
+}
+.kiki-md-table {
+  overflow-x: auto;
+  border-radius: calc(16 * var(--m));
+  background: var(--color-surface-beige);
+  outline: none;
+}
+.kiki-md-table table {
+  border-collapse: collapse;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+.kiki-md-table th,
+.kiki-md-table td {
+  padding: calc(8 * var(--m)) calc(14 * var(--m));
+  text-align: left;
+}
+.kiki-md-table th {
+  font-weight: 700;
+}
+.kiki-md-table tr + tr td {
+  border-top: 1px solid rgb(0 0 0 / 0.07);
+}
+
+.kiki-corrected {
+  display: inline-block;
+  margin-top: calc(6 * var(--m));
+  color: var(--color-ink-muted);
+  font-size: calc(15 * var(--m));
+}
+
+/* The proposal card: the mockup's black pill «Изменения меню» + «открыть» */
+.kiki-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: calc(16 * var(--m));
+  padding: calc(18 * var(--m)) calc(34 * var(--m));
+  border: 0;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  font-size: calc(26 * var(--m));
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.25s;
+}
+.kiki-card-open {
+  color: var(--color-accent);
+  font-size: calc(22 * var(--m));
+}
+.kiki-card:hover,
+.kiki-card:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+}
+.kiki-card:focus-visible .kiki-card-open {
+  text-decoration: underline;
+}
+.kiki-card.is-settled {
+  opacity: 0.55;
+}
+
+/* Chips: suggestions, a choice, an «Открыть …» button */
+.kiki-choices,
+.kiki-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(10 * var(--m));
+  margin-top: calc(14 * var(--m));
+}
+.kiki-chip {
+  min-height: 44px;
+  padding: calc(10 * var(--m)) calc(22 * var(--m));
+  border: var(--menu-border) solid var(--color-accent);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: max(14px, calc(19 * var(--m)));
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.kiki-chip--open {
+  display: inline-flex;
+  margin-top: calc(12 * var(--m));
+  margin-right: calc(10 * var(--m));
+}
+.kiki-chip:hover,
+.kiki-chip:focus-visible {
+  outline: none;
+  background: var(--color-accent-fill);
+  color: #fff;
+}
+.kiki-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Copy on hover / focus inside the message. It hangs below the text and takes no space (the rhythm between messages
+   stays even); only the latest answer keeps it in the flow. */
+.kiki-tools {
+  position: absolute;
+  top: 100%;
+  left: -10px;
+  z-index: 1;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.kiki-msg--kiki.is-latest .kiki-tools {
+  position: static;
+  margin: calc(4 * var(--m)) 0 0 -10px;
+}
+.kiki-msg--kiki:hover .kiki-tools,
+.kiki-msg--kiki:focus-within .kiki-tools {
+  opacity: 1;
+}
+@media (hover: none) {
+  .kiki-tools {
+    display: none;
+  }
+  .kiki-msg--kiki.is-latest .kiki-tools {
+    display: flex;
+    opacity: 1;
+  }
+}
+.kiki-tool {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+.kiki-tool svg {
+  width: 20px;
+  height: 20px;
+}
+.kiki-tool:hover,
+.kiki-tool:focus-visible {
+  outline: none;
+  background: var(--color-surface-beige);
+  color: var(--color-ink);
+}
+
+.kiki-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent-deep);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.kiki-link svg {
+  width: 18px;
+  height: 18px;
+}
+.kiki-link:hover,
+.kiki-link:focus-visible {
+  outline: none;
+  text-decoration: underline;
+}
+
+/* The empty state */
+.kiki-empty {
+  display: flex;
+  flex-direction: column;
+  gap: calc(14 * var(--m));
+  padding-bottom: calc(22 * var(--m));
+}
+.kiki-greeting {
+  font-size: calc(22 * var(--m));
+  font-weight: 500;
+  line-height: 1.35;
+}
+.kiki-privacy {
+  color: var(--color-ink-muted);
+  font-size: max(12px, calc(16 * var(--m)));
+  line-height: 1.4;
+}
+
+/* Thinking: four dots that shuffle in a 2×2 grid (the reference video) + a shimmering status + seconds */
+.kiki-thinking {
+  display: flex;
+  align-items: center;
+  gap: calc(14 * var(--m));
+  margin-top: calc(8 * var(--m));
+  min-height: 44px;
+}
+.kiki-dots {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+.kiki-dots i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: 3.6s var(--ease-in-out) infinite;
+}
+/* Every dot walks: grid → row → diagonal → cluster → column → anti-diagonal → grid. Centres of 8 px dots in a 40 px box,
+   edge gaps ≥ 3 px in every formation (they never merge into a blob); 40 % of each step is a rest. */
+.kiki-dots i:nth-child(1) {
+  animation-name: kiki-dot-1;
+}
+.kiki-dots i:nth-child(2) {
+  animation-name: kiki-dot-2;
+}
+.kiki-dots i:nth-child(3) {
+  animation-name: kiki-dot-3;
+}
+.kiki-dots i:nth-child(4) {
+  animation-name: kiki-dot-4;
+}
+@keyframes kiki-dot-1 {
+  0%,
+  6.67%,
+  100% {
+    transform: translate(10px, 10px);
+  }
+  16.67%,
+  23.33% {
+    transform: translate(0px, 16px);
+  }
+  33.33%,
+  40% {
+    transform: translate(4px, 4px);
+  }
+  50%,
+  56.67% {
+    transform: translate(11px, 11px);
+  }
+  66.67%,
+  73.33% {
+    transform: translate(16px, 0px);
+  }
+  83.33%,
+  90% {
+    transform: translate(28px, 4px);
+  }
+}
+@keyframes kiki-dot-2 {
+  0%,
+  6.67%,
+  100% {
+    transform: translate(22px, 10px);
+  }
+  16.67%,
+  23.33% {
+    transform: translate(21.33px, 16px);
+  }
+  33.33%,
+  40% {
+    transform: translate(20px, 20px);
+  }
+  50%,
+  56.67% {
+    transform: translate(21px, 11px);
+  }
+  66.67%,
+  73.33% {
+    transform: translate(16px, 10.67px);
+  }
+  83.33%,
+  90% {
+    transform: translate(20px, 12px);
+  }
+}
+@keyframes kiki-dot-3 {
+  0%,
+  6.67%,
+  100% {
+    transform: translate(10px, 22px);
+  }
+  16.67%,
+  23.33% {
+    transform: translate(10.67px, 16px);
+  }
+  33.33%,
+  40% {
+    transform: translate(12px, 12px);
+  }
+  50%,
+  56.67% {
+    transform: translate(11px, 21px);
+  }
+  66.67%,
+  73.33% {
+    transform: translate(16px, 21.33px);
+  }
+  83.33%,
+  90% {
+    transform: translate(12px, 20px);
+  }
+}
+@keyframes kiki-dot-4 {
+  0%,
+  6.67%,
+  100% {
+    transform: translate(22px, 22px);
+  }
+  16.67%,
+  23.33% {
+    transform: translate(32px, 16px);
+  }
+  33.33%,
+  40% {
+    transform: translate(28px, 28px);
+  }
+  50%,
+  56.67% {
+    transform: translate(21px, 21px);
+  }
+  66.67%,
+  73.33% {
+    transform: translate(16px, 32px);
+  }
+  83.33%,
+  90% {
+    transform: translate(4px, 28px);
+  }
+}
+
+/* The status: muted text with an accent band travelling over it. Transform only: the band's window moves one way
+   and the accent copy inside it the other way, so the letters stay put (no background-position repaint). */
+.kiki-status {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  color: var(--color-ink-muted);
+  font-size: max(14px, calc(22 * var(--m)));
+  font-weight: 600;
+  white-space: nowrap;
+}
+.kiki-shine {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 35%, #000 50%, transparent 65%);
+  mask-image: linear-gradient(90deg, transparent 35%, #000 50%, transparent 65%);
+  animation: kiki-shine-window 2.2s linear infinite;
+  will-change: transform;
+}
+.kiki-shine > span {
+  display: block;
+  color: var(--color-accent-deep);
+  animation: kiki-shine-text 2.2s linear infinite;
+  will-change: transform;
+}
+@keyframes kiki-shine-window {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes kiki-shine-text {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+/* A closed sheet (phones, tablets) is off the screen: its thinking state rests. */
+.menu-kiki-slot[inert] .kiki-dots i,
+.menu-kiki-slot[inert] .kiki-shine,
+.menu-kiki-slot[inert] .kiki-shine > span {
+  animation-play-state: paused;
+}
+.kiki-elapsed {
+  color: var(--color-ink-muted);
+  font-size: max(13px, calc(18 * var(--m)));
+  font-variant-numeric: tabular-nums;
+}
+
+/* «Ещё о переписке» (⋯ → «Очистить переписку») at the panel's top left */
+.kiki-more-wrap {
+  position: absolute;
+  top: calc(-150 * var(--m));
+  left: calc(-14 * var(--m));
+  z-index: 2;
+}
+.kiki-more {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+/* «Подробнее» in the privacy line: an underlined text button (the line's own colour) */
+.kiki-privacy-more {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.kiki-privacy-more:hover,
+.kiki-privacy-more:focus-visible {
+  outline: none;
+  color: var(--color-accent-deep);
+  text-decoration-thickness: 2px;
+}
+.kiki-more:hover,
+.kiki-more:focus-visible,
+.kiki-more[aria-expanded='true'] {
+  outline: none;
+  background: var(--color-surface-beige);
+  color: var(--color-ink);
+}
+.kiki-more-menu {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  width: min(300px, 80vw);
+  padding: 8px;
+  border-radius: 22px;
+  background: var(--color-bg);
+  box-shadow: 0 14px 40px rgb(0 0 0 / 0.14);
+}
+.kiki-more-item {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.kiki-more-item:hover,
+.kiki-more-item:focus-visible {
+  outline: none;
+  background: var(--color-surface-beige);
+}
+.kiki-more-item:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.kiki-confirm {
+  padding: 8px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.kiki-confirm > div {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.kiki-new {
+  position: absolute;
+  bottom: calc(260 * var(--m));
+  left: 50%;
+  z-index: 2;
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  transform: translateX(-50%);
+  cursor: pointer;
+}
+
+.kiki-offline {
+  margin-bottom: calc(10 * var(--m));
+  color: var(--color-ink-muted);
+  font-size: calc(17 * var(--m));
+  text-align: center;
+}
+
+/* The composer: a textarea that grows up to six lines */
+.kiki-chat .kiki-input {
+  height: auto;
+  min-height: calc(80 * var(--m));
+  padding-top: calc(10 * var(--m));
+  padding-bottom: calc(10 * var(--m));
+}
+.kiki-input textarea {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: calc(24 * var(--m));
+  font-weight: 500;
+  line-height: 1.35;
+  outline: none;
+}
+/* Keyboard focus in the field: the composer's outline turns accent (no rings, stage 3 rule 4.7) */
+.kiki-chat .kiki-input:focus-within {
+  border-color: var(--color-accent);
+}
+/* A wide table scrolls by keyboard: focus shows as a beige wash */
+.kiki-md-table:focus-visible {
+  outline: none;
+  background: rgb(242 228 216 / 0.45);
+}
+.kiki-new:hover,
+.kiki-new:focus-visible {
+  outline: none;
+  background: var(--color-accent-fill);
+}
+.kiki-input textarea::placeholder {
+  color: #9b9592;
+}
+.kiki-input textarea:disabled {
+  opacity: 0.6;
+}
+.kiki-send:disabled {
+  background: var(--color-accent-soft);
+  cursor: default;
+  transform: none;
+}
+.kiki-send--stop {
+  background: #000;
+}
+.kiki-send--stop svg {
+  width: calc(22 * var(--m));
+  height: calc(22 * var(--m));
+}
+.kiki-attach.is-highlighted {
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+  animation: kiki-attach-pulse 1.4s cubic-bezier(0.16, 1, 0.3, 1) 2;
+}
+@keyframes kiki-attach-pulse {
+  50% {
+    transform: scale(1.18);
+  }
+}
+.kiki-chat .kiki-quick-card:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+/* The proposal overlay (a modal <dialog>) */
+.kiki-preview {
+  width: min(760px, calc(100vw - 32px));
+  max-height: min(860px, calc(100dvh - 32px));
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 36px;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.2);
+}
+.kiki-preview::backdrop {
+  background: rgb(30 26 24 / 0.35);
+}
+/* In: rise and fade (a sheet from the bottom on phones); out: the same way back; the backdrop fades with it. */
+.kiki-preview[open] {
+  animation: kiki-preview-in 0.32s var(--ease-out-expo);
+}
+.kiki-preview[open]::backdrop {
+  animation: kiki-fade-in 0.32s var(--ease-out-expo);
+}
+.kiki-preview[data-closing] {
+  animation: kiki-preview-out 0.22s var(--ease-in-out) forwards;
+}
+.kiki-preview[data-closing]::backdrop {
+  animation: kiki-fade-out 0.22s var(--ease-in-out) forwards;
+}
+@keyframes kiki-preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes kiki-preview-out {
+  to {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes kiki-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes kiki-sheet-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes kiki-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes kiki-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+.kiki-preview-sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+}
+.kiki-preview-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 22px 14px 28px;
+}
+.kiki-preview-head h2 {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 800;
+}
+.kiki-pill {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.kiki-preview-close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-surface-beige);
+  cursor: pointer;
+}
+.kiki-preview-close:hover,
+.kiki-preview-close:focus-visible {
+  outline: none;
+  background: #e8d5c4;
+}
+.kiki-preview-body {
+  overflow-y: auto;
+  padding: 0 28px 18px;
+  outline: none;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Keyboard focus on the scrolling list: a faint beige wash (no rings, stage 3 rule 4.7) */
+.kiki-preview-body:focus-visible {
+  background: rgb(242 228 216 / 0.35);
+}
+.kiki-preview-rules {
+  margin-bottom: 14px;
+  padding: 14px 18px;
+  border-radius: 22px;
+  background: var(--color-surface-beige);
+}
+.kiki-preview-rules h3 {
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.kiki-preview-rules li.is-removed {
+  color: var(--color-ink-muted);
+}
+.kiki-preview-stale {
+  margin-bottom: 12px;
+  color: var(--color-ink-muted);
+}
+.kiki-preview-days {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+}
+.kiki-preview-day {
+  padding: 16px 18px;
+  border: var(--menu-border, 2px) solid var(--menu-panel-line, #e7ddd4);
+  border-radius: 26px;
+}
+.kiki-preview-day-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.kiki-preview-day-head h3 {
+  font-size: 18px;
+  font-weight: 800;
+}
+.kiki-preview-kcal {
+  color: var(--color-ink-muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.kiki-preview-meal + .kiki-preview-meal {
+  margin-top: 10px;
+}
+.kiki-preview-meal-title {
+  margin-bottom: 6px;
+  color: var(--color-ink-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+.kiki-preview-meal ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+}
+.kiki-preview-meal li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--color-surface-beige);
+  font-size: 15px;
+  font-weight: 600;
+}
+.kiki-preview-meal li.is-added {
+  border-color: var(--color-accent);
+  background: var(--color-bg);
+}
+/* Faded by colour, not opacity: the name and its tag keep readable contrast */
+.kiki-preview-meal li.is-removed {
+  border-color: var(--color-surface-beige);
+  background: none;
+  color: var(--color-ink-muted);
+}
+.kiki-preview-meal li.is-removed .kiki-tag {
+  color: var(--color-ink-muted);
+}
+.kiki-badge {
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.kiki-tag {
+  color: var(--color-accent-deep);
+  font-size: 12px;
+  font-weight: 700;
+}
+.kiki-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px 22px;
+  border-top: 1px solid rgb(0 0 0 / 0.06);
+}
+.kiki-button {
+  min-height: 48px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-accent-fill);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.kiki-button:hover,
+.kiki-button:focus-visible {
+  outline: none;
+  background: var(--color-accent-deep);
+}
+.kiki-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.kiki-button--ghost {
+  border: 2px solid var(--color-ink);
+  background: none;
+  color: var(--color-ink);
+}
+.kiki-button--ghost:hover,
+.kiki-button--ghost:focus-visible {
+  background: var(--color-surface-beige);
+}
+.kiki-button--small {
+  min-height: 44px;
+  padding: 0 18px;
+}
+
+.kiki-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 1279.98px) {
+  .kiki-more-wrap {
+    top: calc(-120 * var(--m));
+  }
+}
+@media (max-width: 1023.98px) {
+  /* Beside the sheet's beige close button: the same round beige plate */
+  .kiki-more {
+    background: var(--color-surface-beige);
+    color: var(--color-ink);
+  }
+  .kiki-msg,
+  .kiki-greeting {
+    font-size: 16px;
+  }
+  .kiki-bubble {
+    padding: 10px 18px;
+    border-radius: 24px;
+  }
+  .kiki-card {
+    padding: 14px 22px;
+    font-size: 18px;
+  }
+  .kiki-card-open {
+    font-size: 16px;
+  }
+  .kiki-chip {
+    font-size: 15px;
+  }
+  .kiki-input textarea {
+    min-height: 44px;
+    padding-block: 10px;
+    font-size: 17px;
+  }
+  .kiki-attach {
+    width: 44px;
+    height: 44px;
+  }
+  .kiki-new {
+    min-height: 44px;
+  }
+  .kiki-close:focus-visible,
+  .kiki-more:focus-visible {
+    background: var(--color-accent-soft);
+  }
+  .kiki-status {
+    font-size: 15px;
+  }
+  .kiki-privacy {
+    font-size: 13px;
+  }
+  .kiki-more-wrap {
+    top: -96px;
+    left: -4px;
+  }
+  .kiki-new {
+    bottom: 200px;
+  }
+  .kiki-preview[open] {
+    animation-name: kiki-sheet-in;
+  }
+  .kiki-preview[data-closing] {
+    animation-name: kiki-sheet-out;
+  }
+  .kiki-preview {
+    width: 100vw;
+    max-width: none;
+    max-height: 92dvh;
+    margin: auto 0 0;
+    border-radius: 28px 28px 0 0;
+  }
+  .kiki-preview-body {
+    padding: 0 16px 14px;
+  }
+  .kiki-preview-actions {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kiki-dots i:nth-child(1) {
+    transform: translate(10px, 10px);
+    animation: kiki-dot-calm 1.6s var(--ease-in-out) infinite;
+  }
+  .kiki-dots i:nth-child(2) {
+    transform: translate(22px, 10px);
+    animation: kiki-dot-calm 1.6s var(--ease-in-out) infinite;
+  }
+  .kiki-dots i:nth-child(3) {
+    transform: translate(10px, 22px);
+    animation: kiki-dot-calm 1.6s var(--ease-in-out) infinite;
+  }
+  .kiki-dots i:nth-child(4) {
+    transform: translate(22px, 22px);
+    animation: kiki-dot-calm 1.6s var(--ease-in-out) infinite;
+  }
+  .kiki-shine {
+    display: none;
+  }
+  .kiki-preview[open] {
+    animation: kiki-fade-in 0.2s var(--ease-in-out);
+  }
+  .kiki-preview[data-closing] {
+    animation: kiki-fade-out 0.2s var(--ease-in-out) forwards;
+  }
+  .kiki-attach.is-highlighted {
+    animation: none;
+  }
+  .kiki-card,
+  .kiki-chip {
+    transition: none;
+  }
+}
+@keyframes kiki-dot-calm {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Short screens and an open on-screen keyboard: the quick cards step aside for the conversation */
+@media (max-height: 520px) {
+  .kiki-chat .kiki-quick {
+    display: none;
+  }
+}
+.menu-kiki-slot[data-keyboard] .kiki-quick {
+  display: none;
+}
+
+/* An applied or dismissed proposal opens read-only: its status instead of the buttons */
+.kiki-preview-settled {
+  margin-right: auto;
+  color: var(--color-ink-muted);
+  font-weight: 600;
+}

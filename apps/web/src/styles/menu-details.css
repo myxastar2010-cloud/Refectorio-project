@@ -679,3 +679,18 @@ button.seg-tab[aria-selected='true']:focus-visible,
     padding: 24px 18px calc(24px + env(safe-area-inset-bottom));
   }
 }
+
+/* «Как мы используем данные» (avatar menu, Kiki): a calm list, one fact per line */
+.privacy-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 560px;
+  padding-left: 1.1em;
+  font-size: 15px;
+  line-height: 1.45;
+  list-style: disc;
+}
+.privacy-facts li::marker {
+  color: var(--color-accent);
+}

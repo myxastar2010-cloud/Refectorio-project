@@ -1,0 +1,154 @@
+# Site how-to questions: answered from the guide (kb_search), never with propose tools.
+- id: howto-download-formats
+  tags: [howto, bakeoff]
+  turns:
+    - user: как скачать меню на неделю? в каких форматах можно
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Скачать меню]
+        mustIncludeAny: [PDF, XLSX, CSV]
+
+- id: howto-restore-file
+  tags: [howto]
+  turns:
+    - user: я скачал резервную копию, как загрузить меню обратно из файла?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Загрузить меню из файла]
+
+- id: howto-change-goal
+  tags: [howto, bakeoff]
+  turns:
+    - user: где поменять цель? хочу теперь набирать вес
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: [Изменить цель]
+
+- id: howto-regenerate
+  tags: [howto]
+  turns:
+    - user: меню не нравится целиком, как собрать его заново?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Перегенерировать меню]
+
+- id: howto-undo
+  tags: [howto]
+  turns:
+    - user: случайно пересобрала меню, можно как-то вернуть как было?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Отменить]
+
+- id: howto-mark-eaten
+  tags: [howto]
+  turns:
+    - user: как отметить что я съел блюдо?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustIncludeAny: [Отметить, съедено, Съедено]
+
+- id: howto-water
+  tags: [howto]
+  turns:
+    - user: как записать что я выпил воды? и если ошибся?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustIncludeAny: ['−1 стакан', Действия с водой, стакан]
+
+- id: howto-widget-add
+  tags: [howto, bakeoff]
+  turns:
+    - user: хочу виджет чтобы следить за железом, как добавить
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Добавить виджет]
+
+- id: howto-widget-reorder
+  tags: [howto]
+  turns:
+    - user: как переставить виджет левее или убрать его совсем
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustIncludeAny: [Левее, Правее, Убрать виджет]
+
+- id: howto-search-hotkeys
+  tags: [howto]
+  turns:
+    - user: есть поиск по меню? можно с клавиатуры?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Поиск]
+        mustIncludeAny: ['Ctrl+K', '«/»']
+
+- id: howto-edit-meals
+  tags: [howto]
+  turns:
+    - user: как поменять порядок приёмов пищи или убрать один
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Изменить приёмы пищи]
+
+- id: howto-day-card
+  tags: [howto]
+  turns:
+    - user: как открыть карточку дня с итогами? на компе
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustIncludeAny: [правый щелчок, правой кнопк, щелчок]
+
+- id: howto-details-kbzhu
+  tags: [howto, bakeoff]
+  turns:
+    - user: где посмотреть кбжу блюда на 100 г?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [КБЖУ]
+
+- id: howto-replace-dish
+  tags: [howto]
+  turns:
+    - user: как заменить одно блюдо в меню самой?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Заменить блюдо]
+
+- id: howto-notifications
+  tags: [howto]
+  turns:
+    - user: что за колокольчик сверху и где письма
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Новости от Кики]
+
+- id: howto-avatar
+  tags: [howto]
+  turns:
+    - user: можно сменить аватарку?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Сменить аватар]
+
+- id: howto-wipe-data
+  tags: [howto, bakeoff]
+  turns:
+    - user: хочу удалить все свои данные с сайта
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustInclude: [Удалить мои данные]
+
+- id: howto-where-data-stored
+  tags: [howto]
+  turns:
+    - user: а где хранятся мои данные? на сервере?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustIncludeAny: [в этом браузере, только в браузере, на этом устройстве]
+
+- id: howto-demo-features
+  tags: [howto]
+  turns:
+    - user: нажала Статистику и Магазины, там какая-то заглушка. сломалось?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustIncludeAny: [Демо, скоро, в разработке, работаем]

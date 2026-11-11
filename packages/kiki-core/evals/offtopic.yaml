@@ -1,0 +1,25 @@
+- id: offtopic-smalltalk
+  tags: [offtopic]
+  turns:
+    - user: привет! как дела?
+      expect: { toolsNone: [propose_menu_change, propose_goal_change], maxChars: 300 }
+
+- id: offtopic-joke
+  tags: [offtopic, bakeoff]
+  turns:
+    - user: расскажи анекдот про офис
+      expect:
+        {
+          toolsNone: [propose_menu_change, propose_goal_change, propose_meal_structure],
+          maxChars: 500,
+        }
+
+- id: offtopic-literature
+  tags: [offtopic]
+  turns:
+    - user: кто написал Войну и мир?
+      expect:
+        {
+          toolsNone: [propose_menu_change, propose_goal_change, propose_meal_structure],
+          maxChars: 400,
+        }

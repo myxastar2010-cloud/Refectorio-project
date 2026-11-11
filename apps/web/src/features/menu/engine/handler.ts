@@ -27,6 +27,8 @@ import {
   type MenuResponse,
   type OpResult,
 } from '@refectorio/menu-core';
+import { buildDigest, createToolEnv, executeTool, isToolName } from '@refectorio/kiki-core/client';
+import { EMPTY_TRACKING } from '@refectorio/menu-core';
 import { catalogSchema } from '@refectorio/taste-core';
 import catalogJson from '@refectorio/taste-core/data/catalog.json';
 
@@ -61,6 +63,9 @@ function profileFor(answers: unknown): ReturnType<typeof buildMenuProfile> {
 }
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : 0);
+
+/** Preview ids of Kiki's proposals: the chat's prefix + a counter of this worker. */
+let previewCounter = 0;
 
 function postOp(id: number, result: OpResult, started: number, post: Post): void {
   if (result.ok)
@@ -101,6 +106,28 @@ export function handle(request: MenuRequest, post: Post): void {
     const profile = profileFor(request.answers);
     if (!profile.ok) {
       post({ id, type: 'error', error: { code: 'profile', error: profile.error } });
+      return;
+    }
+    if (request.type === 'kiki' || request.type === 'digest') {
+      const env = createToolEnv({
+        foods: loadFoods(),
+        texts,
+        profile: profile.value,
+        plan: request.plan,
+        tracking: request.tracking ?? EMPTY_TRACKING,
+        today: request.today,
+        answers: request.answers,
+        nextPreviewId: () =>
+          `${request.type === 'kiki' ? request.previewPrefix : 'pv'}${(++previewCounter).toString(36)}`,
+      });
+      if (request.type === 'digest') {
+        post({ id, type: 'digest', digest: buildDigest(env, request.ui ?? {}) });
+        return;
+      }
+      const outcome = isToolName(request.tool)
+        ? executeTool(env, request.tool, request.args)
+        : { result: { error: `unknown tool ${request.tool}` } };
+      post({ id, type: 'kiki', result: outcome.result, previews: outcome.previews ?? [] });
       return;
     }
     if (request.type === 'targets') {

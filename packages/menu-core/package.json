@@ -7,7 +7,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./data/rules.json": "./data/rules.json"
+    "./data/rules.json": "./data/rules.json",
+    "./text": "./src/text.ts",
+    "./testing": "./src/testing.ts",
+    "./hash": "./src/hash.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",

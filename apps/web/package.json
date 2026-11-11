@@ -13,13 +13,14 @@
     "prebuild:test": "node ../../scripts/photos/materialize.mjs",
     "build:test": "vite build --mode test --outDir dist-test",
     "preview": "vite preview --port 4173 --strictPort",
-    "preview:test": "vite preview --port 4173 --strictPort --outDir dist-test",
+    "preview:test": "vite preview --strictPort --outDir dist-test",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "test:e2e": "playwright test"
   },
   "dependencies": {
     "@refectorio/contracts": "*",
     "@refectorio/food-data": "*",
+    "@refectorio/kiki-core": "*",
     "@refectorio/menu-core": "*",
     "@refectorio/nutrition-core": "*",
     "@refectorio/taste-core": "*",

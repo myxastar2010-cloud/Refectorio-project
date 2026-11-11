@@ -52,6 +52,32 @@ export type SearchMessage = {
   readonly query: string;
 };
 
+/**
+ * Kiki's browser tools (ТЗ 07 §6) run in this worker with the engine at hand: `kiki` runs one tool (its result goes back
+ * to the model, its previews to the chat), `digest` builds the context digest. Typed loosely here — the shapes belong
+ * to @refectorio/kiki-core, which depends on this package.
+ */
+export type KikiToolMessage = {
+  readonly type: 'kiki';
+  readonly tool: string;
+  readonly args: unknown;
+  readonly answers: unknown;
+  readonly plan: Plan;
+  readonly today: IsoDate;
+  readonly tracking?: Tracking;
+  /** Preview ids start with this (unique per chat session). */
+  readonly previewPrefix: string;
+};
+
+export type DigestMessage = {
+  readonly type: 'digest';
+  readonly answers: unknown;
+  readonly plan: Plan;
+  readonly today: IsoDate;
+  readonly tracking?: Tracking;
+  readonly ui?: unknown;
+};
+
 export type MenuRequest = { readonly id: number } & (
   | { readonly type: 'init' }
   /** What the page shows about every item (names, allergens, portions, nutrients, ingredients). */
@@ -64,6 +90,8 @@ export type MenuRequest = { readonly id: number } & (
   | ApplyMessage
   | AlternativesMessage
   | SearchMessage
+  | KikiToolMessage
+  | DigestMessage
 );
 
 export type MenuStage = 'loading' | 'profile' | 'planning' | 'polishing' | 'done';
@@ -97,4 +125,11 @@ export type MenuResponse =
   | { readonly id: number; readonly type: 'catalog'; readonly items: readonly ItemView[] }
   | { readonly id: number; readonly type: 'limits'; readonly minMainMeals: number }
   | { readonly id: number; readonly type: 'targets'; readonly targets: DayTargets }
+  | {
+      readonly id: number;
+      readonly type: 'kiki';
+      readonly result: unknown;
+      readonly previews: readonly unknown[];
+    }
+  | { readonly id: number; readonly type: 'digest'; readonly digest: string }
   | { readonly id: number; readonly type: 'error'; readonly error: MenuError };

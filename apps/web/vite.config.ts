@@ -15,6 +15,14 @@ const PHOTO_HOSTING = process.env.PHOTO_HOSTING === 'unsplash' ? 'unsplash' : 's
 const hotlinked = PHOTO_HOSTING === 'unsplash';
 
 /**
+ * Kiki's server (ТЗ 07 §2, ADR 0013): the published site talks to the Render Web Service by its origin; the dev server
+ * proxies `/api` to `npm run dev:api` (port 8787), so local work needs no CORS. Only an https origin is accepted.
+ */
+const API_ORIGIN = /^https:\/\/[a-z0-9.-]+$/.test(process.env.VITE_API_ORIGIN ?? '')
+  ? (process.env.VITE_API_ORIGIN as string)
+  : '';
+
+/**
  * Preloads the Open Runde weights that the first screen needs (bold titles and buttons, semibold lead and cards),
  * so text renders in the final font before the first paint whenever possible.
  */
@@ -103,7 +111,7 @@ const META_CSP =
     // Dish photos are served from this origin; the hotlink mode allows images.unsplash.com. Nothing else leaves the site.
     `img-src 'self' data:${hotlinked ? ' https://images.unsplash.com' : ''}`,
     "font-src 'self'",
-    "connect-src 'self'",
+    `connect-src 'self'${API_ORIGIN ? ` ${API_ORIGIN}` : ''}`,
     "manifest-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
@@ -182,6 +190,16 @@ export default defineConfig(({ mode }) => ({
     // Keep fonts and images as separate cacheable files.
     assetsInlineLimit: 0,
   },
-  server: { port: 5173, strictPort: true },
+  server: {
+    port: 5173,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8787',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api/, ''),
+      },
+    },
+  },
   preview: { port: 4173, strictPort: true },
 }));

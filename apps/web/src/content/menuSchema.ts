@@ -168,6 +168,7 @@ export const menuContentSchema = z.object({
     supportKiki: text,
     report: text,
     reportUrl: z.url(),
+    privacy: text,
     download: text,
     wipe: text,
     wipeConfirm: text,

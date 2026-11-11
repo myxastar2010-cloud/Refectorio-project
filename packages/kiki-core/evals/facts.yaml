@@ -1,0 +1,106 @@
+# Menu facts: answerable only with read tools; numbers and names from the fixture week.
+- id: facts-today-dinner
+  tags: [facts]
+  turns:
+    - user: что у меня сегодня на ужин?
+      expect:
+        mustInclude: [Гречка с грибами]
+        toolsNone: [propose_menu_change]
+
+- id: facts-wed-dinner-salmon
+  tags: [facts, bakeoff]
+  turns:
+    - user: чё в среду вечером есть буду
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: [лосось]
+
+- id: facts-carbonara-kcal
+  tags: [facts]
+  turns:
+    - user: сколько ккал в карбонаре?
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: ['634']
+
+- id: facts-schnitzel-protein
+  tags: [facts, bakeoff]
+  turns:
+    - user: сколько белка в шницеле из курицы в субботу?
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: ['41']
+
+- id: facts-where-herring
+  tags: [facts]
+  turns:
+    - user: когда у меня селёдка?
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: [Селёдка]
+        mustIncludeAny: [понедельник, пн, '16']
+
+- id: facts-targets-today
+  tags: [facts]
+  turns:
+    - user: какая у меня норма калорий на сегодня?
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: ['/2[\s  ]?193/']
+
+- id: facts-progress-today
+  tags: [facts]
+  turns:
+    - user: сколько я уже съела сегодня и сколько воды выпила?
+      expect:
+        toolsAny: [get_progress]
+        mustIncludeAny: ['0 из', '0 ккал', ничего, пока нет]
+
+- id: facts-syrniki-allergens
+  tags: [facts]
+  turns:
+    - user: какие аллергены в сырниках?
+      expect:
+        toolsAny: [get_item_details, find_in_menu]
+        mustIncludeAny: [молок, яйц, глютен, пшениц, творог]
+
+- id: facts-plov-cooking-time
+  tags: [facts]
+  turns:
+    - user: сколько готовится плов из среды?
+      expect:
+        toolsAny: [get_item_details, find_in_menu, get_recipe]
+        mustIncludeAny: [мин, час]
+
+- id: facts-thu-breakfast
+  tags: [facts, bakeoff]
+  turns:
+    - user: что на завтрак в четверг?
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: [Оладьи]
+
+- id: facts-sat-snack
+  tags: [facts, bakeoff]
+  turns:
+    - user: какой перекус в субботу?
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: [Миндаль]
+
+- id: facts-latte-where
+  tags: [facts]
+  turns:
+    - user: в какие дни у меня латте?
+      expect:
+        toolsAny: [find_in_menu]
+        mustInclude: [Латте]
+        mustIncludeAny: [пятниц, пт, суббот, сб, понедельник, пн]
+
+- id: facts-caesar-protein
+  tags: [facts]
+  turns:
+    - user: сколько белка в цезаре с курицей в пятницу на обед
+      expect:
+        toolsNone: [propose_menu_change]
+        mustInclude: ['29']

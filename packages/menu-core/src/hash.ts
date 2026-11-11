@@ -23,3 +23,18 @@ export function stableHash(value: unknown): string {
   }
   return hash.toString(16).padStart(8, '0');
 }
+
+/**
+ * The identity of a plan's content (rules, meals, days) for Kiki's previews: revisions repeat after «Отменить», a
+ * restore or a new menu; this key changes whenever anything a proposal was computed from changes. The revision and the
+ * text length ride along, so a 32-bit collision alone cannot pass a changed menu off as the same one.
+ */
+export function planKey(plan: {
+  readonly revision: number;
+  readonly rules: unknown;
+  readonly structure: unknown;
+  readonly days: unknown;
+}): string {
+  const content = { rules: plan.rules, structure: plan.structure, days: plan.days };
+  return `${String(plan.revision)}:${String(canonicalJson(content).length)}:${stableHash(content)}`;
+}

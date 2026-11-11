@@ -179,9 +179,25 @@ test.describe('the menu on a phone', () => {
     // A dialog: focus inside, the page behind it out of reach.
     await expect(kiki.locator(':focus')).toHaveCount(1);
     await expect(page.locator('.menu-main')).toHaveAttribute('inert', '');
+    // Kiki's server, scripted: one plain answer (the chat itself — kiki.spec.ts).
+    await page.route('**/api/kiki/chat', (route) =>
+      route.fulfill({
+        headers: { 'content-type': 'text/event-stream' },
+        body: `event: final\ndata: ${JSON.stringify({
+          type: 'final',
+          text: 'Здравствуйте!',
+          replaced: false,
+          messages: [{ role: 'assistant', content: 'Здравствуйте!' }],
+          model: 'mock',
+          usage: { promptTokens: 1, completionTokens: 1, cachedTokens: 0 },
+        })}\n\n`,
+      }),
+    );
     await kiki.getByRole('textbox', { name: 'Спроси что угодно…' }).fill('Привет');
     await kiki.getByRole('button', { name: 'Отправить' }).click();
-    await expect(page.getByText('Кики подключится совсем скоро')).toBeVisible();
+    await expect(kiki.getByLabel('Переписка с Кики').getByText('Здравствуйте!')).toBeVisible();
+    // No keyboard here: the sheet keeps the whole screen.
+    expect(await kiki.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(800);
     await page.keyboard.press('Escape');
     await expect(page.locator('.menu-kiki-slot')).toHaveAttribute('inert', '');
     await expect(page.getByRole('button', { name: 'Открыть Кики' }).last()).toBeFocused();

@@ -1,6 +1,6 @@
 # Render Blueprint — https://render.com/docs/blueprint-spec
-# Static site: free, served from Render's CDN, never sleeps. The API (stages 2–3) will be a separate
-# Web Service in the Frankfurt region.
+# Static site: free, served from Render's CDN, never sleeps. Kiki's server is the Web Service `refectorio-api`
+# (Frankfurt, free: sleeps after 15 min idle, wakes in ≈ 30–60 s — the site pings /health ahead; ADR 0013).
 services:
   - type: web
     runtime: static
@@ -16,6 +16,9 @@ services:
         value: self
       - key: HUSKY
         value: '0'
+      # Kiki's server origin (CSP connect-src below and the build's <meta> CSP must name the same origin).
+      - key: VITE_API_ORIGIN
+        value: https://refectorio-api.onrender.com
     headers:
       # Hashed build output never changes — cache for a year.
       - path: /assets/*
@@ -45,4 +48,30 @@ services:
         value: max-age=31536000
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://refectorio-api.onrender.com; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+
+  - type: web
+    runtime: node
+    name: refectorio-api
+    region: frankfurt
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build -w @refectorio/api
+    startCommand: node apps/api/dist/server.mjs
+    healthCheckPath: /health
+    pullRequestPreviewsEnabled: false
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: HUSKY
+        value: '0'
+      # Secrets and settings the team pastes in the Render dashboard (never in git): the NVIDIA key, the model chain
+      # (`nvidia:<model>[?reasoning_effort=low]`, comma-separated, primary first) and the allowed site origins.
+      - key: NVIDIA_NIM_API_KEY
+        sync: false
+      - key: AI_PROVIDERS
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # Per-address limits × N (a whole class on one school address on demo day); the server-wide cap stays.
+      - key: KIKI_LIMIT_SCALE
+        value: '1'

@@ -1,4 +1,5 @@
 import {
+  IconShieldLock,
   IconBell,
   IconDownload,
   IconExternalLink,
@@ -25,6 +26,7 @@ type Props = {
   readonly onNotifications: () => void;
   readonly onDigest: (on: boolean) => void;
   readonly onSupport: () => void;
+  readonly onPrivacy: () => void;
   readonly onDownload: () => void;
   readonly onWipe: () => void;
   readonly onLogin: () => void;
@@ -44,6 +46,7 @@ export function AccountMenu({
   onNotifications,
   onDigest,
   onSupport,
+  onPrivacy,
   onDownload,
   onWipe,
   onLogin,
@@ -116,6 +119,10 @@ export function AccountMenu({
           {menu.account.report}
         </a>
       </Submenu>
+      <button type="button" role="menuitem" className="menu-item" onClick={onPrivacy}>
+        <IconShieldLock stroke={1.8} aria-hidden />
+        {menu.account.privacy}
+      </button>
       <button type="button" role="menuitem" className="menu-item" onClick={onDownload}>
         <IconDownload stroke={1.8} aria-hidden />
         {menu.account.download}

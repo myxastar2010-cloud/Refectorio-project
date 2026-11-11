@@ -1,0 +1,19 @@
+{
+  "name": "@refectorio/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ПроЛанч — сервер Кики (Render Web Service refectorio-api): чат по SSE, цепочка моделей NVIDIA Build, база знаний. Без хранения и без логов содержимого.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node dist/server.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "2.1.6",
+    "@refectorio/kiki-core": "*",
+    "hono": "4.13.17",
+    "zod": "^4.6.5"
+  }
+}

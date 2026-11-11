@@ -17,6 +17,7 @@ export default defineConfig({
       nodePackage('taste-core'),
       nodePackage('food-data'),
       nodePackage('menu-core'),
+      nodePackage('kiki-core'),
       {
         // The build flag of vite.config.ts (ADR 0011): unit tests see the default build.
         define: { __PHOTO_HOSTING__: JSON.stringify('self'), __TEST_HOOKS__: 'true' },
@@ -27,6 +28,14 @@ export default defineConfig({
           environment: 'node',
           // CSS is replaced by empty strings in tests by default; tokens.test.ts reads the tokens file as text.
           css: { include: [/styles\/tokens\.css/] },
+        },
+      },
+      {
+        test: {
+          name: 'api',
+          root: './apps/api',
+          include: ['src/**/*.test.ts'],
+          environment: 'node',
         },
       },
       {
@@ -46,6 +55,8 @@ export default defineConfig({
         'packages/taste-core/src/**/*.ts',
         'packages/food-data/src/**/*.ts',
         'packages/menu-core/src/**/*.ts',
+        'packages/kiki-core/src/**/*.ts',
+        'apps/api/src/**/*.ts',
         'apps/web/src/**/*.{ts,tsx}',
       ],
       exclude: [

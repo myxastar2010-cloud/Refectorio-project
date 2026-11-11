@@ -207,6 +207,7 @@ export const menu = {
     supportKiki: 'Спросить Кики',
     report: 'Сообщить о проблеме',
     reportUrl: 'https://github.com/myxastar2010-cloud/Refectorio-project/issues/new',
+    privacy: 'Как мы используем данные',
     download: 'Скачать мои данные',
     wipe: 'Удалить мои данные',
     wipeConfirm:

@@ -7,7 +7,10 @@
   --m: min(100vw / 1920, 100dvh / 1080);
   --menu-line: var(--color-ink-muted);
   --menu-border: calc(2.4 * var(--m));
-  --menu-panel-line: #ddd5d0;
+  /* Kiki's panel and composer outline, measured on the mockup (#939393 at 1920×1080) */
+  --menu-panel-line: #939393;
+  /* A quiet hairline (the phone's tab bar) */
+  --menu-hairline: #ddd5d0;
   /* Keyboard focus on a plain scrolling area: a faint wash of the accent (no rings, stage 3 rule 4.7). */
   --menu-focus-tint: color-mix(in srgb, var(--color-accent) 8%, transparent);
   position: fixed;
@@ -1088,7 +1091,8 @@
   }
   .menu-kiki-slot {
     position: fixed;
-    inset: 0 0 0 auto;
+    /* The visible band above an on-screen keyboard (useKeyboardInset) */
+    inset: var(--kiki-vv-top, 0) 0 var(--kiki-vv-bottom, 0) auto;
     z-index: var(--z-dialog);
     width: min(520px, 92vw);
     transform: translateX(105%);
@@ -1140,7 +1144,7 @@
     flex-direction: row;
     height: auto;
     padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-    border-top: 1px solid var(--menu-panel-line);
+    border-top: 1px solid var(--menu-hairline);
     background: color-mix(in srgb, var(--color-bg) 92%, transparent);
     backdrop-filter: blur(12px);
   }
@@ -1332,7 +1336,7 @@
   }
   .menu-kiki-slot {
     position: fixed;
-    inset: 0;
+    inset: var(--kiki-vv-top, 0) 0 var(--kiki-vv-bottom, 0);
     z-index: var(--z-dialog);
     width: auto;
     transform: translateY(105%);

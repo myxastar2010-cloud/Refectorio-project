@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 4173;
+// E2E_PORT: another port when 4173 is busy with an older preview (it would be reused and test a stale build).
+const PORT = Number(process.env.E2E_PORT ?? 4173);
 const DESKTOP = { width: 1920, height: 1080 };
 
 export default defineConfig({
@@ -24,7 +25,7 @@ export default defineConfig({
   },
   webServer: {
     // A test build (--mode test, dist-test): the same site plus the ?step= hook (features/quiz/flow/testStates.ts).
-    command: 'npm run build:test && npm run preview:test',
+    command: `npm run build:test && npm run preview:test -- --port ${String(PORT)}`,
     url: `http://localhost:${PORT}/`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
