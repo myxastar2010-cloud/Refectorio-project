@@ -14,8 +14,8 @@ concurrency:
 
 jobs:
   quality:
-    # Pinned: ubuntu-latest moves to Ubuntu 26 from 19.10.2026, where Playwright 1.63 cannot install its browser
-    # dependencies (the merge of phase 5 failed there). Move together with a Playwright upgrade.
+    # Pinned: ubuntu-latest moves to Ubuntu 26 from 19.10.2026; Playwright 1.63's dependency installer predates it.
+    # Move together with a Playwright upgrade.
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -38,7 +38,15 @@ jobs:
       - run: npm run typecheck
       - run: npm run test:coverage
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      # Playwright's own Chromium; when its download service fails (11.11.2026: HTTP 400 for every Chromium build), the
+      # e2e smoke runs in the Google Chrome the runner image ships — a failed download must not hide a green suite.
+      - name: Browser for the e2e smoke
+        run: |
+          if ! npx playwright install --with-deps chromium; then
+            echo "::warning::Playwright's Chromium could not be downloaded; the e2e smoke uses the runner's Chrome"
+            echo "PW_CHANNEL=chrome" >> "$GITHUB_ENV"
+            npx playwright install-deps chromium || true
+          fi
       - name: E2E smoke (Chromium)
         run: npm run test:e2e -- --project=chromium
       - name: Lighthouse (desktop budgets)

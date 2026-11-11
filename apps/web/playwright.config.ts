@@ -31,7 +31,15 @@ export default defineConfig({
     timeout: 180_000,
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: DESKTOP } },
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: DESKTOP,
+        // CI only: the runner's own Chrome when Playwright's download service is down (ci.yml sets PW_CHANNEL).
+        ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}),
+      },
+    },
     { name: 'firefox', use: { ...devices['Desktop Firefox'], viewport: DESKTOP } },
     { name: 'webkit', use: { ...devices['Desktop Safari'], viewport: DESKTOP } },
     { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
