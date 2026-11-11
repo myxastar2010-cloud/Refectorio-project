@@ -469,6 +469,8 @@ export function KikiChat({
             setDraft(event.target.value);
           }}
           onKeyDown={onKeyDown}
+          // A long-open page: the server may have gone to sleep since the chat opened (wakes it while the person types).
+          onFocus={warmKiki}
           placeholder={menu.kiki.placeholder}
           aria-label={menu.kiki.placeholder}
           enterKeyHint="send"

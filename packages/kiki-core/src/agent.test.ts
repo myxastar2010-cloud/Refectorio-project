@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   groundingSources,
+  normalizeCalls,
   runTurn,
   toProviderMessages,
   type Complete,
@@ -8,7 +9,7 @@ import {
   type ProviderResult,
 } from './agent';
 import { createKb } from './knowledge';
-import type { WireMessage } from './messages';
+import { toolCallSchema, type WireMessage } from './messages';
 import { MAX_TOOL_ROUNDS, type ChatRequest, type ServerEvent } from './protocol';
 import { IDENTITY_RU } from './validate';
 
@@ -320,11 +321,79 @@ describe('runTurn', () => {
     const { complete, requests } = scripted([say('Отвечаю сразу.')]);
     const events: ServerEvent[] = [];
     await runTurn(
-      request([{ role: 'user', content: 'Вопрос' }], { turnStartedAt: 0 }),
-      { complete, kb, now: () => 100_000 },
+      request([{ role: 'user', content: 'Вопрос' }], { turnElapsedMs: 100_000 }),
+      { complete, kb, now: () => 5 },
       (e) => events.push(e),
     );
     expect(requests[0]?.tools).toBeUndefined();
+  });
+
+  it('the budget is a duration: a computer clock far behind the server never removes the tools (M5)', async () => {
+    const { complete, requests } = scripted([say('Ответ.')]);
+    await runTurn(
+      request([{ role: 'user', content: 'Вопрос' }], { turnElapsedMs: 1200 }),
+      { complete, kb, now: () => 1_800_000_000_000 },
+      () => {},
+    );
+    expect(requests[0]?.tools).toBeDefined();
+  });
+
+  it('a failed fold keeps the old memory and the answer still comes (M7)', async () => {
+    const results = [say('Здравствуйте!')];
+    let calls = 0;
+    const events: ServerEvent[] = [];
+    await runTurn(
+      request([{ role: 'user', content: 'Привет' }], {
+        memory: { summary: 'старое', facts: ['факт'] },
+        fold: [{ role: 'user', content: 'x' }],
+      }),
+      {
+        complete: (r) => {
+          calls++;
+          if (r.jsonOnly) return Promise.reject(new Error('json mode refused'));
+          const next = results.shift();
+          return next ? Promise.resolve(next) : Promise.reject(new Error('none'));
+        },
+        kb,
+        now: () => 0,
+      },
+      (e) => events.push(e),
+    );
+    expect(calls).toBe(2);
+    expect(events.find((e) => e.type === 'memory')).toMatchObject({
+      memory: { summary: 'старое', facts: ['факт'] },
+    });
+    expect(final(events).text).toBe('Здравствуйте!');
+  });
+
+  it('malformed calls from a model are made to fit the wire schema (M8)', () => {
+    const calls = normalizeCalls(
+      [
+        { id: 'a', name: 'get_menu', args: '{}' },
+        { id: 'a', name: 'get_menu', args: '{}' },
+        { id: 'a', name: 'find_in_menu', args: '{"query":"рыба"}' },
+        { id: '', name: 'Get-Menu!', args: '{}' },
+        { id: 'x'.repeat(200), name: 'kb_search', args: 'y'.repeat(9000) },
+      ],
+      '1',
+    );
+    expect(calls.map((c) => c.name)).toEqual([
+      'get_menu',
+      'find_in_menu',
+      'unknown_tool',
+      'kb_search',
+    ]);
+    expect(new Set(calls.map((c) => c.id)).size).toBe(4);
+    expect(calls.every((c) => toolCallSchema.safeParse(c).success)).toBe(true);
+    expect(calls[3]?.args.length).toBeLessThan(100);
+  });
+
+  it('oversized arguments go back to the model as an error (M8)', async () => {
+    const { requests } = await run(request([{ role: 'user', content: 'Найди' }]), [
+      call('kb_search', { query: 'q'.repeat(9000) }),
+      say('Не нашла.'),
+    ]);
+    expect(JSON.stringify(requests[1]?.messages.at(-1))).toContain('arguments too long');
   });
 
   it('folds old turns into memory first', async () => {

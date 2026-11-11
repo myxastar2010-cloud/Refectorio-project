@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import kbJson from '../knowledge/kb.json';
 import { createKb, kbFileSchema, parseCard, parseGuide, stableKbVersion } from './knowledge';
-import { pairingProblem, toolRoundsInTurn, turnStart, type WireMessage } from './messages';
+import {
+  pairingProblem,
+  repairWire,
+  toolRoundsInTurn,
+  turnStart,
+  type WireMessage,
+} from './messages';
 import { contextBlock, SYSTEM_PROMPT_TOKENS } from './prompt';
 import { createEventParser, encodeEvent, type ServerEvent } from './protocol';
 import {
@@ -132,5 +138,34 @@ describe('knowledge', () => {
     expect(parseCard('no front matter')).toBeNull();
     expect(parseCard('---\ntitle: без id\n---\nx')).toBeNull();
     expect(stableKbVersion(file.docs)).toBe(file.version);
+  });
+});
+
+describe('repairWire (M8)', () => {
+  const turn = (q: string): WireMessage[] => [
+    { role: 'user', content: q },
+    { role: 'assistant', content: '', toolCalls: [{ id: `c-${q}`, name: 'get_menu', args: '{}' }] },
+    { role: 'tool', callId: `c-${q}`, name: 'get_menu', content: '{}' },
+    { role: 'assistant', content: 'Ответ.' },
+  ];
+  it('keeps whole turns and drops a broken, an invalid or an unfinished one', () => {
+    const broken = [
+      { role: 'user', content: 'б' },
+      { role: 'assistant', content: '', toolCalls: [{ id: 'x', name: 'Bad Name', args: '{}' }] },
+      { role: 'assistant', content: 'Ответ.' },
+    ];
+    const unfinished = turn('в').slice(0, 2);
+    const out = repairWire([...turn('а'), ...broken, ...turn('г'), ...unfinished], 7);
+    expect(out.wire.filter((m) => m.role === 'user').map((m) => m.content)).toEqual(['а', 'г']);
+    expect(out.dropped).toBe(5);
+    expect(out.folded).toBe(4);
+    expect(pairingProblem(out.wire)).toBeNull();
+  });
+  it('a sound history passes unchanged', () => {
+    const wire = [...turn('а'), ...turn('б')];
+    expect(repairWire(wire, 4)).toEqual({ wire, folded: 4, dropped: 0 });
+  });
+  it('messages before the first question are dropped', () => {
+    expect(repairWire([{ role: 'assistant', content: 'x' }, ...turn('а')]).wire).toHaveLength(4);
   });
 });

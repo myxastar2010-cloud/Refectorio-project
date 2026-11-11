@@ -9,7 +9,9 @@ import type { Kb } from './knowledge';
 import { formatDoc } from './knowledge';
 import {
   MAX_ASSISTANT_CHARS,
+  MAX_TOOL_CALLS_PER_ROUND,
   MAX_TOOL_CHARS,
+  toolCallSchema,
   toolRoundsInTurn,
   turnStart,
   type ToolCall,
@@ -154,6 +156,8 @@ export type AgentDeps = {
   /** Wall-clock budget of a whole turn (ТЗ 07 §2: 45 s without web search). */
   readonly turnBudgetMs?: number;
   readonly maxTokens?: number;
+  /** The request's own signal: a stopped request is never mistaken for a failed memory fold. */
+  readonly signal?: AbortSignal;
 };
 
 export const TURN_BUDGET_MS = 45_000;
@@ -213,14 +217,37 @@ export function groundingSources(
 }
 
 /** The same call twice in one step (R20 §6.3: `required` may duplicate) runs once. */
-function dedupe(calls: readonly ToolCall[]): ToolCall[] {
+const CALL_NAME = /^[a-z_]{2,40}$/;
+const MAX_CALL_ID = 80;
+const MAX_CALL_ARGS = 8000;
+/** Stands for an oversized argument text, so the wire schema still takes the call back. */
+const TOO_LONG_ARGS = '{"_tooLong":true}';
+
+/**
+ * The calls a model wrote, made to fit the wire schema the server itself checks on the next request (review of
+ * phase 5, M8): duplicates run once, a malformed name becomes `unknown_tool`, an id that is empty, too long or repeated
+ * gets a unique one, oversized arguments are replaced (the model gets an error), at most a round's worth of calls.
+ */
+export function normalizeCalls(calls: readonly ToolCall[], step = ''): ToolCall[] {
   const seen = new Set<string>();
-  return calls.filter((c) => {
+  const ids = new Set<string>();
+  const out: ToolCall[] = [];
+  for (const c of calls) {
     const key = `${c.name}\u0000${c.args.trim()}`;
-    if (seen.has(key)) return false;
+    if (seen.has(key)) continue;
     seen.add(key);
-    return true;
-  });
+    let id = c.id;
+    if (!id || id.length > MAX_CALL_ID || ids.has(id)) id = `call-${step}-${String(out.length)}`;
+    ids.add(id);
+    const call: ToolCall = {
+      id,
+      name: CALL_NAME.test(c.name) ? c.name : 'unknown_tool',
+      args: c.args.length > MAX_CALL_ARGS ? TOO_LONG_ARGS : c.args,
+    };
+    if (toolCallSchema.safeParse(call).success) out.push(call);
+    if (out.length >= MAX_TOOL_CALLS_PER_ROUND) break;
+  }
+  return out;
 }
 
 const toolResult = (call: ToolCall, value: unknown): WireMessage => ({
@@ -270,15 +297,24 @@ export async function runTurn(
   const tools = providerTools(names);
   const maxTokens = deps.maxTokens ?? DEFAULT_MAX_TOKENS;
   const budget = deps.turnBudgetMs ?? TURN_BUDGET_MS;
-  const startedAt = request.turnStartedAt ?? deps.now();
+  // The client says how long the turn has run (its own monotonic clock), never when it began: computers' clocks
+  // differ from the server's (review of phase 5, M5).
+  const elapsed = Math.min(Math.max(request.turnElapsedMs ?? 0, 0), budget + 1);
+  const startedAt = deps.now() - elapsed;
   let usage = ZERO;
 
   let memory = request.memory;
   if (request.fold && request.fold.length > 0) {
     emit({ type: 'status', phase: 'thinking' });
-    const folded = await foldMemory(request, deps);
-    memory = folded.memory;
-    usage = addUsage(usage, folded.usage);
+    try {
+      const folded = await foldMemory(request, deps);
+      memory = folded.memory;
+      usage = addUsage(usage, folded.usage);
+    } catch (error) {
+      // Folding is best effort (M7): a failed summary keeps the old memory and the answer still comes; a stopped
+      // request stays stopped.
+      if (deps.signal?.aborted) throw error;
+    }
     emit({ type: 'memory', memory });
   }
 
@@ -306,7 +342,9 @@ export async function runTurn(
     usage = addUsage(usage, result.usage);
     const model = result.model;
 
-    const calls = allowTools ? dedupe(result.toolCalls) : [];
+    const calls = allowTools
+      ? normalizeCalls(result.toolCalls, String(toolRoundsInTurn(working)))
+      : [];
     if (calls.length > 0) {
       if (stream.streamed) emit({ type: 'text-reset' });
       const assistant: WireMessage = {
@@ -320,8 +358,17 @@ export async function runTurn(
       let onlyUi = true;
       let question = '';
       for (const call of calls) {
-        if (!isToolName(call.name) || (names && !names.includes(call.name))) {
-          const message = toolResult(call, { error: `unknown tool ${call.name}` });
+        if (
+          call.args === TOO_LONG_ARGS ||
+          !isToolName(call.name) ||
+          (names && !names.includes(call.name))
+        ) {
+          const message = toolResult(call, {
+            error:
+              call.args === TOO_LONG_ARGS
+                ? 'arguments too long — send fewer or shorter values'
+                : `unknown tool ${call.name}`,
+          });
           working.push(message);
           produced.push(message);
           onlyUi = false;

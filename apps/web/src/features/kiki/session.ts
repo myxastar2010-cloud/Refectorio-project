@@ -8,8 +8,10 @@ import {
   createEventParser,
   EMPTY_MEMORY,
   estimateTokens,
+  MAX_WINDOW_MESSAGES,
   messageTokens,
   PROTOCOL_VERSION,
+  repairWire,
   type ChatRequest,
   type ErrorCode,
   type Memory,
@@ -101,7 +103,9 @@ export const WINDOW_TURNS = 8;
 export const OLD_TOOL_CHARS = 500;
 /** No first byte after this → «Кики просыпается…» (Render's free instance sleeps). */
 export const WAKING_AFTER_MS = 3000;
-/** No answer at all after this → «Кики сейчас недоступна». */
+/** The server has not even answered with headers after this → «Кики сейчас недоступна» (a cold start takes 30–60 s). */
+export const WAKE_GIVE_UP_MS = 100_000;
+/** After the headers, no end of the step after this → «Кики сейчас недоступна» (review of phase 5, M7). */
 export const GIVE_UP_MS = 65_000;
 export const MAX_STEPS = 10;
 
@@ -142,10 +146,24 @@ export function selectWindow(
     used += cost;
     start = from;
   }
+  // The server takes at most MAX_WINDOW_MESSAGES in each part (review of phase 5, minor 6): whole earlier turns go
+  // first; the fold needs no tool results (the summary reads only the words), so it loses those and then its oldest.
+  while (start < last && wire.length - start > MAX_WINDOW_MESSAGES) {
+    const next = wire.findIndex((m, i) => i > start && m.role === 'user');
+    if (next < 0 || next > last) break;
+    start = next;
+  }
   const messages = wire
     .slice(start)
     .map((m, i) => (start + i < last && m.role === 'tool' ? shorten(m) : m));
-  const fold = start - folded >= 2 ? wire.slice(folded, start) : [];
+  const fold =
+    start - folded >= 2
+      ? wire
+          .slice(folded, start)
+          .filter((m) => m.role !== 'tool' && m.content.trim() !== '')
+          .map((m) => (m.role === 'assistant' ? { role: m.role, content: m.content } : m))
+          .slice(-MAX_WINDOW_MESSAGES)
+      : [];
   return { messages, fold, start };
 }
 
@@ -172,6 +190,10 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
   const listeners = new Set<() => void>();
   let controller: AbortController | null = null;
   let emitTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Where the running turn began in the wire: what is saved never holds half a turn (review of phase 5, M8). */
+  let runningFrom: number | null = null;
+  /** Bumped by «Удалить мои данные»: a run of an older generation writes nothing (review minor 3). */
+  let generation = 0;
 
   const emitNow = () => {
     if (emitTimer) clearTimeout(emitTimer);
@@ -189,34 +211,59 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
   };
   const save = () => {
     const items = state.items.slice(-MAX_ITEMS);
-    // Never cut the wire inside a turn: drop whole oldest turns (they are in the memory or forgotten on purpose).
     let wire = state.wire;
     let folded = state.folded;
-    while (wire.length > MAX_WIRE) {
-      const next = wire.findIndex((m, i) => i > 0 && m.role === 'user');
-      if (next <= 0) break;
-      wire = wire.slice(next);
-      folded = Math.max(0, folded - next);
+    if (runningFrom === null) {
+      // Never cut the wire inside a turn: drop whole oldest turns (they are in the memory or forgotten on purpose).
+      while (wire.length > MAX_WIRE) {
+        const next = wire.findIndex((m, i) => i > 0 && m.role === 'user');
+        if (next <= 0) break;
+        wire = wire.slice(next);
+        folded = Math.max(0, folded - next);
+      }
+      state = { ...state, items, wire, folded };
+      deps.persist(state);
+      return;
     }
-    state = { ...state, items, wire, folded };
-    deps.persist(state);
+    // A turn is running (a card applied meanwhile): save the history up to its start; the turn saves itself at the end.
+    state = { ...state, items };
+    deps.persist({
+      ...state,
+      wire: wire.slice(0, runningFrom),
+      folded: Math.min(folded, runningFrom),
+    });
   };
   async function run(turnStart: number, userText: string): Promise<void> {
-    controller = new AbortController();
-    const { signal } = controller;
+    const mine = new AbortController();
+    controller = mine;
+    const { signal } = mine;
+    const gen = generation;
+    const live = () => gen === generation;
+    // Every write of this run goes through these: after «Удалить мои данные» it writes nothing.
+    const setLive = (next: ChatState, soon = false) => {
+      if (live()) set(next, soon);
+    };
+    const saveLive = () => {
+      if (live()) save();
+    };
+    runningFrom = turnStart;
     const startedAt = deps.now();
-    const wallStart = Date.now();
-    set({ ...state, busy: { phase: 'thinking', startedAt, text: '' } });
+    setLive({ ...state, busy: { phase: 'thinking', startedAt, text: '' } });
     const previewIds: string[] = [];
     let choice: ChoiceItem | undefined;
     const buttons: OpenUi[] = [];
     let announced = 0;
 
     const fail = (code: Extract<ChatItem, { kind: 'error' }>['code'], retryAfterMs?: number) => {
-      // The unfinished turn leaves the model's history: a half tool exchange would break the next request.
-      set({
+      runningFrom = null;
+      // The unfinished turn leaves the model's history: a half tool exchange would break the next request. A refused
+      // history (400) is repaired — its broken turns go, the rest stays (M8).
+      const kept = state.wire.slice(0, turnStart);
+      const repaired = code === 'bad_request' ? repairWire(kept, state.folded) : null;
+      setLive({
         ...state,
-        wire: state.wire.slice(0, turnStart),
+        wire: repaired ? repaired.wire : kept,
+        folded: repaired ? repaired.folded : Math.min(state.folded, kept.length),
         busy: null,
         items: [
           ...state.items,
@@ -229,7 +276,7 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
           },
         ],
       });
-      save();
+      saveLive();
     };
 
     try {
@@ -247,21 +294,27 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
           memory: state.memory,
           digest,
           ...(fold.length > 0 ? { fold } : {}),
-          // Wall-clock (the server compares it with its own clock for the turn budget).
-          turnStartedAt: wallStart,
+          // A duration by this tab's monotonic clock: the server never compares clocks (review of phase 5, M5).
+          turnElapsedMs: Math.max(0, Math.round(deps.now() - startedAt)),
         };
         const waking = setTimeout(() => {
-          if (state.busy) set({ ...state, busy: { ...state.busy, phase: 'waking' } });
+          if (state.busy) setLive({ ...state, busy: { ...state.busy, phase: 'waking' } });
         }, WAKING_AFTER_MS);
-        const giveUp = setTimeout(() => {
-          controller?.abort('timeout');
-        }, GIVE_UP_MS);
+        // Two limits (M7): a sleeping server gets time to wake before its headers, then the step gets its own time.
+        // The timer stops this run's own request, never a later one (M6).
+        let giveUp = setTimeout(() => {
+          mine.abort('timeout');
+        }, WAKE_GIVE_UP_MS);
         let res: Response;
         try {
           res = await deps.post(body, signal);
         } finally {
           clearTimeout(waking);
+          clearTimeout(giveUp);
         }
+        giveUp = setTimeout(() => {
+          mine.abort('timeout');
+        }, GIVE_UP_MS);
         if (!res.ok || !res.body) {
           clearTimeout(giveUp);
           let retryAfterMs: number | undefined;
@@ -282,7 +335,7 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
           return;
         }
         if (state.busy?.phase === 'waking')
-          set({ ...state, busy: { ...state.busy, phase: 'thinking' } });
+          setLive({ ...state, busy: { ...state.busy, phase: 'thinking' } });
 
         const parse = createEventParser();
         const decoder = new TextDecoder();
@@ -298,7 +351,7 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
               switch (event.type) {
                 case 'status':
                   if (busy)
-                    set({
+                    setLive({
                       ...state,
                       busy: {
                         ...busy,
@@ -310,7 +363,7 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
                 case 'text-delta':
                   if (busy) {
                     const text = busy.text + event.text;
-                    set({ ...state, busy: { ...busy, text } }, true);
+                    setLive({ ...state, busy: { ...busy, text } }, true);
                     // Completed sentences go to the polite live region, one by one.
                     const end = Math.max(
                       text.lastIndexOf('. '),
@@ -325,7 +378,7 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
                   break;
                 case 'text-reset':
                   announced = 0;
-                  if (busy) set({ ...state, busy: { ...busy, text: '' } });
+                  if (busy) setLive({ ...state, busy: { ...busy, text: '' } });
                   break;
                 case 'ui':
                   if (event.ui.kind === 'choice')
@@ -333,10 +386,10 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
                   else buttons.push(event.ui);
                   break;
                 case 'memory':
-                  set({ ...state, memory: event.memory, folded: start });
+                  setLive({ ...state, memory: event.memory, folded: start });
                   break;
                 case 'continue':
-                  set({ ...state, wire: [...state.wire, ...event.messages] });
+                  setLive({ ...state, wire: [...state.wire, ...event.messages] });
                   break;
                 case 'tool-call':
                   calls.push(event);
@@ -355,13 +408,14 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
                   if (event.replaced) deps.announce?.(event.text);
                   else if (announced < event.text.length)
                     deps.announce?.(event.text.slice(announced).trim());
-                  set({
+                  runningFrom = null;
+                  setLive({
                     ...state,
                     wire: [...state.wire, ...event.messages],
                     items: [...state.items, item],
                     busy: null,
                   });
-                  save();
+                  saveLive();
                   break;
                 }
                 case 'error':
@@ -385,7 +439,7 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
           return;
         }
         if (state.busy)
-          set({
+          setLive({
             ...state,
             busy: {
               ...state.busy,
@@ -417,7 +471,7 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
               },
             };
           }
-          state = { ...state, previews };
+          if (live()) state = { ...state, previews };
           results.push({
             role: 'tool',
             callId: call.callId,
@@ -425,14 +479,15 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
             content: JSON.stringify(out.result).slice(0, 6000),
           });
         }
-        set({ ...state, wire: [...state.wire, ...results] });
+        setLive({ ...state, wire: [...state.wire, ...results] });
       }
       fail('too_many_rounds');
     } catch {
       if (signal.aborted) fail(signal.reason === 'timeout' ? 'timeout' : 'stopped');
       else fail(deps.online() ? 'provider_unavailable' : 'offline');
     } finally {
-      controller = null;
+      // Only this run's own controller: a later turn keeps its «Стоп» and timer (M6).
+      if (controller === mine) controller = null;
     }
   }
 
@@ -491,7 +546,10 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
       save();
     },
     clear() {
+      generation++;
+      runningFrom = null;
       controller?.abort('stop');
+      controller = null;
       set({ ...EMPTY_CHAT });
       deps.persist(state);
     },

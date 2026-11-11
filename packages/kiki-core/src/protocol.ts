@@ -35,8 +35,11 @@ export const chatRequestSchema = z.object({
   digest: z.string().max(MAX_DIGEST_CHARS),
   /** The oldest turns to fold into the memory before answering (one summarisation call). */
   fold: z.array(wireMessageSchema).max(MAX_WINDOW_MESSAGES).optional(),
-  /** Wall-clock start of the turn on the client, ms since epoch (the turn budget spans several POSTs). */
-  turnStartedAt: z.number().int().nonnegative().optional(),
+  /**
+   * How long the turn has run on the client, by its monotonic clock (the turn budget spans several POSTs). A duration,
+   * not a time of day: the computer's clock may differ from the server's (review of phase 5, M5).
+   */
+  turnElapsedMs: z.number().int().nonnegative().max(3_600_000).optional(),
 });
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 

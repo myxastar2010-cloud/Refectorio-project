@@ -3,7 +3,7 @@
  * the chat kept in this browser's database (`refectorio.chat`, wiped with «Удалить мои данные»), and «Применить» for
  * proposals. Proposed plans live in memory for this visit; after a reload a proposal is recomputed on apply.
  */
-import { memorySchema, wireMessageSchema, type ChatRequest } from '@refectorio/kiki-core';
+import { memorySchema, repairWire, type ChatRequest } from '@refectorio/kiki-core';
 import type { Preview } from '@refectorio/kiki-core/client';
 import type { Plan, PlanDiff } from '@refectorio/menu-core';
 import { planKey } from '@refectorio/menu-core/hash';
@@ -35,13 +35,19 @@ const CHAT_VERSION = 1;
 export const API_BASE: string =
   import.meta.env.VITE_API_ORIGIN ?? `${import.meta.env.BASE_URL}api`.replace('//', '/');
 
-let warmed = false;
-/** Wakes the free Render instance ahead of the first question (fire-and-forget, once per visit). */
+/** Render's free instance sleeps after 15 min without requests: wake it again when the chat opens after this. */
+export const WARM_AGAIN_MS = 10 * 60_000;
+let lastContactAt = Number.NEGATIVE_INFINITY;
+/**
+ * Wakes the free Render instance ahead of a question (fire-and-forget): on opening the chat, again when the server
+ * has not been heard from for {@link WARM_AGAIN_MS} (review of phase 5, M7).
+ */
 export function warmKiki(): void {
-  if (warmed || typeof fetch === 'undefined') return;
-  warmed = true;
+  const now = performance.now();
+  if (now - lastContactAt < WARM_AGAIN_MS || typeof fetch === 'undefined') return;
+  lastContactAt = now;
   fetch(`${API_BASE}/health`, { mode: 'cors', credentials: 'omit' }).catch(() => {
-    warmed = false;
+    lastContactAt = Number.NEGATIVE_INFINITY;
   });
 }
 
@@ -50,7 +56,8 @@ const storedSchema = z.object({
   items: z.array(
     z.looseObject({ id: z.string(), kind: z.enum(['user', 'kiki', 'note', 'error']) }),
   ),
-  wire: z.array(wireMessageSchema),
+  // Checked turn by turn on restore (repairWire): one broken turn never costs the whole chat (review of phase 5, M8).
+  wire: z.array(z.unknown()),
   memory: memorySchema,
   folded: z.number().int().nonnegative(),
   previews: z.record(z.string(), z.looseObject({ id: z.string(), status: z.string() })),
@@ -94,6 +101,9 @@ export function chatSession(): ChatSession {
         body: JSON.stringify(body),
         credentials: 'omit',
         signal,
+      }).then((res) => {
+        lastContactAt = performance.now();
+        return res;
       }),
     runTool: async (name, args): Promise<ToolRun> => {
       const { plan, answers, tracking, today } = snapshotForTools();
@@ -156,12 +166,16 @@ export function chatSession(): ChatSession {
     .then((value) => {
       const parsed = storedSchema.safeParse(value);
       // Restore only into an untouched session: a message sent while the database opened wins.
-      if (parsed.success && created.get().items.length === 0 && !created.get().busy)
+      if (parsed.success && created.get().items.length === 0 && !created.get().busy) {
+        const { wire, folded } = repairWire(parsed.data.wire, parsed.data.folded);
         created.restore({
           ...EMPTY_CHAT,
           ...(parsed.data as unknown as Omit<ChatState, 'busy'>),
+          wire,
+          folded,
           busy: null,
         });
+      }
     })
     .catch(() => {});
   // «Удалить мои данные» clears the database; the chat in memory follows.

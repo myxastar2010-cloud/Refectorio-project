@@ -12,7 +12,7 @@ const body = {
   messages: [{ role: 'user', content: text }],
   memory: { summary: '', facts: [] },
   digest: 'Сегодня: вторник, 2026-11-10. Цель: поддержание веса.',
-  turnStartedAt: Date.now(),
+  turnElapsedMs: 0,
 };
 const started = performance.now();
 const res = await fetch(`${base}/kiki/chat`, {

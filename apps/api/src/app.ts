@@ -152,6 +152,7 @@ export function createApp(deps: AppDeps): Hono {
               complete: (r) => deps.chain.complete(r, controller.signal),
               kb: deps.kb,
               now,
+              signal: controller.signal,
             },
             (event) => {
               if (event.type === 'final') model = event.model;

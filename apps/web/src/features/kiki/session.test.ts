@@ -4,9 +4,12 @@ import {
   type ServerEvent,
   type WireMessage,
 } from '@refectorio/kiki-core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   createChatSession,
+  EMPTY_CHAT,
+  WAKE_GIVE_UP_MS,
+  type ChatSession,
   OLD_TOOL_CHARS,
   selectWindow,
   type ChatState,
@@ -84,8 +87,18 @@ describe('selectWindow', () => {
     expect(messages[0]?.role).toBe('user');
     // Old tool results are cut to 500 characters, so turn 2 still fits; turn 1 goes to the memory.
     expect(start).toBe(4);
-    expect(fold.length).toBe(4);
+    // The fold carries the words only: the question and the answer of turn 1 (no tool exchange).
+    expect(fold.map((m) => m.role)).toEqual(['user', 'assistant']);
+    expect(fold.every((m) => m.role !== 'assistant' || !m.toolCalls)).toBe(true);
     expect(selectWindow(wire, 4, 400).fold).toEqual([]);
+  });
+
+  it('never sends more messages than the server takes (minor 6)', () => {
+    const wire = Array.from({ length: 40 }, (_, i) => turn(i)).flat();
+    const { messages, fold } = selectWindow(wire, 0, 1_000_000, 1000);
+    expect(messages.length).toBeLessThanOrEqual(80);
+    expect(messages[0]?.role).toBe('user');
+    expect(fold.length).toBeLessThanOrEqual(80);
   });
 });
 
@@ -263,5 +276,161 @@ describe('chat session', () => {
     h.session.clear();
     expect(h.session.get().items).toEqual([]);
     expect(h.session.get().memory.facts).toEqual([]);
+  });
+});
+
+describe('chat session: review of phase 5 (M5–M8, minor 3)', () => {
+  const continueWithTool: ServerEvent[] = [
+    {
+      type: 'continue',
+      messages: [
+        { role: 'assistant', content: '', toolCalls: [{ id: 'c1', name: 'get_menu', args: '{}' }] },
+      ],
+    },
+    { type: 'tool-call', callId: 'c1', name: 'get_menu', args: {} },
+  ];
+  const finalOk: ServerEvent = {
+    type: 'final',
+    text: 'Готово.',
+    replaced: false,
+    messages: [{ role: 'assistant', content: 'Готово.' }],
+    model: 'm',
+    usage,
+  };
+  const base = (over: Partial<SessionDeps>): SessionDeps => ({
+    post: () => Promise.reject(new Error('unset')),
+    runTool: () => Promise.resolve({ result: {}, previews: [] }),
+    digest: () => Promise.resolve(''),
+    persist: () => {},
+    now: () => 0,
+    newId: (() => {
+      let n = 0;
+      return () => `x${String(n++)}`;
+    })(),
+    online: () => true,
+    ...over,
+  });
+
+  it('sends how long the turn has run, never a time of day (M5)', async () => {
+    let t = 1000;
+    const bodies: ChatRequest[] = [];
+    const responses = [sse(continueWithTool), sse([finalOk])];
+    const session = createChatSession(
+      base({
+        now: () => t,
+        post: (body) => {
+          bodies.push(body);
+          t += 1500;
+          return Promise.resolve(responses.shift() ?? sse([finalOk]));
+        },
+      }),
+    );
+    await session.send('Меню?');
+    expect(bodies.map((b) => b.turnElapsedMs)).toEqual([0, 1500]);
+  });
+
+  it('a stopped request leaves no timer behind to cut the next turn (M6)', async () => {
+    vi.useFakeTimers();
+    try {
+      const signals: AbortSignal[] = [];
+      let release: ((r: Response) => void) | null = null;
+      const session = createChatSession(
+        base({
+          post: (_body, signal) => {
+            signals.push(signal);
+            return new Promise<Response>((resolve, reject) => {
+              release = resolve;
+              signal.addEventListener('abort', () => {
+                reject(new Error('aborted'));
+              });
+            });
+          },
+        }),
+      );
+      const first = session.send('Первый');
+      await vi.advanceTimersByTimeAsync(10_000);
+      session.stop();
+      await first;
+      const second = session.send('Второй');
+      await vi.advanceTimersByTimeAsync(WAKE_GIVE_UP_MS - 5_000);
+      expect(signals[1]?.aborted).toBe(false);
+      (release as ((r: Response) => void) | null)?.(sse([finalOk]));
+      await second;
+      expect(session.get().items.at(-1)).toMatchObject({ kind: 'kiki', text: 'Готово.' });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a card settled during a turn saves the history without half of that turn (M8)', async () => {
+    const saved: ChatState[] = [];
+    const initial: ChatState = {
+      ...EMPTY_CHAT,
+      wire: [
+        { role: 'user', content: 'Без чеснока' },
+        { role: 'assistant', content: 'Вот предложение.' },
+      ],
+      previews: { p1: { id: 'p1', status: 'pending' } as unknown as ChatState['previews'][string] },
+    };
+    const responses = [sse(continueWithTool), sse([finalOk])];
+    const session: ChatSession = createChatSession(
+      base({
+        post: () => Promise.resolve(responses.shift() ?? sse([finalOk])),
+        persist: (s) => saved.push(s),
+        runTool: () => {
+          session.settle('p1', 'applied', 'Применено');
+          return Promise.resolve({ result: {}, previews: [] });
+        },
+      }),
+      initial,
+    );
+    await session.send('Что на ужин?');
+    expect(saved[0]?.wire).toHaveLength(2);
+    expect(saved[0]?.previews.p1?.status).toBe('applied');
+    expect(saved.at(-1)?.wire.map((m) => m.role)).toEqual([
+      'user',
+      'assistant',
+      'user',
+      'assistant',
+      'tool',
+      'assistant',
+    ]);
+  });
+
+  it('a refused history (400) loses only its broken turn (M8)', async () => {
+    const initial: ChatState = {
+      ...EMPTY_CHAT,
+      wire: [
+        { role: 'user', content: 'Раз' },
+        { role: 'assistant', content: 'Ответ.' },
+        { role: 'user', content: 'Два' },
+        { role: 'assistant', content: '', toolCalls: [{ id: 'z', name: 'get_menu', args: '{}' }] },
+      ],
+    };
+    const session = createChatSession(
+      base({ post: () => Promise.resolve(new Response('{}', { status: 400 })) }),
+      initial,
+    );
+    await session.send('Три');
+    expect(session.get().wire.map((m) => m.content)).toEqual(['Раз', 'Ответ.']);
+  });
+
+  it('«Удалить мои данные» during a turn: the run writes nothing afterwards (minor 3)', async () => {
+    const responses = [sse(continueWithTool), sse([finalOk])];
+    const saved: ChatState[] = [];
+    const session: ChatSession = createChatSession(
+      base({
+        post: () => Promise.resolve(responses.shift() ?? sse([finalOk])),
+        persist: (s) => saved.push(s),
+        runTool: () => {
+          session.clear();
+          return Promise.resolve({ result: {}, previews: [] });
+        },
+      }),
+    );
+    await session.send('Меню?');
+    expect(session.get().items).toEqual([]);
+    expect(session.get().wire).toEqual([]);
+    expect(saved.at(-1)?.items).toEqual([]);
   });
 });

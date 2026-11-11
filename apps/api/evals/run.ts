@@ -280,7 +280,7 @@ async function runCase(c: EvalCase, model: ModelSpec, run: number): Promise<Turn
             messages,
             memory: EMPTY_MEMORY,
             digest: buildDigest(fixture.env),
-            turnStartedAt: Date.now(),
+            turnElapsedMs: 0,
           },
           { complete, kb, now: Date.now },
           (e) => events.push(e),

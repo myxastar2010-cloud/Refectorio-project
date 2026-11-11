@@ -85,3 +85,41 @@ export function pairingProblem(messages: readonly WireMessage[]): string | null 
   }
   return null;
 }
+
+/**
+ * A stored or refused history made whole again (review of phase 5, M8): only complete turns stay — a user message,
+ * then messages that pass the schema, pair up and end with Kiki's plain answer. A broken or unfinished turn is dropped
+ * instead of the whole chat. `folded` (messages already in the memory) is moved with the turns kept before it.
+ */
+export function repairWire(
+  raw: readonly unknown[],
+  folded = 0,
+): { wire: WireMessage[]; folded: number; dropped: number } {
+  const turns: { from: number; items: unknown[] }[] = [];
+  raw.forEach((m, i) => {
+    const isUser = typeof m === 'object' && m !== null && (m as { role?: unknown }).role === 'user';
+    if (isUser || turns.length === 0) turns.push({ from: i, items: [] });
+    turns.at(-1)?.items.push(m);
+  });
+  const wire: WireMessage[] = [];
+  let keptFolded = 0;
+  let dropped = 0;
+  for (const turn of turns) {
+    const parsed = turn.items.map((m) => wireMessageSchema.safeParse(m));
+    const messages = parsed.flatMap((p) => (p.success ? [p.data] : []));
+    const last = messages.at(-1);
+    const whole =
+      messages.length === turn.items.length &&
+      messages[0]?.role === 'user' &&
+      last?.role === 'assistant' &&
+      (last.toolCalls?.length ?? 0) === 0 &&
+      pairingProblem(messages) === null;
+    if (!whole) {
+      dropped += turn.items.length;
+      continue;
+    }
+    if (turn.from < folded) keptFolded += messages.length;
+    wire.push(...messages);
+  }
+  return { wire, folded: Math.min(keptFolded, wire.length), dropped };
+}
