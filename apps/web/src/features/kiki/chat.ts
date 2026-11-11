@@ -33,7 +33,7 @@ const CHAT_VERSION = 1;
 
 /** The server: the published site → its Render origin; dev → Vite's `/api` proxy (ТЗ 07 §2). */
 export const API_BASE: string =
-  import.meta.env.VITE_API_ORIGIN ?? `${import.meta.env.BASE_URL}api`.replace('//', '/');
+  __API_ORIGIN__ || `${import.meta.env.BASE_URL}api`.replace('//', '/');
 
 /** Render's free instance sleeps after 15 min without requests: wake it again when the chat opens after this. */
 export const WARM_AGAIN_MS = 10 * 60_000;

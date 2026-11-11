@@ -255,6 +255,10 @@ describe('chat session', () => {
     const broken = harness([new Error('network')]);
     await broken.session.send('Привет');
     expect(broken.session.get().items.at(-1)).toMatchObject({ code: 'provider_unavailable' });
+    // No server at that address (the live site once asked its own static host): «недоступна», not «не получилось».
+    const missing = harness([new Response('Not Found', { status: 404 })]);
+    await missing.session.send('Привет');
+    expect(missing.session.get().items.at(-1)).toMatchObject({ code: 'provider_unavailable' });
   });
 
   it('memory events move the fold mark; clear empties everything', async () => {

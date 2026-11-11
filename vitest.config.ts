@@ -20,7 +20,11 @@ export default defineConfig({
       nodePackage('kiki-core'),
       {
         // The build flag of vite.config.ts (ADR 0011): unit tests see the default build.
-        define: { __PHOTO_HOSTING__: JSON.stringify('self'), __TEST_HOOKS__: 'true' },
+        define: {
+          __PHOTO_HOSTING__: JSON.stringify('self'),
+          __TEST_HOOKS__: 'true',
+          __API_ORIGIN__: JSON.stringify(''),
+        },
         test: {
           name: 'web',
           root: './apps/web',

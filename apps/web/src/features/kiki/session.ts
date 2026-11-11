@@ -327,7 +327,9 @@ export function createChatSession(deps: SessionDeps, initial: ChatState = EMPTY_
           fail(
             res.status === 429
               ? 'rate_limited'
-              : res.status >= 500
+              : // 404/405: no Kiki server at that address (not deployed yet, a wrong address) — «недоступна», not «не
+                // получилось»: the person can do nothing about it but wait.
+                res.status >= 500 || res.status === 404 || res.status === 405
                 ? 'provider_unavailable'
                 : 'bad_request',
             retryAfterMs,

@@ -14,13 +14,19 @@ import { site } from './src/content/site.ru';
 const PHOTO_HOSTING = process.env.PHOTO_HOSTING === 'unsplash' ? 'unsplash' : 'self';
 const hotlinked = PHOTO_HOSTING === 'unsplash';
 
+/** The Render Web Service of render.yaml (`refectorio-api`). */
+const RENDER_API_ORIGIN = 'https://refectorio-api.onrender.com';
 /**
  * Kiki's server (ТЗ 07 §2, ADR 0013): the published site talks to the Render Web Service by its origin; the dev server
- * proxies `/api` to `npm run dev:api` (port 8787), so local work needs no CORS. Only an https origin is accepted.
+ * proxies `/api` to `npm run dev:api` (port 8787), so local work needs no CORS. One value for the CSP and the client
+ * (`__API_ORIGIN__`): `VITE_API_ORIGIN` without a trailing slash, only https. A build on Render (it sets `RENDER`) gets
+ * the service's address even when the dashboard has no `VITE_API_ORIGIN` — the live site was once built without it and
+ * Kiki asked its own static host (review of phase 5, minor 11).
  */
-const API_ORIGIN = /^https:\/\/[a-z0-9.-]+$/.test(process.env.VITE_API_ORIGIN ?? '')
-  ? (process.env.VITE_API_ORIGIN as string)
-  : '';
+const rawApiOrigin = (process.env.VITE_API_ORIGIN || (process.env.RENDER ? RENDER_API_ORIGIN : ''))
+  .trim()
+  .replace(/\/+$/, '');
+const API_ORIGIN = /^https:\/\/[a-z0-9.-]+$/.test(rawApiOrigin) ? rawApiOrigin : '';
 
 /**
  * Preloads the Open Runde weights that the first screen needs (bold titles and buttons, semibold lead and cards),
@@ -163,6 +169,7 @@ export default defineConfig(({ mode }) => ({
     __PHOTO_HOSTING__: JSON.stringify(PHOTO_HOSTING),
     // The quiz's ?step= hook lives only in test builds (playwright.config.ts builds with --mode test).
     __TEST_HOOKS__: JSON.stringify(mode === 'test'),
+    __API_ORIGIN__: JSON.stringify(API_ORIGIN),
   },
   resolve: {
     alias: hotlinked
