@@ -1,13 +1,20 @@
 import { defineConfig } from 'vitest/config';
 
-const nodePackage = (name: string) => ({
+const nodePackage = (name: string, testTimeout?: number) => ({
   test: {
     name,
     root: `./packages/${name}`,
     include: ['src/**/*.test.ts', 'sim/**/*.test.ts', 'data/**/*.test.ts'],
     environment: 'node' as const,
+    ...(testTimeout ? { testTimeout } : {}),
   },
 });
+/**
+ * Tests that plan a whole week (generate, re-plan, a proposal's preview) take 0,3–0,7 s here but several times that
+ * under CI's coverage instrumentation: the 5 s default failed a goal-change preview on 11.11. Speed has its own checks
+ * (menu-core budgets, e2e), so a timeout here only guards against hangs.
+ */
+const PLANNING_TIMEOUT_MS = 30_000;
 
 export default defineConfig({
   test: {
@@ -16,8 +23,8 @@ export default defineConfig({
       nodePackage('contracts'),
       nodePackage('taste-core'),
       nodePackage('food-data'),
-      nodePackage('menu-core'),
-      nodePackage('kiki-core'),
+      nodePackage('menu-core', PLANNING_TIMEOUT_MS),
+      nodePackage('kiki-core', PLANNING_TIMEOUT_MS),
       {
         // The build flag of vite.config.ts (ADR 0011): unit tests see the default build.
         define: {
