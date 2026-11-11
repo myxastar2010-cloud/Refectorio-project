@@ -92,6 +92,18 @@ const database = () => {
   return kv;
 };
 
+let channel: BroadcastChannel | null | undefined;
+/** The chat's own channel between this site's tabs (the menu store has its own). */
+const chatChannel = (): BroadcastChannel | null => {
+  if (channel !== undefined) return channel;
+  const demo = readTestParams(window.location.search).menuDemo;
+  channel =
+    typeof BroadcastChannel === 'undefined'
+      ? null
+      : new BroadcastChannel(`${CHAT_KEY}${demo ? '.demo' : ''}`);
+  return channel;
+};
+
 function snapshotForTools() {
   const { plan, answers, tracking } = menuStore().get();
   return { plan, answers, tracking, today: chatUi.today ?? localIsoDate() };
@@ -158,6 +170,7 @@ export function chatSession(): ChatSession {
         .catch(() => {
           // Storage refused: the chat lives for this visit only (the notice already says so).
         });
+      chatChannel()?.postMessage(stored);
     },
     now: () => performance.now(),
     newId,
@@ -167,23 +180,29 @@ export function chatSession(): ChatSession {
     },
   });
   session = created;
+  const restoreFrom = (value: unknown) => {
+    const parsed = storedSchema.safeParse(value);
+    if (!parsed.success) return;
+    const { wire, folded } = repairWire(parsed.data.wire, parsed.data.folded);
+    created.restore({
+      ...EMPTY_CHAT,
+      ...(parsed.data as unknown as Omit<ChatState, 'busy'>),
+      wire,
+      folded,
+      busy: null,
+    });
+  };
   void database()
     .then((db) => db.get(CHAT_KEY))
     .then((value) => {
-      const parsed = storedSchema.safeParse(value);
       // Restore only into an untouched session: a message sent while the database opened wins.
-      if (parsed.success && created.get().items.length === 0 && !created.get().busy) {
-        const { wire, folded } = repairWire(parsed.data.wire, parsed.data.folded);
-        created.restore({
-          ...EMPTY_CHAT,
-          ...(parsed.data as unknown as Omit<ChatState, 'busy'>),
-          wire,
-          folded,
-          busy: null,
-        });
-      }
+      if (created.get().items.length === 0 && !created.get().busy) restoreFrom(value);
     })
     .catch(() => {});
+  // Another tab saved its chat: this one shows the same (unless it is answering right now; review minor 7).
+  chatChannel()?.addEventListener('message', (event: MessageEvent<unknown>) => {
+    if (!created.get().busy) restoreFrom(event.data);
+  });
   // «Удалить мои данные» clears the database; the chat in memory follows.
   menuStore().subscribe(() => {
     if (!menuStore().get().plan && created.get().items.length > 0) created.clear();
@@ -283,6 +302,14 @@ export async function previewPlan(record: PreviewRecord): Promise<ComputedPrevie
     const op = record.op;
     // Chats saved before 11.11 hold a whole snapshot: on a changed menu it would undo later changes — never replayed.
     if (op.kind !== 'replace') return null;
+    // The dish may have moved or gone since (minor 5): replace it where it is now, or call the card stale.
+    const meal = plan.days.find((d) => d.date === op.slot.date)?.meals[op.slot.meal] ?? [];
+    const index = op.fromItemId
+      ? meal[op.slot.index]?.itemId === op.fromItemId
+        ? op.slot.index
+        : meal.findIndex((i) => i.itemId === op.fromItemId)
+      : op.slot.index;
+    if (index < 0) return null;
     const answer = await menuClient().request({
       type: 'apply',
       answers,
@@ -290,7 +317,7 @@ export async function previewPlan(record: PreviewRecord): Promise<ComputedPrevie
       today,
       tracking,
       op: 'replaceItem',
-      slot: op.slot,
+      slot: { ...op.slot, index },
       itemId: op.itemId,
     });
     if (answer.type !== 'plan') return null;

@@ -644,7 +644,7 @@ function proposeAlternatives(env: ToolEnv, args: ToolArgs<'propose_alternatives'
   for (const alt of options.value) {
     const outcome = propose(
       env,
-      { kind: 'replace', slot, itemId: alt.itemId },
+      { kind: 'replace', slot, itemId: alt.itemId, fromItemId: args.itemId },
       replaceItem(env.engine, env.plan, slot, alt.itemId, opOptions(env)),
     );
     const preview = outcome.previews?.[0];

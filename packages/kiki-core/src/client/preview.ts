@@ -19,7 +19,13 @@ export type PreviewOp =
   | { readonly kind: 'rules'; readonly rules: readonly Rule[] }
   | { readonly kind: 'goal'; readonly answers: unknown }
   | { readonly kind: 'structure'; readonly structure: readonly Meal[] }
-  | { readonly kind: 'replace'; readonly slot: SlotRef; readonly itemId: string };
+  | {
+      readonly kind: 'replace';
+      readonly slot: SlotRef;
+      readonly itemId: string;
+      /** The dish being replaced: a changed menu never gets another dish replaced at that index (minor 5). */
+      readonly fromItemId?: string;
+    };
 
 export type DayChange = {
   readonly date: IsoDate;
