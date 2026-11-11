@@ -17,7 +17,7 @@ import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
 import { streamSSE } from 'hono/streaming';
 import { ChainUnavailable, type Chain } from './chain';
-import type { Limiter } from './rateLimit';
+import { GLOBAL_KEY, type Limiter } from './rateLimit';
 
 export type AppDeps = {
   readonly chain: Chain;
@@ -40,15 +40,23 @@ export const DEFAULT_ORIGINS = [
   'http://localhost:4180',
 ];
 
-/** The client's address: the CDN's header first, then the first X-Forwarded-For hop, then «local». */
-export function clientIp(c: Context): string {
-  const h = (name: string) => c.req.header(name)?.trim();
-  return (
-    h('true-client-ip') ??
-    h('cf-connecting-ip') ??
-    h('x-forwarded-for')?.split(',')[0]?.trim() ??
-    'local'
-  );
+export type IpSource = 'cf' | 'true-client' | 'xff' | 'local';
+
+/**
+ * The client's address. Render sits behind Cloudflare, whose edge overwrites `CF-Connecting-IP` (any plan) and
+ * `True-Client-IP` — a client cannot set them. `X-Forwarded-For` is only appended to by Render, so its first hop is
+ * the client's own claim: the last resort, and the server-wide limit caps what a spoofed address can cost (M4).
+ * The source (never the address) goes to the log, to confirm on the live service which header is there.
+ */
+export function clientIp(c: Context): { ip: string; source: IpSource } {
+  const h = (name: string) => c.req.header(name)?.trim() || undefined;
+  const cf = h('cf-connecting-ip');
+  if (cf) return { ip: cf, source: 'cf' };
+  const trueClient = h('true-client-ip');
+  if (trueClient) return { ip: trueClient, source: 'true-client' };
+  const xff = h('x-forwarded-for')?.split(',')[0]?.trim();
+  if (xff) return { ip: xff, source: 'xff' };
+  return { ip: 'local', source: 'local' };
 }
 
 export function createApp(deps: AppDeps): Hono {
@@ -78,7 +86,8 @@ export function createApp(deps: AppDeps): Hono {
       ok: true,
       version: deps.version,
       kb: deps.kbVersion,
-      models: deps.chain.models.map((m) => m.id),
+      // How many models are configured, never their names (Kiki does not name her provider; review minor 11).
+      models: deps.chain.models.length,
       provider: deps.chain.status(),
     });
   });
@@ -90,8 +99,9 @@ export function createApp(deps: AppDeps): Hono {
       onError: (c) => c.json({ code: 'bad_request', detail: 'too large' }, 413),
     }),
     async (c) => {
+      // Browsers always send Origin on a cross-origin POST: without it the caller is a script (M4).
       const origin = c.req.header('origin');
-      if (origin && !allowed.has(origin))
+      if (!origin || !allowed.has(origin))
         return c.json({ code: 'bad_request', detail: 'origin' }, 403);
       let body: unknown;
       try {
@@ -105,14 +115,19 @@ export function createApp(deps: AppDeps): Hono {
       const problem = pairingProblem(request.messages);
       if (problem) return c.json({ code: 'bad_request', detail: 'pairing' }, 400);
 
-      // A new user turn costs one unit; the steps that bring tool results back are part of the same turn.
+      // Every POST is a model step (the tool steps of a turn too) and counts per address and server-wide; a new user
+      // turn also costs one chat unit (review of phase 5, M4).
+      const { ip, source } = clientIp(c);
       const last = request.messages[request.messages.length - 1];
-      if (last?.role === 'user') {
-        const wait = deps.limiter.take('chat', clientIp(c));
-        if (wait > 0) {
-          c.header('Retry-After', String(Math.ceil(wait / 1000)));
-          return c.json({ code: 'rate_limited', retryable: true, retryAfterMs: wait }, 429);
-        }
+      const wait = deps.limiter.take(
+        ['global', GLOBAL_KEY],
+        ['step', ip],
+        ...(last?.role === 'user' ? [['chat', ip] as const] : []),
+      );
+      if (wait > 0) {
+        log({ event: 'limited', ipSource: source });
+        c.header('Retry-After', String(Math.ceil(wait / 1000)));
+        return c.json({ code: 'rate_limited', retryable: true, retryAfterMs: wait }, 429);
       }
 
       return streamSSE(c, async (stream) => {
@@ -164,6 +179,7 @@ export function createApp(deps: AppDeps): Hono {
             outcome,
             model,
             messages: request.messages.length,
+            ipSource: source,
           });
         }
       });

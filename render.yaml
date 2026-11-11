@@ -72,3 +72,6 @@ services:
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
+      # Per-address limits × N (a whole class on one school address on demo day); the server-wide cap stays.
+      - key: KIKI_LIMIT_SCALE
+        value: '1'

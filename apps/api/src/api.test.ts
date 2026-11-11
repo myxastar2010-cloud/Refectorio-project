@@ -9,7 +9,7 @@ import {
   ProviderError,
   type ModelSpec,
 } from './provider';
-import { createLimiter } from './rateLimit';
+import { createLimiter, scaleLimits, LIMITS, type Limits } from './rateLimit';
 
 const kb = createKb({ version: 't', docs: [] });
 const usage = { promptTokens: 1, completionTokens: 1, cachedTokens: 0 };
@@ -29,12 +29,12 @@ const body = (content = 'Привет') => ({
   digest: '',
 });
 
-function app(chain: Chain, limit = 20) {
+function app(chain: Chain, limit = 20, limits: Limits = {}) {
   return createApp({
     chain,
     kb,
     kbVersion: 't',
-    limiter: createLimiter(() => 0, { chat: [{ limit, ms: 60_000 }], vision: [], search: [] }),
+    limiter: createLimiter(() => 0, { chat: [{ limit, ms: 60_000 }], ...limits }),
     allowedOrigins: [ORIGIN],
     version: 'test',
   });
@@ -61,7 +61,7 @@ describe('app', () => {
   it('health reports version, knowledge and models', async () => {
     const res = await app(ok).request('/health');
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ ok: true, version: 'test', kb: 't', models: ['m1'] });
+    expect(await res.json()).toMatchObject({ ok: true, version: 'test', kb: 't', models: 1 });
     expect(res.headers.get('cache-control')).toBe('no-store');
   });
 
@@ -82,6 +82,15 @@ describe('app', () => {
       (
         await a.request('/kiki/chat', {
           method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body()),
+        })
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await a.request('/kiki/chat', {
+          method: 'POST',
           headers: { 'content-type': 'application/json', origin: ORIGIN },
           body: '{nope',
         })
@@ -93,6 +102,37 @@ describe('app', () => {
     };
     expect((await post(a, orphan)).status).toBe(400);
     expect((await a.request('/nope')).status).toBe(404);
+  });
+
+  it('every step counts per address and server-wide (M4)', async () => {
+    const step = {
+      ...body(),
+      messages: [
+        { role: 'user', content: 'Где рыба?' },
+        {
+          role: 'assistant',
+          content: '',
+          toolCalls: [{ id: 'c1', name: 'find_in_menu', args: '{}' }],
+        },
+        { role: 'tool', callId: 'c1', name: 'find_in_menu', content: '{}' },
+      ],
+    };
+    const perIp = app(ok, 20, { step: [{ limit: 2, ms: 60_000 }] });
+    expect((await post(perIp, step)).status).toBe(200);
+    expect((await post(perIp, step)).status).toBe(200);
+    expect((await post(perIp, step)).status).toBe(429);
+    const wide = app(ok, 20, { global: [{ limit: 1, ms: 60_000 }] });
+    expect((await post(wide, body())).status).toBe(200);
+    const other = await wide.request('/kiki/chat', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: ORIGIN,
+        'cf-connecting-ip': '5.6.7.8',
+      },
+      body: JSON.stringify(body()),
+    });
+    expect(other.status).toBe(429);
   });
 
   it('limits new turns per IP, not tool-result steps', async () => {
@@ -137,15 +177,41 @@ describe('rate limiter', () => {
   it('counts per window and IP, and forgets after the window', () => {
     let t = 0;
     const l = createLimiter(() => t, { chat: [{ limit: 2, ms: 1000 }], vision: [], search: [] });
-    expect(l.take('chat', 'a')).toBe(0);
-    expect(l.take('chat', 'a')).toBe(0);
-    expect(l.take('chat', 'a')).toBe(1000);
-    expect(l.take('chat', 'b')).toBe(0);
+    expect(l.take(['chat', 'a'])).toBe(0);
+    expect(l.take(['chat', 'a'])).toBe(0);
+    expect(l.take(['chat', 'a'])).toBe(1000);
+    expect(l.take(['chat', 'b'])).toBe(0);
     t = 1000;
-    expect(l.take('chat', 'a')).toBe(0);
+    expect(l.take(['chat', 'a'])).toBe(0);
     t = 100_000_000;
     l.sweep();
-    expect(l.take('chat', 'a')).toBe(0);
+    expect(l.size()).toBe(0);
+    expect(l.take(['chat', 'a'])).toBe(0);
+  });
+
+  it('counts all buckets of a use or none of them', () => {
+    const l = createLimiter(() => 0, {
+      chat: [{ limit: 5, ms: 1000 }],
+      step: [{ limit: 1, ms: 1000 }],
+    });
+    expect(l.take(['step', 'a'], ['chat', 'a'])).toBe(0);
+    expect(l.take(['step', 'a'], ['chat', 'a'])).toBe(1000);
+    // The refused use cost no chat unit: 4 more fit.
+    for (let i = 0; i < 4; i++) expect(l.take(['chat', 'a'])).toBe(0);
+    expect(l.take(['chat', 'a'])).toBe(1000);
+  });
+
+  it('keeps at most the given number of counters', () => {
+    const l = createLimiter(() => 0, { step: [{ limit: 9, ms: 1000 }] }, 100);
+    for (let i = 0; i < 500; i++) l.take(['step', `10.0.${String(i)}`]);
+    expect(l.size()).toBeLessThanOrEqual(100);
+  });
+
+  it('a demo scale multiplies per-address limits, never the server-wide one', () => {
+    const scaled = scaleLimits(LIMITS, 3);
+    expect(scaled.chat?.[0]?.limit).toBe(60);
+    expect(scaled.global).toEqual(LIMITS.global);
+    expect(scaleLimits(LIMITS, Number('x'))).toBe(LIMITS);
   });
 });
 

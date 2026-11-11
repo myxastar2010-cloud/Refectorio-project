@@ -1,6 +1,7 @@
 /**
  * Entry of the Render Web Service `refectorio-api` (ТЗ 07 §2, ADR 0013). Configuration only from the environment:
- * PORT, NVIDIA_NIM_API_KEY, AI_PROVIDERS, ALLOWED_ORIGINS (and HTTPS_PROXY on a developer's computer behind a VPN).
+ * PORT, NVIDIA_NIM_API_KEY, AI_PROVIDERS, ALLOWED_ORIGINS, KIKI_LIMIT_SCALE (per-address limits × N for a demo day;
+ * default 1) and HTTPS_PROXY on a developer's computer behind a VPN.
  */
 import http from 'node:http';
 import { serve } from '@hono/node-server';
@@ -9,7 +10,7 @@ import kbJson from '@refectorio/kiki-core/knowledge/kb.json';
 import { createApp, DEFAULT_ORIGINS } from './app';
 import { createChain } from './chain';
 import { parseProviders } from './provider';
-import { createLimiter } from './rateLimit';
+import { createLimiter, LIMITS, scaleLimits } from './rateLimit';
 
 // fetch() ignores HTTPS_PROXY unless asked (the team's VPN is the only way out to NVIDIA from Russia; Render has none).
 if (process.env.HTTPS_PROXY) http.setGlobalProxyFromEnv();
@@ -28,10 +29,13 @@ const origins = (process.env.ALLOWED_ORIGINS ?? '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
-const limiter = createLimiter();
+const limiter = createLimiter(
+  Date.now,
+  scaleLimits(LIMITS, Number(process.env.KIKI_LIMIT_SCALE ?? 1)),
+);
 setInterval(() => {
   limiter.sweep();
-}, 3_600_000).unref();
+}, 600_000).unref();
 
 const app = createApp({
   chain: createChain({
