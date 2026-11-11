@@ -4,9 +4,9 @@
  * screening answers, no names; exclusions are neutral «не использовать» (never «аллергия» — the person says that
  * themselves if they want to). With `deemphasizeNumbers` the digest carries no calories or grams at all.
  */
-import { CATEGORIES, totals, drinking, type IsoDate } from '@refectorio/menu-core';
+import { totals, drinking, type IsoDate } from '@refectorio/menu-core';
 import { estimateTokens } from '../messages';
-import { weekdayRu, type ToolEnv } from './tools';
+import { notUseList, weekdayRu, type ToolEnv } from './tools';
 
 export type UiState = {
   readonly selectedDate?: IsoDate;
@@ -85,12 +85,7 @@ export function buildDigest(env: ToolEnv, ui: UiState = {}): string {
       )} мг.`,
     );
 
-  const notUse = [
-    ...[...s.allergens.keys()].map((a) => `аллерген ${a}`),
-    ...[...s.excluded.categories].map((c) => CATEGORIES[c].labelRu),
-    ...[...s.excluded.ingredientIds].map((i) => env.ingredients.get(i) ?? i),
-    ...[...s.excluded.itemIds].map((i) => env.items.get(i)?.nameRu ?? i),
-  ];
+  const notUse = notUseList(env);
   if (notUse.length > 0) lines.push(`Не использовать: ${notUse.join(', ')}.`);
   lines.push(`Приёмы пищи: ${plan.structure.map((m) => `${m.titleRu} [${m.id}]`).join(', ')}.`);
   const rules = plan.rules.filter((r) => r.active);

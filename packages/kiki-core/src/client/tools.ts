@@ -356,6 +356,42 @@ type Answers = {
   };
 };
 
+/**
+ * Neutral words for the excluded allergen groups. What goes to the model never says «аллергия» or names a level —
+ * that is health data (152-ФЗ ст. 10; ADR 0003, stage 4 addendum; review of phase 5, M9). The engine keeps them as
+ * hard exclusions either way.
+ */
+export const NOT_USE_RU: Readonly<Record<string, string>> = {
+  GLUTEN: 'глютен (пшеница, рожь, ячмень)',
+  CRUSTACEAN: 'ракообразные',
+  MOLLUSC: 'моллюски',
+  FISH: 'рыба',
+  EGG: 'яйца',
+  MILK: 'молоко и молочное',
+  TREE_NUT: 'орехи',
+  PEANUT: 'арахис',
+  SOY: 'соя',
+  CELERY: 'сельдерей',
+  MUSTARD: 'горчица',
+  SESAME: 'кунжут',
+  SULPHITES: 'сульфиты',
+  LUPIN: 'люпин',
+  ASPARTAME: 'аспартам',
+};
+
+/** Everything the menu never uses, in plain neutral words (one list for the digest and the profile tool). */
+export function notUseList(env: ToolEnv): string[] {
+  const s = env.engine.profile.safety;
+  return [
+    ...new Set([
+      ...[...s.allergens.keys()].map((a) => NOT_USE_RU[a] ?? a.toLowerCase()),
+      ...[...s.excluded.categories].map((c) => CATEGORIES[c].labelRu),
+      ...[...s.excluded.ingredientIds].map((i) => env.ingredients.get(i) ?? i),
+      ...[...s.excluded.itemIds].map((i) => nameOf(env, i)),
+    ]),
+  ];
+}
+
 function getProfileSummary(env: ToolEnv): ToolOutcome {
   const { profile } = env.engine;
   const answers = env.answers as Answers;
@@ -366,12 +402,7 @@ function getProfileSummary(env: ToolEnv): ToolOutcome {
       goal: profile.goal,
       allowedGoals: profile.decision.allowedGoals,
       diet: s.diet,
-      notUse: [
-        ...[...s.allergens.keys()].map((a) => `allergen:${a}`),
-        ...[...s.excluded.categories].map((c) => CATEGORIES[c].labelRu),
-        ...[...s.excluded.ingredientIds].map((i) => env.ingredients.get(i) ?? i),
-        ...[...s.excluded.itemIds].map((i) => nameOf(env, i)),
-      ],
+      notUse: notUseList(env),
       meals: env.plan.structure.map((m) => ({ mealId: m.id, kind: m.kind, title: m.titleRu })),
       rules: env.plan.rules.map((r) => ({
         id: r.id,
@@ -385,11 +416,13 @@ function getProfileSummary(env: ToolEnv): ToolOutcome {
         noWeightGoals: !profile.decision.allowedGoals.includes('lose'),
         minMainMeals: s.minMainMeals,
       },
-      ...(profile.unmatchedAllergies.length > 0
-        ? { unclearAllergyText: profile.unmatchedAllergies }
-        : {}),
-      ...(profile.unmatchedDislikes.length > 0
-        ? { unclearDislikeText: profile.unmatchedDislikes }
+      // The quiz's free text never leaves the browser (it may name a condition): only that some words were not
+      // understood, so Kiki asks the person what to leave out (M9).
+      ...(profile.unmatchedAllergies.length + profile.unmatchedDislikes.length > 0
+        ? {
+            unclearExclusions:
+              'some words from the quiz were not matched to foods — ask the person what else to leave out',
+          }
         : {}),
     },
   };

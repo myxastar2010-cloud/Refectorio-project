@@ -245,6 +245,32 @@ describe('digest', () => {
   });
 });
 
+describe('health data never reaches the model (review of phase 5, M9)', () => {
+  const sensitive = fixtureEnv({
+    overrides: {
+      allergies: {
+        items: [
+          { code: 'MILK', level: 'severeAllergy' },
+          { code: 'TREE_NUT', level: 'allergy' },
+        ],
+        custom: ['фейхоа из-за диабета'],
+      },
+      dislikesText: 'не ем ничего после операции на желудке',
+    },
+  });
+  it('the digest and the profile name exclusions neutrally, without the quiz text', () => {
+    const digest = buildDigest(sensitive.env);
+    const profile = json(executeTool(sensitive.env, 'get_profile_summary', {}).result);
+    for (const text of [digest, profile]) {
+      expect(text).not.toMatch(/аллерг|allerg|severe|intoleran|непереносим/i);
+      expect(text).not.toMatch(/диабет|операци|желуд/i);
+    }
+    expect(digest).toMatch(/Не использовать: [^.]*молоко и молочное/);
+    expect(digest).toContain('орехи');
+    expect(profile).toContain('unclearExclusions');
+  });
+});
+
 describe('deemphasizeNumbers: tools never hand the model calories or grams', () => {
   const quiet = fixtureEnv({
     overrides: {
