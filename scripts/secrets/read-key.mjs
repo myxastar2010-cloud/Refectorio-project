@@ -13,6 +13,7 @@ const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 if (process.env.HTTPS_PROXY) http.setGlobalProxyFromEnv?.();
 
 export const KEYS = {
+  apinex: { env: 'APINEX_API_KEY', file: 'apinex-api-key.txt' },
   nvidia: { env: 'NVIDIA_NIM_API_KEY', file: 'nvidia-api-key.txt' },
   tavily: { env: 'TAVILY_API_KEY', file: 'tavily-api-key.txt' },
   pexels: { env: 'PEXELS_API_KEY', file: 'pexels-api-key.txt' },
