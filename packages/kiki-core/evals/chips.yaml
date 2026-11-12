@@ -1,0 +1,26 @@
+# The three chips of the Kiki panel (stage 5, phase 0 baseline): each starts a task, never an explanation of the panel.
+# Root cause seen while writing the stage-5 brief: «Как…/Где…» went to the site guide, whose kiki-panel card holds the
+# chip labels verbatim, so the model explained the panel instead of doing the task.
+- id: chip-eat-out
+  tags: [chip]
+  turns:
+    - user: Где поесть сегодня?
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustNotInclude: ['/панел/', '/чип/', '/подсказк/', '/нажмите/', '/кнопк/']
+
+- id: chip-lunch-box
+  tags: [chip]
+  turns:
+    - user: Что взять завтра на работу?
+      expect:
+        toolsNone: [propose_goal_change]
+        mustNotInclude: ['/панел/', '/чип/', '/подсказк/', '/нажмите/', '/кнопк/']
+
+- id: chip-labs
+  tags: [chip]
+  turns:
+    - user: Расшифруй анализы
+      expect:
+        toolsNone: [propose_menu_change, propose_goal_change]
+        mustNotInclude: ['/панел/', '/чип/', '/подсказк/', '/диагноз/']
