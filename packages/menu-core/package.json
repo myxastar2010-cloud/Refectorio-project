@@ -21,6 +21,6 @@
     "@refectorio/food-data": "*",
     "@refectorio/nutrition-core": "*",
     "@refectorio/taste-core": "*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   }
 }
