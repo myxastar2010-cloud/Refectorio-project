@@ -12,6 +12,7 @@ import kbJson from '@refectorio/kiki-core/knowledge/kb.json';
 import { createApp, DEFAULT_ORIGINS } from './app';
 import { createChain } from './chain';
 import { parseProviders } from './provider';
+import { isPublicOpen, revokedPasses, sharesPerMin } from './config';
 import { MIN_SECRET_CHARS } from './pass';
 import { createLimiter, LIMITS, scaleLimits, withShares } from './rateLimit';
 
@@ -36,16 +37,31 @@ const share = (name: string) =>
   process.env[name] === undefined || process.env[name] === ''
     ? undefined
     : Number(process.env[name]);
-const limiter = createLimiter(
-  Date.now,
-  withShares(scaleLimits(LIMITS, Number(process.env.KIKI_LIMIT_SCALE ?? 1)), {
-    publicPerMin: share('KIKI_PUBLIC_PER_MIN'),
-    reservePerMin: share('KIKI_RESERVE_PER_MIN'),
-  }),
-);
+const limits = withShares(scaleLimits(LIMITS, Number(process.env.KIKI_LIMIT_SCALE ?? 1)), {
+  publicPerMin: share('KIKI_PUBLIC_PER_MIN'),
+  reservePerMin: share('KIKI_RESERVE_PER_MIN'),
+});
+const limiter = createLimiter(Date.now, limits);
 const demoSecret = process.env.KIKI_DEMO_SECRET?.trim() || null;
 if (demoSecret && demoSecret.length < MIN_SECRET_CHARS)
   log({ event: 'config', warning: 'KIKI_DEMO_SECRET is too short: demo passes are off' });
+const publicOpen = isPublicOpen(process.env.KIKI_PUBLIC);
+const revoked = revokedPasses(process.env.KIKI_REVOKED_PASSES);
+const shares = sharesPerMin(limits);
+// What is in force, at every start (no secrets: counts and switches only).
+log({
+  event: 'config',
+  publicOpen,
+  passes: demoSecret !== null && demoSecret.length >= MIN_SECRET_CHARS,
+  revokedPasses: revoked.size,
+  ...shares,
+  ...(shares.belowProvider
+    ? {}
+    : {
+        warning:
+          'public + reserve per minute reach the provider allowance: the reserve is not guaranteed',
+      }),
+});
 setInterval(() => {
   limiter.sweep();
 }, 600_000).unref();
@@ -63,7 +79,8 @@ const app = createApp({
   version: process.env.RENDER_GIT_COMMIT?.slice(0, 7) ?? 'dev',
   log,
   demoSecret,
-  publicOpen: process.env.KIKI_PUBLIC !== '0',
+  publicOpen,
+  revokedPasses: revoked,
 });
 
 const port = Number(process.env.PORT ?? 8787);

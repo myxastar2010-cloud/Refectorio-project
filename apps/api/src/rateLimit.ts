@@ -37,14 +37,19 @@ export const LIMITS = {
     { limit: 4, ms: MIN },
     { limit: 600, ms: DAY },
   ],
+  /** Model calls of one demo pass, keyed by its name: a leaked pass cannot drain the reserve for the others. */
+  pass: [
+    { limit: 60, ms: 10 * MIN },
+    { limit: 400, ms: DAY },
+  ],
 } as const satisfies Record<string, readonly Window[]>;
 export type Bucket = keyof typeof LIMITS;
 export type Limits = Readonly<Partial<Record<Bucket, readonly Window[]>>>;
 export const GLOBAL_KEY = '*';
 /** Counters kept at most (≈ 100 bytes each): beyond this the oldest go first. */
 export const MAX_COUNTERS = 50_000;
-/** Buckets of the whole server: a per-address scale never touches them. */
-const SERVER_WIDE: ReadonlySet<Bucket> = new Set(['public', 'reserve']);
+/** Buckets not keyed by an address (the server's shares, a demo pass): a per-address scale never touches them. */
+const SERVER_WIDE: ReadonlySet<Bucket> = new Set(['public', 'reserve', 'pass']);
 
 type Counter = { start: number; count: number; ms: number };
 type Use = readonly [Bucket, string];

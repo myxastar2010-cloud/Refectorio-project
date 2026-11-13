@@ -66,8 +66,10 @@ export function Story({
     if (!started) return undefined;
     let cancelled = false;
     const isCancelled = () => cancelled;
-    Promise.all([import('./story/story'), import('./story/story-data.json')]).then(
-      ([module, data]) => {
+    // A new attempt (a resize re-creates the story): only its own outcome counts. A pulse already given stays given.
+    storyFailed.current = false;
+    Promise.all([import('./story/story'), import('./story/story-data.json')])
+      .then(([module, data]) => {
         const canvas = canvasRef.current;
         if (isCancelled() || !canvas) return;
         const styles = getComputedStyle(canvas);
@@ -82,10 +84,7 @@ export function Story({
           onCaption: (index) => {
             captionRef.current(index);
           },
-          onPulse: () => {
-            pulsed.current = true;
-            pulseRef.current();
-          },
+          onPulse: pulseOnce,
           startAt:
             __TEST_HOOKS__ && startAt
               ? module.STORY_SCENES.find((id) => id === startAt)
@@ -93,13 +92,13 @@ export function Story({
         });
         handle.current?.setPaused(pausedRef.current);
         if (readyRef.current) handle.current?.finish();
-      },
-      () => {
+      })
+      // Also an error inside the story's own start: no story, the menu still comes.
+      .catch(() => {
         if (isCancelled()) return;
         storyFailed.current = true;
         if (readyRef.current) pulseOnce();
-      },
-    );
+      });
     return () => {
       cancelled = true;
       handle.current?.dispose();

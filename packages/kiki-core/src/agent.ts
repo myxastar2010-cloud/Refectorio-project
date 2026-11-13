@@ -340,9 +340,9 @@ export async function runTurn(
   emit({ type: 'status', phase: 'thinking' });
   for (;;) {
     const overBudget = deps.now() - startedAt > budget;
-    // Tools only while a call for the answer stays after this one.
+    // Tools only while calls for the answer and its corrective re-ask stay after this one.
     const allowTools =
-      toolRoundsInTurn(working) < MAX_TOOL_ROUNDS && !overBudget && callsLeft() >= 2;
+      toolRoundsInTurn(working) < MAX_TOOL_ROUNDS && !overBudget && callsLeft() >= 3;
     // Set inside the stream callback (an object: TS can't see a callback's writes to a local).
     const stream = { streamed: false };
     callsMade++;
@@ -510,18 +510,25 @@ export async function runTurn(
     } else if (issues.length > 0) {
       emit({ type: 'status', phase: 'checking' });
       callsMade++;
-      const retry = await deps.complete({
-        messages: [
-          ...toProviderMessages(system, working),
-          { role: 'assistant', content: text || '…' },
-          { role: 'user', content: correctionPrompt(issues) },
-        ],
-        maxTokens,
-      });
-      usage = addUsage(usage, retry.usage);
-      const second = sanitizeMarkdown(retry.content);
-      const again = validateAnswer(second, sources);
-      text = again.length > 0 ? fallbackAnswer(again) : second;
+      try {
+        const retry = await deps.complete({
+          messages: [
+            ...toProviderMessages(system, working),
+            { role: 'assistant', content: text || '…' },
+            { role: 'user', content: correctionPrompt(issues) },
+          ],
+          maxTokens,
+        });
+        usage = addUsage(usage, retry.usage);
+        const second = sanitizeMarkdown(retry.content);
+        const again = validateAnswer(second, sources);
+        text = again.length > 0 ? fallbackAnswer(again) : second;
+      } catch (error) {
+        // The answer has already streamed: a refused or failed re-ask ends in the safe phrase, not in an error
+        // (a stopped request stays stopped).
+        if (deps.signal?.aborted) throw error;
+        text = fallbackAnswer(issues);
+      }
       replaced = true;
     }
     const answer: WireMessage = { role: 'assistant', content: text };

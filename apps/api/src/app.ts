@@ -38,7 +38,10 @@ export type AppDeps = {
   readonly demoSecret?: string | null;
   /** `KIKI_PUBLIC=0` closes Kiki to everyone without a demo pass (the final's hour). Default open. */
   readonly publicOpen?: boolean;
+  /** `KIKI_REVOKED_PASSES`: these pass names count as no pass at all. */
+  readonly revokedPasses?: ReadonlySet<string>;
   readonly maxCallsPerPost?: number;
+  readonly maxAttemptsPerPost?: number;
   readonly maxClientTokens?: number;
 };
 
@@ -47,6 +50,8 @@ export type AppDeps = {
  * corrective re-ask. A turn with client tools spans several POSTs, each counted by the call budget anyway.
  */
 export const MAX_CALLS_PER_POST = 5;
+/** Provider attempts one POST may make: each call may also try the fallback models (cross-review of phase 0). */
+export const MAX_ATTEMPTS_PER_POST = 8;
 /**
  * What the client may put into one request, in estimated tokens (digest + memory + window + fold). The browser keeps
  * the window at 2 800 and the digest ≤ 12 000 characters; this leaves room for a turn's tool results and a fold, and
@@ -150,7 +155,8 @@ export function createApp(deps: AppDeps): Hono {
         return c.json({ code: 'bad_request', detail: 'too large' }, 413);
 
       const { ip, source } = clientIp(c);
-      const pass = verifyPass(c.req.header(PASS_HEADER), deps.demoSecret);
+      const passName = verifyPass(c.req.header(PASS_HEADER), deps.demoSecret);
+      const pass = passName && !deps.revokedPasses?.has(passName) ? passName : null;
       const limited = (wait: number, bucket: string) => {
         log({ event: 'limited', bucket, ipSource: source, pass: pass !== null });
         c.header('Retry-After', String(Math.ceil(wait / 1000)));
@@ -161,18 +167,23 @@ export function createApp(deps: AppDeps): Hono {
 
       // Model calls — every provider attempt, a fallback model too — are what costs the allowance (security audit P0,
       // D-128): a pass spends the reserve, then the public share; everyone else the public share and their address's.
+      // A pass has a call budget of its own, so one leaked pass cannot drain the reserve for the presenter.
       const reserve = ['reserve', GLOBAL_KEY] as const;
       const shared = ['public', GLOBAL_KEY] as const;
-      const own = ['call', ip] as const;
+      const own = pass ? (['pass', pass] as const) : (['call', ip] as const);
+      const maxAttempts = deps.maxAttemptsPerPost ?? MAX_ATTEMPTS_PER_POST;
+      let attempts = 0;
       const gate: CallGate = () => {
+        attempts++;
+        if (attempts > maxAttempts) return 60_000;
         if (!pass) return deps.limiter.take(own, shared);
-        const fromReserve = deps.limiter.take(reserve);
+        const fromReserve = deps.limiter.take(own, reserve);
         if (fromReserve === 0) return 0;
-        const fromShared = deps.limiter.take(shared);
+        const fromShared = deps.limiter.take(own, shared);
         return fromShared === 0 ? 0 : Math.min(fromReserve, fromShared);
       };
       const callWait = pass
-        ? Math.min(deps.limiter.check(reserve), deps.limiter.check(shared))
+        ? Math.min(deps.limiter.check(own, reserve), deps.limiter.check(own, shared))
         : deps.limiter.check(own, shared);
       if (callWait > 0) return limited(callWait, 'call');
 

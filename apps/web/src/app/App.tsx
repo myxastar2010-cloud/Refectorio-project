@@ -16,6 +16,7 @@ import { loadQuiz } from '../features/quiz/loadQuiz';
 import { ProjectDialog } from '../features/team-dialog/ProjectDialog';
 import { TeamDialog } from '../features/team-dialog/TeamDialog';
 import { whenIdle } from '../lib/idle';
+import { reloadIfRedeployed } from '../lib/staleChunks';
 import { hasStoredMenu } from '../lib/menuFlag';
 import { readTestParams } from '../lib/params';
 import { focusQuietly, trackInputModality } from '../lib/quietFocus';
@@ -195,6 +196,7 @@ function Page() {
     setMenuReveal(null);
     goScene('hero', true);
     notify(site.notices.loadError);
+    void reloadIfRedeployed();
   }, [goScene, notify]);
 
   /** The story ends in its pulse: the menu page is uncovered over the quiz, then the quiz leaves the history. */
@@ -214,6 +216,7 @@ function Page() {
     setQuizScene(() => lazyQuiz());
     exitQuiz();
     notify(site.quizShell.loadError);
+    void reloadIfRedeployed();
   }, [exitQuiz, notify]);
 
   // Entering part 2 moves focus to its title (ТЗ 6.5); leaving it returns focus to «О проекте» («Цены» likewise to its
@@ -426,6 +429,7 @@ function Page() {
       .catch(() => {
         pricingRequested = false;
         notify(site.notices.loadError);
+        void reloadIfRedeployed();
       })
       .finally(() => {
         openingPricing.current = false;
@@ -437,6 +441,7 @@ function Page() {
     if (scene === 'pricing' && !pricingPictures) {
       takeVisit().catch(() => {
         notify(site.notices.loadError);
+        void reloadIfRedeployed();
       });
     }
   }, [scene, pricingPictures, takeVisit, notify]);
@@ -451,12 +456,14 @@ function Page() {
     setDiscoverMounted(false);
     goScene('hero', true);
     notify(site.notices.loadError);
+    void reloadIfRedeployed();
   }, [goScene, notify]);
 
   const pricingFailed = useCallback(() => {
     pricingRequested = false;
     goScene('hero', true);
     notify(site.notices.loadError);
+    void reloadIfRedeployed();
   }, [goScene, notify]);
 
   const inQuiz = scene === 'quiz';

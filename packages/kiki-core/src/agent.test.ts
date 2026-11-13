@@ -454,11 +454,11 @@ describe('the call budget of one request (security audit P0, D-128)', () => {
     return { events, requests };
   }
 
-  it('offers tools only while a call for the answer is left', async () => {
+  it('offers tools only while calls for the answer and its re-ask are left', async () => {
     const searches = Array.from({ length: MAX_TOOL_ROUNDS }, (_, i) =>
       call('kb_search', { query: 'соль' }, `s${String(i)}`),
     );
-    const { events, requests } = await capped(ask, [...searches.slice(0, 2), say('Ответ.')], 3);
+    const { events, requests } = await capped(ask, [...searches.slice(0, 2), say('Ответ.')], 4);
     expect(requests).toHaveLength(3);
     expect(requests[2]?.tools).toBeUndefined();
     expect(final(events).text).toBe('Ответ.');
@@ -467,7 +467,16 @@ describe('the call budget of one request (security audit P0, D-128)', () => {
   it('with no call left for the re-ask, a failed check gives the safe phrase at once', async () => {
     const { events, requests } = await capped(ask, [say('Можно 9 г соли в день.')], 1);
     expect(requests).toHaveLength(1);
-    expect(types(events)).not.toContain('status-checking');
+    expect(events.some((e) => e.type === 'status' && e.phase === 'checking')).toBe(false);
+    expect(final(events).replaced).toBe(true);
+    expect(final(events).text).not.toContain('9 г');
+  });
+
+  it('a refused or failed re-ask ends in the safe phrase, not in an error', async () => {
+    // The scripted provider has nothing for the re-ask: it throws, as the call gate does when the budget is spent.
+    const { events, requests } = await run(ask, [say('Можно 9 г соли в день.')]);
+    expect(requests).toHaveLength(2);
+    expect(events.some((e) => e.type === 'status' && e.phase === 'checking')).toBe(true);
     expect(final(events).replaced).toBe(true);
     expect(final(events).text).not.toContain('9 г');
   });

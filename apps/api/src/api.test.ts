@@ -278,6 +278,45 @@ describe('call budget, demo passes and the switch (security audit P0, D-128)', (
     expect((await post(a, body(), ORIGIN, withPass())).status).toBe(200);
   });
 
+  it('with the reserve spent, a pass goes on from the public share', async () => {
+    const a = app(
+      gated,
+      20,
+      { reserve: [{ limit: 0, ms: 60_000 }], public: [{ limit: 1, ms: 60_000 }] },
+      { demoSecret: secret },
+    );
+    expect((await post(a, body(), ORIGIN, withPass())).status).toBe(200);
+    expect((await post(a, body(), ORIGIN, withPass())).status).toBe(429);
+  });
+
+  it('each pass has its own call budget, and a revoked pass is just a visitor', async () => {
+    const a = app(
+      gated,
+      20,
+      { pass: [{ limit: 1, ms: 60_000 }], public: [{ limit: 0, ms: 60_000 }] },
+      { demoSecret: secret, revokedPasses: new Set(['jury-3']) },
+    );
+    expect((await post(a, body(), ORIGIN, withPass())).status).toBe(200);
+    expect((await post(a, body(), ORIGIN, withPass())).status).toBe(429);
+    expect((await post(a, body(), ORIGIN, withPass(mintPass(secret, 'jury-2')))).status).toBe(200);
+    expect((await post(a, body(), ORIGIN, withPass(mintPass(secret, 'jury-3')))).status).toBe(429);
+  });
+
+  it('caps provider attempts per POST, fallback models included', async () => {
+    const many = fakeChain((r, _signal, gate) => {
+      for (let i = 0; i < 3; i++) {
+        const wait = gate?.() ?? 0;
+        if (wait > 0) return Promise.reject(new ChainUnavailable(wait, false, true));
+      }
+      r.onText?.('Да.');
+      return Promise.resolve({ content: 'Да.', toolCalls: [], model: 'm1', usage });
+    });
+    const out = await events(await post(app(many, 20, {}, { maxAttemptsPerPost: 2 }), body()));
+    expect(out.at(-1)).toMatchObject({ type: 'error', code: 'rate_limited' });
+    const enough = await events(await post(app(many, 20, {}, { maxAttemptsPerPost: 3 }), body()));
+    expect(enough.at(-1)).toMatchObject({ type: 'final' });
+  });
+
   it('the pass header is allowed by CORS', async () => {
     const res = await app(gated).request('/kiki/chat', {
       method: 'OPTIONS',

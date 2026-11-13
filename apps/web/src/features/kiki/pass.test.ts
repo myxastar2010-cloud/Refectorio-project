@@ -37,6 +37,10 @@ describe('demo pass on the device (D-128)', () => {
     expect(capturePass()).toBe(false);
     expect(bad.replaced).toHaveLength(1);
     expect(readPass()).toBeNull();
+    // A broken percent-escape does not throw at startup (it would blank the site).
+    const broken = fakeWindow('#kiki-pass=jury-1.%E0%A4%A');
+    expect(capturePass()).toBe(false);
+    expect(broken.replaced).toHaveLength(1);
   });
 
   it('a pass edited in storage is not sent', () => {

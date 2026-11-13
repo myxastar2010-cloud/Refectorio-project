@@ -11,10 +11,12 @@ const FORMAT = /^[a-z0-9-]{1,32}\.[A-Za-z0-9_-]{43}$/;
 /** Takes a pass from the address (call before the scenes read the hash). True when one was taken. */
 export function capturePass(): boolean {
   if (typeof window === 'undefined' || !window.location.hash.startsWith(PREFIX)) return false;
-  const pass = decodeURIComponent(window.location.hash.slice(PREFIX.length));
+  const raw = window.location.hash.slice(PREFIX.length);
+  // The address is cleared first: a broken link must not stay and break every reload.
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
-  if (!FORMAT.test(pass)) return false;
   try {
+    const pass = decodeURIComponent(raw);
+    if (!FORMAT.test(pass)) return false;
     window.localStorage.setItem(KEY, pass);
     return true;
   } catch {
