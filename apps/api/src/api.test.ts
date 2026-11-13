@@ -1,7 +1,8 @@
 import { createEventParser, createKb, type ServerEvent } from '@refectorio/kiki-core';
 import { describe, expect, it } from 'vitest';
-import { createApp } from './app';
+import { clientTokens, createApp, type AppDeps } from './app';
 import { ChainUnavailable, createChain, type Chain } from './chain';
+import { mintPass } from './pass';
 import {
   parseProviders,
   recoverToolCalls,
@@ -9,7 +10,7 @@ import {
   ProviderError,
   type ModelSpec,
 } from './provider';
-import { createLimiter, scaleLimits, LIMITS, type Limits } from './rateLimit';
+import { createLimiter, scaleLimits, withShares, LIMITS, type Limits } from './rateLimit';
 
 const kb = createKb({ version: 't', docs: [] });
 const usage = { promptTokens: 1, completionTokens: 1, cachedTokens: 0 };
@@ -29,7 +30,7 @@ const body = (content = 'Привет') => ({
   digest: '',
 });
 
-function app(chain: Chain, limit = 20, limits: Limits = {}) {
+function app(chain: Chain, limit = 20, limits: Limits = {}, extra: Partial<AppDeps> = {}) {
   return createApp({
     chain,
     kb,
@@ -37,13 +38,24 @@ function app(chain: Chain, limit = 20, limits: Limits = {}) {
     limiter: createLimiter(() => 0, { chat: [{ limit, ms: 60_000 }], ...limits }),
     allowedOrigins: [ORIGIN],
     version: 'test',
+    ...extra,
   });
 }
 
-const post = (a: ReturnType<typeof createApp>, payload: unknown, origin = ORIGIN) =>
+const post = (
+  a: ReturnType<typeof createApp>,
+  payload: unknown,
+  origin = ORIGIN,
+  headers: Record<string, string> = {},
+) =>
   a.request('/kiki/chat', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', origin, 'x-forwarded-for': '1.2.3.4' },
+    headers: {
+      'content-type': 'application/json',
+      origin,
+      'x-forwarded-for': '1.2.3.4',
+      ...headers,
+    },
     body: JSON.stringify(payload),
   });
 
@@ -54,6 +66,13 @@ async function events(res: Response): Promise<ServerEvent[]> {
 
 describe('app', () => {
   const ok = fakeChain((r) => {
+    r.onText?.('Здравствуйте!');
+    return Promise.resolve({ content: 'Здравствуйте!', toolCalls: [], model: 'm1', usage });
+  });
+  /** Asks the call gate before answering, as the real chain does before every provider attempt. */
+  const gated = fakeChain((r, _signal, gate) => {
+    const wait = gate?.() ?? 0;
+    if (wait > 0) return Promise.reject(new ChainUnavailable(wait, false, true));
     r.onText?.('Здравствуйте!');
     return Promise.resolve({ content: 'Здравствуйте!', toolCalls: [], model: 'm1', usage });
   });
@@ -104,7 +123,7 @@ describe('app', () => {
     expect((await a.request('/nope')).status).toBe(404);
   });
 
-  it('every step counts per address and server-wide (M4)', async () => {
+  it('every step counts per address; model calls server-wide (M4, D-128)', async () => {
     const step = {
       ...body(),
       messages: [
@@ -121,7 +140,8 @@ describe('app', () => {
     expect((await post(perIp, step)).status).toBe(200);
     expect((await post(perIp, step)).status).toBe(200);
     expect((await post(perIp, step)).status).toBe(429);
-    const wide = app(ok, 20, { global: [{ limit: 1, ms: 60_000 }] });
+    // One call spends the whole public share: another address is refused before the stream starts.
+    const wide = app(gated, 20, { public: [{ limit: 1, ms: 60_000 }] });
     expect((await post(wide, body())).status).toBe(200);
     const other = await wide.request('/kiki/chat', {
       method: 'POST',
@@ -170,6 +190,113 @@ describe('app', () => {
       type: 'error',
       code: 'internal',
     });
+    // Our own call budget, not the provider: the chat says «limit», not «Kiki is down».
+    const budget = fakeChain(() => Promise.reject(new ChainUnavailable(5_000, false, true)));
+    expect((await events(await post(app(budget), body()))).at(-1)).toMatchObject({
+      type: 'error',
+      code: 'rate_limited',
+      retryAfterMs: 5_000,
+    });
+  });
+});
+
+describe('call budget, demo passes and the switch (security audit P0, D-128)', () => {
+  const secret = 'test-secret-'.repeat(4);
+  const pass = mintPass(secret, 'jury-1');
+  const gated = fakeChain((r, _signal, gate) => {
+    const wait = gate?.() ?? 0;
+    if (wait > 0) return Promise.reject(new ChainUnavailable(wait, false, true));
+    r.onText?.('Да.');
+    return Promise.resolve({ content: 'Да.', toolCalls: [], model: 'm1', usage });
+  });
+  const withPass = (p = pass) => ({ 'x-kiki-pass': p });
+  const from = (ip: string) => ({ 'x-forwarded-for': ip });
+
+  it('counts model calls per address, and every address shares the public share', async () => {
+    const a = app(gated, 20, { call: [{ limit: 1, ms: 60_000 }] });
+    expect((await post(a, body())).status).toBe(200);
+    const again = await post(a, body());
+    expect(again.status).toBe(429);
+    expect(again.headers.get('retry-after')).toBe('60');
+    expect((await post(a, body(), ORIGIN, from('9.9.9.9'))).status).toBe(200);
+  });
+
+  it('a call refused mid-turn ends the stream with rate_limited', async () => {
+    // The pre-check passes (one call left), the turn needs two: the second is refused by the gate.
+    const twice = fakeChain((r, _signal, gate) => {
+      for (let i = 0; i < 2; i++) {
+        const wait = gate?.() ?? 0;
+        if (wait > 0) return Promise.reject(new ChainUnavailable(wait, false, true));
+      }
+      r.onText?.('Да.');
+      return Promise.resolve({ content: 'Да.', toolCalls: [], model: 'm1', usage });
+    });
+    const out = await events(
+      await post(app(twice, 20, { public: [{ limit: 1, ms: 60_000 }] }), body()),
+    );
+    expect(out.at(-1)).toMatchObject({ type: 'error', code: 'rate_limited' });
+  });
+
+  it('a demo pass spends the reserve, then the public share, and skips address limits', async () => {
+    const a = app(
+      gated,
+      1,
+      {
+        public: [{ limit: 1, ms: 60_000 }],
+        reserve: [{ limit: 2, ms: 60_000 }],
+        call: [{ limit: 1, ms: 60_000 }],
+      },
+      { demoSecret: secret },
+    );
+    expect((await post(a, body())).status).toBe(200);
+    expect((await post(a, body(), ORIGIN, from('5.5.5.5'))).status).toBe(429);
+    // Same address as the first visitor, whose own chat and call limits are spent: the pass still answers twice.
+    for (let i = 0; i < 2; i++) {
+      const res = await post(a, body(), ORIGIN, withPass());
+      expect(res.status).toBe(200);
+      expect((await events(res)).at(-1)).toMatchObject({ type: 'final' });
+    }
+    expect((await post(a, body(), ORIGIN, withPass())).status).toBe(429);
+  });
+
+  it('a forged pass or one signed with another secret is just a visitor', async () => {
+    const a = app(gated, 20, { public: [{ limit: 0, ms: 60_000 }] }, { demoSecret: secret });
+    expect((await post(a, body(), ORIGIN, withPass(`jury-1.${'A'.repeat(43)}`))).status).toBe(429);
+    expect(
+      (await post(a, body(), ORIGIN, withPass(mintPass('other-'.repeat(8), 'jury-1')))).status,
+    ).toBe(429);
+    // No secret on the server: passes are off.
+    const off = app(gated, 20, { public: [{ limit: 0, ms: 60_000 }] });
+    expect((await post(off, body(), ORIGIN, withPass())).status).toBe(429);
+  });
+
+  it('KIKI_PUBLIC=0 closes Kiki to everyone without a pass', async () => {
+    const a = app(gated, 20, {}, { demoSecret: secret, publicOpen: false });
+    const closed = await post(a, body());
+    expect(closed.status).toBe(429);
+    expect(await closed.json()).toMatchObject({ code: 'rate_limited', retryable: true });
+    expect((await post(a, body(), ORIGIN, withPass())).status).toBe(200);
+  });
+
+  it('the pass header is allowed by CORS', async () => {
+    const res = await app(gated).request('/kiki/chat', {
+      method: 'OPTIONS',
+      headers: {
+        origin: ORIGIN,
+        'access-control-request-method': 'POST',
+        'access-control-request-headers': 'content-type,x-kiki-pass',
+      },
+    });
+    expect(res.headers.get('access-control-allow-headers')?.toLowerCase()).toContain('x-kiki-pass');
+  });
+
+  it('refuses requests larger than the client-token cap', async () => {
+    const res = await post(
+      app(gated, 20, {}, { maxClientTokens: 5 }),
+      body('Расскажи подробно про обед'),
+    );
+    expect(res.status).toBe(413);
+    expect(clientTokens(body() as Parameters<typeof clientTokens>[0])).toBeGreaterThan(0);
   });
 });
 
@@ -207,11 +334,40 @@ describe('rate limiter', () => {
     expect(l.size()).toBeLessThanOrEqual(100);
   });
 
-  it('a demo scale multiplies per-address limits, never the server-wide one', () => {
+  it('a demo scale multiplies per-address limits, never the server-wide shares', () => {
     const scaled = scaleLimits(LIMITS, 3);
     expect(scaled.chat?.[0]?.limit).toBe(60);
-    expect(scaled.global).toEqual(LIMITS.global);
+    expect(scaled.call?.[0]?.limit).toBe(90);
+    expect(scaled.public).toEqual(LIMITS.public);
+    expect(scaled.reserve).toEqual(LIMITS.reserve);
     expect(scaleLimits(LIMITS, Number('x'))).toBe(LIMITS);
+  });
+
+  it('the shares per minute stay below the provider allowance (APInex free: 15 / min)', () => {
+    const perMin = (b: 'public' | 'reserve') => LIMITS[b].find((w) => w.ms === 60_000)?.limit ?? 0;
+    expect(perMin('public') + perMin('reserve')).toBeLessThan(15);
+  });
+
+  it('shares from the environment: a valid number replaces the minute window, 0 closes it', () => {
+    const s = withShares(LIMITS, { publicPerMin: 0, reservePerMin: 6 });
+    expect(s.public?.[0]).toEqual({ limit: 0, ms: 60_000 });
+    expect(s.public?.[1]).toEqual(LIMITS.public[1]);
+    expect(s.reserve?.[0]?.limit).toBe(6);
+    expect(withShares(LIMITS, { publicPerMin: Number('x'), reservePerMin: -1 })).toEqual(LIMITS);
+    expect(withShares(LIMITS, {})).toEqual(LIMITS);
+  });
+
+  it('check counts nothing; a closed share waits a whole window', () => {
+    const l = createLimiter(() => 0, {
+      public: [{ limit: 1, ms: 60_000 }],
+      reserve: [{ limit: 0, ms: 60_000 }],
+    });
+    expect(l.check(['public', '*'])).toBe(0);
+    expect(l.check(['public', '*'])).toBe(0);
+    expect(l.take(['public', '*'])).toBe(0);
+    expect(l.check(['public', '*'])).toBe(60_000);
+    expect(l.check(['reserve', '*'])).toBe(60_000);
+    expect(l.take(['reserve', '*'])).toBe(60_000);
   });
 });
 
@@ -438,6 +594,32 @@ describe('chain', () => {
     expect(chain.status().lastErrorCode).toBe('http:429');
     expect(logs.some((l) => JSON.stringify(l).includes('step-error'))).toBe(true);
     expect(JSON.stringify(logs)).not.toContain('ok"');
+  });
+
+  it('asks the call gate before every attempt, a fallback model too (D-128)', async () => {
+    const calls: string[] = [];
+    const fetchImpl = ((_: unknown, init?: RequestInit) => {
+      const id = (
+        JSON.parse(typeof init?.body === 'string' ? init.body : '{}') as { model: string }
+      ).model;
+      calls.push(id);
+      return fakeFetch('', 429)('', init);
+    }) as typeof fetch;
+    const chain = createChain({
+      models: parseProviders('nvidia:a,nvidia:b'),
+      key: () => 'k',
+      fetchImpl,
+    });
+    let left = 1;
+    const gate = () => (left-- > 0 ? 0 : 7_000);
+    await expect(
+      chain.complete({ messages: [], maxTokens: 1 }, undefined, gate),
+    ).rejects.toMatchObject({
+      limited: true,
+      retryAfterMs: 7_000,
+    });
+    // The first model was tried and failed; the fallback was refused by the gate, not called.
+    expect(calls).toEqual(['a']);
   });
 
   it('no key or every model down → ChainUnavailable', async () => {

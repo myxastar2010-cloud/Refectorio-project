@@ -444,3 +444,44 @@ describe('toProviderMessages', () => {
     expect(out[3]).toEqual({ role: 'tool', tool_call_id: '1', name: 'get_menu', content: '{}' });
   });
 });
+
+describe('the call budget of one request (security audit P0, D-128)', () => {
+  const ask = request([{ role: 'user', content: 'Сколько соли можно?' }]);
+  async function capped(req: ChatRequest, results: ProviderResult[], maxCalls: number) {
+    const { complete, requests } = scripted(results);
+    const events: ServerEvent[] = [];
+    await runTurn(req, { complete, kb, now: () => 0, maxCalls }, (e) => events.push(e));
+    return { events, requests };
+  }
+
+  it('offers tools only while a call for the answer is left', async () => {
+    const searches = Array.from({ length: MAX_TOOL_ROUNDS }, (_, i) =>
+      call('kb_search', { query: 'соль' }, `s${String(i)}`),
+    );
+    const { events, requests } = await capped(ask, [...searches.slice(0, 2), say('Ответ.')], 3);
+    expect(requests).toHaveLength(3);
+    expect(requests[2]?.tools).toBeUndefined();
+    expect(final(events).text).toBe('Ответ.');
+  });
+
+  it('with no call left for the re-ask, a failed check gives the safe phrase at once', async () => {
+    const { events, requests } = await capped(ask, [say('Можно 9 г соли в день.')], 1);
+    expect(requests).toHaveLength(1);
+    expect(types(events)).not.toContain('status-checking');
+    expect(final(events).replaced).toBe(true);
+    expect(final(events).text).not.toContain('9 г');
+  });
+
+  it('skips the memory fold when it would leave no call for the answer', async () => {
+    const folded = request([{ role: 'user', content: 'Привет' }], {
+      fold: [
+        { role: 'user', content: 'Старый вопрос' },
+        { role: 'assistant', content: 'Старый ответ' },
+      ],
+    });
+    const { events, requests } = await capped(folded, [say('Здравствуйте!')], 1);
+    expect(requests).toHaveLength(1);
+    expect(events.find((e) => e.type === 'memory')).toMatchObject({ memory: folded.memory });
+    expect(final(events).text).toBe('Здравствуйте!');
+  });
+});

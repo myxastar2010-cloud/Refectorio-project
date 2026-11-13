@@ -26,7 +26,14 @@ import {
   type PreviewRecord,
   type ToolRun,
 } from './session';
+import { readPass } from './pass';
 import { chatUi } from './uiState';
+
+/** The demo pass header when this device has one (D-128). */
+const passHeader = (): Record<string, string> => {
+  const pass = readPass();
+  return pass ? { 'x-kiki-pass': pass } : {};
+};
 
 export const CHAT_KEY = 'refectorio.chat';
 const CHAT_VERSION = 1;
@@ -115,7 +122,7 @@ export function chatSession(): ChatSession {
     post: (body: ChatRequest, signal: AbortSignal) =>
       fetch(`${API_BASE}/kiki/chat`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'content-type': 'application/json', ...passHeader() },
         body: JSON.stringify(body),
         credentials: 'omit',
         signal,

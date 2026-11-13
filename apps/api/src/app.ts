@@ -6,9 +6,12 @@
 import {
   chatRequestSchema,
   encodeEvent,
+  estimateTokens,
   MAX_BODY_BYTES,
+  messageTokens,
   pairingProblem,
   runTurn,
+  type ChatRequest,
   type Kb,
   type ServerEvent,
 } from '@refectorio/kiki-core';
@@ -16,7 +19,8 @@ import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
 import { streamSSE } from 'hono/streaming';
-import { ChainUnavailable, type Chain } from './chain';
+import { ChainUnavailable, type CallGate, type Chain } from './chain';
+import { PASS_HEADER, verifyPass } from './pass';
 import { GLOBAL_KEY, type Limiter } from './rateLimit';
 
 export type AppDeps = {
@@ -30,7 +34,35 @@ export type AppDeps = {
   readonly log?: (entry: Record<string, unknown>) => void;
   /** Keep-alive comment interval while the model thinks (proxies close idle streams). */
   readonly pingMs?: number;
+  /** `KIKI_DEMO_SECRET`: demo passes are valid only with it (≥ 32 characters); none — passes are off. */
+  readonly demoSecret?: string | null;
+  /** `KIKI_PUBLIC=0` closes Kiki to everyone without a demo pass (the final's hour). Default open. */
+  readonly publicOpen?: boolean;
+  readonly maxCallsPerPost?: number;
+  readonly maxClientTokens?: number;
 };
+
+/**
+ * Model calls one POST may make (security audit P0, D-128): the memory fold, up to two tool rounds, the answer and its
+ * corrective re-ask. A turn with client tools spans several POSTs, each counted by the call budget anyway.
+ */
+export const MAX_CALLS_PER_POST = 5;
+/**
+ * What the client may put into one request, in estimated tokens (digest + memory + window + fold). The browser keeps
+ * the window at 2 800 and the digest ≤ 12 000 characters; this leaves room for a turn's tool results and a fold, and
+ * refuses the 256-KB bodies a script would send to use Kiki as a free model (D-128).
+ */
+export const MAX_CLIENT_TOKENS = 16_000;
+
+export function clientTokens(request: ChatRequest): number {
+  const messages = [...request.messages, ...(request.fold ?? [])];
+  return (
+    estimateTokens(request.digest) +
+    estimateTokens(request.memory.summary) +
+    request.memory.facts.reduce((sum, f) => sum + estimateTokens(f), 0) +
+    messages.reduce((sum, m) => sum + messageTokens(m), 0)
+  );
+}
 
 export const DEFAULT_ORIGINS = [
   'https://refectorio.onrender.com',
@@ -75,7 +107,7 @@ export function createApp(deps: AppDeps): Hono {
     cors({
       origin: (origin) => (allowed.has(origin) ? origin : null),
       allowMethods: ['GET', 'POST', 'OPTIONS'],
-      allowHeaders: ['content-type'],
+      allowHeaders: ['content-type', PASS_HEADER],
       maxAge: 600,
     }),
   );
@@ -114,21 +146,45 @@ export function createApp(deps: AppDeps): Hono {
       const request = parsed.data;
       const problem = pairingProblem(request.messages);
       if (problem) return c.json({ code: 'bad_request', detail: 'pairing' }, 400);
+      if (clientTokens(request) > (deps.maxClientTokens ?? MAX_CLIENT_TOKENS))
+        return c.json({ code: 'bad_request', detail: 'too large' }, 413);
 
-      // Every POST is a model step (the tool steps of a turn too) and counts per address and server-wide; a new user
-      // turn also costs one chat unit (review of phase 5, M4).
       const { ip, source } = clientIp(c);
-      const last = request.messages[request.messages.length - 1];
-      const wait = deps.limiter.take(
-        ['global', GLOBAL_KEY],
-        ['step', ip],
-        ...(last?.role === 'user' ? [['chat', ip] as const] : []),
-      );
-      if (wait > 0) {
-        log({ event: 'limited', ipSource: source });
+      const pass = verifyPass(c.req.header(PASS_HEADER), deps.demoSecret);
+      const limited = (wait: number, bucket: string) => {
+        log({ event: 'limited', bucket, ipSource: source, pass: pass !== null });
         c.header('Retry-After', String(Math.ceil(wait / 1000)));
         return c.json({ code: 'rate_limited', retryable: true, retryAfterMs: wait }, 429);
-      }
+      };
+      // The final's hour: only demo passes (D-128).
+      if (!pass && deps.publicOpen === false) return limited(10 * 60_000, 'closed');
+
+      // Model calls — every provider attempt, a fallback model too — are what costs the allowance (security audit P0,
+      // D-128): a pass spends the reserve, then the public share; everyone else the public share and their address's.
+      const reserve = ['reserve', GLOBAL_KEY] as const;
+      const shared = ['public', GLOBAL_KEY] as const;
+      const own = ['call', ip] as const;
+      const gate: CallGate = () => {
+        if (!pass) return deps.limiter.take(own, shared);
+        const fromReserve = deps.limiter.take(reserve);
+        if (fromReserve === 0) return 0;
+        const fromShared = deps.limiter.take(shared);
+        return fromShared === 0 ? 0 : Math.min(fromReserve, fromShared);
+      };
+      const callWait = pass
+        ? Math.min(deps.limiter.check(reserve), deps.limiter.check(shared))
+        : deps.limiter.check(own, shared);
+      if (callWait > 0) return limited(callWait, 'call');
+
+      // Every POST is a step (the tool steps of a turn too), per address; a new user turn also costs one chat unit
+      // (review of phase 5, M4). A pass is counted by its name instead: a hall behind one Wi-Fi address shares nothing.
+      const who = pass ? `pass:${pass}` : ip;
+      const last = request.messages[request.messages.length - 1];
+      const wait = deps.limiter.take(
+        ['step', who],
+        ...(last?.role === 'user' && !pass ? [['chat', ip] as const] : []),
+      );
+      if (wait > 0) return limited(wait, 'step');
 
       return streamSSE(c, async (stream) => {
         const controller = new AbortController();
@@ -149,10 +205,11 @@ export function createApp(deps: AppDeps): Hono {
           await runTurn(
             request,
             {
-              complete: (r) => deps.chain.complete(r, controller.signal),
+              complete: (r) => deps.chain.complete(r, controller.signal, gate),
               kb: deps.kb,
               now,
               signal: controller.signal,
+              maxCalls: deps.maxCallsPerPost ?? MAX_CALLS_PER_POST,
             },
             (event) => {
               if (event.type === 'final') model = event.model;
@@ -165,7 +222,7 @@ export function createApp(deps: AppDeps): Hono {
           if (error instanceof ChainUnavailable)
             send({
               type: 'error',
-              code: 'provider_unavailable',
+              code: error.limited ? 'rate_limited' : 'provider_unavailable',
               retryable: true,
               retryAfterMs: error.retryAfterMs,
             });
@@ -181,6 +238,7 @@ export function createApp(deps: AppDeps): Hono {
             model,
             messages: request.messages.length,
             ipSource: source,
+            pass: pass !== null,
           });
         }
       });

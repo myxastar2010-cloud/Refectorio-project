@@ -75,3 +75,14 @@ services:
       # Per-address limits × N (a whole class on one school address on demo day); the server-wide cap stays.
       - key: KIKI_LIMIT_SCALE
         value: '1'
+      # Demo passes (D-128): the secret behind `#kiki-pass=…` links (≥ 32 characters; a new one revokes every pass).
+      - key: KIKI_DEMO_SECRET
+        sync: false
+      # Model calls per minute for everyone / only for demo passes (sum below the provider's 15 / min); `KIKI_PUBLIC=0`
+      # leaves Kiki to demo passes only (the final's hour).
+      - key: KIKI_PUBLIC_PER_MIN
+        value: '8'
+      - key: KIKI_RESERVE_PER_MIN
+        value: '4'
+      - key: KIKI_PUBLIC
+        value: '1'
