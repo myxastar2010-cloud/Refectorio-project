@@ -86,3 +86,6 @@ services:
         value: '4'
       - key: KIKI_PUBLIC
         value: '1'
+      # Demo-pass names to turn off one by one (comma-separated), without a new secret for everyone (D-130).
+      - key: KIKI_REVOKED_PASSES
+        sync: false
