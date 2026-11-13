@@ -22,10 +22,19 @@ export class ChainUnavailable extends Error {
     readonly retryAfterMs: number,
     /** Some text was already shown when the model failed. */
     readonly streamed: boolean,
+    /** Refused by our own call budget (D-128), not by the provider. */
+    readonly limited = false,
   ) {
     super('all models unavailable');
   }
 }
+
+/**
+ * Asked before every provider attempt (a fallback model too): 0 — go, otherwise the ms until the call budget allows
+ * one (the attempt is not made). Counting attempts, not POSTs, is what keeps a script from turning one request into
+ * many paid calls (security audit P0, D-128).
+ */
+export type CallGate = () => number;
 
 export type ProviderStatus = {
   readonly lastOkAt: number | null;
@@ -34,7 +43,11 @@ export type ProviderStatus = {
 };
 
 export type Chain = {
-  readonly complete: (request: ProviderRequest, signal?: AbortSignal) => ReturnType<Complete>;
+  readonly complete: (
+    request: ProviderRequest,
+    signal?: AbortSignal,
+    gate?: CallGate,
+  ) => ReturnType<Complete>;
   readonly status: () => ProviderStatus;
   readonly models: readonly ModelSpec[];
 };
@@ -49,7 +62,7 @@ export function createChain(options: ChainOptions): Chain {
   const resting = new Map<string, number>();
   let status: ProviderStatus = { lastOkAt: null, lastErrorAt: null, lastErrorCode: null };
 
-  const complete: Chain['complete'] = async (request, signal) => {
+  const complete: Chain['complete'] = async (request, signal, gate) => {
     const key = options.key();
     if (!key) throw new ChainUnavailable(60_000, false);
     const t = now();
@@ -57,6 +70,11 @@ export function createChain(options: ChainOptions): Chain {
     // Every model resting: try them anyway rather than fail outright.
     const order = ready.length > 0 ? ready : options.models;
     for (const model of order) {
+      const wait = gate?.() ?? 0;
+      if (wait > 0) {
+        log({ event: 'call-limited', model: model.id });
+        throw new ChainUnavailable(wait, false, true);
+      }
       const started = now();
       try {
         const result = await streamChat({

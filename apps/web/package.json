@@ -27,11 +27,11 @@
     "@tabler/icons-react": "^3.48.0",
     "blurhash": "2.0.5",
     "clsx": "^2.1.1",
-    "fflate": "0.8.2",
+    "fflate": "0.8.3",
     "motion": "^13.4.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

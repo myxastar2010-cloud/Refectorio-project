@@ -16,6 +16,7 @@ import { loadQuiz } from '../features/quiz/loadQuiz';
 import { ProjectDialog } from '../features/team-dialog/ProjectDialog';
 import { TeamDialog } from '../features/team-dialog/TeamDialog';
 import { whenIdle } from '../lib/idle';
+import { reloadIfRedeployed } from '../lib/staleChunks';
 import { hasStoredMenu } from '../lib/menuFlag';
 import { readTestParams } from '../lib/params';
 import { focusQuietly, trackInputModality } from '../lib/quietFocus';
@@ -173,9 +174,11 @@ function Page() {
     }, lockMs);
   }, []);
 
+  // `force`: a chunk that failed to load sends the person back even mid-transition — the lock it started would
+  // otherwise swallow the way back and leave an empty scene (stage-5 code audit, P1 raised to P0).
   const goScene = useCallback(
-    (next: Scene) => {
-      if (locked()) return;
+    (next: Scene, force = false) => {
+      if (!force && locked()) return;
       lockFor(calm ? DURATION.fade * 1000 : next === 'quiz' ? QUIZ.inputLockMs : SCENE.inputLockMs);
       go(next);
     },
@@ -191,8 +194,9 @@ function Page() {
     menuRequested = null;
     setMenuScene(() => lazyMenu());
     setMenuReveal(null);
-    goScene('hero');
+    goScene('hero', true);
     notify(site.notices.loadError);
+    void reloadIfRedeployed();
   }, [goScene, notify]);
 
   /** The story ends in its pulse: the menu page is uncovered over the quiz, then the quiz leaves the history. */
@@ -212,6 +216,7 @@ function Page() {
     setQuizScene(() => lazyQuiz());
     exitQuiz();
     notify(site.quizShell.loadError);
+    void reloadIfRedeployed();
   }, [exitQuiz, notify]);
 
   // Entering part 2 moves focus to its title (ТЗ 6.5); leaving it returns focus to «О проекте» («Цены» likewise to its
@@ -424,6 +429,7 @@ function Page() {
       .catch(() => {
         pricingRequested = false;
         notify(site.notices.loadError);
+        void reloadIfRedeployed();
       })
       .finally(() => {
         openingPricing.current = false;
@@ -435,6 +441,7 @@ function Page() {
     if (scene === 'pricing' && !pricingPictures) {
       takeVisit().catch(() => {
         notify(site.notices.loadError);
+        void reloadIfRedeployed();
       });
     }
   }, [scene, pricingPictures, takeVisit, notify]);
@@ -447,14 +454,16 @@ function Page() {
   const discoverFailed = useCallback(() => {
     discoverRequested = false;
     setDiscoverMounted(false);
-    goScene('hero');
+    goScene('hero', true);
     notify(site.notices.loadError);
+    void reloadIfRedeployed();
   }, [goScene, notify]);
 
   const pricingFailed = useCallback(() => {
     pricingRequested = false;
-    goScene('hero');
+    goScene('hero', true);
     notify(site.notices.loadError);
+    void reloadIfRedeployed();
   }, [goScene, notify]);
 
   const inQuiz = scene === 'quiz';

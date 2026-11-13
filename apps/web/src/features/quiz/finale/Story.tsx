@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { RawStory } from './story/data';
 import type { StoryHandle } from './story/story';
 
@@ -50,13 +50,26 @@ export function Story({
     pulseRef.current = onPulse;
   }, [onPulse]);
   const readyRef = useRef(ready);
+  /**
+   * The story's chunk did not arrive (offline, a deploy replaced the files): no story, but the menu is still
+   * uncovered — the pulse comes as soon as the menu is ready (stage-5 code audit, P1 raised to P0).
+   */
+  const storyFailed = useRef(false);
+  const pulsed = useRef(false);
+  const pulseOnce = useCallback(() => {
+    if (pulsed.current) return;
+    pulsed.current = true;
+    pulseRef.current();
+  }, []);
 
   useEffect(() => {
     if (!started) return undefined;
     let cancelled = false;
     const isCancelled = () => cancelled;
-    void Promise.all([import('./story/story'), import('./story/story-data.json')]).then(
-      ([module, data]) => {
+    // A new attempt (a resize re-creates the story): only its own outcome counts. A pulse already given stays given.
+    storyFailed.current = false;
+    Promise.all([import('./story/story'), import('./story/story-data.json')])
+      .then(([module, data]) => {
         const canvas = canvasRef.current;
         if (isCancelled() || !canvas) return;
         const styles = getComputedStyle(canvas);
@@ -71,9 +84,7 @@ export function Story({
           onCaption: (index) => {
             captionRef.current(index);
           },
-          onPulse: () => {
-            pulseRef.current();
-          },
+          onPulse: pulseOnce,
           startAt:
             __TEST_HOOKS__ && startAt
               ? module.STORY_SCENES.find((id) => id === startAt)
@@ -81,14 +92,19 @@ export function Story({
         });
         handle.current?.setPaused(pausedRef.current);
         if (readyRef.current) handle.current?.finish();
-      },
-    );
+      })
+      // Also an error inside the story's own start: no story, the menu still comes.
+      .catch(() => {
+        if (isCancelled()) return;
+        storyFailed.current = true;
+        if (readyRef.current) pulseOnce();
+      });
     return () => {
       cancelled = true;
       handle.current?.dispose();
       handle.current = null;
     };
-  }, [started, sizePx, dotPx, calm, seed, startAt]);
+  }, [started, sizePx, dotPx, calm, seed, startAt, pulseOnce]);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -97,8 +113,10 @@ export function Story({
 
   useEffect(() => {
     readyRef.current = ready;
-    if (ready) handle.current?.finish();
-  }, [ready]);
+    if (!ready) return;
+    if (storyFailed.current) pulseOnce();
+    else handle.current?.finish();
+  }, [ready, pulseOnce]);
 
   return (
     <div className="quiz-story" style={{ width: sizePx, height: sizePx }} aria-hidden>

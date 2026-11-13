@@ -20,6 +20,6 @@
   "dependencies": {
     "@refectorio/contracts": "*",
     "@refectorio/nutrition-core": "*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   }
 }

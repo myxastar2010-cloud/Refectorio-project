@@ -49,6 +49,7 @@ export const CASE_TAGS = [
   'identity',
   'injection',
   'bakeoff',
+  'chip',
 ] as const;
 
 export const caseSchema = z.object({

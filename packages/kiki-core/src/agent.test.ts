@@ -444,3 +444,53 @@ describe('toProviderMessages', () => {
     expect(out[3]).toEqual({ role: 'tool', tool_call_id: '1', name: 'get_menu', content: '{}' });
   });
 });
+
+describe('the call budget of one request (security audit P0, D-128)', () => {
+  const ask = request([{ role: 'user', content: 'Сколько соли можно?' }]);
+  async function capped(req: ChatRequest, results: ProviderResult[], maxCalls: number) {
+    const { complete, requests } = scripted(results);
+    const events: ServerEvent[] = [];
+    await runTurn(req, { complete, kb, now: () => 0, maxCalls }, (e) => events.push(e));
+    return { events, requests };
+  }
+
+  it('offers tools only while calls for the answer and its re-ask are left', async () => {
+    const searches = Array.from({ length: MAX_TOOL_ROUNDS }, (_, i) =>
+      call('kb_search', { query: 'соль' }, `s${String(i)}`),
+    );
+    const { events, requests } = await capped(ask, [...searches.slice(0, 2), say('Ответ.')], 4);
+    expect(requests).toHaveLength(3);
+    expect(requests[2]?.tools).toBeUndefined();
+    expect(final(events).text).toBe('Ответ.');
+  });
+
+  it('with no call left for the re-ask, a failed check gives the safe phrase at once', async () => {
+    const { events, requests } = await capped(ask, [say('Можно 9 г соли в день.')], 1);
+    expect(requests).toHaveLength(1);
+    expect(events.some((e) => e.type === 'status' && e.phase === 'checking')).toBe(false);
+    expect(final(events).replaced).toBe(true);
+    expect(final(events).text).not.toContain('9 г');
+  });
+
+  it('a refused or failed re-ask ends in the safe phrase, not in an error', async () => {
+    // The scripted provider has nothing for the re-ask: it throws, as the call gate does when the budget is spent.
+    const { events, requests } = await run(ask, [say('Можно 9 г соли в день.')]);
+    expect(requests).toHaveLength(2);
+    expect(events.some((e) => e.type === 'status' && e.phase === 'checking')).toBe(true);
+    expect(final(events).replaced).toBe(true);
+    expect(final(events).text).not.toContain('9 г');
+  });
+
+  it('skips the memory fold when it would leave no call for the answer', async () => {
+    const folded = request([{ role: 'user', content: 'Привет' }], {
+      fold: [
+        { role: 'user', content: 'Старый вопрос' },
+        { role: 'assistant', content: 'Старый ответ' },
+      ],
+    });
+    const { events, requests } = await capped(folded, [say('Здравствуйте!')], 1);
+    expect(requests).toHaveLength(1);
+    expect(events.find((e) => e.type === 'memory')).toMatchObject({ memory: folded.memory });
+    expect(final(events).text).toBe('Здравствуйте!');
+  });
+});

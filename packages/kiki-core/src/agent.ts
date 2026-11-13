@@ -159,6 +159,12 @@ export type AgentDeps = {
   readonly maxTokens?: number;
   /** The request's own signal: a stopped request is never mistaken for a failed memory fold. */
   readonly signal?: AbortSignal;
+  /**
+   * Model calls this request may make (the memory fold, tool rounds, the answer, its corrective re-ask). Tools are
+   * offered only while a call for the answer is left; with none left for the re-ask, a failed check gives the safe
+   * phrase at once. The server sets it (security audit P0, D-128); unset — unlimited (evals, tests).
+   */
+  readonly maxCalls?: number;
 };
 
 export const TURN_BUDGET_MS = 45_000;
@@ -303,19 +309,25 @@ export async function runTurn(
   const elapsed = Math.min(Math.max(request.turnElapsedMs ?? 0, 0), budget + 1);
   const startedAt = deps.now() - elapsed;
   let usage = ZERO;
+  const maxCalls = deps.maxCalls ?? Number.POSITIVE_INFINITY;
+  let callsMade = 0;
+  const callsLeft = () => maxCalls - callsMade;
 
   let memory = request.memory;
   if (request.fold && request.fold.length > 0) {
     emit({ type: 'status', phase: 'thinking' });
-    try {
-      const folded = await foldMemory(request, deps);
-      memory = folded.memory;
-      usage = addUsage(usage, folded.usage);
-    } catch (error) {
-      // Folding is best effort (M7): a failed summary keeps the old memory and the answer still comes; a stopped
-      // request stays stopped.
-      if (deps.signal?.aborted) throw error;
-    }
+    // The fold needs a call of its own and one must stay for the answer; without them the old memory stays.
+    if (callsLeft() >= 2)
+      try {
+        callsMade++;
+        const folded = await foldMemory(request, deps);
+        memory = folded.memory;
+        usage = addUsage(usage, folded.usage);
+      } catch (error) {
+        // Folding is best effort (M7): a failed summary keeps the old memory and the answer still comes; a stopped
+        // request stays stopped.
+        if (deps.signal?.aborted) throw error;
+      }
     emit({ type: 'memory', memory });
   }
 
@@ -328,9 +340,12 @@ export async function runTurn(
   emit({ type: 'status', phase: 'thinking' });
   for (;;) {
     const overBudget = deps.now() - startedAt > budget;
-    const allowTools = toolRoundsInTurn(working) < MAX_TOOL_ROUNDS && !overBudget;
+    // Tools only while calls for the answer and its corrective re-ask stay after this one.
+    const allowTools =
+      toolRoundsInTurn(working) < MAX_TOOL_ROUNDS && !overBudget && callsLeft() >= 3;
     // Set inside the stream callback (an object: TS can't see a callback's writes to a local).
     const stream = { streamed: false };
+    callsMade++;
     const result = await deps.complete({
       messages: toProviderMessages(system, working),
       ...(allowTools ? { tools } : {}),
@@ -488,20 +503,32 @@ export async function runTurn(
     });
     const issues = validateAnswer(text, sources);
     let replaced = false;
-    if (issues.length > 0) {
+    if (issues.length > 0 && callsLeft() < 1) {
+      // No call left for the re-ask: the safe phrase at once.
+      text = fallbackAnswer(issues);
+      replaced = true;
+    } else if (issues.length > 0) {
       emit({ type: 'status', phase: 'checking' });
-      const retry = await deps.complete({
-        messages: [
-          ...toProviderMessages(system, working),
-          { role: 'assistant', content: text || '…' },
-          { role: 'user', content: correctionPrompt(issues) },
-        ],
-        maxTokens,
-      });
-      usage = addUsage(usage, retry.usage);
-      const second = sanitizeMarkdown(retry.content);
-      const again = validateAnswer(second, sources);
-      text = again.length > 0 ? fallbackAnswer(again) : second;
+      callsMade++;
+      try {
+        const retry = await deps.complete({
+          messages: [
+            ...toProviderMessages(system, working),
+            { role: 'assistant', content: text || '…' },
+            { role: 'user', content: correctionPrompt(issues) },
+          ],
+          maxTokens,
+        });
+        usage = addUsage(usage, retry.usage);
+        const second = sanitizeMarkdown(retry.content);
+        const again = validateAnswer(second, sources);
+        text = again.length > 0 ? fallbackAnswer(again) : second;
+      } catch (error) {
+        // The answer has already streamed: a refused or failed re-ask ends in the safe phrase, not in an error
+        // (a stopped request stays stopped).
+        if (deps.signal?.aborted) throw error;
+        text = fallbackAnswer(issues);
+      }
       replaced = true;
     }
     const answer: WireMessage = { role: 'assistant', content: text };

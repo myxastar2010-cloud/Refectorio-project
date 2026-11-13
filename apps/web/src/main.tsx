@@ -6,6 +6,10 @@ import './styles/globals.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
+import { capturePass } from './features/kiki/pass';
+
+// A demo-pass link (#kiki-pass=…) is not a scene: keep the pass, clear the address before the scenes read it.
+capturePass();
 
 const container = document.getElementById('root');
 if (!container) throw new Error('#root element is missing in index.html');
