@@ -173,9 +173,11 @@ function Page() {
     }, lockMs);
   }, []);
 
+  // `force`: a chunk that failed to load sends the person back even mid-transition — the lock it started would
+  // otherwise swallow the way back and leave an empty scene (stage-5 code audit, P1 raised to P0).
   const goScene = useCallback(
-    (next: Scene) => {
-      if (locked()) return;
+    (next: Scene, force = false) => {
+      if (!force && locked()) return;
       lockFor(calm ? DURATION.fade * 1000 : next === 'quiz' ? QUIZ.inputLockMs : SCENE.inputLockMs);
       go(next);
     },
@@ -191,7 +193,7 @@ function Page() {
     menuRequested = null;
     setMenuScene(() => lazyMenu());
     setMenuReveal(null);
-    goScene('hero');
+    goScene('hero', true);
     notify(site.notices.loadError);
   }, [goScene, notify]);
 
@@ -447,13 +449,13 @@ function Page() {
   const discoverFailed = useCallback(() => {
     discoverRequested = false;
     setDiscoverMounted(false);
-    goScene('hero');
+    goScene('hero', true);
     notify(site.notices.loadError);
   }, [goScene, notify]);
 
   const pricingFailed = useCallback(() => {
     pricingRequested = false;
-    goScene('hero');
+    goScene('hero', true);
     notify(site.notices.loadError);
   }, [goScene, notify]);
 
